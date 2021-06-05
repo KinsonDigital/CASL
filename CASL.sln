@@ -1,0 +1,55 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31321.278
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CASL", "CASL\CASL.csproj", "{B62B38C5-0DFF-46A0-B95A-D613F366040D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Testing", "Testing", "{1D5152DF-EF10-45CD-87F0-436CFAB60002}"
+	ProjectSection(SolutionItems) = preProject
+		Testing\.editorconfig = Testing\.editorconfig
+		Testing\CASL.runsettings = Testing\CASL.runsettings
+	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CASLTesting", "Testing\CASLTesting\CASLTesting.csproj", "{1DC6781C-60A4-478A-9FCF-AB23A9CF111A}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SolutionItems", "SolutionItems", "{A1E4FF06-D30B-4DB5-800A-63FF7D7B39E2}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+		LICENSE.md = LICENSE.md
+		README.md = README.md
+		RELEASENOTES.md = RELEASENOTES.md
+	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CASLTests", "Testing\CASLTests\CASLTests.csproj", "{2F67B7C0-7BA4-4EDD-8B0C-38793A3DE77C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B62B38C5-0DFF-46A0-B95A-D613F366040D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B62B38C5-0DFF-46A0-B95A-D613F366040D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B62B38C5-0DFF-46A0-B95A-D613F366040D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B62B38C5-0DFF-46A0-B95A-D613F366040D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1DC6781C-60A4-478A-9FCF-AB23A9CF111A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1DC6781C-60A4-478A-9FCF-AB23A9CF111A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1DC6781C-60A4-478A-9FCF-AB23A9CF111A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1DC6781C-60A4-478A-9FCF-AB23A9CF111A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2F67B7C0-7BA4-4EDD-8B0C-38793A3DE77C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2F67B7C0-7BA4-4EDD-8B0C-38793A3DE77C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2F67B7C0-7BA4-4EDD-8B0C-38793A3DE77C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2F67B7C0-7BA4-4EDD-8B0C-38793A3DE77C}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{1DC6781C-60A4-478A-9FCF-AB23A9CF111A} = {1D5152DF-EF10-45CD-87F0-436CFAB60002}
+		{2F67B7C0-7BA4-4EDD-8B0C-38793A3DE77C} = {1D5152DF-EF10-45CD-87F0-436CFAB60002}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {71FA48B2-788D-4680-AEE1-64B047BE83DE}
+	EndGlobalSection
+EndGlobal
