@@ -1,0 +1,51 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "build",
+            "type": "shell",
+            "linux" :{
+                "command": "dotnet",
+                "args": [
+                    "build",
+                    "${workspaceFolder}/CASL.sln",
+                    "-c Debug-LINUX",
+                ],
+            },
+            "windows": {
+                "command": "dotnet",
+                "args": [
+                    "build",
+                    "${workspaceFolder}/CASL.sln",
+                    "-c Debug-LINUX",
+                ]
+            }
+            //"problemMatcher": "$msCompile"
+        },
+        {
+            "label": "publish",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "publish",
+                "${workspaceFolder}/Testing/CASLTesting/CASLTesting.csproj",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:NoSummary"
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "watch",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "watch",
+                "run",
+                "${workspaceFolder}/Testing/CASLTesting/CASLTesting.csproj",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:NoSummary"
+            ],
+            "problemMatcher": "$msCompile"
+        }
+    ]
+}

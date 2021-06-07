@@ -10,6 +10,7 @@
     <ApplicationIcon />
     <StartupObject />
     <Configurations>Debug-WIN;Release-WIN;Debug-LINUX;Release-LINUX</Configurations>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug-WIN|AnyCPU'">
