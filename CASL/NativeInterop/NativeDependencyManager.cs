@@ -16,6 +16,7 @@ namespace CASL.NativeInterop
     /// </summary>
     internal abstract class NativeDependencyManager : IDependencyManager
     {
+        private readonly char DirSeparator = Path.DirectorySeparatorChar;
         private readonly IPlatform platform;
         private readonly IFile file;
         private readonly string[] libraryPaths = Array.Empty<string>();
@@ -69,15 +70,19 @@ namespace CASL.NativeInterop
 
             if (this.platform.IsWinPlatform())
             {
-                this.assemblyDirectory = $@"{Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}\";
+                this.assemblyDirectory = $@"{Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}{this.DirSeparator}";
                 this.libraryPaths = new[] { this.assemblyDirectory };
 
-                NativeLibPath = $@"{this.assemblyDirectory}runtimes\{osPlatform}-{architecture}\native\";
+                // TODO: SHould not have to point to this dir path created by the nuget package.
+                // Try this at the assembly path
+                NativeLibPath = $@"{this.assemblyDirectory}runtimes{this.DirSeparator}{osPlatform}-{architecture}{this.DirSeparator}native{this.DirSeparator}";
             }
             else if (this.platform.IsPosixPlatform())
             {
-                // TODO: Add unit tests for this branch once implemented
-                throw new NotImplementedException("Posix library processing has not been implemented yet.");
+                this.assemblyDirectory = $@"{Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}{this.DirSeparator}";
+                this.libraryPaths = new[] { this.assemblyDirectory };
+
+                NativeLibPath = $@"{this.assemblyDirectory}runtimes{this.DirSeparator}{osPlatform}-{architecture}{this.DirSeparator}native{this.DirSeparator}";
             }
         }
 

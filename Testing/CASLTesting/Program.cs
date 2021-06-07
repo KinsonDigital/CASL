@@ -17,7 +17,7 @@ namespace CASPLTesting
     public class Program
     {
         private const string AudioDirName = "AudioFiles";
-        private static readonly string AudioFilePath = $@"{Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}\{AudioDirName}\";
+        private static readonly string AudioFilePath = $@"{Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}{Path.DirectorySeparatorChar}{AudioDirName}{Path.DirectorySeparatorChar}";
         private static readonly char[] Numbers = new[]
         {
             '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',

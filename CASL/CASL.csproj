@@ -9,23 +9,29 @@
     <FileVersion>0.0.1</FileVersion>
     <ApplicationIcon />
     <StartupObject />
+    <Configurations>Debug-WIN;Release-WIN;Debug-LINUX;Release-LINUX</Configurations>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug-WIN|AnyCPU'">
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug-LINUX|AnyCPU'">
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release-WIN|AnyCPU'">
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release-LINUX|AnyCPU'">
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="AudioFiles\**" />
-    <Compile Remove="OpenAL\Extensions\**" />
-    <EmbeddedResource Remove="AudioFiles\**" />
-    <EmbeddedResource Remove="OpenAL\Extensions\**" />
-    <None Remove="AudioFiles\**" />
-    <None Remove="OpenAL\Extensions\**" />
+    <Compile Remove="OpenAL\libs\**" />
+    <EmbeddedResource Remove="OpenAL\libs\**" />
+    <None Remove="OpenAL\libs\**" />
   </ItemGroup>
 
   <ItemGroup>
@@ -34,10 +40,6 @@
 
   <ItemGroup>
     <AdditionalFiles Include="stylecop.json" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="OpenAL\lib\" />
   </ItemGroup>
 
   <ItemGroup>
@@ -55,14 +57,17 @@
     <PackageReference Include="System.IO.Abstractions" Version="13.2.33" />
   </ItemGroup>
 
-  <ItemGroup>
-    <None Update="OpenAL\lib\openal32.dll">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-
-  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="xcopy &quot;$(ProjectDir)OpenAL\lib\*.dll&quot; &quot;$(TargetDir)&quot; /Y /S" />
+  <!--ADD STUFF TO WINDOWS NUGET PACKAGE-->
+  <!--TODO: CREATE A WINDOW SPECIFIC SOLUTION AND PROJECT CONFIGS-->
+  <Target Name="AddNativeWindowLibsToNugetPackage" AfterTargets="Build" Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU' Or '$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <ItemGroup>
+      <!--WINDOWS-->
+      <Content Include="$(ProjectDir)OpenAL\libs\win-x86\*.dll" Pack="true" PackagePath="\runtimes\win-x86\native" />
+      <Content Include="$(ProjectDir)OpenAL\libs\win-x64\*.dll" Pack="true" PackagePath="\runtimes\win-x64\native" />
+      
+      <!--LINUX-->
+      <Content Include="$(ProjectDir)OpenAL\libs\linux-x64\*.dll" Pack="true" PackagePath="\runtimes\linux-x64\native" />
+    </ItemGroup>
   </Target>
-
+  
 </Project>
