@@ -81,6 +81,13 @@
             "label": "Cleanup",
             "type": "shell",
             "group": "build",
+            "windows": {
+                "command": "rmdir",
+                "args": [
+                    "${workspaceFolder}\\Testing\\CASLTesting\\bin\\Debug",
+                    "/Q/S",// Delete recursivly without prompt
+                ]
+            },            
             "linux": {
                 "command": "rm",
                 "args": [
