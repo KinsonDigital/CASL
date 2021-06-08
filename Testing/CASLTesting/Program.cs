@@ -29,8 +29,6 @@ namespace CASPLTesting
             var cancelTokenSrc = new CancellationTokenSource();
             var soundLibDirPath = AudioFilePath;
 
-            var osVersion = Environment.OSVersion;
-
             Sound? sound = null;
 
             string[] GetValidFiles(string path)

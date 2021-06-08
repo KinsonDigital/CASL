@@ -22,7 +22,7 @@ namespace CASL.NativeInterop
             {
                 if (this.platform.IsWinPlatform())
                 {
-                    return "soft_aol.dll";
+                    return "soft_oal.dll";
                 }
                 else if (this.platform.IsPosixPlatform())
                 {

@@ -8,11 +8,15 @@
             "name": ".NET Core Launch (console)",
             "type": "coreclr",
             "request": "launch",
-            "preLaunchTask": "build",
-            "program": "${workspaceFolder}/Testing/CASLTesting/bin/Debug/net5.0/CASLTesting.dll",
+            "preLaunchTask": "BuildEntireSolution",
             "args": [],
             "stopAtEntry": false,
+            "windows": {
+                "program": "${workspaceFolder}/Testing/CASLTesting/bin/Debug-WIN/net5.0/CASLTesting.dll",
+                "console": "integratedTerminal"
+            },
             "linux": {
+                "program": "${workspaceFolder}/Testing/CASLTesting/bin/Debug-LINUX/net5.0/CASLTesting.dll",
                 "console": "integratedTerminal"
             }
         },

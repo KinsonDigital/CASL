@@ -122,7 +122,7 @@ namespace CASL.NativeInterop
         {
             if (NativeLibraries.Count <= 0)
             {
-                throw new Exception("Must set a list of native libraries.");
+                return;
             }
 
             // Check each dependency library file to see if it exists and if

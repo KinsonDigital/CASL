@@ -2,25 +2,34 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "build",
+            "label": "BuildEntireSolution",
             "type": "shell",
-            "linux" :{
-                "command": "dotnet",
-                "args": [
-                    "build",
-                    "${workspaceFolder}/CASL.sln",
-                    "-c Debug-LINUX",
-                ],
-            },
+            "dependsOn": [ "BuildSolution", "CopyNativeLibs", "Cleanup" ],
+            "dependsOrder": "sequence",
+        },
+        {
+            "label": "BuildSolution",
+            "type": "shell",
+            "group": "build",
+            "problemMatcher": "$msCompile",
             "windows": {
                 "command": "dotnet",
                 "args": [
                     "build",
-                    "${workspaceFolder}/CASL.sln",
-                    "-c Debug-LINUX",
+                    "${workspaceFolder}\\CASL.sln",
+                    "-c",
+                    "Debug-WIN",
                 ]
+            },
+            "linux" : {
+                "command": "dotnet",
+                "args": [
+                    "build",
+                    "${workspaceFolder}/CASL.sln",
+                    "-c",
+                    "Debug-LINUX",
+                ],
             }
-            //"problemMatcher": "$msCompile"
         },
         {
             "label": "publish",
@@ -46,6 +55,43 @@
                 "/consoleloggerparameters:NoSummary"
             ],
             "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "CopyNativeLibs",
+            "type": "shell",
+            "group": "build",
+            "windows": {
+                "command": "Copy-Item",
+                "args": [
+                    "-Path",
+                    "${workspaceFolder}\\CASL\\OpenAL\\libs\\win-x64\\*.dll",
+                    "-Destination",
+                    "${workspaceFolder}\\Testing\\CASLTesting\\bin\\Debug-WIN\\net5.0",
+                ]
+            },
+            "linux": {
+                "command": "cp",
+                "args": [
+                    "${workspaceFolder}/CASL/OpenAL/libs/linux-x64/libopenal.so.1",
+                    "${workspaceFolder}/Testing/CASLTesting/bin/Debug-LINUX/net5.0",
+                ]
+            }
+        },
+        {
+            "label": "Cleanup",
+            "type": "shell",
+            "group": "build",
+            "linux": {
+                "command": "rm",
+                "args": [
+                    "-rf",// Delete recursivly without prompt
+                    "${workspaceFolder}/Testing/CASLTesting/bin/Debug",
+                ]
+            }
         }
     ]
 }
+
+/*
+rm -rf "/mnt/k/SOFTWARE DEVELOPMENT/PERSONAL/CASL/Testing/CASLTesting/bin/Debug"
+*/

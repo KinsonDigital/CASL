@@ -19,6 +19,7 @@ namespace CASL.NativeInterop
     /// </summary>
     internal class LibraryLoader : ILibraryLoader
     {
+        private readonly char DirSeparator = Path.DirectorySeparatorChar;
         private readonly IDependencyManager dependencyManager;
         private readonly IPlatform platform;
         private readonly IFile libFile;
@@ -73,7 +74,7 @@ namespace CASL.NativeInterop
             {
                 var libDirPath = Path.EndsInDirectorySeparator(libPath) ?
                     libPath :
-                    $@"{libPath}\";
+                    $@"{libPath}{DirSeparator}";
 
                 if (this.libFile.Exists($"{libDirPath}{LibraryName}"))
                 {
@@ -83,7 +84,7 @@ namespace CASL.NativeInterop
                     {
                         var loadLibExceptionMsg = this.platform.GetLastSystemError();
 
-                        // Add the libary path that is is attempting to be loaded
+                        // Add the library path that is is attempting to be loaded
                         loadLibExceptionMsg += $"\n\nLibrary Path: '{libDirPath}{LibraryName}'";
 
                         // Add the link to information about windows system error codes
@@ -104,7 +105,7 @@ namespace CASL.NativeInterop
             // Add the missing library paths to the exception message
             foreach (var path in missingLibPaths)
             {
-                exceptionMsg += $"\t{path}\\n";
+                exceptionMsg += $"\t{path}{DirSeparator}\n";
             }
 
             throw new Exception(exceptionMsg);
