@@ -142,7 +142,7 @@ namespace CASL
         }
 
         /// <inheritdoc/>
-        public SoundTime Length => new SoundTime(this.totalSeconds);
+        public SoundTime Length => new (this.totalSeconds);
 
         /// <inheritdoc/>
         public bool IsLooping
@@ -154,9 +154,7 @@ namespace CASL
                     throw new Exception(IsDisposedExceptionMessage);
                 }
 
-                return this.ignoreOpenALCalls
-                    ? false
-                    : this.alInvoker.GetSource(this.srcId, ALSourceb.Looping);
+                return !this.ignoreOpenALCalls && this.alInvoker.GetSource(this.srcId, ALSourceb.Looping);
             }
             set
             {

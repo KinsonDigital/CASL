@@ -2,10 +2,10 @@
 // Copyright (c) KinsonDigital. All rights reserved.
 // </copyright>
 
-using System;
-
 namespace CASL.NativeInterop
 {
+    using System;
+
     /// <summary>
     /// Represents the OpenAL library.
     /// </summary>
@@ -26,7 +26,7 @@ namespace CASL.NativeInterop
                 }
                 else if (this.platform.IsPosixPlatform())
                 {
-                    return "libopenal.so.1";
+                    return "libopenal.so";
                 }
                 else
                 {

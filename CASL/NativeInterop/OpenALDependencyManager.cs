@@ -20,19 +20,6 @@ namespace CASL.NativeInterop
         public OpenALDependencyManager(IPlatform platform, IFile file)
             : base(platform, file)
         {
-            //if (platform.IsWinPlatform())
-            //{
-            //    NativeLibraries = new[] { "soft_aol.dll" }.ToReadOnlyCollection();
-            //}
-            //else if (platform.IsPosixPlatform())
-            //{
-            //    NativeLibraries = new[] { "libopenal.so.1" }.ToReadOnlyCollection();
-            //}
-            //else
-            //{
-            //    // TODO: Create custom exception for this
-            //    throw new Exception("Unknown platform");
-            //}
         }
     }
 }

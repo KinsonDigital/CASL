@@ -82,10 +82,11 @@
             "type": "shell",
             "group": "build",
             "windows": {
-                "command": "rmdir",
+                "command": "pwsh",
                 "args": [
+                    "${workspaceFolder}\\BuildScripts\\Cleanup.ps1",
+                    "-DirToDelete",
                     "${workspaceFolder}\\Testing\\CASLTesting\\bin\\Debug",
-                    "/Q/S",// Delete recursivly without prompt
                 ]
             },            
             "linux": {
@@ -98,7 +99,3 @@
         }
     ]
 }
-
-/*
-rm -rf "/mnt/k/SOFTWARE DEVELOPMENT/PERSONAL/CASL/Testing/CASLTesting/bin/Debug"
-*/

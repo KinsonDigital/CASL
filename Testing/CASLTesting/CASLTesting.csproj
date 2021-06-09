@@ -44,9 +44,9 @@
   </ItemGroup>
 
   <!--COPY 64 BIT WINDOWS VERSION OF OPENAL TO APPLICATION DIRECTORY-->
-  <!--<Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="'$(Configuration)|$(Platform)'=='Debug-WIN|AnyCPU'">
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="'$(Configuration)|$(Platform)'=='Debug-WIN|AnyCPU'">
     <Exec Command="xcopy &quot;$(SolutionDir)CASL\OpenAL\libs\win-x64\*.dll&quot; &quot;$(TargetDir)&quot; /Y /Q" />
-  </Target>-->
+  </Target>
 
   <!--COPY 64 BIT LINUX VERSION OF OPENAL TO APPLICATION DIRECTORY-->
   <!-- <Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="'$(Configuration)|$(Platform)'=='Debug-LINUX|AnyCPU'">

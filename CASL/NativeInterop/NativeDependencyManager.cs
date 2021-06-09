@@ -68,6 +68,7 @@ namespace CASL.NativeInterop
                 throw new Exception("Unknown Operating System/Platform");
             }
 
+            // TODO: Each branch here is duplicate...improve this code
             if (this.platform.IsWinPlatform())
             {
                 this.assemblyDirectory = $@"{Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}{this.DirSeparator}";
