@@ -447,10 +447,8 @@ namespace CASL
 
             this.totalSeconds = sampleLen / frequency;
 
-            // TODO: Look into removing SoundData.SampleRate.  This is freq and is now done using OpenAL
             soundSrc.SourceId = this.srcId;
             soundSrc.TotalSeconds = this.totalSeconds;
-            soundSrc.SampleRate = frequency;
 
             this.audioManager.UpdateSoundSource(soundSrc);
 

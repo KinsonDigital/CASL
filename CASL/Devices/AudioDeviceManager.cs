@@ -116,7 +116,6 @@ namespace CASL.Devices
             }
 
             SoundSource soundSrc;
-            soundSrc.SampleRate = 0;
             soundSrc.TotalSeconds = -1f;
             soundSrc.SourceId = 0;
 
