@@ -6,6 +6,7 @@ namespace CASL.OpenAL
 {
     using System;
     using System.Runtime.InteropServices;
+    using CASL.Exceptions;
     using CASL.NativeInterop;
     using CASL.NativeInterop.Factories;
 
@@ -34,8 +35,6 @@ namespace CASL.OpenAL
         private readonly ALDeleteBuffers alDeleteBuffers;
         private readonly ALDeleteSources alDeleteSources;
 
-        // TODO: Convert all buffer and source ID's to uint
-
         /// <summary>
         /// Initializes a new instance of the <see cref="AL"/> class.
         /// </summary>
@@ -47,8 +46,7 @@ namespace CASL.OpenAL
 
             if (libraryPointer == 0)
             {
-                // TODO: Create custom load library exception of some kind
-                throw new Exception($"The library '{libraryLoader.LibraryName}' could not be loaded.");
+                throw new LoadLibraryException($"The library '{libraryLoader.LibraryName}' could not be loaded.");
             }
 
             this.alGetError = delegateFactory.CreateDelegate<ALGetError>(libraryPointer, nameof(this.alGetError));
@@ -74,10 +72,10 @@ namespace CASL.OpenAL
         private delegate ALError ALGetError();
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        private delegate void ALGenBuffers(int n, ref int buffers);
+        private delegate void ALGenBuffers(int n, ref uint buffers);
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        private delegate void ALGenSources(int n, ref int sources);
+        private delegate void ALGenSources(int n, ref uint sources);
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
         [return: MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(ConstCharPtrMarshaler))]
@@ -117,10 +115,10 @@ namespace CASL.OpenAL
         private delegate void ALSourceRewind(uint sid);
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        private delegate void ALDeleteBuffers(int n, [In] ref int buffers);
+        private delegate void ALDeleteBuffers(int n, [In] ref uint buffers);
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        private delegate void ALDeleteSources(int n, ref int sources);
+        private delegate void ALDeleteSources(int n, ref uint sources);
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         private delegate void ALSpeedOfSound(float value);
@@ -146,14 +144,14 @@ namespace CASL.OpenAL
         /// </summary>
         /// <param name="n">The number of buffers to be generated.</param>
         /// <param name="buffers">Pointer to an array of int values which will store the names of the new buffers.</param>
-        public void GenBuffers(int n, ref int buffers) => this.alGenBuffers(n, ref buffers);
+        public void GenBuffers(int n, ref uint buffers) => this.alGenBuffers(n, ref buffers);
 
         /// <summary>
         /// This function generates one or more sources.
         /// </summary>
         /// <param name="n">The number of sources to be generated.</param>
         /// <param name="sources">Pointer to an array of int values which will store the names of the new sources.</param>
-        public void GenSources(int n, ref int sources) => this.alGenSources(n, ref sources);
+        public void GenSources(int n, ref uint sources) => this.alGenSources(n, ref sources);
 
         /// <summary>
         /// This function retrieves an OpenAL string property.
@@ -251,13 +249,13 @@ namespace CASL.OpenAL
         /// </summary>
         /// <param name="n">The number of buffers to be deleted.</param>
         /// <param name="buffers">Pointer to an array of buffer names identifying the buffers to be deleted.</param>
-        public void DeleteBuffers(int n, [In] ref int buffers) => this.alDeleteBuffers(n, ref buffers);
+        public void DeleteBuffers(int n, [In] ref uint buffers) => this.alDeleteBuffers(n, ref buffers);
 
         /// <summary>
         /// This function deletes one or more sources.
         /// </summary>
         /// <param name="n">The number of sources to be deleted.</param>
         /// <param name="sources">Reference to a single source, or an array of source names identifying the sources to be deleted.</param>
-        public void DeleteSources(int n, ref int sources) => this.alDeleteSources(n, ref sources);
+        public void DeleteSources(int n, ref uint sources) => this.alDeleteSources(n, ref sources);
     }
 }

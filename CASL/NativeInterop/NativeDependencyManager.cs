@@ -10,15 +10,17 @@ namespace CASL.NativeInterop
     using System.IO.Abstractions;
     using System.Linq;
     using System.Reflection;
+    using CASL.Exceptions;
 
     /// <summary>
     /// Manages native dependency libraries.
     /// </summary>
     internal abstract class NativeDependencyManager : IDependencyManager
     {
-        private readonly char DirSeparator = Path.DirectorySeparatorChar;
+        private readonly char dirSeparator = Path.DirectorySeparatorChar;
         private readonly IPlatform platform;
         private readonly IFile file;
+        private readonly IPath path;
         private readonly string[] libraryPaths = Array.Empty<string>();
         private readonly string assemblyDirectory = string.Empty;
         private string[] nativeLibraries = Array.Empty<string>();
@@ -28,15 +30,27 @@ namespace CASL.NativeInterop
         /// </summary>
         /// <param name="platform">Manages platform specific operations.</param>
         /// <param name="file">Manages file related operations.</param>
-        public NativeDependencyManager(IPlatform platform, IFile file)
+        /// <param name="path">Manages file paths.</param>
+        public NativeDependencyManager(IPlatform platform, IFile file, IPath path)
         {
             if (platform is null)
             {
-                throw new ArgumentNullException(nameof(platform), "The platform must not be null.");
+                throw new ArgumentNullException(nameof(platform), "The parameter must not be null.");
+            }
+
+            if (file is null)
+            {
+                throw new ArgumentNullException(nameof(file), "The parameter must not be null.");
+            }
+
+            if (path is null)
+            {
+                throw new ArgumentNullException(nameof(path), "The parameter must not be null.");
             }
 
             this.platform = platform;
             this.file = file;
+            this.path = path;
 
             string architecture;
 
@@ -50,7 +64,7 @@ namespace CASL.NativeInterop
             }
             else
             {
-                throw new Exception("Process Architecture Not Recognized.");
+                throw new InvalidOperationException("Process Architecture Not Recognized.");
             }
 
             string osPlatform;
@@ -65,36 +79,19 @@ namespace CASL.NativeInterop
             }
             else
             {
-                throw new Exception("Unknown Operating System/Platform");
+                throw new UnknownPlatformException("Unknown Operating System/Platform.");
             }
 
-            // TODO: Each branch here is duplicate...improve this code
-            if (this.platform.IsWinPlatform())
-            {
-                this.assemblyDirectory = $@"{Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}{this.DirSeparator}";
-                this.libraryPaths = new[] { this.assemblyDirectory };
+            this.assemblyDirectory = $@"{this.path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}{this.dirSeparator}";
+            this.libraryPaths = new[] { this.assemblyDirectory };
 
-                // TODO: SHould not have to point to this dir path created by the nuget package.
-                // Try this at the assembly path
-                NativeLibPath = $@"{this.assemblyDirectory}runtimes{this.DirSeparator}{osPlatform}-{architecture}{this.DirSeparator}native{this.DirSeparator}";
-            }
-            else if (this.platform.IsPosixPlatform())
-            {
-                this.assemblyDirectory = $@"{Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}{this.DirSeparator}";
-                this.libraryPaths = new[] { this.assemblyDirectory };
-
-                NativeLibPath = $@"{this.assemblyDirectory}runtimes{this.DirSeparator}{osPlatform}-{architecture}{this.DirSeparator}native{this.DirSeparator}";
-            }
+            NativeLibPath = $@"{this.assemblyDirectory}runtimes{this.dirSeparator}{osPlatform}-{architecture}{this.dirSeparator}native{this.dirSeparator}";
         }
 
-        /// <summary>
-        /// Gets the path to the <see cref="Library"/> for a <see cref="LibraryLoader"/> to load.
-        /// </summary>
+        /// <inheritdoc/>
         public ReadOnlyCollection<string> LibraryDirPaths => new (this.libraryPaths);
 
-        /// <summary>
-        /// Gets or sets the list of native library dependencies.
-        /// </summary>
+        /// <inheritdoc/>
         public ReadOnlyCollection<string> NativeLibraries
         {
             get => this.nativeLibraries.ToReadOnlyCollection();
@@ -111,14 +108,10 @@ namespace CASL.NativeInterop
             }
         }
 
-        /// <summary>
-        /// Gets or sets the native lib path.
-        /// </summary>
-        public string NativeLibPath { get; set; } = string.Empty;
+        /// <inheritdoc/>
+        public string NativeLibPath { get; private set; } = string.Empty;
 
-        /// <summary>
-        /// Sets up all of the dependencies.
-        /// </summary>
+        /// <inheritdoc/>
         public void SetupDependencies()
         {
             if (NativeLibraries.Count <= 0)

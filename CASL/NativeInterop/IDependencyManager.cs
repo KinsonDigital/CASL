@@ -22,9 +22,9 @@ namespace CASL.NativeInterop
         ReadOnlyCollection<string> NativeLibraries { get; set; }
 
         /// <summary>
-        /// Gets or sets the native lib path.
+        /// Gets the native lib path.
         /// </summary>
-        string NativeLibPath { get; set; }
+        string NativeLibPath { get; }
 
         /// <summary>
         /// Sets up all of the dependencies.

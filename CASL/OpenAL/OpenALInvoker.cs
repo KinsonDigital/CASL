@@ -99,7 +99,7 @@ namespace CASL.OpenAL
         /// <inheritdoc/>
         public uint GenBuffer()
         {
-            var buffer = 0;
+            var buffer = 0u;
             this.al.GenBuffers(1, ref buffer);
 
             var error = GetError();
@@ -114,7 +114,7 @@ namespace CASL.OpenAL
         /// <inheritdoc/>
         public uint GenSource()
         {
-            var source = 0;
+            var source = 0u;
             this.al.GenSources(1, ref source);
 
             var error = GetError();
@@ -355,8 +355,7 @@ namespace CASL.OpenAL
         /// <inheritdoc/>
         public void DeleteBuffer(uint buffer)
         {
-            var castedBuffer = (int)buffer;
-            this.al.DeleteBuffers(1, ref castedBuffer);
+            this.al.DeleteBuffers(1, ref buffer);
 
             var error = GetError();
             var errorMessage = Enum.GetName(typeof(ALError), error);
@@ -367,8 +366,7 @@ namespace CASL.OpenAL
         /// <inheritdoc/>
         public void DeleteSource(uint source)
         {
-            var castedSource = (int)source;
-            this.al.DeleteSources(1, ref castedSource);
+            this.al.DeleteSources(1, ref source);
 
             var error = GetError();
             var errorMessage = Enum.GetName(typeof(ALError), error);

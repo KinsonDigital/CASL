@@ -43,14 +43,24 @@
     </None>
   </ItemGroup>
 
+  <!--COPY 64 BIT WINDOWS VERSION OF OPENAL TO PUBLISH DIRECTORY-->
+  <Target Name="CopyOpenALLib" AfterTargets="publish" Condition="'$(Configuration)|$(Platform)'=='Release-WIN|AnyCPU'">
+    <Copy SourceFiles="..\..\CASL\OpenAL\libs\win-x64\soft_oal.dll" DestinationFolder="bin\Debug-WIN\net5.0\publish\"></Copy>
+  </Target>
+  
+    <!--COPY 64 BIT LINUX VERSION OF OPENAL TO PUBLISH DIRECTORY-->
+  <Target Name="CopyOpenALLib" AfterTargets="publish" Condition="'$(Configuration)|$(Platform)'=='Release-LINUX|AnyCPU'">
+    <Copy SourceFiles="..\..\CASL\OpenAL\libs\linux-x64\libopenal.so.1" DestinationFolder="bin\Release-LINUX\net5.0\publish\"></Copy>
+  </Target>
+
   <!--COPY 64 BIT WINDOWS VERSION OF OPENAL TO APPLICATION DIRECTORY-->
   <Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="'$(Configuration)|$(Platform)'=='Debug-WIN|AnyCPU'">
-    <Exec Command="xcopy &quot;$(SolutionDir)CASL\OpenAL\libs\win-x64\*.dll&quot; &quot;$(TargetDir)&quot; /Y /Q" />
+    <Copy SourceFiles="..\..\CASL\OpenAL\libs\win-x64\soft_oal.dll" DestinationFolder="$(TargetDir)"></Copy>
   </Target>
 
   <!--COPY 64 BIT LINUX VERSION OF OPENAL TO APPLICATION DIRECTORY-->
-  <!-- <Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="'$(Configuration)|$(Platform)'=='Debug-LINUX|AnyCPU'">
-    <Exec Command="REM cp &quot;$(SolutionDir)CASL/OpenAL/libs/win-x64/*.dll&quot; &quot;$(TargetDir)&quot;" />
-  </Target> -->
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="'$(Configuration)|$(Platform)'=='Debug-LINUX|AnyCPU'">
+    <Copy SourceFiles="..\..\CASL\OpenAL\libs\linux-x64\libopenal.so.1" DestinationFolder="$(TargetDir)"></Copy>
+  </Target>
 
 </Project>
