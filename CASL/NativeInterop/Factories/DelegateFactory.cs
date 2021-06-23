@@ -10,8 +10,16 @@ namespace CASL.NativeInterop.Factories
     /// <summary>
     /// Creates delegates to native library functions.
     /// </summary>
-    public class DelegateFactory : IDelegateFactory
+    internal class DelegateFactory : IDelegateFactory
     {
+        private readonly IPlatform platform;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DelegateFactory"/> class.
+        /// </summary>
+        /// <param name="platform">Provides platform specific information.</param>
+        public DelegateFactory(IPlatform platform) => this.platform = platform;
+
         /// <inheritdoc/>
         public TDelegate CreateDelegate<TDelegate>(nint libraryPtr, string procName)
         {
@@ -20,7 +28,16 @@ namespace CASL.NativeInterop.Factories
                 throw new ArgumentException("The pointer must not be zero.", nameof(libraryPtr));
             }
 
-            var libFunctionPtr = NativeMethods.GetProcAddress_WIN(libraryPtr, procName);
+            nint libFunctionPtr;
+
+            if (this.platform.IsWinPlatform())
+            {
+                libFunctionPtr = NativeMethods.GetProcAddress_WIN(libraryPtr, procName);
+            }
+            else
+            {
+                libFunctionPtr = NativeMethods.dlsym_POSIX(libraryPtr, procName);
+            }
 
             if (libFunctionPtr == 0)
             {

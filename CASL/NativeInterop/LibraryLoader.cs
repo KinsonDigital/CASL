@@ -9,6 +9,7 @@ namespace CASL.NativeInterop
     using System.IO;
     using System.IO.Abstractions;
     using System.Linq;
+    using CASL.Exceptions;
 
     /*Refer to these links for more information
     1. https://dev.to/jeikabu/loading-native-libraries-in-c-fh6
@@ -108,8 +109,7 @@ namespace CASL.NativeInterop
                         // Add the link to information about windows system error codes
                         loadLibExceptionMsg += "\n\nSystem Error Codes: https://docs.microsoft.com/en-us/windows/win32/debug/system-error-codes--0-499-";
 
-                        // TODO: Create LoadLibraryFailureException class
-                        throw new Exception(loadLibExceptionMsg);
+                        throw new LoadLibraryException(loadLibExceptionMsg);
                     }
 
                     return libPtr;
@@ -165,8 +165,7 @@ namespace CASL.NativeInterop
                         // Add the library path that is is attempting to be loaded
                         loadLibExceptionMsg += $"\n\nLibrary Path: '{libDirPath}{libraryName}'";
 
-                        // TODO: Create LoadLibraryFailureException class
-                        throw new Exception(loadLibExceptionMsg);
+                        throw new LoadLibraryException(loadLibExceptionMsg);
                     }
 
                     return libPtr;

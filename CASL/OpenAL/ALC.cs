@@ -7,6 +7,7 @@ namespace CASL.OpenAL
     using System;
     using System.Diagnostics.CodeAnalysis;
     using System.Runtime.InteropServices;
+    using CASL.Exceptions;
     using CASL.NativeInterop;
     using CASL.NativeInterop.Factories;
 
@@ -39,8 +40,7 @@ namespace CASL.OpenAL
 
             if (libraryPointer == 0)
             {
-                // TODO: Create custom load library exception of some kind
-                throw new Exception($"The library '{libraryLoader.LibraryName}' could not be loaded.");
+                throw new LoadLibraryException($"The library '{libraryLoader.LibraryName}' could not be loaded.");
             }
 
             this.alcGetError = delegateFactory.CreateDelegate<ALCGetError>(libraryPointer, nameof(this.alcGetError));

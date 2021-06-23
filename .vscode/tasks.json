@@ -2,15 +2,15 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "BuildEntireSolution",
-            "type": "shell",
-            "dependsOn": [ "BuildSolution", "CopyNativeLibs", "Cleanup" ],
-            "dependsOrder": "sequence",
-        },
-        {
             "label": "BuildSolution",
             "type": "shell",
             "group": "build",
+            "dependsOn": [ "SolutionBuild", "CopyNativeLibs", "Cleanup" ],
+            "dependsOrder": "sequence",
+        },
+        {
+            "label": "SolutionBuild",
+            "type": "shell",
             "problemMatcher": "$msCompile",
             "windows": {
                 "command": "dotnet",
@@ -31,6 +31,43 @@
                 ],
             }
         },
+        {
+            "label": "BuildCASLTesting",
+            "type": "shell",
+            "group": "build",
+            "dependsOn": [ "CASLTestingBuild", "CopyNativeLibs", "Cleanup" ],
+            "dependsOrder": "sequence",
+        },
+        {
+            "label": "CASLTestingBuild",
+            "type": "shell",
+            "problemMatcher": "$msCompile",
+            "windows": {
+                "command": "dotnet",
+                "args": [
+                    "build",
+                    "${workspaceFolder}\\Testing\\CASLTesting\\CASLTesting.csproj",
+                    "-c",
+                    "Debug-WIN",
+                    "/p:Platform=any",
+                    "-o",
+                    "${workspaceFolder}\\Testing\\CASLTesting\\bin\\Debug-WIN\\net5.0"
+                ]
+            },
+            "linux" : {
+                "command": "dotnet",
+                "args": [
+                    "build",
+                    "${workspaceFolder}//Testing//CASLTesting//CASLTesting.csproj",
+                    "-c",
+                    "Debug-LINUX",
+                    "-r",
+                    "linux-x64",
+                    "-o",
+                    "${workspaceFolder}/Testing/CASLTesting/bin/Debug-LINUX/net5.0"
+                ],
+            }
+        },        
         {
             "label": "publish",
             "command": "dotnet",
@@ -59,7 +96,6 @@
         {
             "label": "CopyNativeLibs",
             "type": "shell",
-            "group": "build",
             "windows": {
                 "command": "Copy-Item",
                 "args": [
@@ -80,7 +116,6 @@
         {
             "label": "Cleanup",
             "type": "shell",
-            "group": "build",
             "windows": {
                 "command": "pwsh",
                 "args": [

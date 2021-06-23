@@ -31,7 +31,6 @@ namespace CASLTests.Devices
         private readonly ALContext context;
         private readonly uint srcId = 4321;
         private readonly uint bufferId = 9876;
-        private IAudioDeviceManager manager;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AudioDeviceManagerTests"/> class.
@@ -59,11 +58,11 @@ namespace CASLTests.Devices
         public void IsInitialized_WhenGettingValueAfterInitialization_ReturnsTrue()
         {
             // Arrange
-            this.manager = CreateManager();
-            this.manager.InitDevice();
+            var manager = CreateManager();
+            manager.InitDevice();
 
             // Act
-            var actual = this.manager.IsInitialized;
+            var actual = manager.IsInitialized;
 
             // Assert
             Assert.True(actual);
@@ -73,13 +72,13 @@ namespace CASLTests.Devices
         public void DeviceNames_WhenGettingValueAfterBeingDisposed_ThrowsException()
         {
             // Arrange
-            this.manager = CreateManager();
-            this.manager.Dispose();
+            var manager = CreateManager();
+            manager.Dispose();
 
             // Act & Assert
             Assert.ThrowsWithMessage<AudioDeviceManagerNotInitializedException>(() =>
             {
-                _ = this.manager.DeviceNames;
+                _ = manager.DeviceNames;
             }, IsDisposedExceptionMessage);
         }
 
@@ -88,13 +87,13 @@ namespace CASLTests.Devices
         {
             // Arrange
             var expected = new[] { "Device-1", "Device-2" };
-            this.manager = CreateManager();
-            this.manager.InitDevice();
+            var manager = CreateManager();
+            manager.InitDevice();
             this.mockALInvoker.Setup(m => m.GetDeviceList())
                 .Returns(() => new[] { "Device-1", "Device-2" });
 
             // Act
-            var actual = this.manager.DeviceNames;
+            var actual = manager.DeviceNames;
 
             // Assert
             Assert.Equal(expected, actual);
@@ -138,10 +137,10 @@ namespace CASLTests.Devices
         public void InitDevice_WhenInvoked_InitializesDevice()
         {
             // Arrange
-            this.manager = CreateManager();
+            var manager = CreateManager();
 
             // Act
-            this.manager.InitDevice("test-device");
+            manager.InitDevice("test-device");
 
             // Assert
             this.mockALInvoker.Verify(m => m.OpenDevice("OpenAL Soft on test-device"), Times.Once());
@@ -159,12 +158,12 @@ namespace CASLTests.Devices
             var contextResult = !(makeContextCurrentResult is null) && (bool)makeContextCurrentResult;
 
             this.mockALInvoker.Setup(m => m.MakeContextCurrent(this.context)).Returns(false);
-            this.manager = CreateManager();
+            var manager = CreateManager();
 
             // Act & Assert
             Assert.ThrowsWithMessage<InitializeDeviceException>(() =>
             {
-                this.manager.InitDevice("test-device");
+                manager.InitDevice("test-device");
             }, "There was an issue initializing the audio device.");
         }
 
@@ -172,13 +171,13 @@ namespace CASLTests.Devices
         public void InitSound_WithSingleParamAndWhileDisposed_ThrowsException()
         {
             // Arrange
-            this.manager = CreateManager();
-            this.manager.Dispose();
+            var manager = CreateManager();
+            manager.Dispose();
 
             // Act & Assert
             Assert.ThrowsWithMessage<AudioDeviceManagerNotInitializedException>(() =>
             {
-                this.manager.InitSound();
+                manager.InitSound();
             }, IsDisposedExceptionMessage);
         }
 
@@ -186,11 +185,11 @@ namespace CASLTests.Devices
         public void InitSound_WhenInvoked_SetsUpSoundAndReturnsCorrectResult()
         {
             // Arrange
-            this.manager = CreateManager();
-            this.manager.InitDevice();
+            var manager = CreateManager();
+            manager.InitDevice();
 
             // Act
-            var (actualSourceId, actualBufferId) = this.manager.InitSound();
+            var (actualSourceId, actualBufferId) = manager.InitSound();
 
             // Assert
             Assert.Equal(this.srcId, actualSourceId);
@@ -203,12 +202,12 @@ namespace CASLTests.Devices
         public void UpdateSoundSource_WhenNotInitialized_ThrowsException()
         {
             // Arrange
-            this.manager = CreateManager();
+            var manager = CreateManager();
 
             // Act & Assert
             Assert.ThrowsWithMessage<AudioDeviceManagerNotInitializedException>(() =>
             {
-                this.manager.UpdateSoundSource(It.IsAny<SoundSource>());
+                manager.UpdateSoundSource(It.IsAny<SoundSource>());
             }, IsDisposedExceptionMessage);
         }
 
@@ -216,8 +215,8 @@ namespace CASLTests.Devices
         public void UpdateSoundSource_WhenSoundSourceDoesNotExist_ThrowsException()
         {
             // Arrange
-            this.manager = CreateManager();
-            this.manager.InitDevice();
+            var manager = CreateManager();
+            manager.InitDevice();
 
             // Act & Assert
             Assert.ThrowsWithMessage<SoundDataException>(() =>
@@ -226,7 +225,7 @@ namespace CASLTests.Devices
                 {
                     SourceId = 1234,
                 };
-                this.manager.UpdateSoundSource(soundSrc);
+                manager.UpdateSoundSource(soundSrc);
             }, $"The sound source with the source id '1234' does not exist.");
         }
 
@@ -234,9 +233,9 @@ namespace CASLTests.Devices
         public void UpdateSoundSource_WhenInvoked_UpdatesSoundSource()
         {
             // Arrange
-            this.manager = CreateManager();
-            this.manager.InitDevice();
-            this.manager.InitSound();
+            var manager = CreateManager();
+            manager.InitDevice();
+            manager.InitSound();
 
             // Act & Assert
             Assert.DoesNotThrow<Exception>(() =>
@@ -245,7 +244,7 @@ namespace CASLTests.Devices
                 {
                     SourceId = 4321,
                 };
-                this.manager.UpdateSoundSource(otherSoundSrc);
+                manager.UpdateSoundSource(otherSoundSrc);
             });
         }
 
@@ -253,12 +252,12 @@ namespace CASLTests.Devices
         public void ChangeDevice_WhenNotInitialized_ThrowsException()
         {
             // Arrange
-            this.manager = CreateManager();
+            var manager = CreateManager();
 
             // Act & Assert
             Assert.ThrowsWithMessage<AudioDeviceManagerNotInitializedException>(() =>
             {
-                this.manager.ChangeDevice("test-device");
+                manager.ChangeDevice("test-device");
             }, IsDisposedExceptionMessage);
         }
 
@@ -269,13 +268,13 @@ namespace CASLTests.Devices
             this.mockALInvoker.Setup(m => m.GetDeviceList())
                 .Returns(new[] { "test-device" });
 
-            this.manager = CreateManager();
-            this.manager.InitDevice();
+            var manager = CreateManager();
+            manager.InitDevice();
 
             // Act & Assert
             Assert.ThrowsWithMessage<AudioDeviceDoesNotExistException>(() =>
             {
-                this.manager.ChangeDevice("test-device-1");
+                manager.ChangeDevice("test-device-1");
             }, "Device Name: test-device-1\nThe audio device does not exist.");
         }
 
@@ -310,17 +309,17 @@ namespace CASLTests.Devices
                     return oggData;
                 });
 
-            this.manager = CreateManager();
+            var manager = CreateManager();
 
             var sound = new Sound(
                 this.oggFilePath,
                 this.mockALInvoker.Object,
-                this.manager,
+                manager,
                 mockOggDecoder.Object,
                 new Mock<ISoundDecoder<byte>>().Object);
 
             // Act
-            this.manager.ChangeDevice("test-device");
+            manager.ChangeDevice("test-device");
 
             // Assert
             this.mockALInvoker.Verify(m => m.GetSourceState(this.srcId), Times.Once());
@@ -367,18 +366,18 @@ namespace CASLTests.Devices
                     return oggData;
                 });
 
-            this.manager = CreateManager();
-            this.manager.InitDevice();
+            var manager = CreateManager();
+            manager.InitDevice();
 
             var sound = new Sound(
                 this.oggFilePath,
                 this.mockALInvoker.Object,
-                this.manager,
+                manager,
                 mockOggDecoder.Object,
                 new Mock<ISoundDecoder<byte>>().Object);
 
             // Act
-            this.manager.ChangeDevice("test-device");
+            manager.ChangeDevice("test-device");
 
             // Assert
             this.mockALInvoker.Verify(m => m.GetSourceState(this.srcId), Times.Exactly(srcStateInvokeCount));
@@ -391,19 +390,19 @@ namespace CASLTests.Devices
             // Arrange
             this.mockALInvoker.Setup(m => m.GetDeviceList())
                 .Returns(new[] { "test-device" });
-            this.manager = CreateManager();
-            this.manager.InitDevice();
+            var manager = CreateManager();
+            manager.InitDevice();
 
             // Act & Assert
             Assert.Raises<EventArgs>((e) =>
             {
-                this.manager.DeviceChanged += e;
+                manager.DeviceChanged += e;
             }, (e) =>
             {
-                this.manager.DeviceChanged -= e;
+                manager.DeviceChanged -= e;
             }, () =>
             {
-                this.manager.ChangeDevice("test-device");
+                manager.ChangeDevice("test-device");
             });
         }
 
@@ -413,13 +412,13 @@ namespace CASLTests.Devices
             // Arrange
             this.mockALInvoker.Setup(m => m.GetDeviceList())
                 .Returns(new[] { "test-device" });
-            this.manager = CreateManager();
-            this.manager.InitDevice();
+            var manager = CreateManager();
+            manager.InitDevice();
 
             // Act & Assert
             Assert.DoesNotThrowNullReference(() =>
             {
-                this.manager.ChangeDevice("test-device");
+                manager.ChangeDevice("test-device");
             });
         }
 

@@ -4,8 +4,6 @@
 
 namespace CASL.NativeInterop.Factories
 {
-    using System;
-
     /// <summary>
     /// Creates delegates to native library functions.
     /// </summary>

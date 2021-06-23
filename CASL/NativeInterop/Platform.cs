@@ -8,6 +8,7 @@ namespace CASL.NativeInterop
     using System.Diagnostics.CodeAnalysis;
     using System.Globalization;
     using System.Runtime.InteropServices;
+    using CASL.Exceptions;
 
     /// <summary>
     /// Provides information about the current platform.
@@ -15,6 +16,26 @@ namespace CASL.NativeInterop
     [ExcludeFromCodeCoverage]
     internal class Platform : IPlatform
     {
+        /// <inheritdoc/>
+        public string CurrentPlatform
+        {
+            get
+            {
+                var os = Environment.OSVersion.Platform switch
+                {
+                    PlatformID.Win32NT => "Windows",
+                    PlatformID.Unix => "Posix",
+                    _ => throw new UnknownPlatformException(),
+                };
+
+                var bitness = Environment.Is64BitOperatingSystem
+                    ? "x64"
+                    : "x86";
+
+                return $"{os} {bitness}";
+            }
+        }
+
         /// <inheritdoc/>
         public bool IsWinPlatform() => Environment.OSVersion.Platform == PlatformID.Win32NT;
 
@@ -51,7 +72,23 @@ namespace CASL.NativeInterop
         {
             const int RTLD_NOW = 2;
 
-            return IsWinPlatform() ? NativeMethods.LoadLibrary_WIN(libPath) : NativeMethods.dlopen_POSIX(libPath, RTLD_NOW);
+            try
+            {
+                if (IsWinPlatform())
+                {
+                    return NativeMethods.LoadLibrary_WIN(libPath);
+                }
+                else
+                {
+                    return NativeMethods.dlopen_POSIX(libPath, RTLD_NOW);    
+                }
+            }
+            catch (Exception ex)
+            {
+                var systemErrorMsg = GetLastSystemError();
+
+                throw new Exception(systemErrorMsg);
+            }
         }
 
         /// <inheritdoc/>

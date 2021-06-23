@@ -4,7 +4,6 @@
 
 namespace CASL.NativeInterop
 {
-    using System;
     using System.IO.Abstractions;
 
     /// <summary>

@@ -4,8 +4,6 @@
 
 namespace CASL
 {
-    using System;
-
     /// <summary>
     /// A single sound that can be played, paused etc.
     /// </summary>

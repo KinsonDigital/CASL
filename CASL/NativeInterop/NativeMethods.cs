@@ -4,7 +4,6 @@
 
 namespace CASL.NativeInterop
 {
-    using System;
     using System.Runtime.InteropServices;
 
     /// <summary>
@@ -60,14 +59,14 @@ namespace CASL.NativeInterop
          *
          * Refer to link for more info: https://docs.microsoft.com/en-us/visualstudio/code-quality/ca2101?view=vs-2019
          */
-        [DllImport("libdl.so", EntryPoint = "dlopen", SetLastError = true, CharSet = CharSet.Ansi)]
+        [DllImport("libdl.so.2", EntryPoint = "dlopen", SetLastError = true, CharSet = CharSet.Ansi)]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Globalization", "CA2101:Specify marshaling for P/Invoke string arguments", Justification = "Possibly will not work.  Testing needs to be done.")]
         public static extern nint dlopen_POSIX(string fileName, int flags);
 
-        [DllImport("libdl.so", EntryPoint = "dlerror", SetLastError = true, CharSet = CharSet.Ansi)]
+        [DllImport("libdl.so.2", EntryPoint = "dlerror", SetLastError = true, CharSet = CharSet.Ansi)]
         public static extern nint dlerror_POSIX();
 
-        [DllImport("libdl.so", EntryPoint = "dlsym", SetLastError = true, CharSet = CharSet.Ansi)]
+        [DllImport("libdl.so.2", EntryPoint = "dlsym", SetLastError = true, CharSet = CharSet.Ansi)]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Globalization", "CA2101:Specify marshaling for P/Invoke string arguments", Justification = "Possibly will not work.  Testing needs to be done.")]
         public static extern nint dlsym_POSIX(nint handle, string symbol);
     }

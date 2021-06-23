@@ -125,8 +125,6 @@ namespace CASL.OpenAL
             return (uint)source;
         }
 
-        // TODO: Move to extensions
-
         /// <inheritdoc/>
         public string GetErrorString(ALError param) => this.al.Get((ALGetString)param);
 
@@ -216,7 +214,6 @@ namespace CASL.OpenAL
             return result;
         }
 
-        /// TODO: Move to extensions
         /// <inheritdoc/>
         public IList<string> GetDeviceList()
         {

@@ -10,6 +10,11 @@ namespace CASL.NativeInterop
     internal interface IPlatform
     {
         /// <summary>
+        /// Gets the current platform.
+        /// </summary>
+        string CurrentPlatform { get; }
+
+        /// <summary>
         /// Returns a value indicating if the current platform is a windows platform.
         /// </summary>
         /// <returns>True if the the platform is windows.</returns>

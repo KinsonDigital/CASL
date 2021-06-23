@@ -8,7 +8,7 @@
             "name": ".NET Core Launch (console)",
             "type": "coreclr",
             "request": "launch",
-            "preLaunchTask": "BuildEntireSolution",
+            "preLaunchTask": "BuildSolution",
             "args": [],
             "stopAtEntry": false,
             "windows": {

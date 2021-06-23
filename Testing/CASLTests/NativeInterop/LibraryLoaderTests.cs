@@ -10,6 +10,7 @@ namespace CASLTests
     using System.Collections.ObjectModel;
     using System.IO;
     using System.IO.Abstractions;
+    using CASL.Exceptions;
     using CASL.NativeInterop;
     using Moq;
     using Xunit;
@@ -28,10 +29,10 @@ namespace CASLTests
         private readonly string libPath;
         private readonly ReadOnlyCollection<string> libDirPaths;
         private readonly Mock<IDependencyManager> mockDependencyManager;
-        private readonly Mock<IPlatform> mockPlatform;
         private readonly Mock<IDirectory> mockDirectory;
         private readonly Mock<IFile> mockFile;
         private readonly Mock<ILibrary> mockLibrary;
+        private Mock<IPlatform> mockPlatform;
         #endregion
 
         #region Constructors
@@ -47,7 +48,9 @@ namespace CASLTests
             this.mockDependencyManager.SetupGet(p => p.LibraryDirPaths).Returns(this.libDirPaths);
 
             this.mockPlatform = new Mock<IPlatform>();
-            this.mockPlatform.Setup(m => m.IsWinPlatform()).Returns(true);
+
+            MockWindowsPlatform();
+
             this.mockPlatform.Setup(m => m.Is64BitProcess()).Returns(true);
             this.mockPlatform.Setup(m => m.LoadLibrary(this.libPath)).Returns(new IntPtr(1234));
             this.mockPlatform.Setup(m => m.GetLastSystemError()).Returns("Could not load module.");
@@ -185,8 +188,7 @@ namespace CASLTests
         [InlineData(null)]
         public void Ctor_WhenInvokedWithNullOrEmptyPosixLibraryName_ThrowsException(string winLibraryName)
         {
-            this.mockPlatform.Setup(m => m.IsWinPlatform()).Returns(false);
-            this.mockPlatform.Setup(m => m.IsPosixPlatform()).Returns(true);
+            MockPosixPlatform();
             this.mockLibrary.SetupGet(p => p.LibraryName).Returns(winLibraryName);
 
             //Act & //Assert
@@ -205,7 +207,7 @@ namespace CASLTests
             var loader = CreateLoader();
 
             //Act & Assert
-            Assert.ThrowsWithMessage<Exception>(() =>
+            Assert.ThrowsWithMessage<LoadLibraryException>(() =>
             {
                 loader.LoadLibrary();
             }, "Could not load module.\n\nLibrary Path: 'C:\\test-dir\\test-lib.dll'\n\nSystem Error Codes: https://docs.microsoft.com/en-us/windows/win32/debug/system-error-codes--0-499-");
@@ -217,8 +219,7 @@ namespace CASLTests
             // Arrange
             this.mockLibrary.SetupGet(p => p.LibraryName).Returns(PosixLibraryName);
 
-            this.mockPlatform.Setup(m => m.IsWinPlatform()).Returns(false);
-            this.mockPlatform.Setup(m => m.IsPosixPlatform()).Returns(true);
+            MockPosixPlatform();
             this.mockPlatform.Setup(m => m.GetPlatformLibFileExtension()).Returns(".so");
 
             this.mockPlatform.Setup(m => m.LoadLibrary(It.IsAny<string>())).Returns(0);
@@ -230,7 +231,7 @@ namespace CASLTests
             var loader = CreateLoader();
 
             // Act & Assert
-            Assert.ThrowsWithMessage<Exception>(() =>
+            Assert.ThrowsWithMessage<LoadLibraryException>(() =>
             {
                 loader.LoadLibrary();
             }, "Could not load module.\n\nLibrary Path: 'C:\\test-dir\\test-lib.so'");
@@ -287,8 +288,7 @@ namespace CASLTests
             // Arrange
             this.mockLibrary.SetupGet(p => p.LibraryName).Returns(PosixLibraryName);
 
-            this.mockPlatform.Setup(m => m.IsWinPlatform()).Returns(false);
-            this.mockPlatform.Setup(m => m.IsPosixPlatform()).Returns(true);
+            MockPosixPlatform();
             this.mockPlatform.Setup(m => m.GetPlatformLibFileExtension()).Returns(".so");
 
             this.mockPlatform.Setup(m => m.LoadLibrary($"{this.libDirPaths[0]}{PosixLibraryName}")).Returns(1234);
@@ -313,8 +313,7 @@ namespace CASLTests
             // Arrange
             this.mockLibrary.SetupGet(p => p.LibraryName).Returns(PosixLibraryName);
 
-            this.mockPlatform.Setup(m => m.IsWinPlatform()).Returns(false);
-            this.mockPlatform.Setup(m => m.IsPosixPlatform()).Returns(true);
+            MockPosixPlatform();
             this.mockPlatform.Setup(m => m.GetPlatformLibFileExtension()).Returns(".so");
 
             this.mockPlatform.Setup(m => m.LoadLibrary(It.IsAny<string>())).Returns(0);
@@ -344,9 +343,8 @@ namespace CASLTests
         {
             // Arrange
             this.mockLibrary.SetupGet(p => p.LibraryName).Returns(PosixLibraryName);
-            
-            this.mockPlatform.Setup(m => m.IsWinPlatform()).Returns(false);
-            this.mockPlatform.Setup(m => m.IsPosixPlatform()).Returns(true);
+
+            MockPosixPlatform();
             this.mockPlatform.Setup(m => m.GetPlatformLibFileExtension()).Returns(".so");
 
             foreach (var lib in foundLibs)
@@ -366,6 +364,25 @@ namespace CASLTests
             Assert.Equal(1234, actual);
         }
         #endregion
+
+        /// <summary>
+        /// Mocks a windows platform.
+        /// </summary>
+        private void MockWindowsPlatform()
+        {
+            this.mockPlatform.Setup(m => m.IsWinPlatform()).Returns(true);
+            this.mockPlatform.Setup(m => m.IsPosixPlatform()).Returns(false);
+        }
+
+        /// <summary>
+        /// Mocks a posix platform.
+        /// </summary>
+        private void MockPosixPlatform()
+        {
+            this.mockPlatform.Setup(m => m.IsWinPlatform()).Returns(false);
+            this.mockPlatform.Setup(m => m.IsPosixPlatform()).Returns(true);
+        }
+
 
         /// <summary>
         /// Creates a new instance of the <see cref="LibraryLoader"/> class for the purpose of testing.

@@ -4,7 +4,7 @@
 
 namespace CASL.NativeInterop
 {
-    using System;
+    using CASL.Exceptions;
 
     /// <summary>
     /// Represents the OpenAL library.
@@ -13,6 +13,10 @@ namespace CASL.NativeInterop
     {
         private readonly IPlatform platform;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="OpenALLibrary"/> class.
+        /// </summary>
+        /// <param name="platform">Information about the platform.</param>
         public OpenALLibrary(IPlatform platform) => this.platform = platform;
 
         /// <inheritdoc/>
@@ -30,8 +34,7 @@ namespace CASL.NativeInterop
                 }
                 else
                 {
-                    // TODO: Create custom exception for this
-                    throw new Exception("Unknown platform");
+                    throw new UnknownPlatformException($"The platform '{this.platform.CurrentPlatform}' is unknown.");
                 }
             }
         }

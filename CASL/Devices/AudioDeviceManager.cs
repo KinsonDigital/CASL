@@ -11,6 +11,7 @@ namespace CASL.Devices
     using System.Linq;
     using CASL.Data.Exceptions;
     using CASL.Devices.Exceptions;
+    using CASL.Exceptions;
     using CASL.OpenAL;
 
     /// <summary>
@@ -246,7 +247,7 @@ namespace CASL.Devices
         /// </summary>
         /// <param name="errorMsg">The error message from OpenAL.</param>
         [ExcludeFromCodeCoverage]
-        private static void ErrorCallback(string errorMsg) => throw new Exception(errorMsg); // TODO: Create custom audio exception here
+        private static void ErrorCallback(string errorMsg) => throw new AudioException(errorMsg);
 
         /// <summary>
         /// Destroys the current audio device.

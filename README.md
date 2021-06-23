@@ -35,11 +35,11 @@ We strive for **CASL** to be a cross platform library by running under **.NET v5
 We currently have the following maintainers:
 - [Calvin Wilkinson](https://github.com/Perksey) [<img src="https://about.twitter.com/etc/designs/about2-twitter/public/img/favicon.ico" alt="Follow Calvin Wilkinson on Twitter" width="16" />](https://twitter.com/KDCoder)
 
-<h1 style="font-weight:bold" align="center">Building</h1>
+<h1 style="font-weight:bold" align="center">Building And DevEnvironment Setup</h1>
 
-- Make sure you have at the **.NET 5 SDK** installed.
-- Clone the repository
-- Building using **Visual Studio** or **NET CLI**
+1. Click [here](./EnvironmentSetup/WindowsDevEnvSetup.md) for instructions on development and environment setup for windows.
+
+2. Click [here](./EnvironmentSetup/LinuxDevEnvSetup.md) for instructions on development and environment setup for linux.
 
 <h1 style="font-weight:bold" align="center">Contributing</h1>
 
