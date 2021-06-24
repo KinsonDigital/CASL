@@ -74,6 +74,9 @@ namespace CASL.Devices
         public string DeviceInUse { get; private set; } = string.Empty;
 
         /// <inheritdoc/>
+        public SoundSource[] SoundSources => this.soundSources.Values.ToArray();
+
+        /// <inheritdoc/>
         public void InitDevice(string? name = null)
         {
             var nameResult = name != null ? $"{DeviceNamePrefix}{name}" : name;
@@ -201,11 +204,6 @@ namespace CASL.Devices
             if (!IsInitialized)
             {
                 throw new AudioDeviceManagerNotInitializedException(this.isDisposedExceptionMessage);
-            }
-
-            if (!this.soundSources.Keys.Contains(sourceId))
-            {
-                return;
             }
 
             this.soundSources.Remove(sourceId);

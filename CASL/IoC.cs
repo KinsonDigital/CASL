@@ -48,6 +48,7 @@ namespace CASL
             IoCContainer.Register(() => FileSystem.Directory, Lifestyle.Singleton);
             IoCContainer.Register(() => FileSystem.Path, Lifestyle.Singleton);
 
+            IoCContainer.Register<IApplication, Application>(Lifestyle.Singleton);
             IoCContainer.Register<IPlatform, Platform>(Lifestyle.Singleton);
             IoCContainer.Register<ILibrary, OpenALLibrary>(Lifestyle.Singleton);
             IoCContainer.Register<IDelegateFactory, DelegateFactory>(Lifestyle.Singleton);

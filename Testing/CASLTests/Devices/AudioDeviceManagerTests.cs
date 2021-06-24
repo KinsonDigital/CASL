@@ -7,6 +7,7 @@ namespace CASLTests.Devices
 {
 #pragma warning disable IDE0001 // Name can be simplified
     using System;
+    using System.Collections.Generic;
     using System.Collections.ObjectModel;
     using CASL;
     using CASL.Data;
@@ -249,6 +250,46 @@ namespace CASLTests.Devices
         }
 
         [Fact]
+        public void RemoveSoundSource_WhenNotInitialized_ThrowsException()
+        {
+            // Arrange
+            var manager = CreateManager();
+
+            // Act & Assert
+            Assert.ThrowsWithMessage<AudioDeviceManagerNotInitializedException>(() =>
+            {
+                manager.RemoveSoundSource(It.IsAny<uint>());
+            }, "The 'AudioDeviceManager' has not been initialized.\nInvoked the 'InitDevice()' to initialize the device manager.");
+        }
+
+        [Fact]
+        public void RemoveSoundSource_WhenSoundSourceDoesNotExist_DoesNotAttemptToRemoveSoundSource()
+        {
+            // Arrange
+            var manager = CreateManager();
+            var sourceIdNumbers = new List<uint>(new[] { 1122u, 3344u });
+            var myItems = new Queue<uint>();
+            myItems.Enqueue(1122u);
+            myItems.Enqueue(3344u);
+
+            this.mockALInvoker.Setup(m => m.GenSource()).Returns(() =>
+            {
+                return myItems.Dequeue();
+            });
+
+            manager.InitDevice();
+            manager.InitSound();
+            manager.InitSound();
+
+            // Act
+            manager.RemoveSoundSource(3344u);
+
+            // Assert
+            Assert.Single(manager.SoundSources);
+            Assert.Equal(1122u, manager.SoundSources[0].SourceId);
+        }
+
+        [Fact]
         public void ChangeDevice_WhenNotInitialized_ThrowsException()
         {
             // Arrange
@@ -410,8 +451,8 @@ namespace CASLTests.Devices
         public void ChangeDevice_WithNoNoDeviceChangedEventSubscription_DoesNotThrowException()
         {
             // Arrange
-            this.mockALInvoker.Setup(m => m.GetDeviceList())
-                .Returns(new[] { "test-device" });
+            this.mockALInvoker.Setup(m => m.GetDeviceList()).Returns(new[] { "test-device" });
+
             var manager = CreateManager();
             manager.InitDevice();
 

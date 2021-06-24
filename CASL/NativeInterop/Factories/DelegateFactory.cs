@@ -5,11 +5,13 @@
 namespace CASL.NativeInterop.Factories
 {
     using System;
+    using System.Diagnostics.CodeAnalysis;
     using System.Runtime.InteropServices;
 
     /// <summary>
     /// Creates delegates to native library functions.
     /// </summary>
+    [ExcludeFromCodeCoverage]
     internal class DelegateFactory : IDelegateFactory
     {
         private readonly IPlatform platform;

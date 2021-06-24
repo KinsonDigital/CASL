@@ -53,12 +53,12 @@
     <Copy SourceFiles="..\..\CASL\OpenAL\libs\linux-x64\libopenal.so.1" DestinationFolder="bin\Release-LINUX\net5.0\publish\"></Copy>
   </Target>
 
-  <!--COPY 64 BIT WINDOWS VERSION OF OPENAL TO APPLICATION DIRECTORY-->
+  <!--COPY 64 BIT WINDOWS VERSION OF OPENAL TO OUTPUT DIRECTORY-->
   <Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="'$(Configuration)|$(Platform)'=='Debug-WIN|AnyCPU'">
     <Copy SourceFiles="..\..\CASL\OpenAL\libs\win-x64\soft_oal.dll" DestinationFolder="$(TargetDir)"></Copy>
   </Target>
 
-  <!--COPY 64 BIT LINUX VERSION OF OPENAL TO APPLICATION DIRECTORY-->
+  <!--COPY 64 BIT LINUX VERSION OF OPENAL TO OUTPUT DIRECTORY-->
   <Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="'$(Configuration)|$(Platform)'=='Debug-LINUX|AnyCPU'">
     <Copy SourceFiles="..\..\CASL\OpenAL\libs\linux-x64\libopenal.so.1" DestinationFolder="$(TargetDir)"></Copy>
   </Target>

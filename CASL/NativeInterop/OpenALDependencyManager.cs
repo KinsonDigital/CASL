@@ -16,9 +16,10 @@ namespace CASL.NativeInterop
         /// </summary>
         /// <param name="platform">Manages platform specific operations.</param>
         /// <param name="file">Manages file related operations.</param>
-        /// <param name="path">Manages pathing strings.</param>
-        public OpenALDependencyManager(IPlatform platform, IFile file, IPath path)
-            : base(platform, file, path)
+        /// <param name="path">Manages file paths.</param>
+        /// <param name="application">Gets information about the application.</param>
+        public OpenALDependencyManager(IPlatform platform, IFile file, IPath path, IApplication application)
+            : base(platform, file, path, application)
         {
         }
     }

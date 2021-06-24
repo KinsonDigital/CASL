@@ -46,8 +46,8 @@ namespace CASLTests.OpenAL
 
         #region Method Tests
         [Theory]
-        //[InlineData(true, (int)AlcContextAttributes.Sync, 1)]
-        //[InlineData(false, (int)AlcContextAttributes.Sync, 0)]
+        [InlineData(true, (int)AlcContextAttributes.Sync, 1)]
+        [InlineData(false, (int)AlcContextAttributes.Sync, 0)]
         [InlineData(null, 0, 0)]
         public void CreateAttributeArray_WhenInvoked_CreatesAttributeArray(bool? sync, int expectedAttrValue, int expectedIntValue)
         {

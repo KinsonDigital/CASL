@@ -20,11 +20,6 @@ namespace CASL
     public class Sound : ISound
     {
         private const string IsDisposedExceptionMessage = "The sound is disposed.  You must create another sound instance.";
-
-        // NOTE: This warning is ignored due to the implementation of the IAudioManager being a singleton.
-        // This AudioManager implementation as a singleton is being managed by the IoC container class.
-        // Disposing of the audio manager when any sound is disposed would cause issues with how the
-        // audio manager implementation is suppose to behave.
         private readonly IAudioDeviceManager audioManager;
         private readonly ISoundDecoder<float> oggDecoder;
         private readonly ISoundDecoder<byte> mp3Decoder;
@@ -182,21 +177,26 @@ namespace CASL
             {
                 if (Unloaded)
                 {
-                    throw new Exception(IsDisposedExceptionMessage);
+                    throw new InvalidOperationException(IsDisposedExceptionMessage);
                 }
 
-                var currentState = this.alInvoker.GetSourceState(this.srcId);
+                if (this.ignoreOpenALCalls)
+                {
+                    return SoundState.Stopped;
+                }
+                else
+                {
+                    var currentState = this.alInvoker.GetSourceState(this.srcId);
 
-                return this.ignoreOpenALCalls
-                    ? this.alInvoker.GetSourceState(this.srcId) switch
+                    return currentState switch
                     {
                         ALSourceState.Playing => SoundState.Playing,
                         ALSourceState.Paused => SoundState.Paused,
                         ALSourceState.Stopped => SoundState.Stopped,
                         ALSourceState.Initial => SoundState.Stopped,
                         _ => throw new Exception($"The OpenAL sound state of '{nameof(ALSourceState)}: {(int)currentState}' not valid."),
-                    }
-                    : SoundState.Stopped;
+                    };
+                }
             }
         }
 

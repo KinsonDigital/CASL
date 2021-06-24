@@ -6,7 +6,6 @@ namespace CASL.NativeInterop
 {
     using System;
     using System.Collections.Generic;
-    using System.IO;
     using System.IO.Abstractions;
     using System.Linq;
     using CASL.Exceptions;
@@ -21,11 +20,11 @@ namespace CASL.NativeInterop
     /// </summary>
     internal class LibraryLoader : ILibraryLoader
     {
-        private readonly char DirSeparator = Path.DirectorySeparatorChar;
         private readonly IDependencyManager dependencyManager;
         private readonly IPlatform platform;
         private readonly IDirectory directory;
         private readonly IFile file;
+        private readonly IPath path;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="LibraryLoader"/> class.
@@ -34,8 +33,15 @@ namespace CASL.NativeInterop
         /// <param name="platform">Gets required information about the platform.</param>
         /// <param name="directory">Performs directory IO operations.</param>
         /// <param name="file">Performs file IO operations.</param>
+        /// <param name="path">Process paths.</param>
         /// <param name="library">The library to load.</param>
-        public LibraryLoader(IDependencyManager dependencyManager, IPlatform platform, IDirectory directory, IFile file, ILibrary library)
+        public LibraryLoader(
+            IDependencyManager dependencyManager,
+            IPlatform platform,
+            IDirectory directory,
+            IFile file,
+            IPath path,
+            ILibrary library)
         {
             if (dependencyManager is null)
             {
@@ -57,6 +63,11 @@ namespace CASL.NativeInterop
                 throw new ArgumentNullException(nameof(file), "The parameter must not be null.");
             }
 
+            if (path is null)
+            {
+                throw new ArgumentNullException(nameof(path), "The parameter must not be null.");
+            }
+
             if (library is null)
             {
                 throw new ArgumentNullException(nameof(library), "The parameter must not be null.");
@@ -66,6 +77,7 @@ namespace CASL.NativeInterop
             this.platform = platform;
             this.directory = directory;
             this.file = file;
+            this.path = path;
 
             LibraryName = ProcessLibExtension(library.LibraryName);
 
@@ -89,29 +101,14 @@ namespace CASL.NativeInterop
             foreach (var libPath in this.dependencyManager.LibraryDirPaths)
             {
                 // Add a directory separator if one is missing
-                var libDirPath = Path.EndsInDirectorySeparator(libPath) ?
+                var libDirPath = libPath.EndsWith(this.path.DirectorySeparatorChar) ?
                     libPath :
-                    $@"{libPath}{this.DirSeparator}";
+                    $@"{libPath}{this.path.DirectorySeparatorChar}";
 
-                if (this.file.Exists($"{libDirPath}{LibraryName}"))
+                var (exists, libPtr) = LoadLibraryIfExists($"{libDirPath}{LibraryName}");
+
+                if (exists)
                 {
-                    var libPtr = this.platform.LoadLibrary($"{libDirPath}{LibraryName}");
-
-                    if (libPtr == IntPtr.Zero)
-                    {
-                        var loadLibExceptionMsg = this.platform.GetLastSystemError();
-
-                        // Add the library path that is is attempting to be loaded
-                        loadLibExceptionMsg += $"\n\nLibrary Path: '{libDirPath}{LibraryName}'";
-
-                        // TODO: This line below is for Windows specific error codes.
-                        // This needs to be reworked to handle posix systems
-                        // Add the link to information about windows system error codes
-                        loadLibExceptionMsg += "\n\nSystem Error Codes: https://docs.microsoft.com/en-us/windows/win32/debug/system-error-codes--0-499-";
-
-                        throw new LoadLibraryException(loadLibExceptionMsg);
-                    }
-
                     return libPtr;
                 }
 
@@ -126,7 +123,7 @@ namespace CASL.NativeInterop
                 exceptionMsg += $"\t{path}\n";
             }
 
-            throw new Exception(exceptionMsg);
+            throw new LoadLibraryException(exceptionMsg);
         }
 
         /// <summary>
@@ -140,9 +137,9 @@ namespace CASL.NativeInterop
             foreach (var libPath in this.dependencyManager.LibraryDirPaths)
             {
                 // Add a directory separator if one is missing
-                var libDirPath = Path.EndsInDirectorySeparator(libPath) ?
+                var libDirPath = libPath.EndsWith(this.path.DirectorySeparatorChar) ?
                     libPath :
-                    $@"{libPath}{this.DirSeparator}";
+                    $@"{libPath}{this.path.DirectorySeparatorChar}";
 
                 var libraryName = GetLatestPosixLibraryVersion(libDirPath, LibraryName);
 
@@ -152,29 +149,17 @@ namespace CASL.NativeInterop
                     continue;
                 }
 
-                var fullFilePath = $"{libDirPath}{libraryName}";
+                var (exists, libPtr) = LoadLibraryIfExists($"{libDirPath}{libraryName}");
 
-                if (this.file.Exists(fullFilePath))
+                if (exists)
                 {
-                    var libPtr = this.platform.LoadLibrary(fullFilePath);
-
-                    if (libPtr == IntPtr.Zero)
-                    {
-                        var loadLibExceptionMsg = this.platform.GetLastSystemError();
-
-                        // Add the library path that is is attempting to be loaded
-                        loadLibExceptionMsg += $"\n\nLibrary Path: '{libDirPath}{libraryName}'";
-
-                        throw new LoadLibraryException(loadLibExceptionMsg);
-                    }
-
                     return libPtr;
                 }
 
                 missingLibPaths.Add(libPath);
             }
 
-            var exceptionMsg = $"Could not find the library '{LibraryName}'.\nPaths Checked: \n";
+            var exceptionMsg = $"Could not find the library '{LibraryName}'.\n\nPaths Checked: \n";
 
             // Add the missing library paths to the exception message
             foreach (var path in missingLibPaths)
@@ -182,8 +167,38 @@ namespace CASL.NativeInterop
                 exceptionMsg += $"\t{path}\n";
             }
 
-            // TODO: Create custom exception called LoadLibraryException
-            throw new Exception(exceptionMsg);
+            throw new LoadLibraryException(exceptionMsg);
+        }
+
+        /// <summary>
+        /// Loads a library at the given <paramref name="libraryFilePath"/> and returns
+        /// a pointer to it as well as a success flag.
+        /// </summary>
+        /// <param name="libraryFilePath">The path to the libary to load.</param>
+        /// <returns>
+        ///     exists: True if the library was successfully loaded.
+        ///     libPtr: The pointer to the library if a successfully loaded.
+        /// </returns>
+        private (bool exists, nint libPtr) LoadLibraryIfExists(string libraryFilePath)
+        {
+            if (this.file.Exists(libraryFilePath))
+            {
+                var libPtr = this.platform.LoadLibrary(libraryFilePath);
+
+                if (libPtr == IntPtr.Zero)
+                {
+                    var loadLibExceptionMsg = this.platform.GetLastSystemError();
+
+                    // Add the library path that is is attempting to be loaded
+                    loadLibExceptionMsg += $"\n\nLibrary Path: '{libraryFilePath}'";
+
+                    throw new LoadLibraryException(loadLibExceptionMsg);
+                }
+
+                return (true, libPtr);
+            }
+
+            return (false, 0);
         }
 
         /// <summary>
@@ -199,19 +214,19 @@ namespace CASL.NativeInterop
         {
             if (string.IsNullOrEmpty(libraryName))
             {
-                throw new ArgumentNullException(nameof(libraryName), "The library name must not be null or empty.");
+                throw new ArgumentNullException(nameof(libraryName), "The parameter must not be null or empty.");
             }
 
             var libExtension = this.platform.GetPlatformLibFileExtension();
 
-            if (Path.HasExtension(libraryName))
+            if (this.path.HasExtension(libraryName))
             {
                 var libraryNameWithoutExtension = libraryName;
 
                 // Strip any possible extensions off of the library name
-                while (Path.HasExtension(libraryNameWithoutExtension))
+                while (this.path.HasExtension(libraryNameWithoutExtension))
                 {
-                    libraryNameWithoutExtension = Path.GetFileNameWithoutExtension(libraryNameWithoutExtension);
+                    libraryNameWithoutExtension = this.path.GetFileNameWithoutExtension(libraryNameWithoutExtension);
                 }
 
                 return $"{libraryNameWithoutExtension}{libExtension}";
@@ -235,14 +250,14 @@ namespace CASL.NativeInterop
             var libraryNameNoExt = libraryName;
 
             // Strip any extensions off of the name
-            while (Path.HasExtension(libraryNameNoExt))
+            while (this.path.HasExtension(libraryNameNoExt))
             {
-                libraryNameNoExt = Path.GetFileNameWithoutExtension(libraryNameNoExt);
+                libraryNameNoExt = this.path.GetFileNameWithoutExtension(libraryNameNoExt);
             }
 
             var possibleLibs = (from n in this.directory.GetFiles(possibleLibPath)
-                                where Path.GetFileName(n).ToLower().Contains(libraryNameNoExt.ToLower())
-                                    && Path.GetFileName(n).ToLower().Contains(".so")
+                                where this.path.GetFileName(n).ToLower().Contains(libraryNameNoExt.ToLower())
+                                    && this.path.GetFileName(n).ToLower().Contains(".so")
                                 select n).ToArray();
 
             if (possibleLibs.Length <= 0)
@@ -270,7 +285,7 @@ namespace CASL.NativeInterop
             }
 
             var chosenLibName = largestVersion == -1u
-                ? Path.GetFileName(possibleLibs[0])
+                ? this.path.GetFileName(possibleLibs[0])
                 : $"{libraryNameNoExt}{libExtension}.{largestVersion}";
 
             return chosenLibName;

@@ -31,7 +31,7 @@ namespace CASLTests
         private readonly float[] oggBufferData = new float[] { 11f, 22f, 33f, 44f };
         private readonly uint srcId = 1234;
         private readonly uint bufferId = 5678;
-        private Sound sound;
+        private Sound? sound;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SoundTests"/> class.
@@ -314,66 +314,8 @@ namespace CASLTests
             this.mockALInvoker.Verify(m => m.Source(this.srcId, ALSourcef.Gain, expected), Times.Once());
         }
 
-        //[Fact]
-        //public void TimePositionSeconds_WhenDisposed_ThrowsException()
-        //{
-        //    // Arrange
-        //    this.sound = CreateSound(this.oggContentFilePath);
-
-        //    // Act & Assert
-        //    this.sound.Dispose();
-
-        //    Assert.ThrowsWithMessage<Exception>(() =>
-        //    {
-        //        _ = this.sound.TimePositionSeconds;
-        //    }, "The sound is disposed.  You must create another sound instance.");
-        //}
-
-        //[Fact]
-        //public void TimePositionMilliseconds_WhenGettingValue_ReturnsCorrectResult()
-        //{
-        //    // Arrange
-        //    this.mockALInvoker.Setup(m => m.GetSource(this.srcId, ALSourcef.SecOffset)).Returns(90f);
-        //    this.sound = CreateSound(this.oggContentFilePath);
-
-        //    // Act
-        //    var actual = this.sound.TimePositionMilliseconds;
-
-        //    // Assert
-        //    this.mockALInvoker.Verify(m => m.GetSource(this.srcId, ALSourcef.SecOffset), Times.Once());
-        //    Assert.Equal(90_000f, actual);
-        //}
-
-        //[Fact]
-        //public void TimePositionSeconds_WhenGettingValue_GetsSoundTimePosition()
-        //{
-        //    // Arrange
-        //    this.sound = CreateSound(this.oggContentFilePath);
-
-        //    // Act
-        //    _ = this.sound.TimePositionSeconds;
-
-        //    // Assert
-        //    this.mockALInvoker.Verify(m => m.GetSource(this.srcId, ALSourcef.SecOffset), Times.Once());
-        //}
-
-        //[Fact]
-        //public void TimePositionMinutes_WhenGettingValue_ReturnsCorrectResult()
-        //{
-        //    // Arrange
-        //    this.mockALInvoker.Setup(m => m.GetSource(this.srcId, ALSourcef.SecOffset)).Returns(90f);
-        //    this.sound = CreateSound(this.oggContentFilePath);
-
-        //    // Act
-        //    var actual = this.sound.TimePositionMinutes;
-
-        //    // Assert
-        //    this.mockALInvoker.Verify(m => m.GetSource(this.srcId, ALSourcef.SecOffset), Times.Once());
-        //    Assert.Equal(1.5f, actual);
-        //}
-
         [Fact]
-        public void TimePosition_WhenGettingValue_ReturnsCorrectResult()
+        public void Position_WhenGettingValue_ReturnsCorrectResult()
         {
             // Arrange
             var expected = new SoundTime(90);
@@ -386,6 +328,20 @@ namespace CASLTests
             // Assert
             this.mockALInvoker.Verify(m => m.GetSource(this.srcId, ALSourcef.SecOffset), Times.Once());
             Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public void State_WhenGettingValueWhileUnloaded_ThrowsException()
+        {
+            // Arrange
+            this.sound = CreateSound(this.oggContentFilePath);
+            this.sound.Dispose();
+
+            // Act & Assert
+            Assert.ThrowsWithMessage<InvalidOperationException>(() =>
+            {
+                _ = this.sound.State;
+            }, "The sound is disposed.  You must create another sound instance.");
         }
         #endregion
 
@@ -409,6 +365,7 @@ namespace CASLTests
         public void Play_WhenInvoked_PlaysSound()
         {
             // Arrange
+            this.mockALInvoker.Setup(m => m.GetSourceState(this.srcId)).Returns(ALSourceState.Stopped);
             this.sound = CreateSound(this.oggContentFilePath);
 
             // Act
@@ -549,6 +506,7 @@ namespace CASLTests
         {
             // Arrange
             var sound = CreateSound(this.oggContentFilePath);
+            this.mockALInvoker.Setup(m => m.GetSourceState(this.srcId)).Returns(ALSourceState.Stopped);
             this.mockALInvoker.Setup(m => m.GetSource(this.srcId, ALSourcef.SecOffset)).Returns(10f);
 
             // Act

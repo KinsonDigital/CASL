@@ -11,10 +11,11 @@ namespace CASLTests.NativeInterop
     using System.Collections.ObjectModel;
     using System.IO;
     using System.IO.Abstractions;
-    using System.Reflection;
+    using System.Linq;
+    using CASL;
     using CASL.Exceptions;
     using CASL.NativeInterop;
-    using CASLTests.Fakes;
+    using CASLTests.Helpers;
     using Moq;
     using Xunit;
     using Assert = CASLTests.Helpers.AssertExtensions;
@@ -25,11 +26,10 @@ namespace CASLTests.NativeInterop
     /// </summary>
     public class NativeDependencyManagerTests
     {
-        private readonly string ExecutingAssemblyPath = Assembly.GetExecutingAssembly().Location;
-        private readonly string AssemblyDirName;
         private readonly Mock<IPlatform> mockPlatform;
         private readonly Mock<IFile> mockFile;
         private readonly Mock<IPath> mockPath;
+        private readonly Mock<IApplication> mockApp;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="NativeDependencyManagerTests"/> class.
@@ -38,10 +38,8 @@ namespace CASLTests.NativeInterop
         {
             this.mockPlatform = new Mock<IPlatform>();
             this.mockFile = new Mock<IFile>();
-
-            AssemblyDirName = Path.GetDirectoryName(ExecutingAssemblyPath) ?? string.Empty;
             this.mockPath = new Mock<IPath>();
-            this.mockPath.Setup(m => m.GetDirectoryName(It.IsAny<string>())).Returns(@"C:\test-dir");
+            this.mockApp = new Mock<IApplication>();
         }
 
         #region Constructor Tests
@@ -51,7 +49,7 @@ namespace CASLTests.NativeInterop
             // Act & Assert
             Assert.ThrowsWithMessage<ArgumentNullException>(() =>
             {
-                _ = new NativeDependencyManagerFake(null, null, null);
+                _ = new OpenALDependencyManager(null, null, null, null);
             }, "The parameter must not be null. (Parameter 'platform')");
         }
 
@@ -61,7 +59,7 @@ namespace CASLTests.NativeInterop
             // Act & Assert
             Assert.ThrowsWithMessage<ArgumentNullException>(() =>
             {
-                _ = new NativeDependencyManagerFake(new Mock<IPlatform>().Object, null, this.mockPath.Object);
+                _ = new OpenALDependencyManager(new Mock<IPlatform>().Object, null, this.mockPath.Object, this.mockApp.Object);
             }, "The parameter must not be null. (Parameter 'file')");
         }
 
@@ -71,21 +69,30 @@ namespace CASLTests.NativeInterop
             // Act & Assert
             Assert.ThrowsWithMessage<ArgumentNullException>(() =>
             {
-                _ = new NativeDependencyManagerFake(new Mock<IPlatform>().Object, this.mockFile.Object, null);
+                _ = new OpenALDependencyManager(new Mock<IPlatform>().Object, this.mockFile.Object, null, this.mockApp.Object);
             }, "The parameter must not be null. (Parameter 'path')");
+        }
+
+        [Fact]
+        public void Ctor_WhenInvokedWithNullApplication_ThrowsException()
+        {
+            // Act & Assert
+            Assert.ThrowsWithMessage<ArgumentNullException>(() =>
+            {
+                _ = new OpenALDependencyManager(new Mock<IPlatform>().Object, this.mockFile.Object, this.mockPath.Object, null);
+            }, "The parameter must not be null. (Parameter 'application')");
         }
 
         [Fact]
         public void Ctor_WithUnknownArchitecture_ThrowsException()
         {
             // Arrange
-            this.mockPlatform.Setup(m => m.Is32BitProcess()).Returns(false);
-            this.mockPlatform.Setup(m => m.Is64BitProcess()).Returns(false);
+            MockProcessAsUnknown();
 
             // Act & Assert
             Assert.ThrowsWithMessage<InvalidOperationException>(() =>
             {
-                _ = new NativeDependencyManagerFake(this.mockPlatform.Object, this.mockFile.Object, this.mockPath.Object);
+                _ = CreateManager();
             }, "Process Architecture Not Recognized.");
         }
 
@@ -93,33 +100,28 @@ namespace CASLTests.NativeInterop
         public void Ctor_WithUnknownPlatform_ThrowsException()
         {
             // Arrange
-            this.mockPlatform.Setup(m => m.Is32BitProcess()).Returns(false);
-            this.mockPlatform.Setup(m => m.Is64BitProcess()).Returns(true);
-            this.mockPlatform.Setup(m => m.IsWinPlatform()).Returns(false);
-            this.mockPlatform.Setup(m => m.IsPosixPlatform()).Returns(false);
+            MockProcessAs32Bit();
+            MockPlatformAsUnknown();
 
             // Act & Assert
             Assert.ThrowsWithMessage<UnknownPlatformException>(() =>
             {
-                _ = new NativeDependencyManagerFake(this.mockPlatform.Object, this.mockFile.Object, this.mockPath.Object);
+                _ = CreateManager();
             }, "Unknown Operating System/Platform.");
         }
         #endregion
 
         #region Prop Tests
-
         [Fact]
         public void LibraryDirPaths_WhenGettingValue_ReturnsCorrectResult()
         {
             // Arrange
             var expected = new[] { @"C:\test-dir\" };
 
-            this.mockPlatform.Setup(m => m.Is32BitProcess()).Returns(false);
-            this.mockPlatform.Setup(m => m.Is64BitProcess()).Returns(true);
-            this.mockPlatform.Setup(m => m.IsWinPlatform()).Returns(true);
-            this.mockPlatform.Setup(m => m.IsPosixPlatform()).Returns(false);
+            MockProcessAs64Bit();
+            MockPlatformAsWindows();
 
-            var manager = new NativeDependencyManagerFake(this.mockPlatform.Object, this.mockFile.Object, this.mockPath.Object);
+            var manager = CreateManager();
 
             // Act
             var actual = manager.LibraryDirPaths;
@@ -129,19 +131,17 @@ namespace CASLTests.NativeInterop
         }
 
         [Theory]
-        [InlineData(true, true, @"C:\test-dir\runtimes\win-x86\native\")]
-        [InlineData(true, false, @"C:\test-dir\runtimes\linux-x86\native\")]
-        [InlineData(false, true, @"C:\test-dir\runtimes\win-x64\native\")]
-        [InlineData(false, false, @"C:\test-dir\runtimes\linux-x64\native\")]
-        public void NativeLibPath_WhenGettingValue_ReturnsCorrectResult(bool is32Bit, bool isWindows, string expectedNativePath)
+        [InlineData(PlatformType.Windows, ProcessType.x86, @"C:\test-dir\runtimes\win-x86\native\")]
+        [InlineData(PlatformType.Posix, ProcessType.x86, @"C:/test-dir/runtimes/linux-x86/native/")]
+        [InlineData(PlatformType.Windows, ProcessType.x64, @"C:\test-dir\runtimes\win-x64\native\")]
+        [InlineData(PlatformType.Posix, ProcessType.x64, @"C:/test-dir/runtimes/linux-x64/native/")]
+        public void NativeLibPath_WhenGettingValue_ReturnsCorrectResult(PlatformType platform, ProcessType processType, string expectedNativePath)
         {
             // Arrange
-            this.mockPlatform.Setup(m => m.Is32BitProcess()).Returns(is32Bit);
-            this.mockPlatform.Setup(m => m.Is64BitProcess()).Returns(!is32Bit);
-            this.mockPlatform.Setup(m => m.IsWinPlatform()).Returns(isWindows);
-            this.mockPlatform.Setup(m => m.IsPosixPlatform()).Returns(!isWindows);
+            MockPlatformAs(platform);
+            MockProcessAs(processType);
 
-            var manager = new NativeDependencyManagerFake(this.mockPlatform.Object, this.mockFile.Object, this.mockPath.Object);
+            var manager = CreateManager();
 
             // Act
             var actual = manager.NativeLibPath;
@@ -155,9 +155,9 @@ namespace CASLTests.NativeInterop
         {
             // Arrange
             this.mockPlatform.Setup(m => m.Is64BitProcess()).Returns(true);
-            this.mockPlatform.Setup(m => m.IsWinPlatform()).Returns(true);
+            MockPlatformAsWindows();
 
-            var manager = new NativeDependencyManagerFake(this.mockPlatform.Object, this.mockFile.Object, this.mockPath.Object);
+            var manager = CreateManager();
 
             // Act
             manager.NativeLibraries = null;
@@ -174,7 +174,7 @@ namespace CASLTests.NativeInterop
             this.mockPlatform.Setup(m => m.Is64BitProcess()).Returns(true);
             this.mockPlatform.Setup(m => m.IsWinPlatform()).Returns(true);
 
-            var manager = new NativeDependencyManagerFake(this.mockPlatform.Object, this.mockFile.Object, this.mockPath.Object);
+            var manager = CreateManager();
             // Act
             manager.NativeLibraries = new ReadOnlyCollection<string>(new List<string> { "test-native-lib.dll" });
             var actual = manager.NativeLibraries;
@@ -184,5 +184,180 @@ namespace CASLTests.NativeInterop
             Assert.Equal("test-native-lib.dll", actual[0]);
         }
         #endregion
+
+        #region Method Tests
+        [Fact]
+        public void SetupDependencies_WhenLibraryDoesNotExistInDestination_CopiesLibraryFile()
+        {
+            // Arrange
+            var assemblyDirPath = @"C:\test-dir\";
+            var srcDirPath = $@"{assemblyDirPath}runtimes\win-x64\native\";
+
+            MockProcessAs64Bit();
+            MockPlatformAsWindows();
+
+            this.mockFile.Setup(m => m.Exists($"{srcDirPath}lib-A.dll")).Returns(true);
+            this.mockFile.Setup(m => m.Exists($"{srcDirPath}lib-B.dll")).Returns(true);
+
+            var manager = CreateManager();
+            manager.NativeLibraries = new ReadOnlyCollection<string>(new[] { "lib-A.dll", "lib-B.dll" }.ToList());
+
+            // Act
+            manager.SetupDependencies();
+
+            // Assert
+            this.mockFile.Verify(m => m.Copy($"{srcDirPath}lib-A.dll", $"{assemblyDirPath}lib-A.dll", true), Times.Once());
+            this.mockFile.Verify(m => m.Copy($"{srcDirPath}lib-B.dll", $"{assemblyDirPath}lib-B.dll", true), Times.Once());
+        }
+
+        [Fact]
+        public void SetupDependencies_WhenLibraryAlreadyExistsInDestination_DoNotCopyFile()
+        {
+            // Arrange
+            var assemblyDirPath = @"C:\test-dir\";
+            var srcDirPath = $@"{assemblyDirPath}runtimes\win-x64\native\";
+
+            MockProcessAs64Bit();
+            MockPlatformAsWindows();
+
+            this.mockFile.Setup(m => m.Exists($"{assemblyDirPath}lib.dll")).Returns(true);
+
+            var manager = CreateManager();
+            manager.NativeLibraries = new ReadOnlyCollection<string>(new[] { "lib.dll" }.ToList());
+
+            // Act
+            manager.SetupDependencies();
+
+            // Assert
+            this.mockFile.Verify(m => m.Exists($"{srcDirPath}lib.dll"), Times.Never());
+            this.mockFile.Verify(m => m.Copy(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>()), Times.Never());
+        }
+
+        [Fact]
+        public void SetupDependencies_WhenLibrarySrcDoesNotExist_ThrowsException()
+        {
+            // Arrange
+            var assemblyDirPath = @"C:\test-dir\";
+            var srcDirPath = $@"{assemblyDirPath}runtimes\win-x64\native\";
+
+            MockProcessAs64Bit();
+            MockPlatformAsWindows();
+
+            this.mockFile.Setup(m => m.Exists($"{assemblyDirPath}lib.dll")).Returns(false);
+            this.mockFile.Setup(m => m.Exists($"{srcDirPath}lib.dll")).Returns(false);
+
+            var manager = CreateManager();
+            manager.NativeLibraries = new ReadOnlyCollection<string>(new[] { "lib.dll" }.ToList());
+
+            // Act & Assert
+            Assert.ThrowsWithMessage<FileNotFoundException>(() =>
+            {
+                manager.SetupDependencies();
+            }, $"The native dependency library '{srcDirPath}lib.dll' does not exist.");
+        }
+        #endregion
+
+        /// <summary>
+        /// Creates a new instance of <see cref="OpenALDependencyManager"/> for the purpose of testing.
+        /// </summary>
+        /// <returns>The instance to test.</returns>
+        private OpenALDependencyManager CreateManager()
+            => new OpenALDependencyManager(this.mockPlatform.Object, this.mockFile.Object, this.mockPath.Object, this.mockApp.Object);
+
+        /// <summary>
+        /// Mocks the platform as a windows platform.
+        /// </summary>
+        private void MockPlatformAsWindows()
+        {
+            this.mockPlatform.Setup(m => m.IsWinPlatform()).Returns(true);
+            this.mockPlatform.Setup(m => m.IsPosixPlatform()).Returns(false);
+            this.mockApp.SetupGet(p => p.Location).Returns(@"C:\app-dir\");
+            this.mockPath.SetupGet(p => p.DirectorySeparatorChar).Returns('\\');
+            this.mockPath.Setup(m => m.GetDirectoryName(It.IsAny<string>())).Returns(@"C:\test-dir");
+        }
+
+        /// <summary>
+        /// Mocks the platform as a posix platform.
+        /// </summary>
+        private void MockPlatformAsPosix()
+        {
+            this.mockPlatform.Setup(m => m.IsWinPlatform()).Returns(false);
+            this.mockPlatform.Setup(m => m.IsPosixPlatform()).Returns(true);
+            this.mockPath.Setup(m => m.DirectorySeparatorChar).Returns('/');
+            this.mockApp.SetupGet(p => p.Location).Returns("C:/app-dir/");
+            this.mockPath.SetupGet(p => p.DirectorySeparatorChar).Returns('/');
+            this.mockPath.Setup(m => m.GetDirectoryName(It.IsAny<string>())).Returns(@"C:/test-dir");
+        }
+
+        /// <summary>
+        /// Mocks the given <paramref name="platform"/>.
+        /// </summary>
+        /// <param name="platform">The platform to mock.</param>
+        private void MockPlatformAs(PlatformType platform)
+        {
+            switch (platform)
+            {
+                case PlatformType.Windows:
+                    MockPlatformAsWindows();
+                    break;
+                case PlatformType.Posix:
+                    MockPlatformAsPosix();
+                    break;
+            }
+        }
+
+        /// <summary>
+        /// Mocks the platform as unknown.
+        /// </summary>
+        private void MockPlatformAsUnknown()
+        {
+            this.mockPlatform.Setup(m => m.IsWinPlatform()).Returns(false);
+            this.mockPlatform.Setup(m => m.IsPosixPlatform()).Returns(false);
+            this.mockPath.Setup(m => m.DirectorySeparatorChar).Returns('\\');
+        }
+
+        /// <summary>
+        /// Mocks the process as 32 bit.
+        /// </summary>
+        private void MockProcessAs32Bit()
+        {
+            this.mockPlatform.Setup(m => m.Is32BitProcess()).Returns(true);
+            this.mockPlatform.Setup(m => m.Is64BitProcess()).Returns(false);
+        }
+
+        /// <summary>
+        /// Mocks the process as 64 bit.
+        /// </summary>
+        private void MockProcessAs64Bit()
+        {
+            this.mockPlatform.Setup(m => m.Is32BitProcess()).Returns(false);
+            this.mockPlatform.Setup(m => m.Is64BitProcess()).Returns(true);
+        }
+
+        /// <summary>
+        /// Mocks the given <paramref name="process"/>.
+        /// </summary>
+        /// <param name="process">The type of process to mock.</param>
+        private void MockProcessAs(ProcessType process)
+        {
+            switch (process)
+            {
+                case ProcessType.x86:
+                    MockProcessAs32Bit();
+                    break;
+                case ProcessType.x64:
+                    MockProcessAs64Bit();
+                    break;
+            }
+        }
+
+        /// <summary>
+        /// Mocks the process as unknown.
+        /// </summary>
+        private void MockProcessAsUnknown()
+        {
+            this.mockPlatform.Setup(m => m.Is32BitProcess()).Returns(false);
+            this.mockPlatform.Setup(m => m.Is64BitProcess()).Returns(false);
+        }
     }
 }

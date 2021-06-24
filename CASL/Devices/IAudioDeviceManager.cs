@@ -41,6 +41,11 @@ namespace CASL.Devices
         string DeviceInUse { get; }
 
         /// <summary>
+        /// Gets a list of the current sound sources.
+        /// </summary>
+        SoundSource[] SoundSources { get; }
+
+        /// <summary>
         /// Initializes an audio device that matches the given <paramref name="name"/>.
         /// </summary>
         /// <param name="name">The name of the device to initialize for use.</param>

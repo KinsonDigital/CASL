@@ -4,7 +4,7 @@
 
 namespace CASL.OpenAL
 {
-    using System;
+    using System.Diagnostics.CodeAnalysis;
     using System.Runtime.InteropServices;
     using CASL.Exceptions;
     using CASL.NativeInterop;
@@ -13,6 +13,7 @@ namespace CASL.OpenAL
     /// <summary>
     /// Provides access to OpenAL functions.
     /// </summary>
+    [ExcludeFromCodeCoverage]
     internal class AL
     {
         private static nint libraryPointer;
