@@ -11,6 +11,7 @@ namespace CASL
     using CASL.Data.Exceptions;
     using CASL.Devices;
     using CASL.Devices.Factories;
+    using CASL.Exceptions;
     using CASL.OpenAL;
     using IOPath = System.IO.Path;
 
@@ -70,6 +71,7 @@ namespace CASL
 
             this.mp3Decoder = mp3Decoder;
             this.audioManager = audioManager;
+            this.audioManager.DeviceChanging += AudioManager_DeviceChanging;
             this.audioManager.DeviceChanged += AudioManager_DeviceChanged;
 
             Init();
@@ -88,7 +90,7 @@ namespace CASL
             {
                 if (Unloaded)
                 {
-                    throw new Exception(IsDisposedExceptionMessage);
+                    throw new InvalidOperationException(IsDisposedExceptionMessage);
                 }
 
                 // Get the current volume between 0.0 and 1.0
@@ -100,7 +102,7 @@ namespace CASL
             {
                 if (Unloaded)
                 {
-                    throw new Exception(IsDisposedExceptionMessage);
+                    throw new InvalidOperationException(IsDisposedExceptionMessage);
                 }
 
                 if (this.ignoreOpenALCalls)
@@ -127,7 +129,7 @@ namespace CASL
             {
                 if (Unloaded)
                 {
-                    throw new Exception(IsDisposedExceptionMessage);
+                    throw new InvalidOperationException(IsDisposedExceptionMessage);
                 }
 
                 var seconds = this.ignoreOpenALCalls ? 0f : this.alInvoker.GetSource(this.srcId, ALSourcef.SecOffset);
@@ -146,7 +148,7 @@ namespace CASL
             {
                 if (Unloaded)
                 {
-                    throw new Exception(IsDisposedExceptionMessage);
+                    throw new InvalidOperationException(IsDisposedExceptionMessage);
                 }
 
                 return !this.ignoreOpenALCalls && this.alInvoker.GetSource(this.srcId, ALSourceb.Looping);
@@ -155,7 +157,7 @@ namespace CASL
             {
                 if (Unloaded)
                 {
-                    throw new Exception(IsDisposedExceptionMessage);
+                    throw new InvalidOperationException(IsDisposedExceptionMessage);
                 }
 
                 if (this.ignoreOpenALCalls)
@@ -194,7 +196,7 @@ namespace CASL
                         ALSourceState.Paused => SoundState.Paused,
                         ALSourceState.Stopped => SoundState.Stopped,
                         ALSourceState.Initial => SoundState.Stopped,
-                        _ => throw new Exception($"The OpenAL sound state of '{nameof(ALSourceState)}: {(int)currentState}' not valid."),
+                        _ => throw new AudioException($"The OpenAL sound state of '{nameof(ALSourceState)}: {(int)currentState}' is not valid."),
                     };
                 }
             }
@@ -207,17 +209,22 @@ namespace CASL
             {
                 if (Unloaded)
                 {
-                    throw new Exception(IsDisposedExceptionMessage);
+                    throw new InvalidOperationException(IsDisposedExceptionMessage);
                 }
 
                 return this.ignoreOpenALCalls
                     ? 0f
-                    : this.alInvoker.GetSource(this.srcId, ALSourcef.Gain);
+                    : this.alInvoker.GetSource(this.srcId, ALSourcef.Pitch);
             }
             set
             {
                 value = value < 0f ? 0.25f : value;
                 value = value > 2.0f ? 2.0f : value;
+
+                if (this.ignoreOpenALCalls)
+                {
+                    return;
+                }
 
                 this.alInvoker.Source(this.srcId, ALSourcef.Pitch, value);
             }
@@ -228,7 +235,7 @@ namespace CASL
         {
             if (Unloaded)
             {
-                throw new Exception(IsDisposedExceptionMessage);
+                throw new InvalidOperationException(IsDisposedExceptionMessage);
             }
 
             if (State == SoundState.Playing)
@@ -249,7 +256,7 @@ namespace CASL
         {
             if (Unloaded)
             {
-                throw new Exception(IsDisposedExceptionMessage);
+                throw new InvalidOperationException(IsDisposedExceptionMessage);
             }
 
             if (this.ignoreOpenALCalls)
@@ -265,7 +272,7 @@ namespace CASL
         {
             if (Unloaded)
             {
-                throw new Exception(IsDisposedExceptionMessage);
+                throw new InvalidOperationException(IsDisposedExceptionMessage);
             }
 
             if (this.ignoreOpenALCalls)
@@ -281,7 +288,7 @@ namespace CASL
         {
             if (Unloaded)
             {
-                throw new Exception(IsDisposedExceptionMessage);
+                throw new InvalidOperationException(IsDisposedExceptionMessage);
             }
 
             if (this.ignoreOpenALCalls)
@@ -297,7 +304,7 @@ namespace CASL
         {
             if (Unloaded)
             {
-                throw new Exception(IsDisposedExceptionMessage);
+                throw new InvalidOperationException(IsDisposedExceptionMessage);
             }
 
             if (this.ignoreOpenALCalls)
@@ -401,7 +408,7 @@ namespace CASL
             AudioFormat.Stereo8 => ALFormat.Stereo8,
             AudioFormat.Stereo16 => ALFormat.Stereo16,
             AudioFormat.StereoFloat32 => ALFormat.StereoFloat32Ext,
-            _ => throw new Exception("Invalid or unknown audio format."),
+            _ => throw new AudioException("Invalid or unknown audio format."),
         };
 
         /// <summary>
@@ -435,7 +442,7 @@ namespace CASL
 
                     break;
                 default:
-                    throw new Exception($"The file extension '{extension}' is not supported file type.");
+                    throw new AudioException($"The file extension '{extension}' is not supported file type.");
             }
 
             var sizeInBytes = this.alInvoker.GetBuffer(this.bufferId, ALGetBufferi.Size);
@@ -541,6 +548,6 @@ namespace CASL
         /// </summary>
         /// <param name="errorMsg">The OpenAL message.</param>
         [ExcludeFromCodeCoverage]
-        private void ErrorCallback(string errorMsg) => throw new Exception(errorMsg);
+        private void ErrorCallback(string errorMsg) => throw new AudioException(errorMsg);
     }
 }
