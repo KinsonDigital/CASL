@@ -37,13 +37,13 @@ jobs:
       - name: Restore Dependencies
         run: dotnet restore
       - name: Execute Unit Tests
-        run: dotnet test "${{ github.workspace }}\\Testing\\CASLTests\\CASLTests.csproj" -c Debug-WIN /p:CollectCoverage=true /p:CoverletOutput=TestResults/ /p:CoverletOuputFormat=cobertura
+        run: dotnet test "${{ github.workspace }}\\Testing\\CASLTests\\CASLTests.csproj" -c Debug-WIN /p:CollectCoverage=true /p:CoverletOutput=coverage.xml /p:CoverletOuputFormat=cobertura
       - name: Codecov
         uses: codecov/codecov-action@v1.5.2
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           # Path to coverage file to upload
-          file: "${{ github.workspace }}\\Testing\\CASLTests\\TestResults\\coverage.cobertura.xml"
+          file: "${{ github.workspace }}\\Testing\\CASLTests\\coverage.xml"
 
       #- name: Publish Code Coverage Results
       #  uses: coverallsapp/github-action@v1.1.2
