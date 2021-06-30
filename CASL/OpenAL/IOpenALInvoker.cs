@@ -7,10 +7,6 @@ namespace CASL.OpenAL
     using System;
     using System.Collections.Generic;
 
-    /*TODO: Look into this repo for loading native libraries
-     * https://github.com/natemcmaster/DotNetCorePlugins
-     */
-
     /// <summary>
     /// Invokes OpenAL functions.
     /// </summary>
