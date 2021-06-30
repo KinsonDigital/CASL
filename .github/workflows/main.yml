@@ -1,4 +1,4 @@
-name: .NET
+name: Build - Test - Publish Artifacts
 
 on:
   workflow_dispatch:
@@ -37,7 +37,7 @@ jobs:
       - name: Restore Dependencies
         run: dotnet restore
       - name: Execute Unit Tests
-        run: dotnet test "${{ github.workspace }}\\Testing\\CASLTests\\CASLTests.csproj" /p:CollectCoverage=true /p:CoverletOutput=TestResults/ /p:CoverletOuputFormat=lcov
+        run: dotnet test "${{ github.workspace }}\\Testing\\CASLTests\\CASLTests.csproj" -c Debug-WIN /p:CollectCoverage=true /p:CoverletOutput=TestResults/ /p:CoverletOuputFormat=lcov
       #- name: Publish Code Coverage Results
       #  uses: coverallsapp/github-action@v1.1.2
       #  with:
