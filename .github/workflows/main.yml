@@ -42,7 +42,7 @@ jobs:
         uses: coverallsapp/github-action@v1.1.2
         with:
           github-token: ${{ secrets.COVERALLS_TOKEN }}
-          path-to-lcov: "${{ github.workspace }}\\Testing\\CASLTests\\TestResults"
+          path-to-lcov: "${{ github.workspace }}\\Testing\\CASLTests"
   
   Upload_Build_Artifact:
     runs-on: windows-latest
