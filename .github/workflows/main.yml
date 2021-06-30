@@ -38,11 +38,11 @@ jobs:
         run: dotnet restore
       - name: Execute Unit Tests
         run: dotnet test "${{ github.workspace }}\\Testing\\CASLTests\\CASLTests.csproj" -c Debug-WIN /p:CollectCoverage=true /p:CoverletOutput=TestResults/ /p:CoverletOuputFormat=lcov
-      #- name: Publish Code Coverage Results
-      #  uses: coverallsapp/github-action@v1.1.2
-      #  with:
-      #    github-token: ${{ secrets.COVERALLS_TOKEN }}
-      #    path-to-lcov: "${{ github.workspace }}\\Testing\\CASLTests\\TestResults"
+      - name: Publish Code Coverage Results
+        uses: coverallsapp/github-action@v1.1.2
+        with:
+          github-token: ${{ secrets.COVERALLS_TOKEN }}
+          path-to-lcov: "${{ github.workspace }}\\Testing\\CASLTests\\TestResults"
   
   Upload_Build_Artifact:
     runs-on: windows-latest
