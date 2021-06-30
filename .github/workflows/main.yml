@@ -41,6 +41,7 @@ jobs:
       - name: Codecov
         uses: codecov/codecov-action@v1.5.2
         with:
+          token: ${{ secrets.CODECOV_TOKEN }}
           # Path to coverage file to upload
           file: "${{ github.workspace }}\\Testing\\CASLTests\\TestResults\\coverage.cobertura.xml"
 
