@@ -40,7 +40,7 @@ jobs:
         run: dotnet restore
       
       - name: Execute Unit Tests
-        run: dotnet test "${{ github.workspace }}\\Testing\\CASLTests\\CASLTests.csproj" -c Debug-WIN /p:CollectCoverage=true /p:CoverletOutput=TestResults/ /p:CoverletOuputFormat=lcov
+        run: dotnet test "${{ github.workspace }}\\Testing\\CASLTests\\CASLTests.csproj" -c Debug-WIN /p:CollectCoverage=true /p:CoverletOutput=TestResults/ /p:CoverletOuputFormat=cobertura
       
       - name: ReportGenerator
         uses: danielpalme/ReportGenerator-GitHub-Action@4.8.11
@@ -49,7 +49,7 @@ jobs:
           reports: "**/TestResults/coverage.json"
           # The directory where the generated report should be saved.
           targetdir: "${{ github.workspace }}\\Testing\\CASLTests\\TestResults"
-          reporttypes: lcov
+          reporttypes: cobertura
 
       # - name: Codecov
       #   uses: codecov/codecov-action@v1.5.2
@@ -62,7 +62,7 @@ jobs:
         uses: coverallsapp/github-action@v1.1.2
         with:
           github-token: ${{ secrets.COVERALLS_TOKEN }}
-          path-to-lcov: "${{ github.workspace }}\\Testing\\CASLTests\\TestResults\\lcov.info"
+          path-to-lcov: "${{ github.workspace }}\\Testing\\CASLTests\\TestResults\\cobertura.html"
   
   # Upload_Build_Artifact:
   #   runs-on: windows-latest
