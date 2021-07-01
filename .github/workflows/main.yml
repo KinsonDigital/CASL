@@ -49,7 +49,7 @@ jobs:
         uses: danielpalme/ReportGenerator-GitHub-Action@4.8.11
         with:
           # The coverage reports that should be parsed (separated by semicolon). Globbing is supported.
-          reports: "coverage.xml"
+          reports: "**/coverage.xml"
           # The directory where the generated report should be saved.
           targetdir: "${{ github.workspace }}\\Testing\\CASLTests"
 
