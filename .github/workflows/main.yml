@@ -51,18 +51,17 @@ jobs:
           targetdir: "${{ github.workspace }}\\Testing\\CASLTests\\TestResults"
           reporttypes: cobertura
 
-      # - name: Codecov
-      #   uses: codecov/codecov-action@v1.5.2
-      #   with:
-      #     token: ${{ secrets.CODECOV_TOKEN }}
-      #     # Path to coverage file to upload
-      #     file: "${{ github.workspace }}\\Testing\\CASLTests\\Cobertura.xml"
-
-      - name: Publish Code Coverage Results
-        uses: coverallsapp/github-action@v1.1.2
+      - name: Codecov
+        uses: codecov/codecov-action@v1.5.2
         with:
-          github-token: ${{ secrets.COVERALLS_TOKEN }}
-          path-to-lcov: "${{ github.workspace }}\\Testing\\CASLTests\\TestResults\\cobertura.html"
+          token: ${{ secrets.CODECOV_TOKEN }}
+          file: "${{ github.workspace }}\\Testing\\CASLTests\\TestResults\\Cobertura.xml"
+
+      # - name: Publish Code Coverage Results
+      #   uses: coverallsapp/github-action@v1.1.2
+      #   with:
+      #     github-token: ${{ secrets.COVERALLS_TOKEN }}
+      #     path-to-lcov: "${{ github.workspace }}\\Testing\\CASLTests\\TestResults\\cobertura.html"
   
   # Upload_Build_Artifact:
   #   runs-on: windows-latest
