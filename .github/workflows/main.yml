@@ -49,13 +49,14 @@ jobs:
           reports: "**/coverage.xml"
           # The directory where the generated report should be saved.
           targetdir: "${{ github.workspace }}\\Testing\\CASLTests"
+          reporttypes: Cobertura
 
       - name: Codecov
         uses: codecov/codecov-action@v1.5.2
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           # Path to coverage file to upload
-          file: "${{ github.workspace }}\\Testing\\CASLTests\\index.xml"
+          file: "${{ github.workspace }}\\Testing\\CASLTests\\Cobertura.xml"
 
 
 
@@ -65,24 +66,24 @@ jobs:
       #    github-token: ${{ secrets.COVERALLS_TOKEN }}
       #    path-to-lcov: "${{ github.workspace }}\\Testing\\CASLTests\\lcov.json"
   
-  Upload_Build_Artifact:
-    runs-on: windows-latest
-    steps:
-    - uses: actions/checkout@v2
-    - name: Setup .NET 5.0.x
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: 5.0.x
-    - name: Restore Dependencies
-      run: dotnet restore
-    - name: Build
-      run: dotnet build --no-restore
-    - name: Upload a Build Artifact
-      uses: actions/upload-artifact@v2.2.3
-      with:
-        name: CASL
-        path: "${{ github.workspace }}\\CASL\\bin\\Debug\\net5.0"
-        error: There was an issue uploading the build artifact
+  # Upload_Build_Artifact:
+  #   runs-on: windows-latest
+  #   steps:
+  #   - uses: actions/checkout@v2
+  #   - name: Setup .NET 5.0.x
+  #     uses: actions/setup-dotnet@v1
+  #     with:
+  #       dotnet-version: 5.0.x
+  #   - name: Restore Dependencies
+  #     run: dotnet restore
+  #   - name: Build
+  #     run: dotnet build --no-restore
+  #   - name: Upload a Build Artifact
+  #     uses: actions/upload-artifact@v2.2.3
+  #     with:
+  #       name: CASL
+  #       path: "${{ github.workspace }}\\CASL\\bin\\Debug\\net5.0"
+  #       error: There was an issue uploading the build artifact
         
     
 
