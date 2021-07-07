@@ -2,15 +2,19 @@
     <a href="#"><img align="center" src="Documentation/Images/CASL-Logo.png" height="96"></a>
     <br />
 </h1>
+
+<h1 style="font-weight:bold" align="center">CASL</h1>
+
 <div align="center">
 
-**TODO: ADD BUILD BADGE HERE**
+[![codecov](https://codecov.io/gh/KinsonDigital/CASL/branch/feature/master/graph/badge.svg?token=gkqbQI7oCM)](https://codecov.io/gh/KinsonDigital/CASL)
+[![BuildFFFF](https://github.com/KinsonDigital/CASL/actions/workflows/main.yml/badge.svg)](https://github.com/KinsonDigital/CASL/actions/workflows/main.yml)
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.0-4baaaa.svg)](code_of_conduct.md)
+
+[![nuget-package](https://img.shields.io/badge/nuget-windows-orange)](asdf)
 </div>
 
-<h1 style="font-weight:bold" align="center">What Is CASL?</h1>
-
-Pronounced *Castle*, **CASL** is an acronym for (C)ross-platform (A)udio (S)ound (L)ibrary
+Pronounced *Castle*, **CASL** is an acronym for (C)ross-platform (A)udio and (S)ound (L)ibrary
 
 **CASL** is simply a cross-platform, simplistic .NET library for playing and managing sounds that is powered by **OpenAL 1.1** using software rendering of audio.  This is accomplished by using low level bindings to the native **OpenAL** library.
 
