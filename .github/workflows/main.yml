@@ -1,17 +1,18 @@
 name: Build - Test - Publish Artifacts
 
 on:
+  if: github.event_name == 'workflow_dispatch'
   workflow_dispatch:
     inputs:
       branch:
         description: "Branch To Run"
         required: true
         default: 'develop'
-        
+  if: github.event_name == 'push'        
   push:
     branches: [ ${{ github.event.inputs.branch }} ]
-  pull_request:
-    branches: [ master ]
+  # pull_request:
+  #   branches: [ master ]
 
 jobs:
   Build_Project:
