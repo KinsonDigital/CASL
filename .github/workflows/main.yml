@@ -3,7 +3,7 @@ name: Build - Test - Publish Artifacts
 on:
   workflow_dispatch:
   push:
-    branches: [ master ]
+    branches: [ master, feature/create-build-pipeline ]
   # pull_request:
   #   branches: [ master ]
 
