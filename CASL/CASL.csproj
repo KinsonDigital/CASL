@@ -5,12 +5,24 @@
     <TargetFramework>net5.0</TargetFramework>
     <LangVersion>9.0</LangVersion>
     <Nullable>enable</Nullable>
-    <Version>0.0.1</Version>
-    <FileVersion>0.0.1</FileVersion>
+    <Version>1.0.0</Version>
+    <AssemblyVersion>1.0.0</AssemblyVersion>
+    <FileVersion>1.0.0</FileVersion>
     <ApplicationIcon />
     <StartupObject />
     <Configurations>Debug-WIN;Release-WIN;Debug-LINUX;Release-LINUX</Configurations>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Authors>Calvin Wilkinson</Authors>
+    <Description>CASL is a simplistic cross-platform, .NET library for playing and managing sounds powered by OpenAL 1.1 using software rendering.  This is accomplished by using low level bindings to the native OpenAL library.</Description>
+    <Copyright>2021</Copyright>
+    <PackageLicenseFile>LICENSE.md</PackageLicenseFile>
+    <PackageProjectUrl>https://github.com/KinsonDigital/CASL</PackageProjectUrl>
+    <RepositoryType>GIT</RepositoryType>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <RepositoryUrl>https://github.com/KinsonDigital/CASL</RepositoryUrl>
+    <PackageIcon>CASL-Logo.png</PackageIcon>
+    <PackageIconUrl />
+    <PackageId>CASL</PackageId>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug-WIN|AnyCPU'">
@@ -33,6 +45,14 @@
     <Compile Remove="OpenAL\libs\**" />
     <EmbeddedResource Remove="OpenAL\libs\**" />
     <None Remove="OpenAL\libs\**" />
+    <None Include="..\Documentation\Images\CASL-Logo.png">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+    <None Include="..\LICENSE.md">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
   </ItemGroup>
 
   <ItemGroup>
