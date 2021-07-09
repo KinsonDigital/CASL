@@ -62,3 +62,10 @@ jobs:
         name: CASL
         path: "${{ github.workspace }}\\CASL\\bin\\Debug\\net5.0"
         error: There was an issue uploading the build artifact
+
+  Setup_Nuget:
+    name: Setup Nuget
+    runs-on: windows-latest
+    steps:
+    - name: Setup NuGet.exe for use with actions
+  
