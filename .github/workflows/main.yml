@@ -6,7 +6,15 @@ on:
     branches: [ develop ]
 
 jobs:
+  Display_Info:
+    name: Display Info
+    runs-on: windows-latest
+    steps:
+    - name: Display Branch
+      run: echo ${{ github.ref }}
+
   Build_Project:
+    if: ${{ github.ref == 'refs/heads/develop'}}
     name: Build Project
     runs-on: windows-latest
     steps:
