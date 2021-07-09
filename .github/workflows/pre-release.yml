@@ -1,4 +1,4 @@
-name: Build - Test - Publish Artifacts
+name: Perform Pre-Release
 
 on:
   workflow_dispatch:
