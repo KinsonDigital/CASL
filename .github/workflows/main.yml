@@ -1,14 +1,14 @@
-name: Build - Test - Publish Artifacts
+name: Build & Test Dev
 
 on:
   workflow_dispatch:
-  push:
-    branches: [ master, feature/create-build-pipeline ]
-  # pull_request:
-  #   branches: [ master ]
+  pull_request:
+    types: [ synchronize ]
+    branches: [ develop ]
 
 jobs:
   Build_Project:
+    name: Build Project
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v2
@@ -22,6 +22,7 @@ jobs:
       run: dotnet build --no-restore
   
   Run_Unit_Tests:
+    name: Run Unit Tests
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v2
@@ -35,7 +36,7 @@ jobs:
         run: dotnet restore
       
       - name: Execute Unit Tests
-        run: dotnet test "${{ github.workspace }}\\Testing\\CASLTests\\CASLTests.csproj" -c Debug-WIN --collect:"XPlat Code Coverage"
+        run: dotnet test "${{ github.workspace }}\\Testing\\CASLTests\\CASLTests.csproj" -c Debug --collect:"XPlat Code Coverage"
 
       - name: Codecov
         uses: codecov/codecov-action@v1.5.2
@@ -43,7 +44,8 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
           file: "${{ github.workspace }}\\Testing\\CASLTests\\TestResults\\**\\coverage.cobertura.xml"
 
-  Upload_Build_Artifact:
+  Publish_Build_Artifacts:
+    name: Publish Build Artifacts
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v2
