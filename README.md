@@ -1,5 +1,5 @@
 <h1 align="center">
-    <a href="#"><img align="center" src="Documentation/Images/CASL-Logo.png" height="96"></a>
+    <a href="#"><img align="center" src="Documentation/Images/casl-Logo.png" height="96"></a>
     <br />
 </h1>
 
@@ -16,9 +16,9 @@
 
 Pronounced *Castle*, **CASL** is an acronym for (C)ross-platform (A)udio and (S)ound (L)ibrary
 
-**CASL** is simply a cross-platform, simplistic .NET library for playing and managing sounds that is powered by **OpenAL 1.1** using software rendering of audio.  This is accomplished by using low level bindings to the native **OpenAL** library.
+**CASL** is a simplistic cross-platform, .NET library for playing and managing sounds powered by **OpenAL 1.1** using software rendering.  This is accomplished by using low level bindings to the native **OpenAL** library.
 
-This can be used for audio applications such as video games, sound players, and works on any **.NET 5.0** compliant platform.
+This can be used for applications such as video games, sound players, and works on any **.NET 5.0** compliant platform.
 
 <h1 style="font-weight:bold" align="center">Features</h1>
 
@@ -29,7 +29,7 @@ This library is still under development and has not been ran or tested under any
 
 Currently this library can play **.ogg** and **.mp3** file formats.  There are plans to support **.wav** files in the future as well as other possible sound formats.
 
-### Cross-Plaform
+### Cross-Platform
 
 We strive for **CASL** to be a cross platform library by running under **.NET v5.0**.  There are plans for this library to continually be updated as we approach **.NET 6.0** and beyond.
 
@@ -49,7 +49,11 @@ We currently have the following maintainers:
 
 **CASL** encourages and uses [Early Pull Requests](https://medium.com/practical-blend/pull-request-first-f6bb667a9b6). Please don't wait until you're finished with your work before creating a PR.
 
-1. We use [GitHub Flow](https://guides.github.com/introduction/flow/).
+1. We use a simple branching strategy that has 5 branches
+   * <span style="color: #52D1A4;font-weight:bold">master</span> - This is is a long living branch for the purpose of stable production versions of the library.  Stable nuget packages are created from this branch.
+   * <span style="color: #7BB0FC;font-weight:bold">develop</span> - This branch holds the current development work being produced for an upcoming release
+   * <span style="color: #B18BE4;font-weight:bold">feature/my-features</span> - This branch is where development work will be performed and will be merged into the <span style="color: #7BB0FC;font-weight:bold">develop</span> or <span style="color: #E5D89C;font-weight:bold">release</span> branches via pull requests.  When this is created from the <span style="color: #7BB0FC;font-weight:bold">develop</span> branch, this will only be merged back into the <span style="color: #7BB0FC;font-weight:bold">develop</span> branch for fixing bugs or adding new features.  When created from a <span style="color: #E5D89C;font-weight:bold">release</span> branch, it will only be merged back into the <span style="color: #E5D89C;font-weight:bold">release</span> branch.  PR's tagged with **pre-release** will be used to make it easy to know that the <span style="color: #B18BE4;font-weight:bold">feature</span> branch's purpose is for making changes to a **pre-release**.
+   * <span style="color: #E5D89C;font-weight:bold">release/v1.2.3</span> - This branch is created from the <span style="color: #7BB0FC;font-weight:bold">develop</span> branch to encompass a number of features that could be released to production and is where extensive testing will occur before a release.  Pre-release nuget packages will be created from this branch until deemed to be ready for a production release.  Once ready, this branch gets merged into the master branch which then creates a stable production release of the library.  This will also get merged into the develop branch to update current development and merge conflicts resolved.
 2. Fork the CASL repository
 3. Add an empty commit to a new branch to start your work off: `git commit --allow-empty -m "start of [thing you're working on]"`
 4. Once you've pushed a commit, open a [**draft pull request**](https://github.blog/2019-02-14-introducing-draft-pull-requests/). Do this **before** you actually start working.
@@ -57,6 +61,14 @@ We currently have the following maintainers:
 6. All unit tests must pass before a PR will be completed.
 7. Make sure that code follows the project set coding standards.
 8. Tag a maintainer when you're done and ask for a review!
+
+<h1 align="center">
+   <div>
+      <span>Branching Diagram</span>
+   </div>
+   <a href="#"><img style="width: 35%" align="center" src="Documentation/Images/github-branch-diagram.png"></a>
+   <br/>
+</h1>
 
 <h2 align="left">Practices</h2>
 
