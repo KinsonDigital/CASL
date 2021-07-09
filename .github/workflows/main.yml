@@ -2,7 +2,7 @@ name: Build - Test - Publish Artifacts
 
 on:
   workflow_dispatch:
-  push:
+  pull_request:
     branches: [ develop ]
 
 jobs:

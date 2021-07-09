@@ -2,8 +2,6 @@ name: Build - Test - Publish Artifacts
 
 on:
   workflow_dispatch:
-  push:
-    branches: release/v*
   pull_request:
     branches: [ develop ]
 
