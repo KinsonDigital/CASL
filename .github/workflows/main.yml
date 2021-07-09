@@ -3,9 +3,9 @@ name: Build - Test - Publish Artifacts
 on:
   workflow_dispatch:
   push:
-    branches: [ master, feature/create-build-pipeline ]
-  # pull_request:
-  #   branches: [ master ]
+    branches: [ develop ]
+  pull_request:
+    branches: [ develop ]
 
 jobs:
   Build_Project:
