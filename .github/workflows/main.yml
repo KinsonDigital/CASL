@@ -3,6 +3,7 @@ name: Build & Test Dev
 on:
   workflow_dispatch:
   pull_request:
+    branches: [ develop ]
 
 jobs:
   Build_Project:
