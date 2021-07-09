@@ -7,6 +7,7 @@ on:
 
 jobs:
   Build_Project:
+    name: Build Project
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v2
@@ -20,6 +21,7 @@ jobs:
       run: dotnet build --no-restore
   
   Run_Unit_Tests:
+    name: Run Unit Tests
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v2
@@ -41,7 +43,8 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
           file: "${{ github.workspace }}\\Testing\\CASLTests\\TestResults\\**\\coverage.cobertura.xml"
 
-  Upload_Build_Artifact:
+  Publish_Build_Artifacts:
+    name: Publish Build Artifacts
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v2
