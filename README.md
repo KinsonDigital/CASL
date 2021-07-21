@@ -1,5 +1,5 @@
 <h1 align="center">
-    <a href="#"><img align="center" src="Documentation/Images/casl-Logo.png" height="96"></a>
+    <a href="#"><img align="center" src="./Documentation/Images/casl-logo.png" height="96"></a>
     <br />
 </h1>
 
@@ -39,11 +39,12 @@ We strive for **CASL** to be a cross platform library by running under **.NET v5
 We currently have the following maintainers:
 - [Calvin Wilkinson](https://github.com/Perksey) [<img src="https://about.twitter.com/etc/designs/about2-twitter/public/img/favicon.ico" alt="Follow Calvin Wilkinson on Twitter" width="16" />](https://twitter.com/KDCoder)
 
-<h1 style="font-weight:bold" align="center">Building And DevEnvironment Setup</h1>
+<h1 style="font-weight:bold" align="center">Building And Dev Environment Setup</h1>
 
 1. Click [here](./EnvironmentSetup/WindowsDevEnvSetup.md) for instructions on development and environment setup for windows.
 
 2. Click [here](./EnvironmentSetup/LinuxDevEnvSetup.md) for instructions on development and environment setup for linux.
+   * NOTE: Still in development and might not work
 
 <h1 style="font-weight:bold" align="center">Contributing</h1>
 

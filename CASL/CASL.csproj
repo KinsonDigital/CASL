@@ -20,7 +20,7 @@
     <RepositoryType>GIT</RepositoryType>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <RepositoryUrl>https://github.com/KinsonDigital/CASL</RepositoryUrl>
-    <PackageIcon>CASL-Logo.png</PackageIcon>
+    <PackageIcon>casl-logo.png</PackageIcon>
     <PackageIconUrl />
     <PackageId>CASL</PackageId>
   </PropertyGroup>
@@ -29,7 +29,7 @@
     <Compile Remove="OpenAL\libs\**" />
     <EmbeddedResource Remove="OpenAL\libs\**" />
     <None Remove="OpenAL\libs\**" />
-    <None Include="..\Documentation\Images\CASL-Logo.png">
+    <None Include="..\Documentation\Images\casl-logo.png">
       <Pack>True</Pack>
       <PackagePath></PackagePath>
     </None>
