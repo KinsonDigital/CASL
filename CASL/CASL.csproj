@@ -29,10 +29,6 @@
     <Compile Remove="OpenAL\libs\**" />
     <EmbeddedResource Remove="OpenAL\libs\**" />
     <None Remove="OpenAL\libs\**" />
-    <None Include="..\Documentation\Images\casl-logo.png">
-      <Pack>True</Pack>
-      <PackagePath></PackagePath>
-    </None>
     <None Include="..\LICENSE.md">
       <Pack>True</Pack>
       <PackagePath></PackagePath>
