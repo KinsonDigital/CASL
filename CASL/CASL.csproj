@@ -8,7 +8,7 @@
     <Version>1.0.0-preview.1</Version>
     <AssemblyVersion>1.0.0</AssemblyVersion>
     <FileVersion>1.0.0</FileVersion>
-    <ApplicationIcon />
+    <ApplicationIcon>casl-logo.ico</ApplicationIcon>
     <StartupObject />
     <Configurations>Debug;Release</Configurations>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -20,15 +20,23 @@
     <RepositoryType>GIT</RepositoryType>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <RepositoryUrl>https://github.com/KinsonDigital/CASL</RepositoryUrl>
-    <PackageIcon>casl-logo.png</PackageIcon>
     <PackageIconUrl />
-    <PackageId>CASL</PackageId>
+    <PackageId>KinsonDigital.CASL</PackageId>
+    <PackageIcon>casl-logo.png</PackageIcon>
   </PropertyGroup>
 
   <ItemGroup>
     <Compile Remove="OpenAL\libs\**" />
     <EmbeddedResource Remove="OpenAL\libs\**" />
     <None Remove="OpenAL\libs\**" />
+    <None Include="..\Documentation\Images\casl-logo.ico">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+    <None Include="..\Documentation\Images\casl-logo.png">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
     <None Include="..\LICENSE.md">
       <Pack>True</Pack>
       <PackagePath></PackagePath>
