@@ -7,7 +7,7 @@ namespace CASL
     /// <summary>
     /// A single sound that can be played, paused etc.
     /// </summary>
-    public interface ISound : IContent
+    public interface ISound
     {
         /// <summary>
         /// Gets or sets the volume of the sound.
