@@ -5,9 +5,14 @@
     <TargetFramework>net5.0</TargetFramework>
     <LangVersion>9.0</LangVersion>
     <Nullable>enable</Nullable>
-    <Version>1.0.0-preview.2</Version>
+    
+    <!--Update this for preview releases-->
+    <Version>1.0.0-preview.3</Version>
+
+    <!--Update this for preview releases-->
+    <FileVersion>1.0.0-preview.3</FileVersion>
+    
     <AssemblyVersion>1.0.0</AssemblyVersion>
-    <FileVersion>1.0.0-preview.2</FileVersion>
     <ApplicationIcon>casl-logo.ico</ApplicationIcon>
     <StartupObject />
     <Configurations>Debug;Release</Configurations>
