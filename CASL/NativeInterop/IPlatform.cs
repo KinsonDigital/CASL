@@ -4,15 +4,17 @@
 
 namespace CASL.NativeInterop
 {
+    using System.Runtime.InteropServices;
+
     /// <summary>
     /// Provides information about the current platform.
     /// </summary>
     internal interface IPlatform
     {
         /// <summary>
-        /// Gets the current platform.
+        /// Gets the current operating system and platform.
         /// </summary>
-        string CurrentPlatform { get; }
+        string CurrentOSPlatform { get; }
 
         /// <summary>
         /// Returns a value indicating if the current platform is a windows platform.
@@ -21,10 +23,34 @@ namespace CASL.NativeInterop
         bool IsWinPlatform();
 
         /// <summary>
+        /// Returns a value indicating if the current platform is a windows 10 platform.
+        /// </summary>
+        /// <returns>True if windows 10.</returns>
+        bool IsWin10Platform();
+
+        /// <summary>
+        /// Returns a value indicating if the current platform is a Mac OSX platform.
+        /// </summary>
+        /// <returns>True if a Mac OSX platform.</returns>
+        bool IsMacOSXPlatform();
+
+        /// <summary>
+        /// Returns a value indicating if the current platform is a Linux platform.
+        /// </summary>
+        /// <returns>True if a Linux platform.</returns>
+        bool IsLinuxPlatform();
+
+        /// <summary>
         /// Returns a value indicating if the current platform is a posix(MacOS, Linux) platform.
         /// </summary>
         /// <returns>True if a posix platform.</returns>
         bool IsPosixPlatform();
+
+        /// <summary>
+        /// Returns a value indicating if the current platform is a unix platform.
+        /// </summary>
+        /// <returns>True if a unix platform.</returns>
+        bool IsUnixPlatform();
 
         /// <summary>
         /// Returns a value indicating if the process is a 32 bit.
@@ -37,6 +63,24 @@ namespace CASL.NativeInterop
         /// </summary>
         /// <returns>True if the process is 64 bit(x64).</returns>
         bool Is64BitProcess();
+
+        /// <summary>
+        /// Returns a value indicating if the operating system is 32 bit.
+        /// </summary>
+        /// <returns>True if 32 bit.</returns>
+        bool Is32BitOS();
+
+        /// <summary>
+        /// Returns a value indicating if the operating system is 64 bit.
+        /// </summary>
+        /// <returns>True if 64 bit.</returns>
+        bool Is64BitOS();
+
+        /// <summary>
+        /// Returns the process architeture of the system.
+        /// </summary>
+        /// <returns>The process architecture.</returns>
+        Architecture GetProcessArchitecture();
 
         /// <summary>
         /// Returns the proper library extension depending on the current platform.

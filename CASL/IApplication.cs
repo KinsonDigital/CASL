@@ -7,7 +7,7 @@ namespace CASL
     /// <summary>
     /// Provides information about the running application.
     /// </summary>
-    public interface IApplication
+    internal interface IApplication
     {
         /// <summary>
         /// Gets the file path of the current application.

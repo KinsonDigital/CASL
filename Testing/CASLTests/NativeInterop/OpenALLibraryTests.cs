@@ -60,7 +60,7 @@ namespace CASLTests.NativeInterop
             // Arrange
             this.mockPlatform.Setup(m => m.IsWinPlatform()).Returns(false);
             this.mockPlatform.Setup(m => m.IsPosixPlatform()).Returns(false);
-            this.mockPlatform.SetupGet(p => p.CurrentPlatform).Returns("unknown-platform");
+            this.mockPlatform.SetupGet(p => p.CurrentOSPlatform).Returns("unknown-platform");
 
             var library = new OpenALLibrary(this.mockPlatform.Object);
 

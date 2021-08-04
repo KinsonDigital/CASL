@@ -19,7 +19,7 @@ namespace CASL.NativeInterop
         /// <summary>
         /// Loads a library with the set <see cref="LibraryName"/> and returns a pointer to it.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>A pointer to the native library.</returns>
         IntPtr LoadLibrary();
     }
 }

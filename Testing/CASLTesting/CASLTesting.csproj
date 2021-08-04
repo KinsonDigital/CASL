@@ -52,7 +52,7 @@
 
   <!--COPY 64 BIT WINDOWS VERSION OF OPENAL TO OUTPUT DIRECTORY-->
   <Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <Copy SourceFiles="..\..\CASL\OpenAL\libs\win-x64\soft_oal.dll" DestinationFolder="$(TargetDir)"></Copy>
+    <Copy SourceFiles="..\..\CASL\OpenAL\libs\win-x64\soft_oal.dll" DestinationFolder="$(TargetDir)\runtimes\win-x64\native"></Copy>
   </Target>
 
   <!--COPY 64 BIT LINUX VERSION OF OPENAL TO OUTPUT DIRECTORY-->

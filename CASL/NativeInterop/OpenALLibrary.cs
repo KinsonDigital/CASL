@@ -34,7 +34,7 @@ namespace CASL.NativeInterop
                 }
                 else
                 {
-                    throw new UnknownPlatformException($"The platform '{this.platform.CurrentPlatform}' is unknown.");
+                    throw new UnknownPlatformException($"The platform '{this.platform.CurrentOSPlatform}' is unknown.");
                 }
             }
         }

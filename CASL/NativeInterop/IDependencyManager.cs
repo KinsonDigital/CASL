@@ -12,23 +12,22 @@ namespace CASL.NativeInterop
     internal interface IDependencyManager
     {
         /// <summary>
-        /// Gets the path to a <see cref="Library"/> for a <see cref="LibraryLoader"/> to load.
+        /// Gets or sets the list of native library names that a library depends on.
         /// </summary>
-        ReadOnlyCollection<string> LibraryDirPaths { get; }
-
-        /// <summary>
-        /// Gets or sets the list of native library names.
-        /// </summary>
+        /// <remarks>
+        ///     This is not treated like a list of library paths.
+        ///     Any directory paths included with the library names will be ignored.
+        /// </remarks>
         ReadOnlyCollection<string> NativeLibraries { get; set; }
 
         /// <summary>
-        /// Gets the native lib path.
+        /// Gets the native library directory path.
         /// </summary>
-        string NativeLibPath { get; }
+        string NativeLibDirPath { get; }
 
         /// <summary>
-        /// Sets up all of the dependencies.
+        /// Verifies that all of the dependencies exist.
         /// </summary>
-        void SetupDependencies();
+        void VerifyDependencies();
     }
 }
