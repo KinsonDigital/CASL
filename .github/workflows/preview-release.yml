@@ -114,7 +114,7 @@ jobs:
       with:
         tag_name: v${{ steps.get-version.outputs.version }}
         body: |
-          ${{ env.PROJECT_NAME }} - ${{ env.RELEASE_NAME }} Release [v${{ steps.get-version.outputs.version }}](https://github.com/KinsonDigital/Velaptor/tree/v${{ steps.get-version.outputs.version }})
+          ${{ env.PROJECT_NAME }} - ${{ env.RELEASE_NAME }} Release [v${{ steps.get-version.outputs.version }}](https://github.com/KinsonDigital/${{ env.PROJECT_NAME }}/tree/v${{ steps.get-version.outputs.version }})
           Execute the testing application in the **_${{ env.PROJECT_NAME }}-v${{ steps.get-version.outputs.version }}.zip_** file to perform manual testing.
-        files: ${{ github.workspace }}/${{ env.RELEASE_NAME }}Release.zip
+        files: ${{ env.PROJECT_NAME }}-v${{ steps.get-version.outputs.version }}.zip
         prerelease: true
