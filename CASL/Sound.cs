@@ -2,6 +2,7 @@
 // Copyright (c) KinsonDigital. All rights reserved.
 // </copyright>
 
+// TODO: Remove me!! - Status check testing
 namespace CASL
 {
     using System;
