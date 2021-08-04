@@ -10,7 +10,7 @@ env:
 on:
   workflow_dispatch:
   push:
-    branches: [ workflow-testing ]
+    branches: [ workflow-testing, status-checking-tests ]
     paths-ignore:
       - ".github/**"
       - 'Documentation/**'
