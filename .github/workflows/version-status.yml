@@ -25,7 +25,6 @@ jobs:
   Check_Preview_Version_Status:
     name: Check Preview Version Status
     runs-on: windows-latest
-    environment: workflow-testing
     steps:
     - name: Get Version From Project File
       id: get-version
