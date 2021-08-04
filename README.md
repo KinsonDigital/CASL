@@ -8,8 +8,12 @@
 <div align="center">
 
 [![codecov](https://codecov.io/gh/KinsonDigital/CASL/branch/feature/master/graph/badge.svg?token=gkqbQI7oCM)](https://codecov.io/gh/KinsonDigital/CASL)
-[![BuildFFFF](https://github.com/KinsonDigital/CASL/actions/workflows/main.yml/badge.svg)](https://github.com/KinsonDigital/CASL/actions/workflows/main.yml)
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.0-4baaaa.svg)](code_of_conduct.md)
+
+[![Build-QA](https://github.com/KinsonDigital/CASL/actions/workflows/qa-release.yml/badge.svg)](https://github.com/KinsonDigital/CASL/actions/workflows/main.yml)
+[![Build-Preview](https://github.com/KinsonDigital/CASL/actions/workflows/preview-release.yml/badge.svg)](https://github.com/KinsonDigital/CASL/actions/workflows/main.yml)
+[![Build-Production](https://github.com/KinsonDigital/CASL/actions/workflows/production-release.yml/badge.svg)](https://github.com/KinsonDigital/CASL/actions/workflows/main.yml)
+
 
 [![nuget-package](https://img.shields.io/badge/nuget-windows-orange)](asdf)
 </div>
