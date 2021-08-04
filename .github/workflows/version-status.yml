@@ -9,8 +9,9 @@ env:
 
 on:
   workflow_dispatch:
-  push:
-    branches: [ workflow-testing, status-checking-tests ]
+  pull-request:
+    types: [synchronize]
+    branches: [ workflow-testing ]
     paths-ignore:
       - ".github/**"
       - 'Documentation/**'
