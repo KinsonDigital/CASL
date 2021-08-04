@@ -117,3 +117,4 @@ jobs:
           ${{ env.RELEASE_NAME }} Release [v${{ steps.get-version.outputs.version }}](https://github.com/KinsonDigital/Velaptor/tree/v${{ steps.get-version.outputs.version }})
           Execute the testing application in the **_${{ env.RELEASE_NAME }}Release.zip_** file to perform manual testing.
         files: ${{ github.workspace }}/${{ env.RELEASE_NAME }}Release.zip
+        prerelease: true
