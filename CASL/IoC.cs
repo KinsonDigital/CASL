@@ -53,7 +53,8 @@ namespace CASL
             IoCContainer.Register<ILibrary, OpenALLibrary>(Lifestyle.Singleton);
             IoCContainer.Register<IDelegateFactory, DelegateFactory>(Lifestyle.Singleton);
             IoCContainer.Register<IDependencyManager, OpenALDependencyManager>(Lifestyle.Singleton);
-            IoCContainer.Register<ILibraryLoader, LibraryLoader>(Lifestyle.Singleton);
+            IoCContainer.Register<ILibraryLoader, NativeLibraryLoader>(Lifestyle.Singleton);
+            IoCContainer.Register<IFilePathResolver, NativeLibPathResolver>(Lifestyle.Singleton);
 
             SetupAudio();
 

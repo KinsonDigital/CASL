@@ -1,11 +1,11 @@
-﻿// <copyright file="LibraryLoader.cs" company="KinsonDigital">
+﻿// <copyright file="NativeLibraryLoader.cs" company="KinsonDigital">
 // Copyright (c) KinsonDigital. All rights reserved.
 // </copyright>
 
 namespace CASL.NativeInterop
 {
     using System;
-    using System.Collections.Generic;
+    using System.IO;
     using System.IO.Abstractions;
     using System.Linq;
     using CASL.Exceptions;
@@ -18,7 +18,7 @@ namespace CASL.NativeInterop
     /// <summary>
     /// Loads a native library and returns a pointer for the purpose of interoping with it.
     /// </summary>
-    internal class LibraryLoader : ILibraryLoader
+    internal class NativeLibraryLoader : ILibraryLoader
     {
         private readonly IDependencyManager dependencyManager;
         private readonly IPlatform platform;
@@ -27,15 +27,16 @@ namespace CASL.NativeInterop
         private readonly IPath path;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="LibraryLoader"/> class.
+        /// Initializes a new instance of the <see cref="NativeLibraryLoader"/> class.
         /// </summary>
         /// <param name="dependencyManager">Manages the native library's dependencies.</param>
+        /// <param name="libPathResolver">Resolves paths to native libraries.</param>
         /// <param name="platform">Gets required information about the platform.</param>
         /// <param name="directory">Performs directory IO operations.</param>
         /// <param name="file">Performs file IO operations.</param>
         /// <param name="path">Process paths.</param>
         /// <param name="library">The library to load.</param>
-        public LibraryLoader(
+        public NativeLibraryLoader(
             IDependencyManager dependencyManager,
             IPlatform platform,
             IDirectory directory,
@@ -81,93 +82,34 @@ namespace CASL.NativeInterop
 
             LibraryName = ProcessLibExtension(library.LibraryName);
 
-            dependencyManager.SetupDependencies();
+            dependencyManager.VerifyDependencies();
         }
 
         /// <inheritdoc/>
         public string LibraryName { get; }
 
         /// <inheritdoc/>
-        public nint LoadLibrary() => this.platform.IsWinPlatform() ? LoadWindowsLibrary() : LoadPoxisLibrary();
-
-        /// <summary>
-        /// Loads a windows library and returns a pointer to that library.
-        /// </summary>
-        /// <returns>A pointer to the windows library.</returns>
-        private nint LoadWindowsLibrary()
+        public nint LoadLibrary()
         {
-            var missingLibPaths = new List<string>();
+            var libDirPath = this.dependencyManager.NativeLibDirPath;
 
-            foreach (var libPath in this.dependencyManager.LibraryDirPaths)
+            // Add a directory separator if one is missing
+            libDirPath = libDirPath.EndsWith(this.path.DirectorySeparatorChar) ?
+                libDirPath :
+                $@"{libDirPath}{this.path.DirectorySeparatorChar}";
+
+            var libFilePath = $"{libDirPath}{LibraryName}";
+
+            var (exists, libPtr) = LoadLibraryIfExists(libFilePath);
+
+            if (exists)
             {
-                // Add a directory separator if one is missing
-                var libDirPath = libPath.EndsWith(this.path.DirectorySeparatorChar) ?
-                    libPath :
-                    $@"{libPath}{this.path.DirectorySeparatorChar}";
-
-                var (exists, libPtr) = LoadLibraryIfExists($"{libDirPath}{LibraryName}");
-
-                if (exists)
-                {
-                    return libPtr;
-                }
-
-                missingLibPaths.Add(libPath);
+                return libPtr;
             }
 
-            var exceptionMsg = $"Could not find the library '{LibraryName}'.\n\nPaths Checked: \n";
+            var exceptionMsg = $"Could not find the library '{LibraryName}' in directory path '{libDirPath}'";
 
-            // Add the missing library paths to the exception message
-            foreach (var path in missingLibPaths)
-            {
-                exceptionMsg += $"\t{path}\n";
-            }
-
-            throw new LoadLibraryException(exceptionMsg);
-        }
-
-        /// <summary>
-        /// Loads a posix library and returns a pointer to that library.
-        /// </summary>
-        /// <returns>A pointer to the posix library.</returns>
-        private nint LoadPoxisLibrary()
-        {
-            var missingLibPaths = new List<string>();
-
-            foreach (var libPath in this.dependencyManager.LibraryDirPaths)
-            {
-                // Add a directory separator if one is missing
-                var libDirPath = libPath.EndsWith(this.path.DirectorySeparatorChar) ?
-                    libPath :
-                    $@"{libPath}{this.path.DirectorySeparatorChar}";
-
-                var libraryName = GetLatestPosixLibraryVersion(libDirPath, LibraryName);
-
-                if (string.IsNullOrEmpty(libraryName))
-                {
-                    missingLibPaths.Add(libPath);
-                    continue;
-                }
-
-                var (exists, libPtr) = LoadLibraryIfExists($"{libDirPath}{libraryName}");
-
-                if (exists)
-                {
-                    return libPtr;
-                }
-
-                missingLibPaths.Add(libPath);
-            }
-
-            var exceptionMsg = $"Could not find the library '{LibraryName}'.\n\nPaths Checked: \n";
-
-            // Add the missing library paths to the exception message
-            foreach (var path in missingLibPaths)
-            {
-                exceptionMsg += $"\t{path}\n";
-            }
-
-            throw new LoadLibraryException(exceptionMsg);
+            throw new FileNotFoundException(exceptionMsg, libFilePath);
         }
 
         /// <summary>
@@ -217,24 +159,12 @@ namespace CASL.NativeInterop
                 throw new ArgumentNullException(nameof(libraryName), "The parameter must not be null or empty.");
             }
 
-            var libExtension = this.platform.GetPlatformLibFileExtension();
-
-            if (this.path.HasExtension(libraryName))
+            while (this.path.HasExtension(libraryName))
             {
-                var libraryNameWithoutExtension = libraryName;
-
-                // Strip any possible extensions off of the library name
-                while (this.path.HasExtension(libraryNameWithoutExtension))
-                {
-                    libraryNameWithoutExtension = this.path.GetFileNameWithoutExtension(libraryNameWithoutExtension);
-                }
-
-                return $"{libraryNameWithoutExtension}{libExtension}";
+                libraryName = this.path.GetFileNameWithoutExtension(libraryName);
             }
-            else
-            {
-                return $"{libraryName}{libExtension}";
-            }
+
+            return $"{libraryName}{this.platform.GetPlatformLibFileExtension()}";
         }
 
         /// <summary>

@@ -17,38 +17,68 @@ namespace CASL.NativeInterop
     internal class Platform : IPlatform
     {
         /// <inheritdoc/>
-        public string CurrentPlatform
-        {
-            get
-            {
-                var os = Environment.OSVersion.Platform switch
-                {
-                    PlatformID.Win32NT => "Windows",
-                    PlatformID.Unix => "Posix",
-                    _ => throw new UnknownPlatformException(),
-                };
-
-                var bitness = Environment.Is64BitOperatingSystem
-                    ? "x64"
-                    : "x86";
-
-                return $"{os} {bitness}";
-            }
-        }
+        public string CurrentOSPlatform
+            => $"{RuntimeInformation.OSDescription} - {GetProcessArchitecture().ToString().ToLower()}";
 
         /// <inheritdoc/>
-        public bool IsWinPlatform() => Environment.OSVersion.Platform == PlatformID.Win32NT;
+        public bool IsWinPlatform() => RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
 
         /// <inheritdoc/>
-        public bool IsPosixPlatform() => Environment.OSVersion.Platform == PlatformID.Unix ||
-                   Environment.OSVersion.Platform == PlatformID.MacOSX ||
+        public bool IsWin10Platform() => IsWinPlatform() && Environment.OSVersion.Version.Major == 10;
+
+        /// <inheritdoc/>
+        public bool IsMacOSXPlatform() => RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
+
+        /// <inheritdoc/>
+        public bool IsLinuxPlatform() => RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
+
+        /// <inheritdoc/>
+        public bool IsPosixPlatform() => IsUnixPlatform() || IsMacOSXPlatform() ||
                    (int)Environment.OSVersion.Platform == 128;
+
+        /// <inheritdoc/>
+        public bool IsUnixPlatform() => Environment.OSVersion.Platform == PlatformID.Unix;
 
         /// <inheritdoc/>
         public bool Is32BitProcess() => !Is64BitProcess();
 
         /// <inheritdoc/>
         public bool Is64BitProcess() => Environment.Is64BitProcess;
+
+        /// <inheritdoc/>
+        public bool Is32BitOS()
+        {
+            switch (RuntimeInformation.ProcessArchitecture)
+            {
+                case Architecture.X86:
+                case Architecture.Arm:
+                    return true;
+                case Architecture.X64:
+                case Architecture.Arm64:
+                    return false;
+                default:
+                    throw new Exception("Do not know if OS is 32 bit.");
+            }
+        }
+
+        /// <inheritdoc/>
+        public bool Is64BitOS()
+        {
+            switch (RuntimeInformation.ProcessArchitecture)
+            {
+                case Architecture.X86:
+                case Architecture.Arm:
+                    return false;
+                case Architecture.X64:
+                case Architecture.Arm64:
+                    return true;
+                default:
+                    throw new Exception("Do not know if OS is 64 bit.");
+            }
+        }
+
+        /// <inheritdoc/>
+        public Architecture GetProcessArchitecture() => RuntimeInformation.ProcessArchitecture;
 
         /// <inheritdoc/>
         public string GetPlatformLibFileExtension()
@@ -71,23 +101,36 @@ namespace CASL.NativeInterop
         public IntPtr LoadLibrary(string libPath)
         {
             const int RTLD_NOW = 2;
-
             try
             {
                 if (IsWinPlatform())
                 {
                     return NativeMethods.LoadLibrary_WIN(libPath);
                 }
+                else if (IsPosixPlatform())
+                {
+                    return NativeMethods.dlopen_POSIX(libPath, RTLD_NOW);
+                }
                 else
                 {
-                    return NativeMethods.dlopen_POSIX(libPath, RTLD_NOW);    
+                    var ex = new Exception("Platform must be a windows or posix platform.")
+                    {
+                        HResult = 9753,
+                    };
+
+                    throw ex;
                 }
             }
             catch (Exception ex)
             {
-                var systemErrorMsg = GetLastSystemError();
+                if (ex.HResult != 9753)
+                {
+                    var systemErrorMsg = GetLastSystemError();
 
-                throw new Exception(systemErrorMsg);
+                    throw new Exception(systemErrorMsg);
+                }
+
+                throw;
             }
         }
 

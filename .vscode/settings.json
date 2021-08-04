@@ -4,11 +4,15 @@
         "Codecov",
         "Kinson",
         "cobertura",
+        "editorconfig",
+        "gitattributes",
         "ibrary",
         "nint",
         "nuget",
         "nupkg",
         "ound",
+        "runsettings",
+        "softprops",
         "udio"
     ]
 }
