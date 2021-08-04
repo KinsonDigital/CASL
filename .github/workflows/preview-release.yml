@@ -10,7 +10,7 @@ env:
 on:
   workflow_dispatch:
   push:
-    branches: [ release/v*.*.*, release/29-rework-native-lib-system ]
+    branches: [ release/v*.*.* ]
     paths-ignore:
       - ".github/**"
       - 'Documentation/**'
