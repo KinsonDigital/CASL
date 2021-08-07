@@ -1,0 +1,47 @@
+name: Tag Exists Status Check
+
+env:
+  PROJECT_NAME: CASL
+
+on:
+  workflow_dispatch:
+  pull_request:
+    types: [ synchronize ]
+    branches: [ release/* ]
+
+jobs:
+  Verify_Tag_Status_Check:
+    name: Verify Tag Status Check
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Get Version From Project File
+      id: get-version
+      uses: KinsonDigital/vget@v0.3.0
+      with:
+        repo-owner-and-name: '${{ github.repository }}'
+        branch: '${{ github.ref }}'
+        relative-file-path: '${{ env.PROJECT_NAME }}/${{ env.PROJECT_NAME }}.csproj'
+        user-name: 'kinsondigital@gmail.com'
+        password: ${{ secrets.REPO_PASSWORD }}
+
+    - name: Check If Tag Exists
+      id: tag-verifier
+      uses: KinsonDigital/TagVerifier@v0.1
+      with:
+        repo-owner-and-name: '${{ github.repository }}'
+        tag-name: '${{ steps.get-version.outputs.version }}'
+        repo-token: '${{ secrets.GITHUB_TOKEN }}'
+
+    - name: Process Tag Verification Result
+      uses: actions/github-script@v4
+      with:
+        script: |
+          const tagName = '${{ steps.tag-verifier.outputs.tag-exists }}';
+
+          if (tagName === 'true') {
+            core.setFailed(`The tag '${tagName}' already exists. Is the tag name correct?`);
+          } else {
+            console.log(`The version 'v${version}' is valid!!`);
+          }
