@@ -38,10 +38,11 @@ jobs:
       uses: actions/github-script@v4
       with:
         script: |
-          const tagName = '${{ steps.tag-verifier.outputs.tag-exists }}';
+          const tagExists = '${{ steps.tag-verifier.outputs.tag-exists }}';
+          const tagName = '${{ steps.get-version.outputs.version }}';
 
-          if (tagName === 'true') {
+          if (tagExists === 'true') {
             core.setFailed(`The tag '${tagName}' already exists. Is the tag name correct?`);
           } else {
-            console.log(`The version 'v${version}' is valid!!`);
+            core.info(`The tag '${tagName}' does not exit and is free to use!!`);
           }
