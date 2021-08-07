@@ -12,9 +12,7 @@ body:
 
 - type: textarea
   attributes:
-    label: |
-      ---
-      Description
+    label: Description
     description: A description of feature/change in the user's perspective
   validations:
     required: true
