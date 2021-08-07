@@ -28,7 +28,7 @@ jobs:
 
     - name: Check If Tag Exists
       id: tag-verifier
-      uses: KinsonDigital/TagVerifier@v0.1
+      uses: KinsonDigital/TagVerifier@v0.2.0
       with:
         repo-owner-and-name: '${{ github.repository }}'
         tag-name: '${{ steps.get-version.outputs.version }}'
