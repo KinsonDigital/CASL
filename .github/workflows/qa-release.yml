@@ -1,4 +1,4 @@
-name: Build/Test/Release (Development)
+name: Build/Test/Release (QA)
 
 env:
   PROJECT_NAME: CASL
