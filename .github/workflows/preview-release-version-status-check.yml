@@ -18,13 +18,12 @@ jobs:
 
     - name: Get Version From Project File
       id: get-version
-      uses: KinsonDigital/vget@v0.3.0
+      uses: KinsonDigital/vget@v0.4.0
       with:
         repo-owner-and-name: '${{ github.repository }}'
         branch: '${{ github.ref }}'
         relative-file-path: '${{ env.PROJECT_NAME }}/${{ env.PROJECT_NAME }}.csproj'
-        user-name: 'kinsondigital@gmail.com'
-        password: ${{ secrets.REPO_PASSWORD }}
+        github-token: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Validate Preview Version Value
       uses: actions/github-script@v4
