@@ -87,7 +87,7 @@ jobs:
         result-encoding: string
 
     - name: Zip Release
-      run: Compress-Archive -Path "./${{ env.RELEASE_NAME }}Release" -DestinationPath "${{ github.workspace }}/${{ env.PROJECT_NAME }}-${{ steps.qa-version.outputs.result }}.zip"
+      run: Compress-Archive -Path "./${{ env.RELEASE_NAME }}Release" -DestinationPath "${{ github.workspace }}/${{ env.PROJECT_NAME }}-TestingApp-${{ steps.qa-version.outputs.result }}.zip"
 
     - name: Release Testing Application
       uses: softprops/action-gh-release@v1
@@ -95,6 +95,6 @@ jobs:
         tag_name: ${{ steps.qa-version.outputs.result }}
         body: |
           ${{ env.PROJECT_NAME }} - ${{ env.RELEASE_NAME }} Release [${{ steps.qa-version.outputs.result }}](https://github.com/KinsonDigital/${{ env.PROJECT_NAME }}/tree/${{ steps.qa-version.outputs.result }})
-          Execute the testing application in the **_${{ env.PROJECT_NAME }}-${{ steps.qa-version.outputs.result }}.zip_** file to perform manual testing.
+          Execute the testing application in the **_${{ env.PROJECT_NAME }}-TestingApp-${{ steps.qa-version.outputs.result }}.zip_** file to perform manual testing.
         files: ${{ github.workspace }}/${{ env.PROJECT_NAME }}-${{ steps.qa-version.outputs.result }}.zip
         prerelease: true

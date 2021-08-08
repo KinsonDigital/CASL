@@ -103,7 +103,7 @@ jobs:
         github-token: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Zip Release
-      run: Compress-Archive -Path "./${{ env.RELEASE_NAME }}Release" -DestinationPath "${{ github.workspace }}/${{ env.PROJECT_NAME }}-v${{ steps.get-version.outputs.version }}.zip"
+      run: Compress-Archive -Path "./${{ env.RELEASE_NAME }}Release" -DestinationPath "${{ github.workspace }}/${{ env.PROJECT_NAME }}-TestingApp-v${{ steps.get-version.outputs.version }}.zip"
 
     - name: Release Testing Application
       uses: softprops/action-gh-release@v1
@@ -111,6 +111,6 @@ jobs:
         tag_name: v${{ steps.get-version.outputs.version }}
         body: |
           ${{ env.PROJECT_NAME }} - ${{ env.RELEASE_NAME }} Release [v${{ steps.get-version.outputs.version }}](https://github.com/KinsonDigital/${{ env.PROJECT_NAME }}/tree/v${{ steps.get-version.outputs.version }})
-          Execute the testing application in the **_${{ env.PROJECT_NAME }}-v${{ steps.get-version.outputs.version }}.zip_** file to perform manual testing.
+          Execute the testing application in the **_${{ env.PROJECT_NAME }}-TestingApp-v${{ steps.get-version.outputs.version }}.zip_** file to perform manual testing.
         files: ${{ env.PROJECT_NAME }}-v${{ steps.get-version.outputs.version }}.zip
         prerelease: true
