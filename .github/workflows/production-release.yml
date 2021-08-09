@@ -63,18 +63,17 @@ jobs:
       run: dotnet pack "${{ github.workspace }}/${{ env.PROJECT_NAME }}/${{ env.PROJECT_NAME }}.csproj" -o "${{ github.workspace }}" -c ${{ env.BUILD_CONFIG }}
 
     - name: Get Version From Project File
-      id: get-version
+      id: prod-version
       uses: KinsonDigital/vget@v0.4.0
       with:
         repo-owner-and-name: '${{ github.repository }}'
         branch: '${{ github.ref }}'
         relative-file-path: '${{ env.PROJECT_NAME }}/${{ env.PROJECT_NAME }}.csproj'
-        user-name: 'kinsondigital@gmail.com'
-        password: ${{ secrets.REPO_PASSWORD }}
+        github-token: ${{ secrets.GITHUB_TOKEN }}
     
     # DISABLE ME FOR WORKFLOW TESTING
-    # - name: Publish Nuget Package
-    #   run: dotnet nuget push "${{ github.workspace }}/KinsonDigital.${{ env.PROJECT_NAME }}.${{ steps.get-version.outputs.version }}.nupkg" --api-key ${{ secrets.NUGET_ORG_API_KEY }} --source https://api.nuget.org/v3/index.json
+    - name: Publish Nuget Package
+      run: dotnet nuget push "${{ github.workspace }}/KinsonDigital.${{ env.PROJECT_NAME }}.${{ steps.prod-version.outputs.version }}.nupkg" --api-key ${{ secrets.NUGET_ORG_API_KEY }} --source https://api.nuget.org/v3/index.json
 
   Build_And_Release_Testing_App:
     name: Build & Release (Testing App)
@@ -95,7 +94,7 @@ jobs:
       run: dotnet publish "${{ github.workspace }}/Testing/${{ env.PROJECT_NAME }}Testing/${{ env.PROJECT_NAME }}Testing.csproj" -c ${{ env.BUILD_CONFIG }} -o ./${{ env.RELEASE_NAME }}Release --no-restore
 
     - name: Get Version From Project File
-      id: get-version
+      id: prod-version
       uses: KinsonDigital/vget@v0.4.0
       with:
         repo-owner-and-name: '${{ github.repository }}'
@@ -104,11 +103,13 @@ jobs:
         github-token: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Zip Release
-      run: Compress-Archive -Path "./${{ env.RELEASE_NAME }}Release" -DestinationPath "${{ github.workspace }}/${{ env.RELEASE_NAME }}Release.zip"
+      run: Compress-Archive -Path "./${{ env.RELEASE_NAME }}Release" -DestinationPath "${{ github.workspace }}/${{ env.PROJECT_NAME }}-TestingApp-${{ steps.prod-version.outputs.version }}.zip"
 
     - name: Release Testing Application
-      uses: softprops/action-gh-release@v1
+      uses: softprops/action-gh-release@v0.1.8
       with:
-        tag_name: v${{ steps.get-version.outputs.version }}
-        body: ${{ env.RELEASE_NAME }} Release [v${{ steps.get-version.outputs.version }}](https://github.com/KinsonDigital/Velaptor/tree/v${{ steps.get-version.outputs.version }})
-        files: ${{ github.workspace }}/${{ env.RELEASE_NAME }}Release.zip
+        tag_name: v${{ steps.prod-version.outputs.version }}
+        body: |
+          ${{ env.PROJECT_NAME }} - ${{ env.RELEASE_NAME }} Release [${{ steps.prod-version.outputs.version }}](https://github.com/KinsonDigital/${{ env.PROJECT_NAME }}/tree/${{ steps.prod-version.outputs.version }})
+          Execute the testing application in the **_${{ env.PROJECT_NAME }}-TestingApp-${{ steps.prod-version.outputs.version }}.zip_** file to perform manual testing.
+        files: ${{ github.workspace }}/${{ env.PROJECT_NAME }}-TestingApp-${{ steps.prod-version.outputs.version }}.zip
