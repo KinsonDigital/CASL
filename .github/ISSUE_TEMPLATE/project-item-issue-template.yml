@@ -25,9 +25,9 @@ body:
       Add more items as needed . . .
     value: |
       **This issue is finished when:**
-      1. [ ] Code documentation added if required
-      2. [ ] Unit tests added
-      3. [ ] All unit tests pass
+      - [ ] Code documentation added if required
+      - [ ] Unit tests added
+      - [ ] All unit tests pass
   validations:
     required: true
     render: markdown
