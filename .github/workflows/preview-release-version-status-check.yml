@@ -31,7 +31,7 @@ jobs:
         script: |
           const script = require('./.github/workflows/status-check-scripts/preview-version-status-check.js');
           let version = '${{ steps.get-version.outputs.version }}';
-          let scriptResult = script({github, context, core, version});
+          let scriptResult = script({version});
 
           if (scriptResult.failed === true) {
             core.setFailed(scriptResult.error);
