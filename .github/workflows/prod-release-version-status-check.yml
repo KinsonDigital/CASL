@@ -1,4 +1,4 @@
-name: Production Release Version Status Check
+name: Production Version Status Check
 
 env:
   PROJECT_NAME: CASL
@@ -10,8 +10,8 @@ on:
     branches: [ master ]
 
 jobs:
-  Validate_Prod_Version_Status_Check:
-    name: Validate Production Version Status Check
+  Prod_Version_Status_Check:
+    name: Production Version Status Check
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v2

@@ -1,4 +1,4 @@
-name: Preview Release Version Status Check
+name: Preview Version Status Check
 
 env:
   PROJECT_NAME: CASL
@@ -10,8 +10,8 @@ on:
     branches: [ release/* ]
 
 jobs:
-  Validate_Preview_Version_Status_Check:
-    name: Validate Preview Version Status Check
+  Prev_Version_Status_Check:
+    name: Preview Version Status Check
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v2
@@ -29,7 +29,7 @@ jobs:
       uses: actions/github-script@v4
       with:
         script: |
-          const script = require('./.github/workflows/status-check-scripts/preview-version-status-check.js');
+          const script = require('./.github/workflows/status-check-scripts/prev-version-status-check.js');
           let version = '${{ steps.get-version.outputs.version }}';
           let scriptResult = script({version});
 

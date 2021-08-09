@@ -1,4 +1,4 @@
-name: Tag Exists Status Check
+name: Tag Does Not Exit Status Check
 
 env:
   PROJECT_NAME: CASL
@@ -10,8 +10,8 @@ on:
     branches: [ release/* ]
 
 jobs:
-  Verify_Tag_Status_Check:
-    name: Verify Tag Status Check
+  Tag_Does_Not_Exit_Status_Check:
+    name: Tag Does Not Exit Status Check
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v2
