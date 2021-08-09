@@ -90,7 +90,7 @@ jobs:
       run: Compress-Archive -Path "./${{ env.RELEASE_NAME }}Release" -DestinationPath "${{ github.workspace }}/${{ env.PROJECT_NAME }}-TestingApp-${{ steps.qa-version.outputs.result }}.zip"
 
     - name: Release Testing Application
-      uses: softprops/action-gh-release@v1
+      uses: softprops/action-gh-release@v0.1.8
       with:
         tag_name: ${{ steps.qa-version.outputs.result }}
         body: |
