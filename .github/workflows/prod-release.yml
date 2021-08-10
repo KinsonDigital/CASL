@@ -1,16 +1,16 @@
-name: Build/Test/Release (Preview)
+name: 🚀Production Release
 
 env:
   PROJECT_NAME: CASL
-  BUILD_CONFIG: Debug
-  RELEASE_NAME: Preview
+  BUILD_CONFIG: Release
+  RELEASE_NAME: Production
   NET_SDK_VERSION: 5.0.x # Changing this means changing ARTIFACT_FOLDER_NAME
   ARTIFACT_FOLDER_NAME: '5.0' # Changing this means changing NET_SDK_VERSION
 
 on:
   workflow_dispatch:
   push:
-    branches: [ release/v*.*.* ]
+    branches: [ master ]
     paths-ignore:
       - ".github/**"
       - 'Documentation/**'
@@ -25,7 +25,7 @@ jobs:
   Library_Build_And_Test:
     name: Build & Test (Library)
     runs-on: windows-latest
-    environment: workflow-testing
+    environment: production
     steps:
     - uses: actions/checkout@v2
 
@@ -63,24 +63,21 @@ jobs:
       run: dotnet pack "${{ github.workspace }}/${{ env.PROJECT_NAME }}/${{ env.PROJECT_NAME }}.csproj" -o "${{ github.workspace }}" -c ${{ env.BUILD_CONFIG }}
 
     - name: Get Version From Project File
-      id: get-version
-      uses: KinsonDigital/vget@v0.3.0
+      id: prod-version
+      uses: KinsonDigital/vget@v0.4.0
       with:
         repo-owner-and-name: '${{ github.repository }}'
         branch: '${{ github.ref }}'
         relative-file-path: '${{ env.PROJECT_NAME }}/${{ env.PROJECT_NAME }}.csproj'
-        user-name: 'kinsondigital@gmail.com'
-        password: ${{ secrets.REPO_PASSWORD }}
-        contains: '-preview.'
+        github-token: ${{ secrets.GITHUB_TOKEN }}
     
-    # DISABLE ME FOR WORKFLOW TESTING
-    # - name: Publish Nuget Package
-    #   run: dotnet nuget push "${{ github.workspace }}/KinsonDigital.${{ env.PROJECT_NAME }}.${{ steps.get-version.outputs.version }}.nupkg" --api-key ${{ secrets.NUGET_ORG_API_KEY }} --source https://api.nuget.org/v3/index.json
+    - name: Publish Nuget Package
+      run: dotnet nuget push "${{ github.workspace }}/KinsonDigital.${{ env.PROJECT_NAME }}.${{ steps.prod-version.outputs.version }}.nupkg" --api-key ${{ secrets.NUGET_ORG_API_KEY }} --source https://api.nuget.org/v3/index.json
 
   Build_And_Release_Testing_App:
     name: Build & Release (Testing App)
     runs-on: windows-latest
-    environment: workflow-testing
+    environment: production
     steps:
     - uses: actions/checkout@v2
 
@@ -92,28 +89,27 @@ jobs:
     - name: Restore Dependencies
       run: dotnet restore "${{ github.workspace }}/Testing/${{ env.PROJECT_NAME }}Testing/${{ env.PROJECT_NAME }}Testing.csproj"
 
-    - name: Build
-      run: dotnet publish "${{ github.workspace }}/Testing/${{ env.PROJECT_NAME }}Testing/${{ env.PROJECT_NAME }}Testing.csproj" -c ${{ env.BUILD_CONFIG }} -o ./${{ env.RELEASE_NAME }}Release --no-restore
-
     - name: Get Version From Project File
-      id: get-version
-      uses: KinsonDigital/vget@v0.3.0
+      id: prod-version
+      uses: KinsonDigital/vget@v0.4.0
       with:
         repo-owner-and-name: '${{ github.repository }}'
         branch: '${{ github.ref }}'
         relative-file-path: '${{ env.PROJECT_NAME }}/${{ env.PROJECT_NAME }}.csproj'
-        user-name: 'kinsondigital@gmail.com'
-        password: ${{ secrets.REPO_PASSWORD }}
-        contains: '-preview.'
+        github-token: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Zip Release
-      run: Compress-Archive -Path "./${{ env.RELEASE_NAME }}Release" -DestinationPath "${{ github.workspace }}/${{ env.RELEASE_NAME }}Release.zip"
+    - name: Package Testing App
+      run: |
+        ${{ github.workspace }}/BuildScripts/PackageTestingApp.ps1 -Workspace "${{ github.workspace }}" `
+          -ProjectName "${{ env.PROJECT_NAME }}" `
+          -ReleaseName "${{ env.RELEASE_NAME }}" `
+          -Version "${{ steps.prod-version.outputs.version }}"
 
     - name: Release Testing Application
-      uses: softprops/action-gh-release@v1
+      uses: softprops/action-gh-release@v0.1.8
       with:
-        tag_name: v${{ steps.get-version.outputs.version }}
+        tag_name: v${{ steps.prod-version.outputs.version }}
         body: |
-          ${{ env.RELEASE_NAME }} Release [v${{ steps.get-version.outputs.version }}](https://github.com/KinsonDigital/Velaptor/tree/v${{ steps.get-version.outputs.version }})
-          Execute the testing application in the **_${{ env.RELEASE_NAME }}Release.zip_** file to perform manual testing.
-        files: ${{ github.workspace }}/${{ env.RELEASE_NAME }}Release.zip
+          ${{ env.PROJECT_NAME }} - ${{ env.RELEASE_NAME }} Release [${{ steps.prod-version.outputs.version }}](https://github.com/KinsonDigital/${{ env.PROJECT_NAME }}/tree/${{ steps.prod-version.outputs.version }})
+          Execute the testing application in the **_${{ env.PROJECT_NAME }}-TestingApp-${{ steps.prod-version.outputs.version }}.zip_** file to perform manual testing.
+        files: ${{ github.workspace }}/${{ env.PROJECT_NAME }}-TestingApp-${{ steps.prod-version.outputs.version }}.zip
