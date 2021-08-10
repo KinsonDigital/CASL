@@ -1,4 +1,4 @@
-name: Build/Test/Release (QA)
+name: QA Release
 
 env:
   PROJECT_NAME: CASL
@@ -25,7 +25,7 @@ jobs:
   Library_Build_And_Test:
     name: Build & Test (Library)
     runs-on: windows-latest
-    environment: qa
+    # environment: qa
     steps:
     - uses: actions/checkout@v2
 
@@ -59,7 +59,7 @@ jobs:
   Build_And_Release_Testing_App:
     name: Build & Release (Testing App)
     runs-on: windows-latest
-    environment: qa
+    # environment: qa
     steps:
     - uses: actions/checkout@v2
 
@@ -71,10 +71,10 @@ jobs:
     - name: Restore Dependencies
       run: dotnet restore "${{ github.workspace }}/Testing/${{ env.PROJECT_NAME }}Testing/${{ env.PROJECT_NAME }}Testing.csproj"
 
-    - name: Build
-      run: dotnet publish "${{ github.workspace }}/Testing/${{ env.PROJECT_NAME }}Testing/${{ env.PROJECT_NAME }}Testing.csproj" -c ${{ env.BUILD_CONFIG }} -o ./${{ env.RELEASE_NAME }}Release --no-restore
+    # - name: Build
+    #   run: dotnet publish "${{ github.workspace }}/Testing/${{ env.PROJECT_NAME }}Testing/${{ env.PROJECT_NAME }}Testing.csproj" -c ${{ env.BUILD_CONFIG }} -o ./${{ env.RELEASE_NAME }}Release --no-restore
 
-    - name: Build QA Version
+    - name: Build QA Version String
       uses: actions/github-script@v4
       id: qa-version
       with:
@@ -83,11 +83,22 @@ jobs:
           let day = new Date().getDate();
           let month = new Date().getMonth();
           let year = new Date().getFullYear();
-          return `${{ env.RELEASE_NAME }}.${year}.${month + 1}.${day}.${commitHash.slice(-5)}`;
+          let version = `${{ env.RELEASE_NAME }}.${year}.${month + 1}.${day}.${commitHash.slice(-5)}`;
+
+          console.log(`QA Version: ${version}`);
+
+          return version;
         result-encoding: string
 
-    - name: Zip Release
-      run: Compress-Archive -Path "./${{ env.RELEASE_NAME }}Release" -DestinationPath "${{ github.workspace }}/${{ env.PROJECT_NAME }}-TestingApp-${{ steps.qa-version.outputs.result }}.zip"
+    # - name: Zip Release
+    #   run: Compress-Archive -Path "./${{ env.RELEASE_NAME }}Release" -DestinationPath "${{ github.workspace }}/${{ env.PROJECT_NAME }}-TestingApp-${{ steps.qa-version.outputs.result }}.zip"
+
+    - name: Package Testing App
+      run: |
+        ${{ github.workspace }}/BuildScripts/PackageTestingApp.ps1 -Workspace "${{ github.workspace }}" `
+          -ProjectName "${{ env.PROJECT_NAME }}" `
+          -ReleaseName "${{ env.RELEASE_NAME }}" `
+          -Version "${{ steps.qa-version.outputs.result }}"
 
     - name: Release Testing Application
       uses: softprops/action-gh-release@v0.1.8
@@ -96,5 +107,5 @@ jobs:
         body: |
           ${{ env.PROJECT_NAME }} - ${{ env.RELEASE_NAME }} Release [${{ steps.qa-version.outputs.result }}](https://github.com/KinsonDigital/${{ env.PROJECT_NAME }}/tree/${{ steps.qa-version.outputs.result }})
           Execute the testing application in the **_${{ env.PROJECT_NAME }}-TestingApp-${{ steps.qa-version.outputs.result }}.zip_** file to perform manual testing.
-        files: ${{ github.workspace }}/${{ env.PROJECT_NAME }}-${{ steps.qa-version.outputs.result }}.zip
+        files: ${{ github.workspace }}/${{ env.PROJECT_NAME }}-TestingApp-${{ steps.qa-version.outputs.result }}.zip
         prerelease: true
