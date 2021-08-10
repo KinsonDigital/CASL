@@ -113,5 +113,5 @@ jobs:
         body: |
           ${{ env.PROJECT_NAME }} - ${{ env.RELEASE_NAME }} Release [v${{ steps.prev-version.outputs.version }}](https://github.com/KinsonDigital/${{ env.PROJECT_NAME }}/tree/v${{ steps.prev-version.outputs.version }})
           Execute the testing application in the **_${{ env.PROJECT_NAME }}-TestingApp-v${{ steps.prev-version.outputs.version }}.zip_** file to perform manual testing.
-        files: ${{ env.PROJECT_NAME }}-TestingApp-v${{ steps.prev-version.outputs.version }}.zip
+        files: ${{ env.PROJECT_NAME }}-TestingApp-${{ steps.prev-version.outputs.version }}.zip
         prerelease: true

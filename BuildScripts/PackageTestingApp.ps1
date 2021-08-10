@@ -24,4 +24,5 @@ dotnet.exe publish "$($Workspace)/Testing/$($ProjectName)Testing/$($ProjectName)
 Write-Host "Packaging Testing Application . . .";
 Compress-Archive -Path $destBaseDirPath -DestinationPath $testingAppPackagePath -Force;
 
-Write-Host "\nTesting Application Path: $($testingAppPackagePath)";
+Write-Host "";
+Write-Host "Testing Application Path: $($testingAppPackagePath)";

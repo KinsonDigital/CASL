@@ -1,4 +1,4 @@
-name: Build/Test/Release (Production)
+name: 🚀Production Release
 
 env:
   PROJECT_NAME: CASL
@@ -71,7 +71,6 @@ jobs:
         relative-file-path: '${{ env.PROJECT_NAME }}/${{ env.PROJECT_NAME }}.csproj'
         github-token: ${{ secrets.GITHUB_TOKEN }}
     
-    # DISABLE ME FOR WORKFLOW TESTING
     - name: Publish Nuget Package
       run: dotnet nuget push "${{ github.workspace }}/KinsonDigital.${{ env.PROJECT_NAME }}.${{ steps.prod-version.outputs.version }}.nupkg" --api-key ${{ secrets.NUGET_ORG_API_KEY }} --source https://api.nuget.org/v3/index.json
 
@@ -90,9 +89,6 @@ jobs:
     - name: Restore Dependencies
       run: dotnet restore "${{ github.workspace }}/Testing/${{ env.PROJECT_NAME }}Testing/${{ env.PROJECT_NAME }}Testing.csproj"
 
-    - name: Build
-      run: dotnet publish "${{ github.workspace }}/Testing/${{ env.PROJECT_NAME }}Testing/${{ env.PROJECT_NAME }}Testing.csproj" -c ${{ env.BUILD_CONFIG }} -o ./${{ env.RELEASE_NAME }}Release --no-restore
-
     - name: Get Version From Project File
       id: prod-version
       uses: KinsonDigital/vget@v0.4.0
@@ -102,8 +98,12 @@ jobs:
         relative-file-path: '${{ env.PROJECT_NAME }}/${{ env.PROJECT_NAME }}.csproj'
         github-token: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Zip Release
-      run: Compress-Archive -Path "./${{ env.RELEASE_NAME }}Release" -DestinationPath "${{ github.workspace }}/${{ env.PROJECT_NAME }}-TestingApp-${{ steps.prod-version.outputs.version }}.zip"
+    - name: Package Testing App
+      run: |
+        ${{ github.workspace }}/BuildScripts/PackageTestingApp.ps1 -Workspace "${{ github.workspace }}" `
+          -ProjectName "${{ env.PROJECT_NAME }}" `
+          -ReleaseName "${{ env.RELEASE_NAME }}" `
+          -Version "${{ steps.prod-version.outputs.version }}"
 
     - name: Release Testing Application
       uses: softprops/action-gh-release@v0.1.8
