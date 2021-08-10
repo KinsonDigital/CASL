@@ -7,15 +7,15 @@
 
 <div align="center">
 
-[![codecov](https://codecov.io/gh/KinsonDigital/CASL/branch/feature/master/graph/badge.svg?token=gkqbQI7oCM)](https://codecov.io/gh/KinsonDigital/CASL)
-[![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.0-4baaaa.svg)](code_of_conduct.md)
+![](https://img.shields.io/github/workflow/status/KinsonDigital/CASL/%F0%9F%9A%80Preview%20Release?label=QA%20Release%20%F0%9F%9A%80&logo=GitHub&style=plastic)
+![](https://img.shields.io/github/workflow/status/KinsonDigital/CASL/%F0%9F%9A%80Preview%20Release?label=Preview%20Release%20%F0%9F%9A%80&logo=GitHub&style=plastic)
+![](https://img.shields.io/github/workflow/status/KinsonDigital/CASL/%F0%9F%9A%80Production%20Release?label=Production%20Release%20%F0%9F%9A%80&logo=GitHub&style=plastic)
 
-[![Build-QA](https://github.com/KinsonDigital/CASL/actions/workflows/qa-release.yml/badge.svg)](https://github.com/KinsonDigital/CASL/actions/workflows/main.yml)
-[![Build-Preview](https://github.com/KinsonDigital/CASL/actions/workflows/prev-release.yml/badge.svg)](https://github.com/KinsonDigital/CASL/actions/workflows/main.yml)
-[![Build-Production](https://github.com/KinsonDigital/CASL/actions/workflows/prod-release.yml/badge.svg)](https://github.com/KinsonDigital/CASL/actions/workflows/main.yml)
+![](https://img.shields.io/codecov/c/github/KinsonDigital/CASL/master?label=Code%20Coverage&logo=CodeCov&style=plastic)
+[![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.0-4baaaa.svg?style=plastic)](code_of_conduct.md)
 
+![](https://img.shields.io/nuget/v/KinsonDigital.CASL?logo=nuget&style=plastic)
 
-[![nuget-package](https://img.shields.io/badge/nuget-windows-orange)](asdf)
 </div>
 
 Pronounced *Castle*, **CASL** is an acronym for (C)ross-platform (A)udio and (S)ound (L)ibrary
