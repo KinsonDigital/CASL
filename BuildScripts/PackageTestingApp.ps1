@@ -1,8 +1,25 @@
-param([string]$Workspace, [string]$ProjectName, [string]$ReleaseName, [string]$Version);
+param([string]$Workspace,
+      [string]$ProjectName,
+      [string]$BuildConfig,
+      [string]$ReleaseName,
+      [string]$Version);
 
 [string]$srcBaseDirPath = "$($Workspace)/$($ProjectName)/OpenAL/libs/";
-[string]$destBaseDirPath = "$($Workspace)/Testing/ProductionRelease/";
+[string]$destBaseDirPath = "$($Workspace)/Testing/$($ReleaseName)Release/";
 [string]$winOpenALLibName = "soft_oal.dll";
+
+# Print out param values for logging/debugging purposes
+Write-Host "Workspace Dir Path: $($Workspace)";
+Write-Host "Project Name: $($ProjectName)";
+Write-Host "Build Configuration: $($BuildConfig)";
+Write-Host "Release Name: $($ReleaseName)";
+Write-Host "Version: $($Version)";
+
+# Verify that the build config is only 'Debug' or 'Release'
+if ($BuildConfig -ne "Debug" -and $BuildConfig -ne "Release") {
+    Write-Host "The build config parameter must be either 'Debug' or 'Release'"
+    exit 1
+}
 
 # Create required runtimes directories
 Write-Host "Copying native libraries . . .";
@@ -16,7 +33,7 @@ Copy-Item -Path "$($srcBaseDirPath)win-x86/$($winOpenALLibName)" -Destination "$
 Copy-Item -Path "$($srcBaseDirPath)linux-x64/libopenal.so.1" -Destination "$($destBaseDirPath)/runtimes/linux-x64/native/" -Recurse -Force;
 
 # Publish Testing Application
-dotnet.exe publish "$($Workspace)/Testing/$($ProjectName)Testing/$($ProjectName)Testing.csproj" -c Debug -o "$($Workspace)/Testing/$($ReleaseName)Release/" --no-restore;
+dotnet.exe publish "$($Workspace)/Testing/$($ProjectName)Testing/$($ProjectName)Testing.csproj" -c $($BuildConfig) -o "$($Workspace)/Testing/$($ReleaseName)Release/" --no-restore;
 
 [string]$testingAppPackagePath = "$($Workspace)/$($ProjectName)-TestingApp-$($Version).zip";
 
