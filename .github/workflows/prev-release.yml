@@ -22,9 +22,40 @@ on:
       - '.vscode/**'
 
 jobs:
+  Validate_Version_Syntax:
+    name: Validate Version Syntax
+    runs-on: windows-latest
+    environment: preview
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Get Version From Project File
+      id: prev-version
+      uses: KinsonDigital/vget@v0.4.0
+      with:
+        repo-owner-and-name: '${{ github.repository }}'
+        branch: '${{ github.ref }}'
+        relative-file-path: '${{ env.PROJECT_NAME }}/${{ env.PROJECT_NAME }}.csproj'
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Validate Preview Version Value
+      uses: actions/github-script@v4
+      with:
+        script: |
+          const script = require('./.github/workflows/status-check-scripts/prev-version-status-check.js');
+          let version = '${{ steps.prev-version.outputs.version }}';
+          let scriptResult = script({version});
+
+          if (scriptResult.failed === true) {
+            core.setFailed(scriptResult.error);
+          } else {
+            console.log(`The version 'v${version}' is valid!!`);
+          }
+
   Library_Build_And_Test:
     name: Build & Test (Library)
     runs-on: windows-latest
+    needs: Validate_Version_Syntax
     environment: preview
     steps:
     - uses: actions/checkout@v2
@@ -78,6 +109,7 @@ jobs:
   Build_And_Release_Testing_App:
     name: Build & Release (Testing App)
     runs-on: windows-latest
+    needs: Validate_Version_Syntax
     environment: preview
     steps:
     - uses: actions/checkout@v2
@@ -107,7 +139,7 @@ jobs:
           -Version "${{ steps.prev-version.outputs.version }}"
 
     - name: Release Testing Application
-      uses: softprops/action-gh-release@v0.1.8
+      uses: softprops/action-gh-release@v0.1.12
       with:
         tag_name: v${{ steps.prev-version.outputs.version }}
         body: |
