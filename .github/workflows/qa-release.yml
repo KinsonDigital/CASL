@@ -98,7 +98,7 @@ jobs:
           -Version "${{ steps.qa-version.outputs.result }}"
 
     - name: Release Testing Application
-      uses: softprops/action-gh-release@v0.1.8
+      uses: softprops/action-gh-release@v0.1.12
       with:
         tag_name: ${{ steps.qa-version.outputs.result }}
         body: |
