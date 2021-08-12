@@ -13,16 +13,6 @@ This pull request performs a production release for version **_[add version here
 
 ---
 
-## Optional Checklist:
-- [ ] Bug Fix (non-breaking change which fixes an issue)
-- [ ] Breaking change (fix or feature that would cause existing functionality to change)
-- [ ] My change requires a change to the documentation.
-- [ ] I have added tests to cover my changes.
-  - [ ] I have updated the documentation accordingly.
-  - [ ] If changes to documentation have been made, the PR contains the **documentation** label.
-
----
-
 ## Required Checklist (All Must Be Reviewed And Checked):
 <!-- Go over all the following points, and put an `x` in all the boxes that apply. -->
 <!-- If you're unsure about any of these, don't hesitate to ask. We're here to help! -->
@@ -30,8 +20,9 @@ This pull request performs a production release for version **_[add version here
   * **Example:** 🚀Release To Production - v1.2.3
 - [ ] The **_[add version here]_** text in the PR description replaced with the version.
 - [ ] Issue[s] exists and is linked to this PR.
-- [ ] This PR is only for bringing changes from a **_version-release_** branches into a the **_master_** branch
-    - 💡 A **_version-release_** branch is the branch used for preview releases and has a syntax of **_release/v1.2.3_**
+- [ ] This PR is only for bringing changes from a **_version branch_** into a the **_master_** branch
+    - 💡 A **_version_** branch is the branch used for production releases and has a syntax of **_release/v\*.\*.\*_**
+      - **Example:** release/v1.2.3
 - [ ] My code follows the code style of this project.
 - [ ] All tests passed locally.
   - 💡 Status checks are put in place to run unit tests every single time a change is pushed to a PR.  This does not mean that the tests pass in both the local and CI environment.
