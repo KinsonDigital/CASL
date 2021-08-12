@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
   pull_request:
     types: [ synchronize ]
-    branches: [ preview/v*.*.*-preview.* ]
+    branches: [ release/v*.*.* ]
     paths-ignore:
       - ".github/**"
       - 'Documentation/**'

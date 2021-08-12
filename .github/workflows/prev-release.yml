@@ -109,7 +109,6 @@ jobs:
         branch: '${{ github.ref }}'
         relative-file-path: '${{ env.PROJECT_NAME }}/${{ env.PROJECT_NAME }}.csproj'
         github-token: ${{ secrets.GITHUB_TOKEN }}
-        contains: '-preview.'
     
     - name: Publish Nuget Package
       run: dotnet nuget push "${{ github.workspace }}/KinsonDigital.${{ env.PROJECT_NAME }}.${{ steps.prev-version.outputs.version }}.nupkg" --api-key ${{ secrets.NUGET_ORG_API_KEY }} --source https://api.nuget.org/v3/index.json

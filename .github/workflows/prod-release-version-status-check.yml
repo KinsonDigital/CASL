@@ -25,7 +25,7 @@ jobs:
         relative-file-path: '${{ env.PROJECT_NAME }}/${{ env.PROJECT_NAME }}.csproj'
         github-token: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Validate Production Version Value
+    - name: Validate Production Version
       uses: actions/github-script@v4
       with:
         script: |
