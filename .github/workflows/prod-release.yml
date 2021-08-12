@@ -52,6 +52,14 @@ jobs:
             console.log(`The version 'v${version}' is valid!!`);
           }
 
+    - name: Check For Nuget Package
+      id: nuget-check
+      uses: KinsonDigital/NugetVersionChecker@v0.1.0
+      with:
+        nuget-package-name: KinsonDigital.${{ env.PROJECT_NAME }}
+        version: ${{ steps.prod-version.outputs.version }}
+        fail-if-version-exists: true
+
   Library_Build_And_Test:
     name: Build & Test (Library)
     runs-on: windows-latest
