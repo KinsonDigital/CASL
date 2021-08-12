@@ -135,6 +135,7 @@ jobs:
         ${{ github.workspace }}/BuildScripts/PackageTestingApp.ps1 -Workspace "${{ github.workspace }}" `
           -ProjectName "${{ env.PROJECT_NAME }}" `
           -ReleaseName "${{ env.RELEASE_NAME }}" `
+          -BuildConfig "${{ env.BUILD_CONFIG }}" `
           -Version "${{ steps.prod-version.outputs.version }}"
 
     - name: Release Testing Application
