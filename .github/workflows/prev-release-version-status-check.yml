@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
   pull_request:
     types: [ synchronize ]
-    branches: [ release/* ]
+    branches: [ release/v*.*.* ]
 
 jobs:
   Prev_Version_Status_Check:
@@ -25,7 +25,7 @@ jobs:
         relative-file-path: '${{ env.PROJECT_NAME }}/${{ env.PROJECT_NAME }}.csproj'
         github-token: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Validate Preview Version Value
+    - name: Validate Preview Version
       uses: actions/github-script@v4
       with:
         script: |
