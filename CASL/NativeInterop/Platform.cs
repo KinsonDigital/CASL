@@ -146,7 +146,7 @@ namespace CASL.NativeInterop
             }
             else if (IsPosixPlatform())
             {
-                return NativeMethods.dlerror_POSIX().ToManagedUTF8String();
+                return ((IntPtr)NativeMethods.dlerror_POSIX()).ToManagedUTF8String();
             }
             else
             {

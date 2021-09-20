@@ -4,6 +4,7 @@
 
 namespace CASL.NativeInterop
 {
+    using System;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
     using System.Linq;
@@ -19,12 +20,12 @@ namespace CASL.NativeInterop
         /// </summary>
         /// <param name="ptrToStringData">The string to convert.</param>
         /// <returns>The string data pointed to by the <see langword="nint"/>.</returns>
-        public static string ToManagedUTF8String(this nint ptrToStringData)
+        public static string ToManagedUTF8String(this IntPtr ptrToStringData)
         {
             var result = string.Empty;
 
             // NOTE: Use to have a default parameter like this => bool freePtr = false
-            if (ptrToStringData == 0)
+            if (ptrToStringData == IntPtr.Zero)
             {
                 return result;
             }
