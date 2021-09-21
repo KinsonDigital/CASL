@@ -1,3 +1,0 @@
-- Make sure you have at the **.NET 5 SDK** installed.
-- Clone the repository
-- Building using **Visual Studio** or **NET CLI**
