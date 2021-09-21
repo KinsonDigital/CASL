@@ -1,5 +1,4 @@
-
-# Linux Development Setup
+<h1 style="font-weight:bold" align="center">Linux Development Environment Setup</h1>
 
 Setting up the development environment is not as easy with linux systems as it is for windows.  There are many different ways to go about this and I am not an expert on this.  The instructions below are how I went about setting up **Ubuntu** as a development environment so I could do testing on a linux machine.  Recommendations on how to improve are welcome!!
 
@@ -18,7 +17,7 @@ Setting up the development environment is not as easy with linux systems as it i
 
 When setting up a linux environment, there are some options.  At first I started using **WSL2** but ran into issues when I actually wanted to run the **CASLTesting** project so I could actually hear sound being played.  This did not work because **WSL2** does not have access to the sound hardware.  There are ways to go about this but my investigations and attempts failed.
 
-This is why I decided to just install **VirtualBox** so I could run the the linux **Ubuntu** OS which would give me the sound hardware and a more productive development experience for running and testing the library.  You can absolutely use whatever you want such as **HyperV**, **WSL2**(If you can get sound working), or even other supported linux operating systems that work for **NET 5.0**.  You can of course just have a real installation on another machine of the required linux OS.
+This is why I decided to just install **VirtualBox** so I could run the the linux **Ubuntu** OS which would give me the sound hardware and a more productive development experience for running and testing the library.  You can absolutely use whatever you want such as **HyperV**, **WSL2** (If you can get sound working), or even other supported linux operating systems that work for **NET 5.0**.  You can of course just have a real installation on another machine of the required linux OS.
 
 This is what I did to set everything up.
 
@@ -39,3 +38,10 @@ This is what I did to set everything up.
    * After the above commands are finished, you should be able to enter the command `dotnet` and get appropriate output verifying that dotnet has been installed
 6. Install **GIT** by entering the command below
    * `sudo apt-get install git`
+
+
+<div align="right">
+
+   [< Windows Dev Env Setup](./WindowsDevEnvSetup.md) | [Branching >](./../Branching.md)
+   <br/>
+</div>
