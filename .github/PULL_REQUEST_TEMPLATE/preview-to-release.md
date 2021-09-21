@@ -1,40 +1,20 @@
-<!-- Provide a short general summary of your changes in the Title above -->
-
-## Develop PR Description
-<!-- Describe your changes in detail -->
-
----
-
-## Related Issue
-<!-- This project only accepts pull requests related to open issues -->
-<!-- If suggesting a new feature or change, please discuss it in an issue first -->
-<!-- If fixing a bug, there should be a description with steps to reproduce in the linked issue -->
-<!-- Please provide a link to the issue here and the issue should be linked to the pull request -->
-
----
-
-## Motivation and Context
-<!-- Why is this change required? What problem does it solve? -->
-
----
-
-## How Has This Been Manually Tested?
-<!-- Please describe in detail how you tested your changes. -->
 <!--
-    Include details of your testing environment, and the tests you ran to
-    see how your change affects other areas of the code, etc.
-    This can also include testing using the testing application included in the solution
+    !! NOTE !! - ONLY PROJECT OWNERS AND MAINTAINERS MANAGE PRODUCTION AND PREVIEW RELEASE PULL REQUESTS
+    If you have contributions to make, use the "feature-to-develop" pull request template.
 -->
 
----
+<!-- Provide a short general summary of your changes in the Title above -->
+## Preview Release PR Description
+This pull request performs a preview release for version **_[add version here]_**
 
-## Screenshots (if appropriate):
+## How Has This Been Tested?
+- [ ] Testing Application (Manual)
+- [ ] No Testing Required
 
 ---
 
 ## Development Checklist:
 **Types Of Changes:**
-<!-- What types of changes does your code introduce? Put an `x` in all the boxes that apply: -->
 - [ ] Bug Fix(es)
   - [ ] A **_bug_** label has been added to the PR
 - [ ] Contains breaking change(s)
@@ -57,14 +37,24 @@
 
 ---
 
-## PR Checklist
+## Review Checklist:
 <!-- Go over all the following points, and put an `x` in all the boxes that apply. -->
 <!-- If you're unsure about any of these, don't hesitate to ask. We're here to help! -->
-- [ ] I have read the **CONTRIBUTING** document.
-- [ ] An issue exists and is linked to this PR.
-- [ ] This PR is only for bringing changes from ***feature*** branches into the ***develop*** branch
+- [ ] PR title matches the example below with the correct version
+  * 💡 **Example:** 🚀Release To Preview - v1.2.3-preview.4
+- [ ] The **_[add version here]_** text in the PR description replaced with the version.
+- [ ] Issue[s] exists and is linked to this PR.
 - [ ] My code follows the coding style of this project.
   - 💡 This is enforced by the *.editorconfig* files in the project and displayed as warnings.  If there is an edge case with coding style that should be ignored or changed, reach out and lets discuss it.
-- [ ] I have written unit tests to cover my changes.
-- [ ] All unit tests passed locally.
+- [ ] All tests passed locally.
   - 💡 Status checks are put in place to run unit tests every single time a change is pushed to a PR.  This does not mean that the tests pass in both the local and CI environment.
+- [ ] Update library version by updating the **_\<Version/\>_** and **_\<FileVersion/\>_** tags in the **_Velaptor_** **_.csproj_** file.
+  - 💡 Every change to a PR will run a status check to confirm that the version has the correct syntax, a tag does not exist, and that it has not already been published to nuget.org
+  - 💡 Make sure to add the **_-preview.\<number\>_** syntax to the end of the version
+    - **Example:**
+      ``` html
+      <Version>1.2.3-preview.4</Version>
+      <FileVersion>1.2.3-preview.4</FileVersion>
+      ```
+- [ ] I have updated the release notes by creating a new preview release notes file and adding it to the **_./Documentation/ReleaseNotes/PreviewReleases_** folder
+- [ ] A **_preview_** label has been added to the PR
