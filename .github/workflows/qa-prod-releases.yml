@@ -1,16 +1,28 @@
-name: 🚀Preview Release
+name: 🚀QA/Prod Release
 
 
 env:
   PROJECT_NAME: CASL
-  BUILD_CONFIG: Debug
   NET_SDK_VERSION: 5.0.x # Changing this means changing ARTIFACT_FOLDER_NAME
   ARTIFACT_FOLDER_NAME: '5.0' # Changing this means changing NET_SDK_VERSION
-  SHOULD_SEND_TWEET: ${{ secrets.TWITTER_BROADCAST_ENABLED }}
-  
+
 
 on:
-  workflow_dispatch: # Preview releases are only done manually
+  workflow_dispatch:
+  push:
+    branches: [
+      develop, # QA Releases
+      master # Production Releases
+    ]
+    paths-ignore:
+      - ".github/**"
+      - 'Documentation/**'
+      - '.editorconfig'
+      - '*.runsettings'
+      - '.gitattributes'
+      - '.gitignore'
+      - '*.md'
+      - '.vscode/**'
 
 
 jobs:
@@ -34,11 +46,11 @@ jobs:
       run: |
         $projFileVersion = "${{ steps.proj-file-version.outputs.version }}";
 
-        # If the version is not a preview type, fail
-        if ($projFileVersion.Contains("-preview.") -eq $false)
+        # Fail if the version is not a preview type and this is a production release
+        if ($projFileVersion.Contains("-preview.") -and "${{ github.ref }}".EndsWith("master"))
         {
-            echo "The version must be a preview version type for a preview release.";
-            echo "Valid Version Example: v1.2.3-preview.4";
+            echo "The version '${{ steps.proj-file-version.outputs.version }}' must not be a preview version type for QA and Production releases.";
+            echo "Valid Version Example: v1.2.3";
 
             exit 1 # Fail
         }
@@ -51,7 +63,7 @@ jobs:
         version: "${{ steps.proj-file-version.outputs.version }}"
         check-nuget: "true"
         fail-if-nuget-version-exists: "true"
-
+      
 
   Validate_Branch:
     name: Validate Branch
@@ -60,13 +72,30 @@ jobs:
     # TODO: Replace this with the new upcoming branch validation github action
     - name: Validate Branch Name
       run: |
-        echo "I am disabled"
-        # # If the branch is not a release branch, fail the workflow
-        # if ("${{ github.ref }}".Contains("release/v") -eq $false)
-        # {
-        #   echo "Preview releases can only be performed with 'release/v*.*.*' branches."
-        #   exit 1 # Fail
-        # }
+        # If the branch is not a 'develop' or 'master' branch, fail the workflow
+        if ("${{ github.ref }}".EndsWith("develop") -eq $false -and "${{ github.ref }}".EndsWith("master") -eq $false)
+        {
+          echo "QA releases can only be performed with the 'develop' branch."
+          echo "Production releases can only be performed with the 'master' branch."
+          exit 1 # Fail
+        }
+
+
+  Determine_Build_Config:
+    name: Determine Build Config
+    runs-on: windows-latest
+    steps:
+    - name: Determine Build Config
+      id: determine_build_config
+      run: |
+        # If the branch ends with master, the build config is release
+        if ("${{ github.ref }}".EndsWith("master")) {
+          echo "::set-output name=build-config::Release"
+        } else { # Build config for any other branch is debug
+          echo "::set-output name=build-config::Debug"
+        }
+    outputs:
+      build-config: ${{ steps.determine_build_config.outputs.build-config }}
 
 
   Validate_Release_Notes_Exist:
@@ -87,20 +116,26 @@ jobs:
     - name: Check For Release Notes
       run: |
         [string]$version = "${{ steps.proj-file-version.outputs.version }}";
-        [string]$filePath = "${{ github.workspace }}\Documentation\ReleaseNotes\PreviewReleases\Release-Notes-v$version.md";
-
-        if (-not([System.IO.File]::Exists($filePath))) {
-          Write-Host "A preview release notes file '$filePath' does not exist.";
-          Write-Host "You must add release notes for preview releases.";
-
+        [string]$filePath = "${{ github.workspace }}\Documentation\ReleaseNotes\ProductionReleases\Release-Notes-v$version.md";
+        
+        # If the branch is master (prod) and the release notes don't exist, fail the job
+        if ("${{ github.ref }}" -eq "master" -and -not([System.IO.File]::Exists($filePath))) {
+          Write-Host "A production release notes file '$filePath' does not exist.";
+          Write-Host "You must add release notes for production releases.";
+        
           exit 1 # Fail
-        }      
+        }
 
 
   Build_And_Test_Library:
     name: Build & Test (Library)
     runs-on: windows-latest
-    needs: [ Validate_Version, Validate_Branch, Validate_Release_Notes_Exist ]
+    needs: [
+      Validate_Version,
+      Validate_Branch,
+      Determine_Build_Config,
+      Validate_Release_Notes_Exist
+    ]
     steps:
     - uses: actions/checkout@v2
 
@@ -120,6 +155,7 @@ jobs:
 
     - name: Display Workflow Info
       run: |
+        echo "Build Config: ${{ needs.Determine_Build_Config.outputs.build-config }}"
         echo "Current Branch: ${{ github.ref }}"
         echo "Project File Version: ${{ steps.proj-file-version.outputs.version }}"
 
@@ -128,12 +164,12 @@ jobs:
 
     - name: Build
       run: dotnet build "${{ github.workspace }}/${{ env.PROJECT_NAME }}/${{ env.PROJECT_NAME }}.csproj" `
-        -c ${{ env.BUILD_CONFIG }} `
+        -c ${{ needs.Determine_Build_Config.outputs.build-config }} `
         --no-restore
 
     - name: Execute Unit Tests
       run: dotnet test "${{ github.workspace }}/Testing/${{ env.PROJECT_NAME }}Tests/${{ env.PROJECT_NAME }}Tests.csproj" `
-        -c ${{ env.BUILD_CONFIG }} `
+        -c ${{ needs.Determine_Build_Config.outputs.build-config }} `
         --collect:"XPlat Code Coverage" `
         --no-restore
 
@@ -147,7 +183,7 @@ jobs:
       uses: actions/upload-artifact@v2.2.3
       with:
         name: ${{ env.PROJECT_NAME }} Build Artifacts
-        path: ${{ github.workspace }}/${{ env.PROJECT_NAME }}/bin/${{ env.BUILD_CONFIG }}/net${{ env.ARTIFACT_FOLDER_NAME }}
+        path: ${{ github.workspace }}/${{ env.PROJECT_NAME }}/bin/${{ needs.Determine_Build_Config.outputs.build-config }}/net${{ env.ARTIFACT_FOLDER_NAME }}
         error: There was an issue uploading the build artifact
 
     - name: Setup Nuget
@@ -156,19 +192,24 @@ jobs:
     - name: Create Nuget Package
       run: dotnet pack "${{ github.workspace }}/${{ env.PROJECT_NAME }}/${{ env.PROJECT_NAME }}.csproj" `
         -o "${{ github.workspace }}" `
-        -c ${{ env.BUILD_CONFIG }}
+        -c ${{ needs.Determine_Build_Config.outputs.build-config }}
    
     - name: Publish Nuget Package
-      run: echo "Nuget Package Published!! (FAKE)"
-      # run: dotnet nuget push "${{ github.workspace }}/KinsonDigital.${{ env.PROJECT_NAME }}.${{ steps.proj-file-version.outputs.version }}.nupkg" `
-      #   --api-key ${{ secrets.NUGET_ORG_API_KEY }} `
-      #   --source https://api.nuget.org/v3/index.json
+      if: endsWith(github.ref, 'master')
+      run: echo "Publish Nuget Package Step Invoked"
+      run: dotnet nuget push "${{ github.workspace }}/KinsonDigital.${{ env.PROJECT_NAME }}.${{ steps.proj-file-version.outputs.version }}.nupkg" `
+        --api-key ${{ secrets.NUGET_ORG_API_KEY }} `
+        --source https://api.nuget.org/v3/index.json
 
-    
+
   Build_And_Release_Testing_App:
     name: Build & Release (Testing App)
     runs-on: windows-latest
-    needs: [ Validate_Version, Validate_Branch, Validate_Release_Notes_Exist ]
+    needs: [
+      Validate_Version,
+      Validate_Branch,
+      Determine_Build_Config,
+      Validate_Release_Notes_Exist ]
     steps:
     - uses: actions/checkout@v2
 
@@ -181,6 +222,23 @@ jobs:
         relative-file-path: '${{ env.PROJECT_NAME }}/${{ env.PROJECT_NAME }}.csproj'
         github-token: ${{ secrets.GITHUB_TOKEN }}
 
+    - name: Determine Release Type
+      id: determine_release_type
+      run: |
+        echo "Branch: ${{ github.ref }}"
+
+        # If the branch is master, then set the release type to production
+        if ("${{ github.ref }}".EndsWith("master"))
+        {
+          echo "::set-output name=is-prerelease::false";
+          echo "::set-output name=release-type::Production";
+        }
+        elseif ("${{ github.ref }}".EndsWith("develop"))
+        { # If the branch is the develop branch, set the release type to qa
+          echo "::set-output name=is-prerelease::true";
+          echo "::set-output name=release-type::QA";
+        }
+
     - name: Setup .NET SDK
       uses: actions/setup-dotnet@v1
       with:
@@ -192,27 +250,39 @@ jobs:
     - name: Build Testing App
       run: |
         dotnet publish "${{ github.workspace }}/Testing/${{ env.PROJECT_NAME }}Testing/${{ env.PROJECT_NAME }}Testing.csproj" `
-          -c ${{ env.BUILD_CONFIG }} `
-          -o "${{ github.workspace }}/Testing/PreviewRelease/" `
+          -c ${{ needs.Determine_Build_Config.outputs.build-config }} `
+          -o "${{ github.workspace }}/Testing/${{ steps.determine_release_type.outputs.release-type }}Release/" `
           --no-restore `
 
     - name: Package Testing App
       run: |
-        Compress-Archive -Path "${{ github.workspace }}/Testing/PreviewRelease" `
+        Compress-Archive -Path "${{ github.workspace }}/Testing/${{ steps.determine_release_type.outputs.release-type }}Release" `
           -DestinationPath "${{ github.workspace }}/${{ env.PROJECT_NAME }}-TestingApp-v${{ steps.proj-file-version.outputs.version }}.zip" `
           -Force
 
-    - name: Release Testing Application
-      uses: softprops/action-gh-release@v0.1.13
+    - name: Release Testing Application (QA)
+      if: github.ref == 'develop'
+      uses: softprops/action-gh-release@v0.1.12
       with:
         tag_name: v${{ steps.proj-file-version.outputs.version }}
         body: |
-          ${{ env.PROJECT_NAME }} - Preview Release [v${{ steps.proj-file-version.outputs.version }}](https://github.com/KinsonDigital/${{ env.PROJECT_NAME }}/tree/v${{ steps.proj-file-version.outputs.version }})
+          ${{ env.PROJECT_NAME }} - ${{ steps.determine_release_type.outputs.release-type }} Release
+          Execute the testing application in the **_${{ env.PROJECT_NAME }}-TestingApp-v${{ steps.proj-file-version.outputs.version }}.zip_** file to perform manual testing.
+        files: ${{ env.PROJECT_NAME }}-TestingApp-v${{ steps.proj-file-version.outputs.version }}.zip
+        prerelease: ${{ steps.determine_release_type.outputs.is-prerelease }}
+
+    - name: Release Testing Application (Production)
+      if: github.ref == 'master'
+      uses: softprops/action-gh-release@v0.1.12
+      with:
+        tag_name: v${{ steps.proj-file-version.outputs.version }}
+        body: |
+          ${{ env.PROJECT_NAME }} - ${{ steps.determine_release_type.outputs.release-type }} Release
           Execute the testing application in the **_${{ env.PROJECT_NAME }}-TestingApp-v${{ steps.proj-file-version.outputs.version }}.zip_** file to perform manual testing.
         files: |
           ${{ env.PROJECT_NAME }}-TestingApp-v${{ steps.proj-file-version.outputs.version }}.zip
-          ${{ github.workspace }}\Documentation\ReleaseNotes\PreviewReleases\Release-Notes-v${{ steps.proj-file-version.outputs.version }}.md
-        prerelease: true
+          ${{ github.workspace }}\Documentation\ReleaseNotes\ProductionReleases\Release-Notes-v${{ steps.proj-file-version.outputs.version }}.md
+        prerelease: ${{ steps.determine_release_type.outputs.is-prerelease }}
 
 
   Broadcast_To_Social_Media:
@@ -222,8 +292,7 @@ jobs:
       Validate_Version,
       Validate_Branch,
       Build_And_Test_Library,
-      Build_And_Release_Testing_App,
-      Validate_Release_Notes_Exist
+      Build_And_Release_Testing_App
     ]
     steps:
     - name: Get Version From Project File
@@ -238,10 +307,8 @@ jobs:
     - name: Determine Tweet Broadcast
       id: determine_tweet_broadcast
       run: |
-        echo "Branch: ${{ github.ref }}";
-
         if ("${{ secrets.TWITTER_BROADCAST_ENABLED }}" -eq "true" -and `
-            "${{ github.ref }}".Contains("release/v")) {
+            "${{ github.ref }}".EndsWith("master")) {
           echo "::set-output name=broadcast-tweet::true";
         } else {
           echo "::set-output name=broadcast-tweet::false";
