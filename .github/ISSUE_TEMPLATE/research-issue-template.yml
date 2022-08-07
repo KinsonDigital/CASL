@@ -81,9 +81,9 @@ body:
       
       | Priority Type       | Label                                                              |
       |---------------------|--------------------------------------------------------------------|
-      | Low Priority        | https://github.com/KinsonDigital/Velaptor/labels/low%20priority    |
-      | Medium Priority     | https://github.com/KinsonDigital/Velaptor/labels/medium%20priority |
-      | High Priority       | https://github.com/KinsonDigital/Velaptor/labels/high%20priority   |
+      | Low Priority        | https://github.com/KinsonDigital/CASL/labels/low%20priority    |
+      | Medium Priority     | https://github.com/KinsonDigital/CASL/labels/medium%20priority |
+      | High Priority       | https://github.com/KinsonDigital/CASL/labels/high%20priority   |
       </details>
 
 - type: checkboxes

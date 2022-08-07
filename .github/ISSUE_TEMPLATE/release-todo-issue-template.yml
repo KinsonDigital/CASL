@@ -40,11 +40,11 @@ body:
     label: Post-Release ToDo List
     description: Verify that release went smoothly.
     options:
-    - label: The release displayed in [GitHub Releases](https://github.com/KinsonDigital/Velaptor/releases) is correct.    
-    - label: The [nuget package](https://www.nuget.org/packages/KinsonDigital.Velaptor/) has been successfully deployed to the public repository.
+    - label: The release displayed in [GitHub Releases](https://github.com/KinsonDigital/CASL/releases) is correct.    
+    - label: The [nuget package](https://www.nuget.org/packages/KinsonDigital.CASL/) has been successfully deployed to the public repository.
     - label: Announcement of release on [Twitter](https://twitter.com/KDCoder) verified. (Announcement should be performed automatically with the release)
     - label: Announcement has been pushed to [Ko-Fi](https://ko-fi.com/kinsondigital).
-    - label: Announcement has been pushed to the correct [GitHub Release Discussion Board](https://github.com/KinsonDigital/Velaptor/discussions/categories/releases).
+    - label: Announcement has been pushed to the correct [GitHub Release Discussion Board](https://github.com/KinsonDigital/CASL/discussions/categories/releases).
     - label: Announcement has been pushed to the Discord channel.
 
 
@@ -57,9 +57,9 @@ body:
       
       | Release Types         | Label Used                                                                             |
       |-----------------------|----------------------------------------------------------------------------------------|
-      | Preview Release       | https://github.com/KinsonDigital/Velaptor/labels/%F0%9F%9A%80Preview%20Release         |
-      | Production Release    | https://github.com/KinsonDigital/Velaptor/labels/%F0%9F%9A%80Production%20Release      |
-      | Hot Fix Release       | https://github.com/KinsonDigital/Velaptor/labels/%F0%9F%9A%80Hot%20Fix%20Release       |
+      | Preview Release       | https://github.com/KinsonDigital/CASL/labels/%F0%9F%9A%80Preview%20Release         |
+      | Production Release    | https://github.com/KinsonDigital/CASL/labels/%F0%9F%9A%80Production%20Release      |
+      | Hot Fix Release       | https://github.com/KinsonDigital/CASL/labels/%F0%9F%9A%80Hot%20Fix%20Release       |
       </details>
 
       ---
@@ -114,8 +114,8 @@ body:
       **_<details closed><summary>Release Execution</summary>_**
 
       The release is performed by running one of the release workflows below:
-      - [Preview Release](https://github.com/KinsonDigital/Velaptor/actions/workflows/preview-release.yml)
-      - [Production Release](https://github.com/KinsonDigital/Velaptor/actions/workflows/qa-prod-releases.yml)
+      - [Preview Release](https://github.com/KinsonDigital/CASL/actions/workflows/preview-release.yml)
+      - [Production Release](https://github.com/KinsonDigital/CASL/actions/workflows/qa-prod-releases.yml)
       </details>
   validations:
     required: true

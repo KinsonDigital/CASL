@@ -72,21 +72,21 @@ body:
       
       | Change Type         | Label                                                                                |
       |---------------------|--------------------------------------------------------------------------------------|
-      | Bug Fixes           | https://github.com/KinsonDigital/Velaptor/labels/%F0%9F%90%9Bbug                     |
-      | Breaking Changes    | https://github.com/KinsonDigital/Velaptor/labels/%F0%9F%A7%A8breaking%20changes      |
-      | New Feature         | https://github.com/KinsonDigital/Velaptor/labels/%E2%9C%A8new%20feature              |
-      | Workflow Changes    | https://github.com/KinsonDigital/Velaptor/labels/workflow                            |
-      | Code Doc Changes    | https://github.com/KinsonDigital/Velaptor/labels/%F0%9F%93%91documentation%2Fcode    |
-      | Product Doc Changes | https://github.com/KinsonDigital/Velaptor/labels/%F0%9F%93%9Ddocumentation%2Fproduct |
+      | Bug Fixes           | https://github.com/KinsonDigital/CASL/labels/%F0%9F%90%9Bbug                     |
+      | Breaking Changes    | https://github.com/KinsonDigital/CASL/labels/%F0%9F%A7%A8breaking%20changes      |
+      | New Feature         | https://github.com/KinsonDigital/CASL/labels/%E2%9C%A8new%20feature              |
+      | Workflow Changes    | https://github.com/KinsonDigital/CASL/labels/workflow                            |
+      | Code Doc Changes    | https://github.com/KinsonDigital/CASL/labels/%F0%9F%93%91documentation%2Fcode    |
+      | Product Doc Changes | https://github.com/KinsonDigital/CASL/labels/%F0%9F%93%9Ddocumentation%2Fproduct |
       </details>
 
       **_<details closed><summary>Priority Type Labels</summary>_**
       
       | Priority Type       | Label                                                              |
       |---------------------|--------------------------------------------------------------------|
-      | Low Priority        | https://github.com/KinsonDigital/Velaptor/labels/low%20priority    |
-      | Medium Priority     | https://github.com/KinsonDigital/Velaptor/labels/medium%20priority |
-      | High Priority       | https://github.com/KinsonDigital/Velaptor/labels/high%20priority   |
+      | Low Priority        | https://github.com/KinsonDigital/CASL/labels/low%20priority    |
+      | Medium Priority     | https://github.com/KinsonDigital/CASL/labels/medium%20priority |
+      | High Priority       | https://github.com/KinsonDigital/CASL/labels/high%20priority   |
       </details>
 
 - type: checkboxes
