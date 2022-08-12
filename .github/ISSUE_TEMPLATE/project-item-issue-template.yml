@@ -1,33 +1,29 @@
 name: 🚧 Project Item
-description: Create an issue for a project.  (Mostly for project maintainers)
-title: "🚧<title>"
+description: Create an issue for a project (Project maintainers only).
+title: "🚧"
 body:
 - type: checkboxes
   attributes:
-    label: I have done the items below . . .
-    description: Please make sure to do the items below.
+    label: Complete The Item Below
     options:
-    - label: I have updated the title by replacing the '**_<title_**>' section.
+    - label: I have updated the title without removing the 🚧 emoji.
       required: true
 
 - type: textarea
   attributes:
     label: Description
-    description: A description of feature/change in the user's perspective
+    description: A description of the feature and/or change.
   validations:
     required: true
 
 - type: textarea
   attributes:
     label: Acceptance Criteria
-    description: |
-      The list of items and checkboxes of things that need to be finished for the definition of done.
-      Add more items as needed . . .
-    value: |
-      **This issue is finished when:**
-      - [ ] Code documentation added if required
-      - [ ] Unit tests added
-      - [ ] All unit tests pass
+    placeholder: |
+      Example:
+        - [ ] Item 1 complete
+        - [ ] Item 2 complete
+    description: The items to complete in order to satisfy the Definition of Done.
   validations:
     required: true
     render: markdown
@@ -35,27 +31,23 @@ body:
 - type: checkboxes
   attributes:
     label: ToDo Items
-    description: Complete the following items before asking for a PR review
+    description: Complete the following items before requesting a PR review.
     options:
-    - label: Draft pull request created and linked to this issue
-    - label: Priority label added to issue (**_low priority_**, **_medium priority_**, or **_high priority_**)
-    - label: Issue linked to the proper project
-    - label: Issue linked to proper milestone
-    - label: Unit tests have been written and/or adjusted for code additions or changes
-    - label: All unit tests pass
+    - label: Change type labels added to this issue.  Refer to the _**Change Type Labels**_ section below.
+    - label: Priority label added to this issue.  Refer to the _**Priority Type Labels**_ section below.
+    - label: Issue linked to the correct project _(if required)_.
+    - label: Issue linked to the correct milestone _(if required)_.
+    - label: Draft pull request created and linked to this issue _(only required with code changes)_.
 
 - type: textarea
   attributes:
     label: Issue Dependencies
     placeholder: |
-      No Issue Dependencies
       Example:
-        #10 Create new class
-        #20 Add unit tests to service
-        #30 Cleanup code in UI
+        - #10
+        - #20
     description: |
-      A list of issues that are dependencies of this issue and need to be finishes first
-      Use the '#\<number\>' syntax to link to an issue
+      A list of issues that are dependencies of this issue and need to be completed first.
   validations:
     required: false
 
@@ -63,13 +55,45 @@ body:
   attributes:
     label: Related Work
     placeholder: |
-      No Related Work Items Added
       Example:
-        - #10 Create new class
-        - #20 Add unit tests to service
-        - #30 Cleanup code in UI
+        - #10 
+        - #20
     description: |
-      A list of issues that are related to this issue but that is not a dependency
-      Use the '#\<number\>' syntax to link to an issue
+      A list of issues related to this issue but are not a dependency.
   validations:
-    required: false    
+    required: false
+
+- type: textarea
+  attributes:
+    label: "Additional Information:"
+    description: DO NOT CHANGE ANYTHING BELOW!!
+    value: |
+      **_<details closed><summary>Change Type Labels</summary>_**
+      
+      | Change Type         | Label                                                                                |
+      |---------------------|--------------------------------------------------------------------------------------|
+      | Bug Fixes           | https://github.com/KinsonDigital/CASL/labels/%F0%9F%90%9Bbug                     |
+      | Breaking Changes    | https://github.com/KinsonDigital/CASL/labels/%F0%9F%A7%A8breaking%20changes      |
+      | New Feature         | https://github.com/KinsonDigital/CASL/labels/%E2%9C%A8new%20feature              |
+      | Workflow Changes    | https://github.com/KinsonDigital/CASL/labels/workflow                            |
+      | Code Doc Changes    | https://github.com/KinsonDigital/CASL/labels/%F0%9F%93%91documentation%2Fcode    |
+      | Product Doc Changes | https://github.com/KinsonDigital/CASL/labels/%F0%9F%93%9Ddocumentation%2Fproduct |
+      </details>
+
+      **_<details closed><summary>Priority Type Labels</summary>_**
+      
+      | Priority Type       | Label                                                              |
+      |---------------------|--------------------------------------------------------------------|
+      | Low Priority        | https://github.com/KinsonDigital/CASL/labels/low%20priority    |
+      | Medium Priority     | https://github.com/KinsonDigital/CASL/labels/medium%20priority |
+      | High Priority       | https://github.com/KinsonDigital/CASL/labels/high%20priority   |
+      </details>
+
+- type: checkboxes
+  id: terms
+  attributes:
+    label: Code of Conduct
+    description: By submitting this issue, you agree to follow our [Code of Conduct](../../code_of_conduct.md).
+    options:
+      - label: I agree to follow this project's Code of Conduct.
+        required: true
