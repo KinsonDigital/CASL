@@ -20,7 +20,7 @@
 
 <h2 style="font-weight:bold" align="center" >!! NOTICE !!</h2>
 
-This library is still under development and has not reached v1.0.0 yet and is currently under preview.
+This library is still under development and is not at v1.0.0 yet!!  However, all of the major features are available, so we ensourage you to use it and provide feedback.  That is what open source is all about 🥳 
 
 <h2 style="font-weight:bold" align="center">📖 About CASL</h2>
 
