@@ -20,6 +20,7 @@ namespace CASL.NativeInterop
     /// </summary>
     internal class NativeLibraryLoader : ILibraryLoader
     {
+        private const char CrossPlatDirSeparatorChar = '/';
         private readonly IDependencyManager dependencyManager;
         private readonly IPlatform platform;
         private readonly IDirectory directory;
@@ -94,11 +95,9 @@ namespace CASL.NativeInterop
             var libDirPath = this.dependencyManager.NativeLibDirPath;
 
             // Add a directory separator if one is missing
-            libDirPath = libDirPath.EndsWith(this.path.DirectorySeparatorChar) ?
-                libDirPath :
-                $@"{libDirPath}{this.path.DirectorySeparatorChar}";
+            libDirPath = libDirPath.ToCrossPlatPath().TrimAllFromEnd(CrossPlatDirSeparatorChar);
 
-            var libFilePath = $"{libDirPath}{LibraryName}";
+            var libFilePath = $"{libDirPath}{CrossPlatDirSeparatorChar}{LibraryName}";
 
             var (exists, libPtr) = LoadLibraryIfExists(libFilePath);
 

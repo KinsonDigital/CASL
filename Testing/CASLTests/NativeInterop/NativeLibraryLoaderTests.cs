@@ -24,6 +24,7 @@ namespace CASLTests
     public class NativeLibraryLoaderTests
     {
         private const string WinDirPath = @"C:\Program Files\test-app";
+        private const string CrossPlatWinDirPath = @"C:/Program Files/test-app";
         private const string LinuxDirPath = "/user/bin/test-app";
         private const string MacOSDirPath = "/Applications/test-app";
         private const string WinExtension = ".dll";
@@ -183,7 +184,7 @@ namespace CASLTests
         {
             //Arrange
             this.mockLibrary.SetupGet(p => p.LibraryName).Returns(libName);
-            this.mockPath.Setup(m => m.GetFileNameWithoutExtension(libName)).Returns($"{libName.Split('.')[0]}");
+            this.mockPath.Setup(m => m.GetFileNameWithoutExtension(libName)).Returns(LibNameWithoutExt);
             this.mockPath.Setup(m => m.HasExtension(It.IsAny<string>()))
                 .Returns<string>(path =>
                 {
@@ -201,25 +202,25 @@ namespace CASLTests
 
         #region Method Tests
         [Theory]
-        [InlineData(WinDirPath, WinSeparatorChar, WinLibNameWithExt, WinExtension)]
-        [InlineData(LinuxDirPath, PoxixSeparatorChar, PosixLibNameWithExt, PosixExtenstion)]
+        [InlineData(WinDirPath, CrossPlatWinDirPath, WinLibNameWithExt, WinExtension)]
+        [InlineData(LinuxDirPath, LinuxDirPath, PosixLibNameWithExt, PosixExtenstion)]
         public void LoadLibrary_WhenLibraryDoesNotLoad_ThrowsException(
             string dirPath,
-            char dirSeparatorChar,
+            string expectedDirPath,
             string libName,
             string extension)
         {
             //Arrange
-            var systemError = "Could not load the library";
+            const string systemError = "Could not load the library";
 
-            this.mockFile.Setup(m => m.Exists($"{dirPath}{dirSeparatorChar}{libName}")).Returns(true);
+            var expectedPath = $"{expectedDirPath}{PoxixSeparatorChar}{libName}";
+            this.mockFile.Setup(m => m.Exists(It.IsAny<string?>())).Returns(true);
 
-            this.mockDependencyManager.SetupGet(p => p.NativeLibDirPath).Returns($"{dirPath}{dirSeparatorChar}");
+            this.mockDependencyManager.SetupGet(p => p.NativeLibDirPath).Returns(dirPath);
 
             this.mockLibrary.SetupGet(p => p.LibraryName).Returns(libName);
 
-            this.mockPath.Setup(m => m.GetFileNameWithoutExtension(libName)).Returns(libName.Split('.')[0]);
-            this.mockPath.SetupGet(p => p.DirectorySeparatorChar).Returns(dirSeparatorChar);
+            this.mockPath.Setup(m => m.GetFileNameWithoutExtension(libName)).Returns(LibNameWithoutExt);
             this.mockPath.Setup(m => m.HasExtension(It.IsAny<string>()))
                 .Returns<string>(path =>
                 {
@@ -235,7 +236,7 @@ namespace CASLTests
             Assert.ThrowsWithMessage<LoadLibraryException>(() =>
             {
                 loader.LoadLibrary();
-            }, $"{systemError}\n\nLibrary Path: '{dirPath}{dirSeparatorChar}{libName}'");
+            }, $"{systemError}\n\nLibrary Path: '{expectedPath}'");
         }
 
         [Fact]
@@ -243,12 +244,11 @@ namespace CASLTests
         {
             // Arrange
             nint expected = 1234;
-            var libFilePath = $"{WinDirPath}{WinSeparatorChar}{WinLibNameWithExt}";
+            var libFilePath = $"{CrossPlatWinDirPath}/{WinLibNameWithExt}";
             this.mockFile.Setup(m => m.Exists(libFilePath)).Returns(true);
             this.mockDependencyManager.SetupGet(p => p.NativeLibDirPath).Returns(WinDirPath);
             this.mockLibrary.SetupGet(p => p.LibraryName).Returns(WinLibNameWithExt);
 
-            this.mockPath.SetupGet(p => p.DirectorySeparatorChar).Returns(WinSeparatorChar);
             this.mockPath.Setup(m => m.GetFileNameWithoutExtension(WinLibNameWithExt)).Returns(LibNameWithoutExt);
             this.mockPath.Setup(m => m.HasExtension(It.IsAny<string>()))
                 .Returns<string>(path =>
@@ -272,12 +272,11 @@ namespace CASLTests
         public void LoadLibrary_WhenLibraryFileDoesNotExist_ThrowsException()
         {
             nint expected = 1234;
-            var libFilePath = $"{WinDirPath}{WinSeparatorChar}{WinLibNameWithExt}";
+            var libFilePath = $"{CrossPlatWinDirPath}/{WinLibNameWithExt}";
             this.mockFile.Setup(m => m.Exists(It.IsAny<string>())).Returns(false);
             this.mockDependencyManager.SetupGet(p => p.NativeLibDirPath).Returns(WinDirPath);
             this.mockLibrary.SetupGet(p => p.LibraryName).Returns(WinLibNameWithExt);
 
-            this.mockPath.SetupGet(p => p.DirectorySeparatorChar).Returns(WinSeparatorChar);
             this.mockPath.Setup(m => m.GetFileNameWithoutExtension(WinLibNameWithExt)).Returns(LibNameWithoutExt);
             this.mockPath.Setup(m => m.HasExtension(It.IsAny<string>()))
                .Returns<string>(path =>
@@ -294,7 +293,7 @@ namespace CASLTests
             Assert.ThrowsWithMessage<FileNotFoundException>(() =>
             {
                 _ = loader.LoadLibrary();
-            }, $"Could not find the library '{WinLibNameWithExt}' in directory path '{WinDirPath}{WinSeparatorChar}'");
+            }, $"Could not find the library '{WinLibNameWithExt}' in directory path '{CrossPlatWinDirPath}'");
         }
         #endregion
 
@@ -318,7 +317,6 @@ namespace CASLTests
 
             this.mockFile.Setup(m => m.Exists(this.libPath)).Returns(true);
 
-            this.mockPath.SetupGet(p => p.DirectorySeparatorChar).Returns('\\');
             this.mockPath.Setup(m => m.HasExtension(WinLibNameWithExt)).Returns(true);
             this.mockPath.Setup(m => m.GetFileNameWithoutExtension(It.IsAny<string>()))
                 .Returns(WinLibNameWithExt.Replace(".dll", ""));
