@@ -9,6 +9,7 @@ namespace CASLTests.Devices
     using System;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
+    using System.IO.Abstractions;
     using CASL;
     using CASL.Data;
     using CASL.Data.Exceptions;
@@ -28,6 +29,7 @@ namespace CASLTests.Devices
         private static readonly string IsDisposedExceptionMessage = $"The '{nameof(AudioDeviceManager)}' has not been initialized.\nInvoked the '{nameof(AudioDeviceManager.InitDevice)}()' to initialize the device manager.";
         private readonly string oggFilePath;
         private readonly Mock<IOpenALInvoker> mockALInvoker;
+        private readonly Mock<IPath> mockPath;
         private readonly ALDevice device;
         private readonly ALContext context;
         private readonly uint srcId = 4321;
@@ -52,6 +54,8 @@ namespace CASLTests.Devices
             this.mockALInvoker.Setup(m => m.CreateContext(this.device, It.IsAny<ALContextAttributes>()))
                 .Returns(this.context);
             this.mockALInvoker.Setup(m => m.MakeContextCurrent(this.context)).Returns(true);
+
+            this.mockPath = new Mock<IPath>();
         }
 
         #region Prop Tests
@@ -357,7 +361,8 @@ namespace CASLTests.Devices
                 this.mockALInvoker.Object,
                 manager,
                 mockOggDecoder.Object,
-                new Mock<ISoundDecoder<byte>>().Object);
+                new Mock<ISoundDecoder<byte>>().Object,
+                this.mockPath.Object);
 
             // Act
             manager.ChangeDevice("test-device");
@@ -415,7 +420,8 @@ namespace CASLTests.Devices
                 this.mockALInvoker.Object,
                 manager,
                 mockOggDecoder.Object,
-                new Mock<ISoundDecoder<byte>>().Object);
+                new Mock<ISoundDecoder<byte>>().Object,
+                this.mockPath.Object);
 
             // Act
             manager.ChangeDevice("test-device");
@@ -493,7 +499,7 @@ namespace CASLTests.Devices
         {
             /* This is the total seconds for every byte of data
              * based on 2 Channels, 32 bit depth and a frequency of 44100.
-             * 
+             *
              * Changing the channels, bit depth, or frequency changes the conversion factor.
              */
             const int bytesPerSec = 352801; // Conversion factor

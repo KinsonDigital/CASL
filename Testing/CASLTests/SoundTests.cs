@@ -7,6 +7,7 @@ namespace CASLTests
 {
     using System;
     using System.Collections.ObjectModel;
+    using System.IO.Abstractions;
     using CASL;
     using CASL.Data;
     using CASL.Data.Exceptions;
@@ -22,10 +23,13 @@ namespace CASLTests
     /// </summary>
     public class SoundTests
     {
+        private const string OggFileExtension = ".ogg";
+        private const string MP3FileExtension = ".mp3";
         private readonly Mock<IAudioDeviceManager> mockAudioManager;
         private readonly Mock<ISoundDecoder<float>> mockOggDecoder;
         private readonly Mock<ISoundDecoder<byte>> mockMp3Decoder;
         private readonly Mock<IOpenALInvoker> mockALInvoker;
+        private readonly Mock<IPath> mockPath;
         private readonly string soundFileNameWithoutExtension = "sound";
         private readonly string oggContentFilePath;
         private readonly string mp3ContentFilePath;
@@ -38,8 +42,9 @@ namespace CASLTests
         /// </summary>
         public SoundTests()
         {
-            this.oggContentFilePath = @$"C:\temp\Content\Sounds\{this.soundFileNameWithoutExtension}.ogg";
-            this.mp3ContentFilePath = @$"C:\temp\Content\Sounds\{this.soundFileNameWithoutExtension}.mp3";
+            const string soundsDirPath = "C:/temp/Content/Sounds";
+            this.oggContentFilePath = $"{soundsDirPath}/{this.soundFileNameWithoutExtension}{OggFileExtension}";
+            this.mp3ContentFilePath = $"{soundsDirPath}/{this.soundFileNameWithoutExtension}{MP3FileExtension}";
 
             this.mockALInvoker = new Mock<IOpenALInvoker>();
             this.mockALInvoker.Setup(m => m.GenSource()).Returns(this.srcId);
@@ -65,6 +70,12 @@ namespace CASLTests
             });
 
             this.mockMp3Decoder = new Mock<ISoundDecoder<byte>>();
+
+            this.mockPath = new Mock<IPath>();
+            this.mockPath.Setup(m => m.GetExtension(this.oggContentFilePath)).Returns(OggFileExtension);
+            this.mockPath.Setup(m => m.GetExtension(this.mp3ContentFilePath)).Returns(MP3FileExtension);
+            this.mockPath.Setup(m => m.GetFileNameWithoutExtension(It.IsAny<string?>()))
+                .Returns(this.soundFileNameWithoutExtension);
         }
 
         #region Constructor Tests
@@ -203,17 +214,26 @@ namespace CASLTests
         [Fact]
         public void Ctor_WhenUsingUnsupportedFileType_ThrowsException()
         {
+            // Arrange
+            this.mockPath.Setup(m => m.GetExtension(It.IsAny<string?>())).Returns(".wav");
+
             // Act & Assert
             Assert.ThrowsWithMessage<AudioException>(() =>
             {
-                _ = new Sound(@"C:\temp\Content\Sounds\sound.wav", this.mockALInvoker.Object, this.mockAudioManager.Object, this.mockOggDecoder.Object, this.mockMp3Decoder.Object);
+                _ = new Sound(
+                    @"C:\temp\Content\Sounds\sound.wav",
+                    this.mockALInvoker.Object,
+                    this.mockAudioManager.Object,
+                    this.mockOggDecoder.Object,
+                    this.mockMp3Decoder.Object,
+                    this.mockPath.Object);
             }, "The file extension '.wav' is not supported file type.");
         }
         #endregion
 
         #region Prop Tests
         [Fact]
-        public void ContentName_WhenGettingValue_ReturnsCorrectResult()
+        public void Name_WhenGettingValue_ReturnsCorrectResult()
         {
             // Act
             var sound = CreateSound(this.oggContentFilePath);
@@ -1023,12 +1043,17 @@ namespace CASLTests
         /// <param name="filePath">The path to the sound file.</param>
         /// <returns>The instance for testing.</returns>
         private Sound CreateSound(string filePath)
-            => new (filePath, this.mockALInvoker.Object, this.mockAudioManager.Object, this.mockOggDecoder.Object, this.mockMp3Decoder.Object);
+            => new (filePath,
+                this.mockALInvoker.Object,
+                this.mockAudioManager.Object,
+                this.mockOggDecoder.Object,
+                this.mockMp3Decoder.Object,
+                this.mockPath.Object);
 
         /// <summary>
         /// Mocks the buffer data stats to influence the total seconds that the sound has.
         /// </summary>
-        /// <param name="channels">The total number of seconds to simulate.</param>
+        /// <param name="totalSeconds">The total number of seconds to simulate.</param>
         private void MockSoundLength(float totalSeconds)
         {
             /* This is the total seconds for every byte of data

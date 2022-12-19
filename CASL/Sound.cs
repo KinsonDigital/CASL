@@ -2,6 +2,8 @@
 // Copyright (c) KinsonDigital. All rights reserved.
 // </copyright>
 
+using System.IO.Abstractions;
+
 namespace CASL
 {
     using System;
@@ -13,18 +15,19 @@ namespace CASL
     using CASL.Devices.Factories;
     using CASL.Exceptions;
     using CASL.OpenAL;
-    using IOPath = System.IO.Path;
 
     /// <summary>
     /// A single sound that can be played, paused etc.
     /// </summary>
     public class Sound : ISound
     {
+        private const char CrossPlatDirSeparatorChar = '/';
         private const string IsDisposedExceptionMessage = "The sound is disposed.  You must create another sound instance.";
         private readonly IAudioDeviceManager audioManager;
         private readonly ISoundDecoder<float> oggDecoder;
         private readonly ISoundDecoder<byte> mp3Decoder;
         private readonly IOpenALInvoker alInvoker;
+        private readonly IPath path;
         private uint srcId;
         private uint bufferId;
         private bool ignoreOpenALCalls;
@@ -37,7 +40,7 @@ namespace CASL
         [ExcludeFromCodeCoverage]
         public Sound(string filePath)
         {
-            Path = filePath;
+            Path = filePath.ToCrossPlatPath().TrimAllFromEnd(CrossPlatDirSeparatorChar);
 
             this.alInvoker = IoC.Container.GetInstance<IOpenALInvoker>();
             this.alInvoker.ErrorCallback += ErrorCallback;
@@ -48,6 +51,8 @@ namespace CASL
             this.audioManager = AudioDeviceManagerFactory.CreateDeviceManager();
             this.audioManager.DeviceChanging += AudioManager_DeviceChanging;
             this.audioManager.DeviceChanged += AudioManager_DeviceChanged;
+            this.path = IoC.Container.GetInstance<IPath>();
+
             Init();
         }
 
@@ -59,10 +64,16 @@ namespace CASL
         /// <param name="audioManager">Manages audio related operations.</param>
         /// <param name="oggDecoder">Decodes OGG audio files.</param>
         /// <param name="mp3Decoder">Decodes MP3 audio files.</param>
-        /// <param name="soundPathResolver">Resolves paths to sound content.</param>
-        internal Sound(string filePath, IOpenALInvoker alInvoker, IAudioDeviceManager audioManager, ISoundDecoder<float> oggDecoder, ISoundDecoder<byte> mp3Decoder)
+        /// <param name="path">Manages paths.</param>
+        internal Sound(
+            string filePath,
+            IOpenALInvoker alInvoker,
+            IAudioDeviceManager audioManager,
+            ISoundDecoder<float> oggDecoder,
+            ISoundDecoder<byte> mp3Decoder,
+            IPath path)
         {
-            Path = filePath;
+            Path = filePath.ToCrossPlatPath().TrimAllFromEnd(CrossPlatDirSeparatorChar);
 
             this.alInvoker = alInvoker;
             this.alInvoker.ErrorCallback += ErrorCallback;
@@ -71,6 +82,8 @@ namespace CASL
 
             this.mp3Decoder = mp3Decoder;
             this.audioManager = audioManager;
+            this.path = path;
+
             this.audioManager.DeviceChanging += AudioManager_DeviceChanging;
             this.audioManager.DeviceChanged += AudioManager_DeviceChanged;
 
@@ -78,7 +91,7 @@ namespace CASL
         }
 
         /// <inheritdoc/>
-        public string Name => IOPath.GetFileNameWithoutExtension(Path);
+        public string Name => this.path.GetFileNameWithoutExtension(Path);
 
         /// <inheritdoc/>
         public string Path { get; private set; }
@@ -423,7 +436,7 @@ namespace CASL
 
             (this.srcId, this.bufferId) = this.audioManager.InitSound();
 
-            var extension = IOPath.GetExtension(Path);
+            var extension = this.path.GetExtension(Path);
 
             SoundSource soundSrc;
 
