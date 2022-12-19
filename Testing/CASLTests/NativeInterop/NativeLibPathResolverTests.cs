@@ -46,17 +46,15 @@ namespace CASLTests.NativeInterop
             string platform)
         {
             // Arrange
-            var assemblyFilePath = $@"{appDirPath}test-assembly{extension}";
             var libName = $"test-lib{extension}";
-            var expected = $@"{appDirPath}{separatorChar}runtimes{separatorChar}{platform}{separatorChar}native{separatorChar}test-lib{extension}";
+            var expected = @$"C:/Program Files/test-app/runtimes/{platform}/native/test-lib{extension}";
 
             MockWindowsPlatform();
             this.mockPlatform.Setup(m => m.IsWin10Platform()).Returns(isWin10);
             this.mockPlatform.Setup(m => m.GetProcessArchitecture()).Returns(arch);
             this.mockPlatform.Setup(m => m.GetPlatformLibFileExtension()).Returns(extension);
 
-            mockPath.SetupGet(p => p.DirectorySeparatorChar).Returns(separatorChar);
-            mockPath.Setup(m => m.GetDirectoryName(It.IsAny<string>())).Returns(appDirPath);
+            mockPath.Setup(m => m.GetDirectoryName(It.IsAny<string>())).Returns(WinDirPath);
             mockPath.Setup(m => m.HasExtension(It.IsAny<string>())).Returns(hasExtension);
             mockPath.Setup(m => m.GetFileNameWithoutExtension(libName)).Returns(libName.Split('.')[0]);
 
@@ -81,9 +79,8 @@ namespace CASLTests.NativeInterop
             string platform)
         {
             // Arrange
-            var assemblyFilePath = $@"{appDirPath}test-assembly{extension}";
             var libName = $"test-lib{extension}";
-            var expected = $@"{appDirPath}{separatorChar}runtimes{separatorChar}{platform}{separatorChar}native{separatorChar}test-lib{extension}";
+            var expected = $@"{LinuxDirPath}{separatorChar}runtimes{separatorChar}{platform}{separatorChar}native{separatorChar}test-lib{extension}";
 
             MockMacOSPlatform();
             this.mockPlatform.Setup(m => m.Is32BitProcess()).Returns(is32BitProcess);
@@ -91,11 +88,9 @@ namespace CASLTests.NativeInterop
             this.mockPlatform.Setup(m => m.GetPlatformLibFileExtension()).Returns(extension);
 
             this.mockPath.SetupGet(p => p.DirectorySeparatorChar).Returns(separatorChar);
-            this.mockPath.Setup(m => m.GetDirectoryName(It.IsAny<string>())).Returns(appDirPath);
+            this.mockPath.Setup(m => m.GetDirectoryName(It.IsAny<string>())).Returns(LinuxDirPath);
             this.mockPath.Setup(m => m.HasExtension(libName)).Returns(true);
             this.mockPath.Setup(m => m.GetFileNameWithoutExtension(libName)).Returns(libName.Split('.')[0]);
-
-            this.mockApp.SetupGet(p => p.Location).Returns(assemblyFilePath);
 
             var resolver = CreateResolver();
 
@@ -116,10 +111,9 @@ namespace CASLTests.NativeInterop
             Architecture arch,
             string platform)
         {
-            // Arrange  
-            var assemblyFilePath = $@"{appDirPath}test-assembly{extension}";
+            // Arrange
             var libName = $"test-lib{extension}";
-            var expected = $@"{appDirPath}{separatorChar}runtimes{separatorChar}{platform}{separatorChar}native{separatorChar}test-lib{extension}";
+            var expected = $@"{MacOSDirPath}{separatorChar}runtimes{separatorChar}{platform}{separatorChar}native{separatorChar}test-lib{extension}";
 
             MockLinuxPlatform();
             mockPlatform.Setup(m => m.Is32BitProcess()).Returns(is32BitProcess);
@@ -127,11 +121,9 @@ namespace CASLTests.NativeInterop
             mockPlatform.Setup(m => m.GetPlatformLibFileExtension()).Returns(extension);
 
             this.mockPath.SetupGet(p => p.DirectorySeparatorChar).Returns(separatorChar);
-            this.mockPath.Setup(m => m.GetDirectoryName(It.IsAny<string>())).Returns(appDirPath);
+            this.mockPath.Setup(m => m.GetDirectoryName(It.IsAny<string>())).Returns(MacOSDirPath);
             this.mockPath.Setup(m => m.HasExtension(libName)).Returns(true);
             this.mockPath.Setup(m => m.GetFileNameWithoutExtension(libName)).Returns(libName.Split('.')[0]);
-
-            this.mockApp.SetupGet(p => p.Location).Returns(appDirPath);
 
             var resolver = CreateResolver();
 
@@ -142,7 +134,7 @@ namespace CASLTests.NativeInterop
             Assert.Equal(expected, actual);
         }
         #endregion
-        
+
         /// <summary>
         /// Creates a new instance of <see cref="NativeLibPathResolver"/> for the purpose of testing.
         /// </summary>

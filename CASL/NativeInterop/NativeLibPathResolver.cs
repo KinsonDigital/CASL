@@ -13,6 +13,7 @@ namespace CASL.NativeInterop
     /// </summary>
     internal class NativeLibPathResolver : IFilePathResolver
     {
+        private const char CrossPlatDirSeparatorChar = '/';
         private readonly IPlatform platform;
         private readonly IPath path;
         private readonly string basePath;
@@ -28,9 +29,8 @@ namespace CASL.NativeInterop
             this.platform = platform;
             this.path = path;
 
-            var dirName = this.path.GetDirectoryName(application.Location);
-
-            this.basePath = $@"{this.path.GetDirectoryName(application.Location)}{this.path.DirectorySeparatorChar}";
+            this.basePath = (this.path.GetDirectoryName(application.Location) ?? string.Empty).ToCrossPlatPath()
+                .TrimAllFromEnd(CrossPlatDirSeparatorChar);
         }
 
         /// <inheritdoc/>
@@ -52,13 +52,12 @@ namespace CASL.NativeInterop
             }
             else if (this.platform.IsLinuxPlatform())
             {
-                // NOTE: Major linux distros dropped 32 support a long time ago
+                // NOTE: Major linux distros dropped 32 bit support a long time ago
                 platform = "linux-x64";
             }
 
-            var separator = this.path.DirectorySeparatorChar;
-
-            return $@"{this.basePath}runtimes{separator}{platform}{this.path.DirectorySeparatorChar}native{separator}";
+            return $@"{this.basePath}{CrossPlatDirSeparatorChar}runtimes{CrossPlatDirSeparatorChar}{platform}" +
+                $"{CrossPlatDirSeparatorChar}native";
         }
 
         /// <summary>
@@ -74,7 +73,7 @@ namespace CASL.NativeInterop
                 ? $"{this.path.GetFileNameWithoutExtension(libName)}{this.platform.GetPlatformLibFileExtension()}"
                 : $"{libName}{this.platform.GetPlatformLibFileExtension()}";
 
-            return $@"{GetDirPath()}{libName}";
+            return $@"{GetDirPath()}{CrossPlatDirSeparatorChar}{libName}";
         }
     }
 }
