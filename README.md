@@ -20,7 +20,7 @@
 
 <h2 style="font-weight:bold" align="center" >!! NOTICE !!</h2>
 
-This library is still under development and has not reached v1.0.0 yet and is currently under preview.
+This library is still under development and is not at v1.0.0 yet!!  However, all of the major features are available, so we ensourage you to use it and provide feedback.  That is what open source is all about 🥳 
 
 <h2 style="font-weight:bold" align="center">📖 About CASL</h2>
 
@@ -58,7 +58,7 @@ We currently have the following maintainers:
 2. Create a feature branch following the feature branch section in the documentation [here](./Documentation/Branching.md)
 3. Add an empty commit to the new feature branch to start your work off.
    - Use this git command: `git commit --allow-empty -m "start of [thing you're working on]"`
-4. Once you've pushed a commit, open a [**draft pull request**](https://github.blog/2019-02-14-introducing-draft-pull-requests/). Do this **before** you actually start working.
+4. Once you've pushed a commit, open a [**draft pull request**](https://github.blog/2019-02-14-introducing-draft-pull-requests/). Do this **before** you start working.
 5. Make your commits in small, incremental steps with clear descriptions.
 6. All unit tests must pass before a PR will be completed.
 7. Make sure that the code follows the the coding standards.

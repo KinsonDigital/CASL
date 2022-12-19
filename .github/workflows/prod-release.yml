@@ -1,4 +1,4 @@
-name: 🚀Preview Release
+name: 🚀Production Release
 
 
 defaults:
@@ -11,8 +11,8 @@ on:
 
 
 jobs:
-  preview_release:
-    name: Preview Release
+  production_release:
+    name: Production Release
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -20,8 +20,8 @@ jobs:
     - name: Restore DotNet Tools
       run: dotnet tool restore
 
-    - name: Run Preview Release
-      run: dotnet cicd PreviewRelease
+    - name: Run Production Release
+      run: dotnet cicd ProductionRelease
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         NugetOrgApiKey: ${{ secrets.NUGET_ORG_API_KEY }}

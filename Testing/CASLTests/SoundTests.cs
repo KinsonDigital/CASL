@@ -2,58 +2,65 @@
 // Copyright (c) KinsonDigital. All rights reserved.
 // </copyright>
 
+using System;
+using System.Collections.ObjectModel;
+using System.IO.Abstractions;
+using CASL;
+using CASL.Data;
+using CASL.Data.Exceptions;
+using CASL.Devices;
+using CASL.Exceptions;
+using CASL.OpenAL;
+using CASLTests.Helpers;
+using Moq;
+using Xunit;
+
 #pragma warning disable IDE0002 // Name can be simplified
 namespace CASLTests
 {
-    using System;
-    using System.Collections.ObjectModel;
-    using CASL;
-    using CASL.Data;
-    using CASL.Data.Exceptions;
-    using CASL.Devices;
-    using CASL.Exceptions;
-    using CASL.OpenAL;
-    using Moq;
-    using Xunit;
-    using Assert = CASLTests.Helpers.AssertExtensions;
+    using Assert = AssertExtensions;
 
     /// <summary>
     /// Tests the <see cref="Sound"/> class.
     /// </summary>
     public class SoundTests
     {
+        private const string OggFileExtension = ".ogg";
+        private const string MP3FileExtension = ".mp3";
+        private const uint SrcId = 1234;
+        private const uint BufferId = 5678;
+        private const string SoundFileNameWithoutExtension = "sound";
         private readonly Mock<IAudioDeviceManager> mockAudioManager;
         private readonly Mock<ISoundDecoder<float>> mockOggDecoder;
         private readonly Mock<ISoundDecoder<byte>> mockMp3Decoder;
         private readonly Mock<IOpenALInvoker> mockALInvoker;
-        private readonly string soundFileNameWithoutExtension = "sound";
+        private readonly Mock<IPath> mockPath;
         private readonly string oggContentFilePath;
         private readonly string mp3ContentFilePath;
-        private readonly float[] oggBufferData = new float[] { 11f, 22f, 33f, 44f };
-        private readonly uint srcId = 1234;
-        private readonly uint bufferId = 5678;
+        private readonly float[] oggBufferData = { 11f, 22f, 33f, 44f };
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SoundTests"/> class.
         /// </summary>
         public SoundTests()
         {
-            this.oggContentFilePath = @$"C:\temp\Content\Sounds\{this.soundFileNameWithoutExtension}.ogg";
-            this.mp3ContentFilePath = @$"C:\temp\Content\Sounds\{this.soundFileNameWithoutExtension}.mp3";
+            const string soundsDirPath = "C:/temp/Content/Sounds";
+            this.oggContentFilePath = $"{soundsDirPath}/{SoundFileNameWithoutExtension}{OggFileExtension}";
+            this.mp3ContentFilePath = $"{soundsDirPath}/{SoundFileNameWithoutExtension}{MP3FileExtension}";
 
             this.mockALInvoker = new Mock<IOpenALInvoker>();
-            this.mockALInvoker.Setup(m => m.GenSource()).Returns(this.srcId);
-            this.mockALInvoker.Setup(m => m.GenBuffer()).Returns(this.bufferId);
+            this.mockALInvoker.Setup(m => m.GenSource()).Returns(SrcId);
+            this.mockALInvoker.Setup(m => m.GenBuffer()).Returns(BufferId);
 
             MockSoundLength(266);
 
             this.mockAudioManager = new Mock<IAudioDeviceManager>();
-            this.mockAudioManager.Setup(m => m.InitSound()).Returns((this.srcId, this.bufferId));
+            this.mockAudioManager.Setup(m => m.InitSound()).Returns((SrcId, BufferId));
 
             this.mockOggDecoder = new Mock<ISoundDecoder<float>>();
             this.mockOggDecoder.Setup(m => m.LoadData(this.oggContentFilePath)).Returns(() =>
             {
-                var result = new SoundData<float>()
+                var result = new SoundData<float>
                 {
                     BufferData = new ReadOnlyCollection<float>(this.oggBufferData),
                     Channels = 2,
@@ -65,6 +72,12 @@ namespace CASLTests
             });
 
             this.mockMp3Decoder = new Mock<ISoundDecoder<byte>>();
+
+            this.mockPath = new Mock<IPath>();
+            this.mockPath.Setup(m => m.GetExtension(this.oggContentFilePath)).Returns(OggFileExtension);
+            this.mockPath.Setup(m => m.GetExtension(this.mp3ContentFilePath)).Returns(MP3FileExtension);
+            this.mockPath.Setup(m => m.GetFileNameWithoutExtension(It.IsAny<string?>()))
+                .Returns(SoundFileNameWithoutExtension);
         }
 
         #region Constructor Tests
@@ -72,7 +85,7 @@ namespace CASLTests
         public void Ctor_WhenInvoking_SubscribesToDeviceChangedEvent()
         {
             // Act
-            var sound = CreateSound(this.oggContentFilePath);
+            _ = CreateSound(this.oggContentFilePath);
 
             // Assert
             this.mockAudioManager.VerifyAdd(m => m.DeviceChanged += It.IsAny<EventHandler<EventArgs>>(),
@@ -146,11 +159,11 @@ namespace CASLTests
                 });
 
             // Act
-            var sound = CreateSound(this.oggContentFilePath);
+            _ = CreateSound(this.oggContentFilePath);
 
             // Assert
             this.mockOggDecoder.Verify(m => m.LoadData(this.oggContentFilePath), Times.Once());
-            this.mockALInvoker.Verify(m => m.BufferData(this.bufferId, (ALFormat)expected, new[] { 1f, 2f }, 44100), Times.Once());
+            this.mockALInvoker.Verify(m => m.BufferData(BufferId, (ALFormat)expected, new[] { 1f, 2f }, 44100), Times.Once());
         }
 
         [Fact]
@@ -197,23 +210,32 @@ namespace CASLTests
 
             // Assert
             this.mockMp3Decoder.Verify(m => m.LoadData(this.mp3ContentFilePath), Times.Once());
-            this.mockALInvoker.Verify(m => m.BufferData(this.bufferId, ALFormat.Stereo16, new byte[] { 1, 2 }, 44100), Times.Once());
+            this.mockALInvoker.Verify(m => m.BufferData(BufferId, ALFormat.Stereo16, new byte[] { 1, 2 }, 44100), Times.Once());
         }
 
         [Fact]
         public void Ctor_WhenUsingUnsupportedFileType_ThrowsException()
         {
+            // Arrange
+            this.mockPath.Setup(m => m.GetExtension(It.IsAny<string?>())).Returns(".wav");
+
             // Act & Assert
             Assert.ThrowsWithMessage<AudioException>(() =>
             {
-                _ = new Sound(@"C:\temp\Content\Sounds\sound.wav", this.mockALInvoker.Object, this.mockAudioManager.Object, this.mockOggDecoder.Object, this.mockMp3Decoder.Object);
+                _ = new Sound(
+                    @"C:\temp\Content\Sounds\sound.wav",
+                    this.mockALInvoker.Object,
+                    this.mockAudioManager.Object,
+                    this.mockOggDecoder.Object,
+                    this.mockMp3Decoder.Object,
+                    this.mockPath.Object);
             }, "The file extension '.wav' is not supported file type.");
         }
         #endregion
 
         #region Prop Tests
         [Fact]
-        public void ContentName_WhenGettingValue_ReturnsCorrectResult()
+        public void Name_WhenGettingValue_ReturnsCorrectResult()
         {
             // Act
             var sound = CreateSound(this.oggContentFilePath);
@@ -247,7 +269,7 @@ namespace CASLTests
             _ = sound.IsLooping;
 
             // Assert
-            this.mockALInvoker.Verify(m => m.GetSource(this.srcId, ALSourceb.Looping), Times.Once());
+            this.mockALInvoker.Verify(m => m.GetSource(SrcId, ALSourceb.Looping), Times.Once());
         }
 
         [Fact]
@@ -290,7 +312,7 @@ namespace CASLTests
             sound.IsLooping = true;
 
             // Assert
-            this.mockALInvoker.Verify(m => m.Source(this.srcId, ALSourceb.Looping, true), Times.Once());
+            this.mockALInvoker.Verify(m => m.Source(SrcId, ALSourceb.Looping, true), Times.Once());
         }
 
         [Fact]
@@ -332,7 +354,7 @@ namespace CASLTests
             _ = sound.Volume;
 
             // Assert
-            this.mockALInvoker.Verify(m => m.GetSource(this.srcId, ALSourcef.Gain), Times.Once());
+            this.mockALInvoker.Verify(m => m.GetSource(SrcId, ALSourcef.Gain), Times.Once());
         }
 
         [Fact]
@@ -364,25 +386,25 @@ namespace CASLTests
             sound.Volume = volume;
 
             // Assert
-            this.mockALInvoker.Verify(m => m.Source(this.srcId, ALSourcef.Gain, expected), Times.Once());
+            this.mockALInvoker.Verify(m => m.Source(SrcId, ALSourcef.Gain, expected), Times.Once());
         }
 
         [Fact]
-        public void Volume_WhenGettingValueWHileIgnoringOpenALCalls_ReturnsZero()
+        public void Volume_WhenGettingValueWhileIgnoringOpenALCalls_ReturnsZero()
         {
             // Arrange
             var sound = CreateSound(this.oggContentFilePath);
             this.mockAudioManager.Raise(manager => manager.DeviceChanging += null, EventArgs.Empty);
 
             // Act
-            var actual = sound.Volume;
+            _ = sound.Volume;
 
             // Assert
             this.mockALInvoker.Verify(m => m.GetSource(It.IsAny<uint>(), It.IsAny<ALSourcef>()), Times.Never());
         }
 
         [Fact]
-        public void Volume_WhenSettingValueWHileIgnoringOpenALCalls_DoesNotAttemptToSetSoundVolume()
+        public void Volume_WhenSettingValueWhileIgnoringOpenALCalls_DoesNotAttemptToSetSoundVolume()
         {
             // Arrange
             var sound = CreateSound(this.oggContentFilePath);
@@ -400,14 +422,14 @@ namespace CASLTests
         {
             // Arrange
             var expected = new SoundTime(90);
-            this.mockALInvoker.Setup(m => m.GetSource(this.srcId, ALSourcef.SecOffset)).Returns(90f);
+            this.mockALInvoker.Setup(m => m.GetSource(SrcId, ALSourcef.SecOffset)).Returns(90f);
             var sound = CreateSound(this.oggContentFilePath);
 
             // Act
             var actual = sound.Position;
 
             // Assert
-            this.mockALInvoker.Verify(m => m.GetSource(this.srcId, ALSourcef.SecOffset), Times.Once());
+            this.mockALInvoker.Verify(m => m.GetSource(SrcId, ALSourcef.SecOffset), Times.Once());
             Assert.Equal(expected, actual);
         }
 
@@ -445,13 +467,13 @@ namespace CASLTests
         {
             // Arrange
             var sound = CreateSound(this.oggContentFilePath);
-            var expected = new SoundTime(266);
+            var expected = new SoundTime(266.00076f);
 
             // Act
             var actual = sound.Length;
 
             // Assert
-            Assert.Equal(expected, actual);
+            Assert.Equal(expected.TotalSeconds, actual.TotalSeconds);
         }
 
         [Fact]
@@ -497,7 +519,7 @@ namespace CASLTests
              */
 
             // Arrange
-            this.mockALInvoker.Setup(m => m.GetSourceState(this.srcId)).Returns((ALSourceState)openALState);
+            this.mockALInvoker.Setup(m => m.GetSourceState(SrcId)).Returns((ALSourceState)openALState);
             var sound = CreateSound(this.oggContentFilePath);
 
             // Act
@@ -512,7 +534,7 @@ namespace CASLTests
         {
             // Arrange
             var sound = CreateSound(this.oggContentFilePath);
-            this.mockALInvoker.Setup(m => m.GetSourceState(this.srcId)).Returns(0f);
+            this.mockALInvoker.Setup(m => m.GetSourceState(SrcId)).Returns(0f);
 
             // Act & Assert
             Assert.ThrowsWithMessage<AudioException>(() =>
@@ -563,8 +585,8 @@ namespace CASLTests
             _ = sound.PlaySpeed;
 
             // Assert
-            this.mockALInvoker.Verify(m => m.GetSource(this.srcId, ALSourcef.Pitch), Times.Once());
-            this.mockALInvoker.Verify(m => m.Source(this.srcId, ALSourcef.Pitch, expectedResult), Times.Once());
+            this.mockALInvoker.Verify(m => m.GetSource(SrcId, ALSourcef.Pitch), Times.Once());
+            this.mockALInvoker.Verify(m => m.Source(SrcId, ALSourcef.Pitch, expectedResult), Times.Once());
         }
 
         [Fact]
@@ -602,21 +624,21 @@ namespace CASLTests
         public void Play_WhenInvoked_PlaysSound()
         {
             // Arrange
-            this.mockALInvoker.Setup(m => m.GetSourceState(this.srcId)).Returns(ALSourceState.Stopped);
+            this.mockALInvoker.Setup(m => m.GetSourceState(SrcId)).Returns(ALSourceState.Stopped);
             var sound = CreateSound(this.oggContentFilePath);
 
             // Act
             sound.Play();
 
             // Assert
-            this.mockALInvoker.Verify(m => m.SourcePlay(this.srcId), Times.Once());
+            this.mockALInvoker.Verify(m => m.SourcePlay(SrcId), Times.Once());
         }
 
         [Fact]
         public void Play_WhenAlreadyPlaying_DoesNotAttemptToPlaySoundAgain()
         {
             // Arrange
-            this.mockALInvoker.Setup(m => m.GetSourceState(this.srcId)).Returns(ALSourceState.Playing);
+            this.mockALInvoker.Setup(m => m.GetSourceState(SrcId)).Returns(ALSourceState.Playing);
             var sound = CreateSound(this.oggContentFilePath);
 
             // Act
@@ -632,7 +654,7 @@ namespace CASLTests
             // Arrange
             var sound = CreateSound(this.oggContentFilePath);
 
-            this.mockALInvoker.Setup(m => m.GetSourceState(this.srcId)).Returns(ALSourceState.Playing);
+            this.mockALInvoker.Setup(m => m.GetSourceState(SrcId)).Returns(ALSourceState.Playing);
             this.mockAudioManager.Raise(manager => manager.DeviceChanging += null, EventArgs.Empty);
 
             // Act
@@ -666,7 +688,7 @@ namespace CASLTests
             sound.Pause();
 
             // Assert
-            this.mockALInvoker.Verify(m => m.SourcePause(this.srcId), Times.Once());
+            this.mockALInvoker.Verify(m => m.SourcePause(SrcId), Times.Once());
         }
 
         [Fact]
@@ -708,7 +730,7 @@ namespace CASLTests
             sound.Stop();
 
             // Assert
-            this.mockALInvoker.Verify(m => m.SourceStop(this.srcId), Times.Once());
+            this.mockALInvoker.Verify(m => m.SourceStop(SrcId), Times.Once());
         }
 
         [Fact]
@@ -750,11 +772,11 @@ namespace CASLTests
             sound.Reset();
 
             // Assert
-            this.mockALInvoker.Verify(m => m.SourceRewind(this.srcId), Times.Once());
+            this.mockALInvoker.Verify(m => m.SourceRewind(SrcId), Times.Once());
         }
 
         [Fact]
-        public void Reset_WhenIgnoringOpenALCalls_DoesNotAtteptToResetSound()
+        public void Reset_WhenIgnoringOpenALCalls_DoesNotAttemptToResetSound()
         {
             // Arrange
             var sound = CreateSound(this.oggContentFilePath);
@@ -785,7 +807,7 @@ namespace CASLTests
         [Theory]
         [InlineData(10f, 10f)]
         [InlineData(-2f, 0f)]
-        [InlineData(300f, 50f)]
+        [InlineData(300f, 50.0001373f)]
         public void SetTimePosition_WithInvoked_SetsTimePosition(float seconds, float expected)
         {
             // Arrange
@@ -807,7 +829,7 @@ namespace CASLTests
             sound.SetTimePosition(seconds);
 
             // Assert
-            this.mockALInvoker.Verify(m => m.Source(this.srcId, ALSourcef.SecOffset, expected), Times.Once());
+            this.mockALInvoker.Verify(m => m.Source(SrcId, ALSourcef.SecOffset, expected), Times.Once());
         }
 
         [Fact]
@@ -825,19 +847,19 @@ namespace CASLTests
         }
 
         [Fact]
-        public void Rewind_WhenTimeIsPastBeginingOfSound_ResetsAndPlaysSound()
+        public void Rewind_WhenTimeIsPastBeginningOfSound_ResetsAndPlaysSound()
         {
             // Arrange
             var sound = CreateSound(this.oggContentFilePath);
-            this.mockALInvoker.Setup(m => m.GetSourceState(this.srcId)).Returns(ALSourceState.Stopped);
-            this.mockALInvoker.Setup(m => m.GetSource(this.srcId, ALSourcef.SecOffset)).Returns(10f);
+            this.mockALInvoker.Setup(m => m.GetSourceState(SrcId)).Returns(ALSourceState.Stopped);
+            this.mockALInvoker.Setup(m => m.GetSource(SrcId, ALSourcef.SecOffset)).Returns(10f);
 
             // Act
             sound.Rewind(20f);
 
             // Assert
-            this.mockALInvoker.Verify(m => m.SourceRewind(this.srcId), Times.Once());
-            this.mockALInvoker.Verify(m => m.SourcePlay(this.srcId), Times.Once());
+            this.mockALInvoker.Verify(m => m.SourceRewind(SrcId), Times.Once());
+            this.mockALInvoker.Verify(m => m.SourcePlay(SrcId), Times.Once());
             this.mockALInvoker.Verify(m => m.Source(It.IsAny<uint>(), It.IsAny<ALSourcef>(), It.IsAny<float>()), Times.Never());
         }
 
@@ -846,7 +868,7 @@ namespace CASLTests
         {
             // Arrange
             MockSoundLength(25);
-            this.mockALInvoker.Setup(m => m.GetSource(this.srcId, ALSourcef.SecOffset))
+            this.mockALInvoker.Setup(m => m.GetSource(SrcId, ALSourcef.SecOffset))
                 .Returns(15f);
             var sound = CreateSound(this.oggContentFilePath);
 
@@ -854,7 +876,7 @@ namespace CASLTests
             sound.Rewind(10f);
 
             // Assert
-            this.mockALInvoker.Verify(m => m.Source(this.srcId, ALSourcef.SecOffset, 5f), Times.Once());
+            this.mockALInvoker.Verify(m => m.Source(SrcId, ALSourcef.SecOffset, 5f), Times.Once());
         }
 
         [Fact]
@@ -876,7 +898,7 @@ namespace CASLTests
         {
             // Arrange
             MockSoundLength(10);
-            this.mockALInvoker.Setup(m => m.GetSource(this.srcId, ALSourcef.SecOffset)).Returns(10f);
+            this.mockALInvoker.Setup(m => m.GetSource(SrcId, ALSourcef.SecOffset)).Returns(10f);
 
             var sound = CreateSound(this.oggContentFilePath);
 
@@ -884,12 +906,12 @@ namespace CASLTests
             sound.FastForward(20f);
 
             // Assert
-            this.mockALInvoker.Verify(m => m.SourceRewind(this.srcId), Times.Once());
+            this.mockALInvoker.Verify(m => m.SourceRewind(SrcId), Times.Once());
             this.mockALInvoker.Verify(m => m.Source(It.IsAny<uint>(), It.IsAny<ALSourcef>(), It.IsAny<float>()), Times.Never());
         }
 
         [Fact]
-        public void FastForward_WhenIgnoringOpenALCalls_DoesNotAttempToResetSound()
+        public void FastForward_WhenIgnoringOpenALCalls_DoesNotAttemptToResetSound()
         {
             // Arrange
             var sound = CreateSound(this.oggContentFilePath);
@@ -910,7 +932,7 @@ namespace CASLTests
             MockSoundLength(60);
             this.mockOggDecoder.Setup(m => m.LoadData(this.oggContentFilePath)).Returns(() =>
             {
-                var result = new SoundData<float>()
+                var result = new SoundData<float>
                 {
                     BufferData = new ReadOnlyCollection<float>(this.oggBufferData),
                     Channels = 2,
@@ -921,25 +943,25 @@ namespace CASLTests
                 return result;
             });
 
-            this.mockALInvoker.Setup(m => m.GetSource(this.srcId, ALSourcef.SecOffset)).Returns(30f);
+            this.mockALInvoker.Setup(m => m.GetSource(SrcId, ALSourcef.SecOffset)).Returns(30f);
             var sound = CreateSound(this.oggContentFilePath);
 
             // Act
             sound.FastForward(10f);
 
             // Assert
-            this.mockALInvoker.Verify(m => m.Source(this.srcId, ALSourcef.SecOffset, 40f), Times.Once());
+            this.mockALInvoker.Verify(m => m.Source(SrcId, ALSourcef.SecOffset, 40f), Times.Once());
         }
 
         [Fact]
-        public void Sound_WhenChangingAudoDevice_ReinitializesSound()
+        public void Sound_WhenChangingAudioDevice_ReinitializeSound()
         {
             // Arrange
             // Simulate an audio device change so the event is invoked inside of the sound class
             this.mockAudioManager.Setup(m => m.ChangeDevice(It.IsAny<string>()))
-                .Callback<string>((name) =>
+                .Callback<string>(_ =>
                 {
-                    this.mockAudioManager.Raise(manager => manager.DeviceChanged += (sender, e) => { }, EventArgs.Empty);
+                    this.mockAudioManager.Raise(manager => manager.DeviceChanged += (_, _) => { }, EventArgs.Empty);
                 });
 
             this.mockOggDecoder.Setup(m => m.LoadData(this.oggContentFilePath))
@@ -961,7 +983,7 @@ namespace CASLTests
             // Assert
             // NOTE: The first invoke is during Sound construction, the second is when changing audio devices
             this.mockOggDecoder.Verify(m => m.LoadData(this.oggContentFilePath), Times.Exactly(2));
-            this.mockALInvoker.Verify(m => m.BufferData(this.bufferId, ALFormat.Stereo16, new[] { 1f, 2f }, 44100), Times.Exactly(2));
+            this.mockALInvoker.Verify(m => m.BufferData(BufferId, ALFormat.Stereo16, new[] { 1f, 2f }, 44100), Times.Exactly(2));
         }
 
         [Fact]
@@ -979,10 +1001,10 @@ namespace CASLTests
             this.mockMp3Decoder.Verify(m => m.Dispose(), Times.Once());
             this.mockAudioManager.VerifyRemove(m => m.DeviceChanged -= It.IsAny<EventHandler<EventArgs>>(),
                 Times.Once(),
-                $"Unsubscription to the event '{nameof(IAudioDeviceManager.DeviceChanged)}' event did not occur.");
+                $"Un-subscription to the event '{nameof(IAudioDeviceManager.DeviceChanged)}' event did not occur.");
             this.mockALInvoker.VerifyRemove(m => m.ErrorCallback -= It.IsAny<Action<string>>(),
                 Times.Once(),
-                $"Unsubscription to the event '{nameof(IOpenALInvoker.ErrorCallback)}' event did not occur.");
+                $"Un-subscription to the event '{nameof(IOpenALInvoker.ErrorCallback)}' event did not occur.");
         }
 
         [Fact]
@@ -1005,7 +1027,7 @@ namespace CASLTests
         public void Dispose_WithInvalidSourceID_DoesNotAttemptSourceAndBufferDeletion()
         {
             // Arrange
-            this.mockAudioManager.Setup(m => m.InitSound()).Returns((0u, this.bufferId));
+            this.mockAudioManager.Setup(m => m.InitSound()).Returns((0u, BufferId));
             var sound = CreateSound(this.oggContentFilePath);
 
             // Act
@@ -1013,7 +1035,7 @@ namespace CASLTests
             sound.Dispose();
 
             // Assert
-            this.mockALInvoker.Verify(m => m.DeleteSource(this.srcId), Times.Never());
+            this.mockALInvoker.Verify(m => m.DeleteSource(SrcId), Times.Never());
         }
         #endregion
 
@@ -1023,12 +1045,17 @@ namespace CASLTests
         /// <param name="filePath">The path to the sound file.</param>
         /// <returns>The instance for testing.</returns>
         private Sound CreateSound(string filePath)
-            => new (filePath, this.mockALInvoker.Object, this.mockAudioManager.Object, this.mockOggDecoder.Object, this.mockMp3Decoder.Object);
+            => new (filePath,
+                this.mockALInvoker.Object,
+                this.mockAudioManager.Object,
+                this.mockOggDecoder.Object,
+                this.mockMp3Decoder.Object,
+                this.mockPath.Object);
 
         /// <summary>
         /// Mocks the buffer data stats to influence the total seconds that the sound has.
         /// </summary>
-        /// <param name="channels">The total number of seconds to simulate.</param>
+        /// <param name="totalSeconds">The total number of seconds to simulate.</param>
         private void MockSoundLength(float totalSeconds)
         {
             /* This is the total seconds for every byte of data
@@ -1041,10 +1068,10 @@ namespace CASLTests
 
             var size = (int)(totalSeconds * bytesPerSec);
 
-            this.mockALInvoker.Setup(m => m.GetBuffer(this.bufferId, ALGetBufferi.Size)).Returns(size);
-            this.mockALInvoker.Setup(m => m.GetBuffer(this.bufferId, ALGetBufferi.Channels)).Returns(channels);
-            this.mockALInvoker.Setup(m => m.GetBuffer(this.bufferId, ALGetBufferi.Bits)).Returns(bitDepth);
-            this.mockALInvoker.Setup(m => m.GetBuffer(this.bufferId, ALGetBufferi.Frequency)).Returns(freq);
+            this.mockALInvoker.Setup(m => m.GetBuffer(BufferId, ALGetBufferi.Size)).Returns(size);
+            this.mockALInvoker.Setup(m => m.GetBuffer(BufferId, ALGetBufferi.Channels)).Returns(channels);
+            this.mockALInvoker.Setup(m => m.GetBuffer(BufferId, ALGetBufferi.Bits)).Returns(bitDepth);
+            this.mockALInvoker.Setup(m => m.GetBuffer(BufferId, ALGetBufferi.Frequency)).Returns(freq);
         }
     }
 }

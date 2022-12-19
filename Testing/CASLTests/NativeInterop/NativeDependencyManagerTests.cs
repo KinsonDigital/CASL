@@ -12,11 +12,10 @@ namespace CASLTests.NativeInterop
     using System.IO;
     using System.IO.Abstractions;
     using System.Linq;
-    using CASL;
     using CASL.NativeInterop;
     using Moq;
     using Xunit;
-    using Assert = CASLTests.Helpers.AssertExtensions;
+    using Assert = Helpers.AssertExtensions;
 #pragma warning restore IDE0001 // Name can be simplified
 
     /// <summary>
@@ -24,10 +23,8 @@ namespace CASLTests.NativeInterop
     /// </summary>
     public class NativeDependencyManagerTests
     {
-        private readonly Mock<IPlatform> mockPlatform;
         private readonly Mock<IFile> mockFile;
         private readonly Mock<IPath> mockPath;
-        private readonly Mock<IApplication> mockApp;
         private readonly Mock<IFilePathResolver> mockPathResolver;
 
         /// <summary>
@@ -35,24 +32,12 @@ namespace CASLTests.NativeInterop
         /// </summary>
         public NativeDependencyManagerTests()
         {
-            this.mockPlatform = new Mock<IPlatform>();
             this.mockFile = new Mock<IFile>();
             this.mockPath = new Mock<IPath>();
-            this.mockApp = new Mock<IApplication>();
             this.mockPathResolver = new Mock<IFilePathResolver>();
         }
 
         #region Constructor Tests
-        [Fact]
-        public void Ctor_WhenInvokedWithNullPlatform_ThrowsException()
-        {
-            // Act & Assert
-            Assert.ThrowsWithMessage<ArgumentNullException>(() =>
-            {
-                _ = new OpenALDependencyManager(null, null, null, null, null);
-            }, "The parameter must not be null. (Parameter 'platform')");
-        }
-
         [Fact]
         public void Ctor_WhenInvokedWithNullFile_ThrowsException()
         {
@@ -60,10 +45,8 @@ namespace CASLTests.NativeInterop
             Assert.ThrowsWithMessage<ArgumentNullException>(() =>
             {
                 _ = new OpenALDependencyManager(
-                    new Mock<IPlatform>().Object,
                     null,
                     this.mockPath.Object,
-                    this.mockApp.Object,
                     this.mockPathResolver.Object);
             }, "The parameter must not be null. (Parameter 'file')");
         }
@@ -75,27 +58,10 @@ namespace CASLTests.NativeInterop
             Assert.ThrowsWithMessage<ArgumentNullException>(() =>
             {
                 _ = new OpenALDependencyManager(
-                    new Mock<IPlatform>().Object,
                     this.mockFile.Object,
                     null,
-                    this.mockApp.Object,
                     this.mockPathResolver.Object);
             }, "The parameter must not be null. (Parameter 'path')");
-        }
-
-        [Fact]
-        public void Ctor_WhenInvokedWithNullApplication_ThrowsException()
-        {
-            // Act & Assert
-            Assert.ThrowsWithMessage<ArgumentNullException>(() =>
-            {
-                _ = new OpenALDependencyManager(
-                    new Mock<IPlatform>().Object,
-                    this.mockFile.Object,
-                    this.mockPath.Object,
-                    null,
-                    this.mockPathResolver.Object);
-            }, "The parameter must not be null. (Parameter 'application')");
         }
 
         [Fact]
@@ -105,10 +71,8 @@ namespace CASLTests.NativeInterop
             Assert.ThrowsWithMessage<ArgumentNullException>(() =>
             {
                 _ = new OpenALDependencyManager(
-                    new Mock<IPlatform>().Object,
                     this.mockFile.Object,
                     this.mockPath.Object,
-                    this.mockApp.Object,
                     null);
             }, "The parameter must not be null. (Parameter 'nativeLibPathResolver')");
         }
@@ -116,39 +80,49 @@ namespace CASLTests.NativeInterop
 
         #region Prop Tests
         [Fact]
-        public void NativeLibraries_WhenGettingNullValue_ReturnsCorrecResult()
+        public void NativeLibraries_WhenSettingValue_ReturnsCorrectResult()
         {
             // Arrange
-            this.mockPlatform.Setup(m => m.Is64BitProcess()).Returns(true);
+            const string dirPath = "C:/test-dir";
+            const string libNameWithExtension = "test-native-lib.dll";
+            const string libNameWithoutExtension = "test-native-lib";
+
+            this.mockPathResolver.Setup(m => m.GetDirPath()).Returns(dirPath);
+            this.mockPath.Setup(m => m.GetFileNameWithoutExtension(libNameWithExtension))
+                .Returns(libNameWithoutExtension);
 
             var manager = CreateManager();
 
             // Act
-            manager.NativeLibraries = null;
+            manager.NativeLibraries = new ReadOnlyCollection<string>(new List<string> { libNameWithExtension });
             var actual = manager.NativeLibraries;
 
             // Assert
-            Assert.Empty(actual);
+            Xunit.Assert.Single(actual);
+            Xunit.Assert.Equal("test-native-lib", actual[0]);
         }
 
-        [Fact]
-        public void NativeLibraries_WhenSettingValue_ReturnsCorrecResult()
+        [Theory]
+        [InlineData(@"C:\test-dir")]
+        [InlineData(@"C:\test-dir\")]
+        [InlineData(@"C:\test-dir\\")]
+        [InlineData("C:/test-dir")]
+        [InlineData("C:/test-dir/")]
+        [InlineData("C:/test-dir//")]
+        public void NativeLibDirPath_WhenGettingValue_ReturnsCorrectResult(string dirPath)
         {
             // Arrange
-            var libName = "test-native-lib.dll";
-            this.mockPlatform.Setup(m => m.Is64BitProcess()).Returns(true);
-            this.mockPlatform.Setup(m => m.IsWinPlatform()).Returns(true);
-            this.mockPath.Setup(m => m.GetFileNameWithoutExtension(libName)).Returns(libName.Split('.')[0]);
+            const string expected = "C:/test-dir";
 
-            var manager = CreateManager();
+            this.mockPathResolver.Setup(m => m.GetDirPath()).Returns(dirPath);
+
+            var sut = CreateManager();
 
             // Act
-            manager.NativeLibraries = new ReadOnlyCollection<string>(new List<string> { libName });
-            var actual = manager.NativeLibraries;
+            var actual = sut.NativeLibDirPath;
 
             // Assert
-            Assert.Single(actual);
-            Assert.Equal("test-native-lib", actual[0]);
+            Xunit.Assert.Equal(expected, actual);
         }
         #endregion
 
@@ -157,10 +131,10 @@ namespace CASLTests.NativeInterop
         public void VerifyDependencies_WhenLibrarySrcDoesNotExist_ThrowsException()
         {
             // Arrange
-            var assemblyDirPath = @"C:\test-dir\";
-            var srcDirPath = $@"{assemblyDirPath}runtimes\win-x64\native\";
+            const string assemblyDirPath = @"C:/test-dir";
+            const string srcDirPath = $@"{assemblyDirPath}/runtimes/win-x64/native";
 
-            this.mockFile.Setup(m => m.Exists($"{srcDirPath}lib.dll")).Returns(false);
+            this.mockFile.Setup(m => m.Exists($"{srcDirPath}/lib.dll")).Returns(false);
             this.mockPathResolver.Setup(m => m.GetDirPath()).Returns(srcDirPath);
 
             this.mockPath.Setup(m => m.GetExtension("lib.dll")).Returns(".dll");
@@ -173,7 +147,7 @@ namespace CASLTests.NativeInterop
             Assert.ThrowsWithMessage<FileNotFoundException>(() =>
             {
                 manager.VerifyDependencies();
-            }, $"The native dependency library '{srcDirPath}lib.dll' does not exist.");
+            }, $"The native dependency library '{srcDirPath}/lib.dll' does not exist.");
         }
 
         [Fact]
@@ -205,11 +179,8 @@ namespace CASLTests.NativeInterop
         /// </summary>
         /// <returns>The instance to test.</returns>
         private OpenALDependencyManager CreateManager()
-            => new OpenALDependencyManager(
-                this.mockPlatform.Object,
-                this.mockFile.Object,
+            => new (this.mockFile.Object,
                 this.mockPath.Object,
-                this.mockApp.Object,
                 this.mockPathResolver.Object);
     }
 }
