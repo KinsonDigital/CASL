@@ -16,6 +16,9 @@ namespace CASL
     /// </summary>
     internal static class ExtensionMethods
     {
+        private const char WinDirSeparatorChar = '\\';
+        private const char CrossPlatDirSeparatorChar = '/';
+
         /// <summary>
         ///     Registers that a new instance of <typeparamref name="TImplementation"/> will be returned every time
         ///     a <typeparamref name="TService"/> is requested (transient).
@@ -127,6 +130,38 @@ namespace CASL
             }
 
             return result.ToArray();
+        }
+
+        /// <summary>
+        /// Converts the given <paramref name="path"/> to a cross platform path.
+        /// </summary>
+        /// <param name="path">The file or directory path.</param>
+        /// <returns>The cross platform version of the <paramref name="path"/>.</returns>
+        /// <returns>
+        ///     This changes all '\' characters to '/' characters.
+        ///     The '/' directory separator is valid on Windows and Linux systems.
+        /// </returns>
+        public static string ToCrossPlatPath(this string path) => path.Replace(WinDirSeparatorChar, CrossPlatDirSeparatorChar);
+
+        /// <summary>
+        /// Trims all of the consecutive characters that match the given <paramref name="character"/> from the <c>string</c>.
+        /// </summary>
+        /// <param name="value">The <c>string</c> to trim.</param>
+        /// <param name="character">The character to trim.</param>
+        /// <returns>The original <c>string</c> after being trim.</returns>
+        public static string TrimAllFromEnd(this string value, char character)
+        {
+            if (string.IsNullOrEmpty(value))
+            {
+                return string.Empty;
+            }
+
+            while (value.EndsWith(character))
+            {
+                value = value.TrimEnd(character);
+            }
+
+            return value;
         }
     }
 }
