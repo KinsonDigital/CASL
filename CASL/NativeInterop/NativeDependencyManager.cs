@@ -22,45 +22,21 @@ namespace CASL.NativeInterop
         /// <summary>
         /// Initializes a new instance of the <see cref="NativeDependencyManager"/> class.
         /// </summary>
-        /// <param name="platform">Manages platform specific operations.</param>
         /// <param name="file">Manages file related operations.</param>
         /// <param name="path">Manages file paths.</param>
-        /// <param name="application">Gets information about the application.</param>
         /// <param name="nativeLibPathResolver">Resolves native library paths.</param>
-        public NativeDependencyManager(
-            IPlatform platform,
+        protected NativeDependencyManager(
             IFile file,
             IPath path,
-            IApplication application,
             IFilePathResolver nativeLibPathResolver)
         {
-            if (platform is null)
-            {
-                throw new ArgumentNullException(nameof(platform), "The parameter must not be null.");
-            }
-
-            if (file is null)
-            {
-                throw new ArgumentNullException(nameof(file), "The parameter must not be null.");
-            }
-
-            if (path is null)
-            {
-                throw new ArgumentNullException(nameof(path), "The parameter must not be null.");
-            }
-
-            if (application is null)
-            {
-                throw new ArgumentNullException(nameof(application), "The parameter must not be null.");
-            }
+            this.file = file ?? throw new ArgumentNullException(nameof(file), "The parameter must not be null.");
+            this.path = path ?? throw new ArgumentNullException(nameof(path), "The parameter must not be null.");
 
             if (nativeLibPathResolver is null)
             {
                 throw new ArgumentNullException(nameof(nativeLibPathResolver), "The parameter must not be null.");
             }
-
-            this.file = file;
-            this.path = path;
 
             NativeLibDirPath = nativeLibPathResolver.GetDirPath().ToCrossPlatPath().TrimAllFromEnd('/');
         }
@@ -92,16 +68,11 @@ namespace CASL.NativeInterop
         }
 
         /// <inheritdoc/>
-        public string NativeLibDirPath { get; private set; } = string.Empty;
+        public string NativeLibDirPath { get; }
 
         /// <inheritdoc/>
         public void VerifyDependencies()
         {
-            if (NativeLibraries is null)
-            {
-                return;
-            }
-
             /* Check each dependency library file to see if it already exists in the
             * destination folder, and if it does not, move it from the runtimes
             * folder to the destination execution folder
@@ -110,11 +81,7 @@ namespace CASL.NativeInterop
             {
                 var srcFilePath = $@"{NativeLibDirPath}/{library}";
 
-                if (this.file.Exists(srcFilePath))
-                {
-                    continue;
-                }
-                else
+                if (this.file.Exists(srcFilePath) is false)
                 {
                     throw new FileNotFoundException($"The native dependency library '{srcFilePath}' does not exist.");
                 }

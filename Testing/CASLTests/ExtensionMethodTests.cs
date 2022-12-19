@@ -30,8 +30,8 @@ namespace CASLTests
         public void ToStrings_WithNullCharSeparatedItems_ReturnsCorrectList()
         {
             // Arrange
-            var strValues = "Item1\0Item2\0";
-            nint ptr = Marshal.StringToHGlobalAnsi(strValues);
+            const string strValues = "Item1\0Item2\0";
+            var ptr = Marshal.StringToHGlobalAnsi(strValues);
 
             // Act
             var actual = ptr.ToStrings();

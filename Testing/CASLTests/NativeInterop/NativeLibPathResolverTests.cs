@@ -15,11 +15,11 @@ namespace CASLTests.NativeInterop
     {
         private const string WinDirPath = @"C:\Program Files\test-app";
         private const string LinuxDirPath = "/user/bin/test-app";
-        private const string MacOSDirPath = "/Applications/test-app";
+        private const string MacOSXDirPath = "/Applications/test-app";
         private const string WinExtension = ".dll";
         private const string PosixExtension = ".so";// MacOSX and Linux systems
         private const char WinSeparatorChar = '\\';
-        private const char PoxixSeparatorChar = '/';// MacOSX and Linux systems
+        private const char PosixSeparatorChar = '/';// MacOSX and Linux systems
         private readonly Mock<IPlatform> mockPlatform;
         private readonly Mock<IApplication> mockApp;
         private readonly Mock<IPath> mockPath;
@@ -54,9 +54,9 @@ namespace CASLTests.NativeInterop
             this.mockPlatform.Setup(m => m.GetProcessArchitecture()).Returns(arch);
             this.mockPlatform.Setup(m => m.GetPlatformLibFileExtension()).Returns(extension);
 
-            mockPath.Setup(m => m.GetDirectoryName(It.IsAny<string>())).Returns(WinDirPath);
-            mockPath.Setup(m => m.HasExtension(It.IsAny<string>())).Returns(hasExtension);
-            mockPath.Setup(m => m.GetFileNameWithoutExtension(libName)).Returns(libName.Split('.')[0]);
+            this.mockPath.Setup(m => m.GetDirectoryName(It.IsAny<string>())).Returns(WinDirPath);
+            this.mockPath.Setup(m => m.HasExtension(It.IsAny<string>())).Returns(hasExtension);
+            this.mockPath.Setup(m => m.GetFileNameWithoutExtension(libName)).Returns(libName.Split('.')[0]);
 
             var resolver = CreateResolver();
 
@@ -68,8 +68,8 @@ namespace CASLTests.NativeInterop
         }
 
         [Theory]
-        [InlineData(LinuxDirPath, PosixExtension, PoxixSeparatorChar, true, Architecture.X86, "osx")]
-        [InlineData(LinuxDirPath, PosixExtension, PoxixSeparatorChar, false, Architecture.X64, "osx-x64")]
+        [InlineData(LinuxDirPath, PosixExtension, PosixSeparatorChar, true, Architecture.X86, "osx")]
+        [InlineData(LinuxDirPath, PosixExtension, PosixSeparatorChar, false, Architecture.X64, "osx-x64")]
         public void GetPath_WhenMacOSX_ReturnsCorrectPath(
             string appDirPath,
             string extension,
@@ -82,7 +82,7 @@ namespace CASLTests.NativeInterop
             var libName = $"test-lib{extension}";
             var expected = $@"{LinuxDirPath}{separatorChar}runtimes{separatorChar}{platform}{separatorChar}native{separatorChar}test-lib{extension}";
 
-            MockMacOSPlatform();
+            MockMacOSXPlatform();
             this.mockPlatform.Setup(m => m.Is32BitProcess()).Returns(is32BitProcess);
             this.mockPlatform.Setup(m => m.GetProcessArchitecture()).Returns(arch);
             this.mockPlatform.Setup(m => m.GetPlatformLibFileExtension()).Returns(extension);
@@ -102,7 +102,7 @@ namespace CASLTests.NativeInterop
         }
 
         [Theory]
-        [InlineData(MacOSDirPath, PosixExtension, PoxixSeparatorChar, false, Architecture.X64, "linux-x64")]
+        [InlineData(MacOSXDirPath, PosixExtension, PosixSeparatorChar, false, Architecture.X64, "linux-x64")]
         public void GetPath_WhenLinuxOS_ReturnsCorrectPath(
             string appDirPath,
             string extension,
@@ -113,15 +113,15 @@ namespace CASLTests.NativeInterop
         {
             // Arrange
             var libName = $"test-lib{extension}";
-            var expected = $@"{MacOSDirPath}{separatorChar}runtimes{separatorChar}{platform}{separatorChar}native{separatorChar}test-lib{extension}";
+            var expected = $@"{MacOSXDirPath}{separatorChar}runtimes{separatorChar}{platform}{separatorChar}native{separatorChar}test-lib{extension}";
 
             MockLinuxPlatform();
-            mockPlatform.Setup(m => m.Is32BitProcess()).Returns(is32BitProcess);
-            mockPlatform.Setup(m => m.GetProcessArchitecture()).Returns(arch);
-            mockPlatform.Setup(m => m.GetPlatformLibFileExtension()).Returns(extension);
+            this.mockPlatform.Setup(m => m.Is32BitProcess()).Returns(is32BitProcess);
+            this.mockPlatform.Setup(m => m.GetProcessArchitecture()).Returns(arch);
+            this.mockPlatform.Setup(m => m.GetPlatformLibFileExtension()).Returns(extension);
 
             this.mockPath.SetupGet(p => p.DirectorySeparatorChar).Returns(separatorChar);
-            this.mockPath.Setup(m => m.GetDirectoryName(It.IsAny<string>())).Returns(MacOSDirPath);
+            this.mockPath.Setup(m => m.GetDirectoryName(It.IsAny<string>())).Returns(MacOSXDirPath);
             this.mockPath.Setup(m => m.HasExtension(libName)).Returns(true);
             this.mockPath.Setup(m => m.GetFileNameWithoutExtension(libName)).Returns(libName.Split('.')[0]);
 
@@ -165,7 +165,7 @@ namespace CASLTests.NativeInterop
         /// <summary>
         /// Mocks the platform to be MacOSX.
         /// </summary>
-        private void MockMacOSPlatform()
+        private void MockMacOSXPlatform()
         {
             this.mockPlatform.Setup(m => m.IsWinPlatform()).Returns(false);
             this.mockPlatform.Setup(m => m.IsMacOSXPlatform()).Returns(true);

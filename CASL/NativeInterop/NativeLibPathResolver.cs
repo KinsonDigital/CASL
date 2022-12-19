@@ -4,9 +4,7 @@
 
 namespace CASL.NativeInterop
 {
-    using System;
     using System.IO.Abstractions;
-    using System.Runtime.InteropServices;
 
     /// <summary>
     /// Resolves paths to native libraries.
@@ -36,27 +34,23 @@ namespace CASL.NativeInterop
         /// <inheritdoc/>
         public string GetDirPath()
         {
-            var platform = string.Empty;
+            var platformValue = string.Empty;
 
             if (this.platform.IsWinPlatform())
             {
-                platform = "win";
-
-                platform = $"{platform}-{this.platform.GetProcessArchitecture().ToString().ToLower()}";
+                platformValue = $"win-{this.platform.GetProcessArchitecture().ToString().ToLower()}";
             }
             else if (this.platform.IsMacOSXPlatform())
             {
-                platform = "osx";
-
-                platform += this.platform.Is32BitProcess() ? string.Empty : "-x64";
+                platformValue = $"osx{(this.platform.Is32BitProcess() ? string.Empty : "-x64")}";
             }
             else if (this.platform.IsLinuxPlatform())
             {
                 // NOTE: Major linux distros dropped 32 bit support a long time ago
-                platform = "linux-x64";
+                platformValue = "linux-x64";
             }
 
-            return $@"{this.basePath}{CrossPlatDirSeparatorChar}runtimes{CrossPlatDirSeparatorChar}{platform}" +
+            return $@"{this.basePath}{CrossPlatDirSeparatorChar}runtimes{CrossPlatDirSeparatorChar}{platformValue}" +
                 $"{CrossPlatDirSeparatorChar}native";
         }
 

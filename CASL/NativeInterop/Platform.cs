@@ -8,7 +8,6 @@ namespace CASL.NativeInterop
     using System.Diagnostics.CodeAnalysis;
     using System.Globalization;
     using System.Runtime.InteropServices;
-    using CASL.Exceptions;
 
     /// <summary>
     /// Provides information about the current platform.

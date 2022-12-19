@@ -3,19 +3,18 @@
 // </copyright>
 
 #pragma warning disable IDE0002 // Name can be simplified
-namespace CASLTests
+namespace CASLTests.NativeInterop
 {
 #pragma warning disable IDE0001 // Name can be simplified
     using System;
     using System.Collections.ObjectModel;
     using System.IO;
     using System.IO.Abstractions;
-    using System.Runtime.InteropServices;
     using CASL.Exceptions;
     using CASL.NativeInterop;
     using Moq;
     using Xunit;
-    using Assert = CASLTests.Helpers.AssertExtensions;
+    using Assert = Helpers.AssertExtensions;
 #pragma warning restore IDE0001 // Name can be simplified
 
     /// <summary>
@@ -26,16 +25,13 @@ namespace CASLTests
         private const string WinDirPath = @"C:\Program Files\test-app";
         private const string CrossPlatWinDirPath = @"C:/Program Files/test-app";
         private const string LinuxDirPath = "/user/bin/test-app";
-        private const string MacOSDirPath = "/Applications/test-app";
         private const string WinExtension = ".dll";
         private const string PosixExtenstion = ".so";
         private const string LibNameWithoutExt = "test-lib";
         private const string WinLibNameWithExt = LibNameWithoutExt + WinExtension;
         private const string PosixLibNameWithExt = LibNameWithoutExt + PosixExtenstion;
-        private const char WinSeparatorChar = '\\';
-        private const char PoxixSeparatorChar = '/';// MacOSX and Linux systems
+        private const char PosixSeparatorChar = '/';// MacOSX and Linux systems
         private readonly Mock<IDependencyManager> mockDependencyManager;
-        private readonly Mock<IFilePathResolver> mockPathResolver;
         private readonly Mock<IPlatform> mockPlatform;
         private readonly Mock<IDirectory> mockDirectory;
         private readonly Mock<IFile> mockFile;
@@ -50,13 +46,7 @@ namespace CASLTests
         /// </summary>
         public NativeLibraryLoaderTests()
         {
-            var testPath = @"/user/bin/my-lib.so.2";
-
-            var nameNoExt = Path.GetFileNameWithoutExtension(testPath);
-            var extension = Path.GetExtension(testPath);
-
             this.mockDependencyManager = new Mock<IDependencyManager>();
-            this.mockPathResolver = new Mock<IFilePathResolver>();
             this.mockPlatform = new Mock<IPlatform>();
             this.mockDirectory = new Mock<IDirectory>();
             this.mockFile = new Mock<IFile>();
@@ -72,7 +62,7 @@ namespace CASLTests
             //Act & Assert
             Assert.ThrowsWithMessage<ArgumentNullException>(() =>
             {
-                var loader = new NativeLibraryLoader(
+                _ = new NativeLibraryLoader(
                     null,
                     this.mockPlatform.Object,
                     this.mockDirectory.Object,
@@ -88,7 +78,7 @@ namespace CASLTests
             //Act & Assert
             Assert.ThrowsWithMessage<ArgumentNullException>(() =>
             {
-                var loader = new NativeLibraryLoader(
+                _ = new NativeLibraryLoader(
                     this.mockDependencyManager.Object,
                     null,
                     this.mockDirectory.Object,
@@ -104,7 +94,7 @@ namespace CASLTests
             //Act & Assert
             Assert.ThrowsWithMessage<ArgumentNullException>(() =>
             {
-                var loader = new NativeLibraryLoader(
+                _ = new NativeLibraryLoader(
                     this.mockDependencyManager.Object,
                     this.mockPlatform.Object,
                     null,
@@ -120,7 +110,7 @@ namespace CASLTests
             //Act & Assert
             Assert.ThrowsWithMessage<ArgumentNullException>(() =>
             {
-                var loader = new NativeLibraryLoader(
+                _ = new NativeLibraryLoader(
                     this.mockDependencyManager.Object,
                     this.mockPlatform.Object,
                     this.mockDirectory.Object,
@@ -136,7 +126,7 @@ namespace CASLTests
             //Act & Assert
             Assert.ThrowsWithMessage<ArgumentNullException>(() =>
             {
-                var loader = new NativeLibraryLoader(
+                _ = new NativeLibraryLoader(
                     this.mockDependencyManager.Object,
                     this.mockPlatform.Object,
                     this.mockDirectory.Object,
@@ -152,7 +142,7 @@ namespace CASLTests
             //Act & Assert
             Assert.ThrowsWithMessage<ArgumentNullException>(() =>
             {
-                var loader = new NativeLibraryLoader(
+                _ = new NativeLibraryLoader(
                     this.mockDependencyManager.Object,
                     this.mockPlatform.Object,
                     this.mockDirectory.Object,
@@ -186,17 +176,14 @@ namespace CASLTests
             this.mockLibrary.SetupGet(p => p.LibraryName).Returns(libName);
             this.mockPath.Setup(m => m.GetFileNameWithoutExtension(libName)).Returns(LibNameWithoutExt);
             this.mockPath.Setup(m => m.HasExtension(It.IsAny<string>()))
-                .Returns<string>(path =>
-                {
-                    return path.Contains('.');
-                });
+                .Returns<string>(path => path.Contains('.'));
             this.mockPlatform.Setup(m => m.GetPlatformLibFileExtension()).Returns(extension);
 
             //Act
             var loader = CreateLoader();
 
             //Assert
-            Assert.Equal(WinLibNameWithExt, loader.LibraryName);
+            Xunit.Assert.Equal(WinLibNameWithExt, loader.LibraryName);
         }
         #endregion
 
@@ -213,7 +200,7 @@ namespace CASLTests
             //Arrange
             const string systemError = "Could not load the library";
 
-            var expectedPath = $"{expectedDirPath}{PoxixSeparatorChar}{libName}";
+            var expectedPath = $"{expectedDirPath}{PosixSeparatorChar}{libName}";
             this.mockFile.Setup(m => m.Exists(It.IsAny<string?>())).Returns(true);
 
             this.mockDependencyManager.SetupGet(p => p.NativeLibDirPath).Returns(dirPath);
@@ -222,10 +209,7 @@ namespace CASLTests
 
             this.mockPath.Setup(m => m.GetFileNameWithoutExtension(libName)).Returns(LibNameWithoutExt);
             this.mockPath.Setup(m => m.HasExtension(It.IsAny<string>()))
-                .Returns<string>(path =>
-                {
-                    return path.Contains('.');
-                });
+                .Returns<string>(path => path.Contains('.'));
 
             this.mockPlatform.Setup(m => m.GetPlatformLibFileExtension()).Returns(extension);
             this.mockPlatform.Setup(m => m.GetLastSystemError()).Returns(systemError);
@@ -251,10 +235,7 @@ namespace CASLTests
 
             this.mockPath.Setup(m => m.GetFileNameWithoutExtension(WinLibNameWithExt)).Returns(LibNameWithoutExt);
             this.mockPath.Setup(m => m.HasExtension(It.IsAny<string>()))
-                .Returns<string>(path =>
-                {
-                    return path.Contains('.');
-                });
+                .Returns<string>(path => path.Contains('.'));
 
             this.mockPlatform.Setup(m => m.GetPlatformLibFileExtension()).Returns(WinExtension);
             this.mockPlatform.Setup(m => m.LoadLibrary(libFilePath)).Returns(expected);
@@ -265,7 +246,7 @@ namespace CASLTests
             var actual = loader.LoadLibrary();
 
             // Assert
-            Assert.Equal(expected, actual);
+            Xunit.Assert.Equal(expected, actual);
         }
 
         [Fact]
@@ -279,10 +260,7 @@ namespace CASLTests
 
             this.mockPath.Setup(m => m.GetFileNameWithoutExtension(WinLibNameWithExt)).Returns(LibNameWithoutExt);
             this.mockPath.Setup(m => m.HasExtension(It.IsAny<string>()))
-               .Returns<string>(path =>
-               {
-                   return path.Contains('.');
-               });
+               .Returns<string>(path => path.Contains('.'));
 
             this.mockPlatform.Setup(m => m.GetPlatformLibFileExtension()).Returns(WinExtension);
             this.mockPlatform.Setup(m => m.LoadLibrary(libFilePath)).Returns(expected);
@@ -310,7 +288,7 @@ namespace CASLTests
             this.mockPlatform.Setup(m => m.GetPlatformLibFileExtension()).Returns(".dll");
             this.mockPlatform.Setup(m => m.Is32BitProcess()).Returns(false);
             this.mockPlatform.Setup(m => m.Is64BitProcess()).Returns(true);
-            this.mockPlatform.Setup(m => m.LoadLibrary(this.libPath)).Returns(new IntPtr(1234));
+            this.mockPlatform.Setup(m => m.LoadLibrary(this.libPath)).Returns(new nint(1234));
             this.mockPlatform.Setup(m => m.GetLastSystemError()).Returns("Could not load module.");
 
             this.mockDirectory.Setup(m => m.Exists(this.libDirPaths[0])).Returns(true);

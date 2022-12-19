@@ -12,7 +12,6 @@ namespace CASL
     using CASL.Devices;
     using CASL.Devices.Factories;
     using CASL.Exceptions;
-    using CASL.NativeInterop;
     using CASL.OpenAL;
     using IOPath = System.IO.Path;
 
