@@ -1,4 +1,4 @@
-﻿// <copyright file="NativeDependencyManager.cs" company="KinsonDigital">
+// <copyright file="NativeDependencyManager.cs" company="KinsonDigital">
 // Copyright (c) KinsonDigital. All rights reserved.
 // </copyright>
 
@@ -62,7 +62,7 @@ namespace CASL.NativeInterop
             this.file = file;
             this.path = path;
 
-            NativeLibDirPath = nativeLibPathResolver.GetDirPath();
+            NativeLibDirPath = nativeLibPathResolver.GetDirPath().ToCrossPlatPath().TrimAllFromEnd('/');
         }
 
         /// <summary>
@@ -78,23 +78,16 @@ namespace CASL.NativeInterop
             get => this.nativeLibraries.ToReadOnlyCollection();
             set
             {
-                if (value is null)
+                var result = new List<string>();
+
+                foreach (var lib in value)
                 {
-                    this.nativeLibraries = Array.Empty<string>();
+                    var extension = this.path.GetExtension(lib);
+
+                    result.Add($"{this.path.GetFileNameWithoutExtension(lib)}{extension}");
                 }
-                else
-                {
-                    var result = new List<string>();
 
-                    foreach (var lib in value)
-                    {
-                        var extension = this.path.GetExtension(lib);
-
-                        result.Add($"{this.path.GetFileNameWithoutExtension(lib)}{extension}");
-                    }
-
-                    this.nativeLibraries = result.ToArray();
-                }
+                this.nativeLibraries = result.ToArray();
             }
         }
 
@@ -104,13 +97,18 @@ namespace CASL.NativeInterop
         /// <inheritdoc/>
         public void VerifyDependencies()
         {
+            if (NativeLibraries is null)
+            {
+                return;
+            }
+
             /* Check each dependency library file to see if it already exists in the
             * destination folder, and if it does not, move it from the runtimes
             * folder to the destination execution folder
             */
             foreach (var library in NativeLibraries)
             {
-                var srcFilePath = $@"{NativeLibDirPath}{library}";
+                var srcFilePath = $@"{NativeLibDirPath}/{library}";
 
                 if (this.file.Exists(srcFilePath))
                 {

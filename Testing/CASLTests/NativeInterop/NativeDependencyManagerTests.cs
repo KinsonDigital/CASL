@@ -116,39 +116,51 @@ namespace CASLTests.NativeInterop
 
         #region Prop Tests
         [Fact]
-        public void NativeLibraries_WhenGettingNullValue_ReturnsCorrecResult()
+        public void NativeLibraries_WhenSettingValue_ReturnsCorrectResult()
         {
             // Arrange
-            this.mockPlatform.Setup(m => m.Is64BitProcess()).Returns(true);
+            const string dirPath = "C:/test-dir";
+            const string libNameWithExtension = "test-native-lib.dll";
+            const string libNameWithoutExtension = "test-native-lib";
 
-            var manager = CreateManager();
-
-            // Act
-            manager.NativeLibraries = null;
-            var actual = manager.NativeLibraries;
-
-            // Assert
-            Assert.Empty(actual);
-        }
-
-        [Fact]
-        public void NativeLibraries_WhenSettingValue_ReturnsCorrecResult()
-        {
-            // Arrange
-            var libName = "test-native-lib.dll";
+            this.mockPathResolver.Setup(m => m.GetDirPath()).Returns(dirPath);
             this.mockPlatform.Setup(m => m.Is64BitProcess()).Returns(true);
             this.mockPlatform.Setup(m => m.IsWinPlatform()).Returns(true);
-            this.mockPath.Setup(m => m.GetFileNameWithoutExtension(libName)).Returns(libName.Split('.')[0]);
+            this.mockPath.Setup(m => m.GetFileNameWithoutExtension(libNameWithExtension))
+                .Returns(libNameWithoutExtension);
 
             var manager = CreateManager();
 
             // Act
-            manager.NativeLibraries = new ReadOnlyCollection<string>(new List<string> { libName });
+            manager.NativeLibraries = new ReadOnlyCollection<string>(new List<string> { libNameWithExtension });
             var actual = manager.NativeLibraries;
 
             // Assert
             Assert.Single(actual);
             Assert.Equal("test-native-lib", actual[0]);
+        }
+
+        [Theory]
+        [InlineData(@"C:\test-dir")]
+        [InlineData(@"C:\test-dir\")]
+        [InlineData(@"C:\test-dir\\")]
+        [InlineData("C:/test-dir")]
+        [InlineData("C:/test-dir/")]
+        [InlineData("C:/test-dir//")]
+        public void NativeLibDirPath_WhenGettingValue_ReturnsCorrectResult(string dirPath)
+        {
+            // Arrange
+            const string expected = "C:/test-dir";
+
+            this.mockPathResolver.Setup(m => m.GetDirPath()).Returns(dirPath);
+
+            var sut = CreateManager();
+
+            // Act
+            var actual = sut.NativeLibDirPath;
+
+            // Assert
+            Assert.Equal(expected, actual);
         }
         #endregion
 
@@ -157,10 +169,10 @@ namespace CASLTests.NativeInterop
         public void VerifyDependencies_WhenLibrarySrcDoesNotExist_ThrowsException()
         {
             // Arrange
-            var assemblyDirPath = @"C:\test-dir\";
-            var srcDirPath = $@"{assemblyDirPath}runtimes\win-x64\native\";
+            const string assemblyDirPath = @"C:/test-dir";
+            const string srcDirPath = $@"{assemblyDirPath}/runtimes/win-x64/native";
 
-            this.mockFile.Setup(m => m.Exists($"{srcDirPath}lib.dll")).Returns(false);
+            this.mockFile.Setup(m => m.Exists($"{srcDirPath}/lib.dll")).Returns(false);
             this.mockPathResolver.Setup(m => m.GetDirPath()).Returns(srcDirPath);
 
             this.mockPath.Setup(m => m.GetExtension("lib.dll")).Returns(".dll");
@@ -173,7 +185,7 @@ namespace CASLTests.NativeInterop
             Assert.ThrowsWithMessage<FileNotFoundException>(() =>
             {
                 manager.VerifyDependencies();
-            }, $"The native dependency library '{srcDirPath}lib.dll' does not exist.");
+            }, $"The native dependency library '{srcDirPath}/lib.dll' does not exist.");
         }
 
         [Fact]
