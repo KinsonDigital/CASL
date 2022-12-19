@@ -54,4 +54,4 @@ As with all software, there is always a chance for issues and bugs, especially f
 4. [#88](https://github.com/KinsonDigital/CASL/issues/88) - Added release note template files to the project for preview and production releases.
 5. [#86](https://github.com/KinsonDigital/CASL/issues/86) - Updated the project's code of conduct.
 6. [#83](https://github.com/KinsonDigital/CASL/issues/83) - Updated the branching documentation.
-7. [#64](https://github.com/KinsonDigital/CASL/issues/64) - Created a backers file.
+7. [#77](https://github.com/KinsonDigital/CASL/issues/77) - Created a backers file.
