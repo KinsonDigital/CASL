@@ -2,12 +2,11 @@
 // Copyright (c) KinsonDigital. All rights reserved.
 // </copyright>
 
-using System.IO.Abstractions;
-
 namespace CASL
 {
     using System;
     using System.Diagnostics.CodeAnalysis;
+    using System.IO.Abstractions;
     using System.Linq;
     using CASL.Data;
     using CASL.Data.Exceptions;
@@ -19,7 +18,7 @@ namespace CASL
     /// <summary>
     /// A single sound that can be played, paused etc.
     /// </summary>
-    public class Sound : ISound
+    public sealed class Sound : ISound
     {
         private const char CrossPlatDirSeparatorChar = '/';
         private const string IsDisposedExceptionMessage = "The sound is disposed.  You must create another sound instance.";
@@ -31,6 +30,7 @@ namespace CASL
         private uint srcId;
         private uint bufferId;
         private bool ignoreOpenALCalls;
+        private bool isDisposed;
         private float totalSeconds;
 
         /// <summary>
@@ -40,7 +40,7 @@ namespace CASL
         [ExcludeFromCodeCoverage]
         public Sound(string filePath)
         {
-            Path = filePath.ToCrossPlatPath().TrimAllFromEnd(CrossPlatDirSeparatorChar);
+            FilePath = filePath.ToCrossPlatPath().TrimAllFromEnd(CrossPlatDirSeparatorChar);
 
             this.alInvoker = IoC.Container.GetInstance<IOpenALInvoker>();
             this.alInvoker.ErrorCallback += ErrorCallback;
@@ -73,7 +73,7 @@ namespace CASL
             ISoundDecoder<byte> mp3Decoder,
             IPath path)
         {
-            Path = filePath.ToCrossPlatPath().TrimAllFromEnd(CrossPlatDirSeparatorChar);
+            FilePath = filePath.ToCrossPlatPath().TrimAllFromEnd(CrossPlatDirSeparatorChar);
 
             this.alInvoker = alInvoker;
             this.alInvoker.ErrorCallback += ErrorCallback;
@@ -91,17 +91,17 @@ namespace CASL
         }
 
         /// <inheritdoc/>
-        public string Name => this.path.GetFileNameWithoutExtension(Path);
+        public string Name => this.path.GetFileNameWithoutExtension(FilePath);
 
         /// <inheritdoc/>
-        public string Path { get; private set; }
+        public string FilePath { get; }
 
         /// <inheritdoc/>
         public float Volume
         {
             get
             {
-                if (Unloaded)
+                if (this.isDisposed)
                 {
                     throw new InvalidOperationException(IsDisposedExceptionMessage);
                 }
@@ -113,7 +113,7 @@ namespace CASL
             }
             set
             {
-                if (Unloaded)
+                if (this.isDisposed)
                 {
                     throw new InvalidOperationException(IsDisposedExceptionMessage);
                 }
@@ -140,7 +140,7 @@ namespace CASL
         {
             get
             {
-                if (Unloaded)
+                if (this.isDisposed)
                 {
                     throw new InvalidOperationException(IsDisposedExceptionMessage);
                 }
@@ -159,7 +159,7 @@ namespace CASL
         {
             get
             {
-                if (Unloaded)
+                if (this.isDisposed)
                 {
                     throw new InvalidOperationException(IsDisposedExceptionMessage);
                 }
@@ -168,7 +168,7 @@ namespace CASL
             }
             set
             {
-                if (Unloaded)
+                if (this.isDisposed)
                 {
                     throw new InvalidOperationException(IsDisposedExceptionMessage);
                 }
@@ -183,14 +183,11 @@ namespace CASL
         }
 
         /// <inheritdoc/>
-        public bool Unloaded { get; private set; }
-
-        /// <inheritdoc/>
         public SoundState State
         {
             get
             {
-                if (Unloaded)
+                if (this.isDisposed)
                 {
                     throw new InvalidOperationException(IsDisposedExceptionMessage);
                 }
@@ -220,7 +217,7 @@ namespace CASL
         {
             get
             {
-                if (Unloaded)
+                if (this.isDisposed)
                 {
                     throw new InvalidOperationException(IsDisposedExceptionMessage);
                 }
@@ -246,7 +243,7 @@ namespace CASL
         /// <inheritdoc/>
         public void Play()
         {
-            if (Unloaded)
+            if (this.isDisposed)
             {
                 throw new InvalidOperationException(IsDisposedExceptionMessage);
             }
@@ -267,7 +264,7 @@ namespace CASL
         /// <inheritdoc/>
         public void Pause()
         {
-            if (Unloaded)
+            if (this.isDisposed)
             {
                 throw new InvalidOperationException(IsDisposedExceptionMessage);
             }
@@ -283,7 +280,7 @@ namespace CASL
         /// <inheritdoc/>
         public void Stop()
         {
-            if (Unloaded)
+            if (this.isDisposed)
             {
                 throw new InvalidOperationException(IsDisposedExceptionMessage);
             }
@@ -299,7 +296,7 @@ namespace CASL
         /// <inheritdoc/>
         public void Reset()
         {
-            if (Unloaded)
+            if (this.isDisposed)
             {
                 throw new InvalidOperationException(IsDisposedExceptionMessage);
             }
@@ -315,7 +312,7 @@ namespace CASL
         /// <inheritdoc/>
         public void SetTimePosition(float seconds)
         {
-            if (Unloaded)
+            if (this.isDisposed)
             {
                 throw new InvalidOperationException(IsDisposedExceptionMessage);
             }
@@ -378,35 +375,7 @@ namespace CASL
         }
 
         /// <inheritdoc/>
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        /// <summary>
-        /// <inheritdoc/>
-        /// </summary>
-        /// <param name="disposing"><see langword="true"/> to dispose of managed resources.</param>
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!Unloaded)
-            {
-                if (disposing)
-                {
-                    this.oggDecoder.Dispose();
-                    this.mp3Decoder.Dispose();
-                    this.audioManager.DeviceChanging -= AudioManager_DeviceChanging;
-                    this.audioManager.DeviceChanged -= AudioManager_DeviceChanged;
-                }
-
-                UnloadSoundData();
-
-                this.alInvoker.ErrorCallback -= ErrorCallback;
-
-                Unloaded = true;
-            }
-        }
+        public void Dispose() => Dispose(true);
 
         /// <summary>
         /// Maps the given audio <paramref name="format"/> to the <see cref="ALFormat"/> type equivalent.
@@ -425,6 +394,39 @@ namespace CASL
         };
 
         /// <summary>
+        /// The callback invoked when an OpenAL error occurs.
+        /// </summary>
+        /// <param name="errorMsg">The OpenAL message.</param>
+        [ExcludeFromCodeCoverage]
+        private static void ErrorCallback(string errorMsg) => throw new AudioException(errorMsg);
+
+        /// <summary>
+        /// <inheritdoc cref="IDisposable.Dispose"/>
+        /// </summary>
+        /// <param name="disposing"><see langword="true"/> to dispose of managed resources.</param>
+        private void Dispose(bool disposing)
+        {
+            if (!this.isDisposed)
+            {
+                if (disposing)
+                {
+                    this.oggDecoder.Dispose();
+                    this.mp3Decoder.Dispose();
+                    this.audioManager.DeviceChanging -= AudioManager_DeviceChanging;
+                    this.audioManager.DeviceChanged -= AudioManager_DeviceChanged;
+                }
+
+                UnloadSoundData();
+
+                // ReSharper disable HeapView.DelegateAllocation
+                this.alInvoker.ErrorCallback -= ErrorCallback;
+
+                // ReSharper restore HeapView.DelegateAllocation
+                this.isDisposed = true;
+            }
+        }
+
+        /// <summary>
         /// Initializes the sound.
         /// </summary>
         private void Init()
@@ -436,20 +438,20 @@ namespace CASL
 
             (this.srcId, this.bufferId) = this.audioManager.InitSound();
 
-            var extension = this.path.GetExtension(Path);
+            var extension = this.path.GetExtension(FilePath);
 
             SoundSource soundSrc;
 
             switch (extension)
             {
                 case ".ogg":
-                    var oggData = this.oggDecoder.LoadData(Path);
+                    var oggData = this.oggDecoder.LoadData(FilePath);
 
                     UploadOggData(oggData);
 
                     break;
                 case ".mp3":
-                    var mp3Data = this.mp3Decoder.LoadData(Path);
+                    var mp3Data = this.mp3Decoder.LoadData(FilePath);
 
                     UploadMp3Data(mp3Data);
 
@@ -465,7 +467,7 @@ namespace CASL
 
             var sampleLen = sizeInBytes * 8 / (totalChannels * bitDepth);
 
-            this.totalSeconds = sampleLen / frequency;
+            this.totalSeconds = (float)sampleLen / frequency;
 
             soundSrc.SourceId = this.srcId;
             soundSrc.TotalSeconds = this.totalSeconds;
@@ -555,12 +557,5 @@ namespace CASL
         /// <param name="sender">The source of the event.</param>
         /// <param name="e">Contains various event related information.</param>
         private void AudioManager_DeviceChanged(object? sender, EventArgs e) => Init();
-
-        /// <summary>
-        /// The callback invoked when an OpenAL error occurs.
-        /// </summary>
-        /// <param name="errorMsg">The OpenAL message.</param>
-        [ExcludeFromCodeCoverage]
-        private void ErrorCallback(string errorMsg) => throw new AudioException(errorMsg);
     }
 }

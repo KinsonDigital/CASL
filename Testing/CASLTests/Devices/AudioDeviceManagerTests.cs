@@ -27,7 +27,7 @@ namespace CASLTests.Devices
     public class AudioDeviceManagerTests
     {
         private const string OggFileExtension = ".ogg";
-        private static readonly string IsDisposedExceptionMessage = $"The '{nameof(AudioDeviceManager)}' has not been initialized.\nInvoked the '{nameof(AudioDeviceManager.InitDevice)}()' to initialize the device manager.";
+        private const string IsDisposedExceptionMessage = $"The '{nameof(AudioDeviceManager)}' has not been initialized.\nInvoked the '{nameof(AudioDeviceManager.InitDevice)}()' to initialize the device manager.";
         private readonly string oggFilePath;
         private readonly Mock<IOpenALInvoker> mockALInvoker;
         private readonly Mock<IPath> mockPath;
@@ -162,8 +162,6 @@ namespace CASLTests.Devices
         {
             // Arrange
             // The MakeContextCurrent call does not take nullable bool.  This fixes that issue
-            var contextResult = !(makeContextCurrentResult is null) && (bool)makeContextCurrentResult;
-
             this.mockALInvoker.Setup(m => m.MakeContextCurrent(this.context)).Returns(false);
             var manager = CreateManager();
 
@@ -273,15 +271,11 @@ namespace CASLTests.Devices
         {
             // Arrange
             var manager = CreateManager();
-            var sourceIdNumbers = new List<uint>(new[] { 1122u, 3344u });
             var myItems = new Queue<uint>();
             myItems.Enqueue(1122u);
             myItems.Enqueue(3344u);
 
-            this.mockALInvoker.Setup(m => m.GenSource()).Returns(() =>
-            {
-                return myItems.Dequeue();
-            });
+            this.mockALInvoker.Setup(m => m.GenSource()).Returns(() => myItems.Dequeue());
 
             manager.InitDevice();
             manager.InitSound();
@@ -358,7 +352,7 @@ namespace CASLTests.Devices
 
             var manager = CreateManager();
 
-            var sound = new Sound(
+            _ = new Sound(
                 this.oggFilePath,
                 this.mockALInvoker.Object,
                 manager,
@@ -417,7 +411,7 @@ namespace CASLTests.Devices
             var manager = CreateManager();
             manager.InitDevice();
 
-            var sound = new Sound(
+            _ = new Sound(
                 this.oggFilePath,
                 this.mockALInvoker.Object,
                 manager,
@@ -496,7 +490,7 @@ namespace CASLTests.Devices
         /// <summary>
         /// Mocks the buffer data stats to influence the total seconds that the sound has.
         /// </summary>
-        /// <param name="channels">The total number of seconds to simulate.</param>
+        /// <param name="totalSeconds">The total number of seconds to simulate.</param>
         private void MockSoundLength(float totalSeconds)
         {
             /* This is the total seconds for every byte of data
