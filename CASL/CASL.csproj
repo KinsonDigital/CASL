@@ -2,16 +2,16 @@
 
   <PropertyGroup>
     <OutputType>Library</OutputType>
-    <TargetFramework>net5.0</TargetFramework>
-    <LangVersion>9.0</LangVersion>
+    <TargetFramework>net7.0</TargetFramework>
+    <LangVersion>11.0</LangVersion>
     <Nullable>enable</Nullable>
-    
+
     <!--Update this for preview releases-->
     <Version>1.0.0-preview.10</Version>
 
     <!--Update this for preview releases-->
     <FileVersion>1.0.0-preview.10</FileVersion>
-    
+
     <AssemblyVersion>1.0.0</AssemblyVersion>
     <ApplicationIcon>casl-logo.ico</ApplicationIcon>
     <StartupObject />
@@ -36,15 +36,15 @@
     <None Remove="OpenAL\libs\**" />
     <None Include="..\Documentation\Images\casl-logo.ico">
       <Pack>True</Pack>
-      <PackagePath></PackagePath>
+      <PackagePath/>
     </None>
     <None Include="..\Documentation\Images\casl-logo.png">
       <Pack>True</Pack>
-      <PackagePath></PackagePath>
+      <PackagePath/>
     </None>
     <None Include="..\LICENSE.md">
       <Pack>True</Pack>
-      <PackagePath></PackagePath>
+      <PackagePath/>
     </None>
   </ItemGroup>
 
@@ -78,10 +78,10 @@
       <!--WINDOWS-->
       <Content Include="$(ProjectDir)OpenAL\libs\win-x86\*.dll" Pack="true" PackagePath="\runtimes\win-x86\native" />
       <Content Include="$(ProjectDir)OpenAL\libs\win-x64\*.dll" Pack="true" PackagePath="\runtimes\win-x64\native" />
-      
+
       <!--LINUX-->
       <Content Include="$(ProjectDir)OpenAL\libs\linux-x64\*.so*" Pack="true" PackagePath="\runtimes\linux-x64\native" />
     </ItemGroup>
   </Target>
-  
+
 </Project>
