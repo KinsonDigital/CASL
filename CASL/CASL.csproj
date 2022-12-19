@@ -36,15 +36,15 @@
     <None Remove="OpenAL\libs\**" />
     <None Include="..\Documentation\Images\casl-logo.ico">
       <Pack>True</Pack>
-      <PackagePath/>
+      <PackagePath />
     </None>
     <None Include="..\Documentation\Images\casl-logo.png">
       <Pack>True</Pack>
-      <PackagePath/>
+      <PackagePath />
     </None>
     <None Include="..\LICENSE.md">
       <Pack>True</Pack>
-      <PackagePath/>
+      <PackagePath />
     </None>
   </ItemGroup>
 
@@ -57,7 +57,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="5.0.3">
+    <PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="7.0.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
@@ -68,7 +68,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="System.IO.Abstractions" Version="13.2.33" />
+    <PackageReference Include="System.IO.Abstractions" Version="19.1.5" />
   </ItemGroup>
 
   <!--ADD STUFF TO WINDOWS NUGET PACKAGE-->
