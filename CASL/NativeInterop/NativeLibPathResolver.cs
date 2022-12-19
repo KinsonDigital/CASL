@@ -4,15 +4,14 @@
 
 namespace CASL.NativeInterop
 {
-    using System;
     using System.IO.Abstractions;
-    using System.Runtime.InteropServices;
 
     /// <summary>
     /// Resolves paths to native libraries.
     /// </summary>
     internal class NativeLibPathResolver : IFilePathResolver
     {
+        private const char CrossPlatDirSeparatorChar = '/';
         private readonly IPlatform platform;
         private readonly IPath path;
         private readonly string basePath;
@@ -28,37 +27,31 @@ namespace CASL.NativeInterop
             this.platform = platform;
             this.path = path;
 
-            var dirName = this.path.GetDirectoryName(application.Location);
-
-            this.basePath = $@"{this.path.GetDirectoryName(application.Location)}{this.path.DirectorySeparatorChar}";
+            this.basePath = (this.path.GetDirectoryName(application.Location) ?? string.Empty).ToCrossPlatPath()
+                .TrimAllFromEnd(CrossPlatDirSeparatorChar);
         }
 
         /// <inheritdoc/>
         public string GetDirPath()
         {
-            var platform = string.Empty;
+            var platformValue = string.Empty;
 
             if (this.platform.IsWinPlatform())
             {
-                platform = "win";
-
-                platform = $"{platform}-{this.platform.GetProcessArchitecture().ToString().ToLower()}";
+                platformValue = $"win-{this.platform.GetProcessArchitecture().ToString().ToLower()}";
             }
             else if (this.platform.IsMacOSXPlatform())
             {
-                platform = "osx";
-
-                platform += this.platform.Is32BitProcess() ? string.Empty : "-x64";
+                platformValue = $"osx{(this.platform.Is32BitProcess() ? string.Empty : "-x64")}";
             }
             else if (this.platform.IsLinuxPlatform())
             {
-                // NOTE: Major linux distros dropped 32 support a long time ago
-                platform = "linux-x64";
+                // NOTE: Major linux distros dropped 32 bit support a long time ago
+                platformValue = "linux-x64";
             }
 
-            var separator = this.path.DirectorySeparatorChar;
-
-            return $@"{this.basePath}runtimes{separator}{platform}{this.path.DirectorySeparatorChar}native{separator}";
+            return $@"{this.basePath}{CrossPlatDirSeparatorChar}runtimes{CrossPlatDirSeparatorChar}{platformValue}" +
+                $"{CrossPlatDirSeparatorChar}native";
         }
 
         /// <summary>
@@ -74,7 +67,7 @@ namespace CASL.NativeInterop
                 ? $"{this.path.GetFileNameWithoutExtension(libName)}{this.platform.GetPlatformLibFileExtension()}"
                 : $"{libName}{this.platform.GetPlatformLibFileExtension()}";
 
-            return $@"{GetDirPath()}{libName}";
+            return $@"{GetDirPath()}{CrossPlatDirSeparatorChar}{libName}";
         }
     }
 }
