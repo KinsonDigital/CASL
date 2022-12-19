@@ -26,6 +26,7 @@ namespace CASLTests.Devices
     /// </summary>
     public class AudioDeviceManagerTests
     {
+        private const string OggFileExtension = ".ogg";
         private static readonly string IsDisposedExceptionMessage = $"The '{nameof(AudioDeviceManager)}' has not been initialized.\nInvoked the '{nameof(AudioDeviceManager.InitDevice)}()' to initialize the device manager.";
         private readonly string oggFilePath;
         private readonly Mock<IOpenALInvoker> mockALInvoker;
@@ -40,7 +41,7 @@ namespace CASLTests.Devices
         /// </summary>
         public AudioDeviceManagerTests()
         {
-            this.oggFilePath = @"C:\temp\Content\Sounds\sound.ogg";
+            this.oggFilePath = @"C:/temp/Content/Sounds/sound.ogg";
             this.device = new ALDevice(1234);
             this.context = new ALContext(5678);
 
@@ -56,6 +57,7 @@ namespace CASLTests.Devices
             this.mockALInvoker.Setup(m => m.MakeContextCurrent(this.context)).Returns(true);
 
             this.mockPath = new Mock<IPath>();
+            this.mockPath.Setup(m => m.GetExtension(It.IsAny<string?>())).Returns(OggFileExtension);
         }
 
         #region Prop Tests
