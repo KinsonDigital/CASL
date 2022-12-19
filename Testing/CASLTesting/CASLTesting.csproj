@@ -20,7 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="5.0.3">
+    <PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="7.0.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
@@ -45,14 +45,14 @@
 
   <!--COPY 64 BIT WINDOWS VERSION OF OPENAL TO PUBLISH DIRECTORY-->
   <Target Name="CopyOpenALLib" AfterTargets="publish" Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <Copy SourceFiles="..\..\CASL\OpenAL\libs\win-x64\soft_oal.dll" DestinationFolder="bin\Debug\net5.0\publish\"/>
+    <Copy SourceFiles="..\..\CASL\OpenAL\libs\win-x64\soft_oal.dll" DestinationFolder="bin\Debug\net5.0\publish\" />
   </Target>
 
     <!--COPY 64 BIT LINUX VERSION OF OPENAL TO PUBLISH DIRECTORY-->
 
   <!--COPY 64 BIT WINDOWS VERSION OF OPENAL TO OUTPUT DIRECTORY-->
   <Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <Copy SourceFiles="..\..\CASL\OpenAL\libs\win-x64\soft_oal.dll" DestinationFolder="$(TargetDir)\runtimes\win-x64\native"/>
+    <Copy SourceFiles="..\..\CASL\OpenAL\libs\win-x64\soft_oal.dll" DestinationFolder="$(TargetDir)\runtimes\win-x64\native" />
   </Target>
 
   <!--COPY 64 BIT LINUX VERSION OF OPENAL TO OUTPUT DIRECTORY-->
