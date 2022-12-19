@@ -8,7 +8,7 @@ namespace CASL.NativeInterop
     using System.IO;
     using System.IO.Abstractions;
     using System.Linq;
-    using CASL.Exceptions;
+    using Exceptions;
 
     /*Refer to these links for more information
     1. https://dev.to/jeikabu/loading-native-libraries-in-c-fh6
@@ -20,6 +20,7 @@ namespace CASL.NativeInterop
     /// </summary>
     internal class NativeLibraryLoader : ILibraryLoader
     {
+        private const char CrossPlatDirSeparatorChar = '/';
         private readonly IDependencyManager dependencyManager;
         private readonly IPlatform platform;
         private readonly IDirectory directory;
@@ -30,7 +31,6 @@ namespace CASL.NativeInterop
         /// Initializes a new instance of the <see cref="NativeLibraryLoader"/> class.
         /// </summary>
         /// <param name="dependencyManager">Manages the native library's dependencies.</param>
-        /// <param name="libPathResolver">Resolves paths to native libraries.</param>
         /// <param name="platform">Gets required information about the platform.</param>
         /// <param name="directory">Performs directory IO operations.</param>
         /// <param name="file">Performs file IO operations.</param>
@@ -44,41 +44,16 @@ namespace CASL.NativeInterop
             IPath path,
             ILibrary library)
         {
-            if (dependencyManager is null)
-            {
-                throw new ArgumentNullException(nameof(dependencyManager), "The parameter must not be null.");
-            }
-
-            if (platform is null)
-            {
-                throw new ArgumentNullException(nameof(platform), "The parameter must not be null.");
-            }
-
-            if (directory is null)
-            {
-                throw new ArgumentNullException(nameof(directory), "The parameter must not be null.");
-            }
-
-            if (file is null)
-            {
-                throw new ArgumentNullException(nameof(file), "The parameter must not be null.");
-            }
-
-            if (path is null)
-            {
-                throw new ArgumentNullException(nameof(path), "The parameter must not be null.");
-            }
+            this.dependencyManager = dependencyManager ?? throw new ArgumentNullException(nameof(dependencyManager), "The parameter must not be null.");
+            this.platform = platform ?? throw new ArgumentNullException(nameof(platform), "The parameter must not be null.");
+            this.directory = directory ?? throw new ArgumentNullException(nameof(directory), "The parameter must not be null.");
+            this.file = file ?? throw new ArgumentNullException(nameof(file), "The parameter must not be null.");
+            this.path = path ?? throw new ArgumentNullException(nameof(path), "The parameter must not be null.");
 
             if (library is null)
             {
                 throw new ArgumentNullException(nameof(library), "The parameter must not be null.");
             }
-
-            this.dependencyManager = dependencyManager;
-            this.platform = platform;
-            this.directory = directory;
-            this.file = file;
-            this.path = path;
 
             LibraryName = ProcessLibExtension(library.LibraryName);
 
@@ -94,11 +69,9 @@ namespace CASL.NativeInterop
             var libDirPath = this.dependencyManager.NativeLibDirPath;
 
             // Add a directory separator if one is missing
-            libDirPath = libDirPath.EndsWith(this.path.DirectorySeparatorChar) ?
-                libDirPath :
-                $@"{libDirPath}{this.path.DirectorySeparatorChar}";
+            libDirPath = libDirPath.ToCrossPlatPath().TrimAllFromEnd(CrossPlatDirSeparatorChar);
 
-            var libFilePath = $"{libDirPath}{LibraryName}";
+            var libFilePath = $"{libDirPath}{CrossPlatDirSeparatorChar}{LibraryName}";
 
             var (exists, libPtr) = LoadLibraryIfExists(libFilePath);
 
@@ -116,31 +89,31 @@ namespace CASL.NativeInterop
         /// Loads a library at the given <paramref name="libraryFilePath"/> and returns
         /// a pointer to it as well as a success flag.
         /// </summary>
-        /// <param name="libraryFilePath">The path to the libary to load.</param>
+        /// <param name="libraryFilePath">The path to the library.</param>
         /// <returns>
         ///     exists: True if the library was successfully loaded.
         ///     libPtr: The pointer to the library if a successfully loaded.
         /// </returns>
         private (bool exists, nint libPtr) LoadLibraryIfExists(string libraryFilePath)
         {
-            if (this.file.Exists(libraryFilePath))
+            if (!this.file.Exists(libraryFilePath))
             {
-                var libPtr = this.platform.LoadLibrary(libraryFilePath);
+                return (false, 0);
+            }
 
-                if (libPtr == IntPtr.Zero)
-                {
-                    var loadLibExceptionMsg = this.platform.GetLastSystemError();
+            var libPtr = this.platform.LoadLibrary(libraryFilePath);
 
-                    // Add the library path that is is attempting to be loaded
-                    loadLibExceptionMsg += $"\n\nLibrary Path: '{libraryFilePath}'";
-
-                    throw new LoadLibraryException(loadLibExceptionMsg);
-                }
-
+            if (libPtr != nint.Zero)
+            {
                 return (true, libPtr);
             }
 
-            return (false, 0);
+            var loadLibExceptionMsg = this.platform.GetLastSystemError();
+
+            // Add the library path that is is attempting to be loaded
+            loadLibExceptionMsg += $"\n\nLibrary Path: '{libraryFilePath}'";
+
+            throw new LoadLibraryException(loadLibExceptionMsg);
         }
 
         /// <summary>
@@ -168,7 +141,7 @@ namespace CASL.NativeInterop
         }
 
         /// <summary>
-        /// Searchs for and gets the latest version of a posix library that matches the given <paramref name="libraryName"/>.
+        /// Searches for and gets the latest version of a posix library that matches the given <paramref name="libraryName"/>.
         /// </summary>
         /// <param name="possibleLibPath">The path to where the libraries might exist.</param>
         /// <param name="libraryName">The library name to process.</param>
