@@ -26,9 +26,9 @@ This library is still under development and is not at v1.0.0 yet!!  However, all
 
 Pronounced *Castle*, **CASL** is an acronym for (C)ross-platform (A)udio and (S)ound (L)ibrary
 
-**CASL** is a simplistic cross-platform, .NET library for playing and managing sounds powered by **OpenAL 1.1** using software rendering.  This is accomplished by using low level bindings to the native **OpenAL** library.
+**CASL** is an easy to use, cross-platform, dotnet library for playing and managing sounds powered by **OpenAL 1.1** using software rendering.  This is accomplished by using low level bindings to the native **OpenAL** library.
 
-This can be used for applications such as video games, sound players, and works on any **.NET 5.0** compliant platform.
+This can be used for applications such as video games, sound players, and works on any dotnet compliant platform.
 
 <h2 style="font-weight:bold" align="center">✨Features</h2>
 
@@ -38,17 +38,13 @@ Currently this library can play **.ogg** and **.mp3** file formats.  There are p
 
 ### Cross-Platform
 
-We strive for **CASL** to be a cross platform library by running under **.NET v5.0**.  There are plans for this library to continually be updated as we approach **.NET 6.0** and beyond.
-
+We strive for **CASL** to be a cross platform library by running under the latest possible dotnet version.  
 
 <h2 style="font-weight:bold" align="center">🔧Maintainers</h2>
 
 We currently have the following maintainers:
-- [Calvin Wilkinson](https://github.com/Perksey) [<img src="https://about.twitter.com/etc/designs/about2-twitter/public/img/favicon.ico" alt="Follow Calvin Wilkinson on Twitter" width="16" />](https://twitter.com/KDCoder)
-
-<h2 style="font-weight:bold" align="center">📄Documentation</h2>
-
-- Goto the [Table Of Contents](./Documentation/TableOfContents.md) for instructions on various things such as the branching, release process, environment setup and more.
+- [![twitter-logo](https://raw.githubusercontent.com/KinsonDigital/CASL/release/v1.0.0/Documentation/Images/twitter-logo-16x16.svg)Calvin Wilkinson](https://twitter.com/KDCoder) (KinsonDigital GitHub Organization - Owner)
+- [![twitter-logo](https://raw.githubusercontent.com/KinsonDigital/CASL/release/v1.0.0/Documentation/Images/twitter-logo-16x16.svg)Kristen Wilkinson](https://twitter.com/kswilky) (KinsonDigital GitHub Organization - Documentation Maintainer & Tester)
 
 <h2 style="font-weight:bold" align="center">🙏🏼Contributing</h2>
 
