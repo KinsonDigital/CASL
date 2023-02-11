@@ -76,7 +76,6 @@
   <Target Name="AddNativeWindowLibsToNugetPackage" AfterTargets="Build" Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU' Or '$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <ItemGroup>
       <!--WINDOWS-->
-      <Content Include="$(ProjectDir)OpenAL\libs\win-x86\*.dll" Pack="true" PackagePath="\runtimes\win-x86\native" />
       <Content Include="$(ProjectDir)OpenAL\libs\win-x64\*.dll" Pack="true" PackagePath="\runtimes\win-x64\native" />
 
       <!--LINUX-->
