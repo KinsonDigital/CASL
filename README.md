@@ -7,15 +7,16 @@
 
 <div align="center">
 
-![](https://img.shields.io/github/workflow/status/KinsonDigital/CASL/%F0%9F%9A%80Preview%20Release?label=QA%20Release%20%F0%9F%9A%80&logo=GitHub&style=plastic)
-![](https://img.shields.io/github/workflow/status/KinsonDigital/CASL/%F0%9F%9A%80Preview%20Release?label=Preview%20Release%20%F0%9F%9A%80&logo=GitHub&style=plastic)
-![](https://img.shields.io/github/workflow/status/KinsonDigital/CASL/%F0%9F%9A%80Production%20Release?label=Production%20Release%20%F0%9F%9A%80&logo=GitHub&style=plastic)
+![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/KinsonDigital/CASL/prod-release-pr-status-check.yml?color=2F8840&label=Prod%20CI%20Build&logo=GitHub)
+![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/KinsonDigital/CASL/prev-release-pr-status-check.yml?color=2F8840&label=Preview%20CI%20Build&logo=GitHub)
 
-![](https://img.shields.io/codecov/c/github/KinsonDigital/CASL/master?label=Code%20Coverage&logo=CodeCov&style=plastic)
-[![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.0-4baaaa.svg?style=plastic)](code_of_conduct.md)
+![Codecov](https://img.shields.io/codecov/c/github/KinsonDigital/CASL?color=2F8840&label=Code%20Coverage&logo=codecov)
 
-![](https://img.shields.io/nuget/v/KinsonDigital.CASL?logo=nuget&style=plastic)
+[![Latest Nuget Release](https://img.shields.io/nuget/vpre/kinsondigital.CASL?label=Latest%20Release&logo=nuget)](https://www.nuget.org/packages/KinsonDigital.CASL)
+![Nuget](https://img.shields.io/nuget/dt/KinsonDigital.CASL?color=0094FF&label=nuget%20downloads&logo=nuget)
 
+[![Good First GitHub Issues](https://img.shields.io/github/issues/kinsondigital/CASL/good%20first%20issue?color=7057ff&label=Good%20First%20Issues)](https://github.com/KinsonDigital/CASL/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22)
+[![Discord](https://img.shields.io/discord/481597721199902720?color=%23575CCB&label=chat%20on%20discord&logo=discord&logoColor=white)](https://discord.gg/qewu6fNgv7)
 </div>
 
 <h2 style="font-weight:bold" align="center" >!! NOTICE !!</h2>
