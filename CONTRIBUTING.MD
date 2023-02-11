@@ -175,6 +175,6 @@ If the core team is unable to champion an issue, they will mark it with a "help 
 - [Working With Forks](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/about-forks)
 - [Early Pull Requests](https://medium.com/practical-blend/pull-request-first-f6bb667a9b6)
 - [Discord Server](https://discord.gg/qewu6fNgv7)
-- [Main Branching Docs](./Documentation/Branching.md)
+- [Branching Diagram](./Documentation/Branching.md)
 - [Draft Pull Requests](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/about-pull-requests#draft-pull-requests)
 - [GIT](https://git-scm.com/)
