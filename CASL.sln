@@ -18,7 +18,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SolutionItems", "SolutionIt
 		.editorconfig = .editorconfig
 		LICENSE.md = LICENSE.md
 		README.md = README.md
-		RELEASENOTES.md = RELEASENOTES.md
+		.gitignore = .gitignore
+		code_of_conduct.md = code_of_conduct.md
+		CONTRIBUTING.MD = CONTRIBUTING.MD
+		.nuke\parameters.json = .nuke\parameters.json
+		.config\dotnet-tools.json = .config\dotnet-tools.json
+		BACKERS.md = BACKERS.md
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CASLTests", "Testing\CASLTests\CASLTests.csproj", "{2F67B7C0-7BA4-4EDD-8B0C-38793A3DE77C}"
@@ -27,7 +32,15 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "GitHub", "GitHub", "{FFFF8D
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "WorkFlows", "WorkFlows", "{5F701C8E-2B7C-427B-B16F-068BD369D2BF}"
 	ProjectSection(SolutionItems) = preProject
-		.github\workflows\main.yml = .github\workflows\main.yml
+		.github\workflows\build-pr-status-check.yml = .github\workflows\build-pr-status-check.yml
+		.github\workflows\feature-pr-status-check.yml = .github\workflows\feature-pr-status-check.yml
+		.github\workflows\hotfix-pr-status-check.yml = .github\workflows\hotfix-pr-status-check.yml
+		.github\workflows\prev-feature-pr-status-check.yml = .github\workflows\prev-feature-pr-status-check.yml
+		.github\workflows\prev-release.yml = .github\workflows\prev-release.yml
+		.github\workflows\prev-release-pr-status-check.yml = .github\workflows\prev-release-pr-status-check.yml
+		.github\workflows\prod-release.yml = .github\workflows\prod-release.yml
+		.github\workflows\prod-release-pr-status-check.yml = .github\workflows\prod-release-pr-status-check.yml
+		.github\workflows\unit-test-pr-status-check.yml = .github\workflows\unit-test-pr-status-check.yml
 	EndProjectSection
 EndProject
 Global
