@@ -42,45 +42,27 @@ Currently, this library can play **.ogg** and **.mp3** file formats.  There are 
 
 We strive for **CASL** to be a cross-platform library by running under the latest possible dotnet version.  
 
-<h2 style="font-weight:bold" align="center">🔧 Maintainers 🔧</h2>
+<h2 style="font-weight:bold;" align="center">🙏🏼 Contributing 🙏🏼</h2>
+
+Interested in contributing? If so, click [here](https://github.com/KinsonDigital/.github/blob/master/docs/CONTRIBUTING.md) to learn how to contribute your time or [here](https://github.com/sponsors/KinsonDigital) if you are interested in contributing your funds via one-time or recurring donation.
+
+
+<h2 style="font-weight:bold;" align="center">🔧 Maintainers 🔧</h2>
 
 - [![twitter-logo](https://raw.githubusercontent.com/KinsonDigital/.github/master/Images/twitter-logo-16x16.svg)Calvin Wilkinson](https://twitter.com/KDCoder) (KinsonDigital GitHub Organization - Owner)
-- [![twitter-logo](https://raw.githubusercontent.com/KinsonDigital/.github/master/Images/twitter-logo-16x16.svg)Kristen Wilkinson](https://twitter.com/kswilky) (KinsonDigital GitHub Organization - Documentation Maintainer & Tester)
+- [![twitter-logo](https://raw.githubusercontent.com/KinsonDigital/.github/master/Images/twitter-logo-16x16.svg)Kristen Wilkinson](https://twitter.com/kswilky) (KinsonDigital GitHub Organization - Project Management, Documentation, Tester)
 
-<h2 style="font-weight:bold" align="center">🙏🏼 Contributing 🙏🏼</h2>
+<br/>
 
-**CASL** encourages and uses [Early Pull Requests](https://medium.com/practical-blend/pull-request-first-f6bb667a9b6). Please don't wait until you're finished with your work before creating a PR.
+<h2 style="font-weight:bold;" align="center">🚔 Licensing And Governance 🚔</h2>
 
-1. Fork the repository
-2. Create a feature branch following the feature branch section in the documentation [here](./Documentation/Branching.md)
-3. Add an empty commit to the new feature branch to start your work off.
-   - Use this git command: `git commit --allow-empty -m "start of [thing you're working on]"`
-4. Once you've pushed a commit, open a [**draft pull request**](https://github.blog/2019-02-14-introducing-draft-pull-requests/). Do this **before** you start working.
-5. Make your commits in small, incremental steps with clear descriptions.
-6. All unit tests must pass before a PR will be completed.
-7. Make sure that the code follows the coding standards.
-   - Pay attention to the warnings in **Visual Studio**!!
-   - Refer to the *.editorconfig* files in the code base for rules
-8. Tag a maintainer when you're done and ask for a review!
 
-If you have any questions, contact a project maintainer
+<div align="center">
 
-<h2 style="font-weight:bold" align="center">Practices</h2>
+[![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.0-4baaaa.svg?style=flat)](code_of_conduct.md)
+![GitHub](https://img.shields.io/github/license/kinsondigital/CASL)
+</div>
 
-1. The code base is highly tested using unit testing with a high level of code coverage.  When contributing, make sure to add or adjust the unit tests appropriately regarding your changes.
-2. We use a combination of [StyleCop](https://github.com/DotNetAnalyzers/StyleCopAnalyzers) and [Microsoft.CodeAnalysis.NetAnalyzers](https://github.com/dotnet/roslyn-analyzers) libraries for maintaining coding standards.
-   - We understand that there are some exceptions to the rule and that not all coding standards fit every situation.  In these scenarios, contact a maintainer and let's discuss it!!  Warnings can always be suppressed if need be.
-- We use [semantic versioning 2.0](https://semver.org/) for versioning.
 
-<h2 style="font-weight:bold" align="center">Further Resources</h2>
-
-- A sample project **CASLTesting** can be found in the [Testing Folder](https://github.com/KinsonDigital/CASPL/tree/master/Testing/CASLTesting)
-  - This project serves the purpose of a sample project as well as a simple way to do manual testing of the library
-- Goto [OpenAL](https://www.openal.org/) for more information and documentation.
-- Check out [NVorbis](https://github.com/NVorbis/NVorbis) for dealing with **.ogg** data.
-- Check out [MP3Sharp](https://github.com/ZaneDubya/MP3Sharp) for dealing with **.mp3** data.
-
-<h2 style="font-weight:bold" align="center">🚔 Licensing And Governance 🚔</h2>
-
-**CASL** is distributed under the very permissive MIT license and all dependencies are distributed under MIT-compatible licenses.
-This project has adopted the code of conduct defined by the [Contributor Covenant](http://contributor-covenant.org/) to clarify expected behavior in our community.
+This software is distributed under the very permissive [MIT license](https://github.com/KinsonDigital/.github/blob/release/v1.0.0/LICENSE.md) and all dependencies are distributed under MIT-compatible licenses.
+This project has adopted the code of conduct defined by the **Contributor Covenant** to clarify expected behavior in our community.
