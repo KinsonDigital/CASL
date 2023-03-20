@@ -64,7 +64,7 @@ Interested in contributing? If so, click [here](https://github.com/KinsonDigital
 
 <br/>
 
-<h2 style="font-weight:bold;" align="center">🚔 Licensing And Governance 🚔</h2>
+<h2 style="font-weight:bold;" align="center">🚔 Licensing and Governance 🚔</h2>
 
 
 <div align="center">
