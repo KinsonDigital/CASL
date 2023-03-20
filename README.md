@@ -1,9 +1,9 @@
-<h1 align="center">
+<div align="center">
     <a href="#"><img align="center" src="./Documentation/Images/casl-logo.png" height="96"></a>
     <br />
-</h1>
+</div>
 
-<h1 style="font-weight:bold" align="center">CASL</h1>
+<h1 style="border:0;font-weight:bold" align="center">CASL</h1>
 
 <div align="center">
 
@@ -25,22 +25,31 @@ This library is still under development and is not at v1.0.0 yet!!  However, all
 
 <h2 style="font-weight:bold" align="center">📖 About CASL 📖</h2>
 
-Pronounced *Castle*, **CASL** is an acronym for (C)ross-platform (A)udio and (S)ound (L)ibrary
+**CASL** (pronounced Castle), is an acronym for (C)ross-platform (A)udio and (S)ound (L)ibrary and uses the latest possible dotnet version. **CASL** plays and manages sounds powered by **OpenAL 1.1**, using software rendering, which is accomplished by using low-level bindings to the native **OpenAL** library.  
 
-**CASL** is a cross-platform dotnet library for playing and managing sounds powered by **OpenAL 1.1** using software rendering.  This is accomplished by using low-level bindings to the native **OpenAL** library.
-
-This can be used for applications such as video games, and sound players, and will work on any dotnet compliant platform.
-> **Note** Cross-platform work is still a WIP, but works fine with windows.
+**CASL** can be used for video games and sound players and works on any dotnet-compliant platform.
+> **Note** Cross-platform work is still a WIP, but CASL works using Windows.
 
 <h2 style="font-weight:bold" align="center">✨ Features ✨</h2>
 
 ### Audio Formats
 
-Currently, this library can play **.ogg** and **.mp3** file formats.  There are plans to support **.wav** files in the future as well as other possible sound formats.
+Currently, this library can play **.ogg** and **.mp3** file formats.  There are plans to support **.wav** files and other sound formats in the future.
 
-### Cross-Platform
+### Playback Features
 
-We strive for **CASL** to be a cross-platform library by running under the latest possible dotnet version.  
+- Play (Normal Speed)
+- Play speed control
+- Pause
+- Relative library location
+- Stop
+- Loop control
+- Volume control
+- Playback positioning
+  - Fast forward
+  - Rewind
+  - Manual set
+- Choosing audio hardware devices
 
 <h2 style="font-weight:bold;" align="center">🙏🏼 Contributing 🙏🏼</h2>
 
