@@ -1,5 +1,5 @@
 <div align="center">
-    <a href="#"><img align="center" src="./Documentation/Images/casl-logo.png" height="96"></a>
+    <img align="center" src="./Documentation/Images/casl-logo.png" height="96">
     <br />
 </div>
 
