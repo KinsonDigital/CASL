@@ -38,23 +38,22 @@ Currently, this library can play **.ogg** and **.mp3** file formats.  There are 
 
 ### Playback Features
 
-- Play (Normal Speed)
+- Play (normal speed)
 - Play speed control
 - Pause
-- Relative library location
 - Stop
+- Relative library location
 - Loop control
 - Volume control
 - Playback positioning
   - Fast forward
   - Rewind
-  - Manual set
+  - Manual position set
 - Choosing audio hardware devices
 
 <h2 style="font-weight:bold;" align="center">🙏🏼 Contributing 🙏🏼</h2>
 
 Interested in contributing? If so, click [here](https://github.com/KinsonDigital/.github/blob/master/docs/CONTRIBUTING.md) to learn how to contribute your time or [here](https://github.com/sponsors/KinsonDigital) if you are interested in contributing your funds via a one-time or recurring donation.
-
 
 <h2 style="font-weight:bold;" align="center">🔧 Maintainers 🔧</h2>
 
@@ -66,13 +65,11 @@ Interested in contributing? If so, click [here](https://github.com/KinsonDigital
 
 <h2 style="font-weight:bold;" align="center">🚔 Licensing and Governance 🚔</h2>
 
-
 <div align="center">
 
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.0-4baaaa.svg?style=flat)](https://github.com/KinsonDigital/.github/blob/master/docs/code_of_conduct.md)
 [![GitHub](https://img.shields.io/github/license/kinsondigital/CASL)](https://github.com/KinsonDigital/CASL/blob/release/v1.0.0/LICENSE.md)
 </div>
-
 
 This software is distributed under the very permissive MIT license and all dependencies are distributed under MIT-compatible licenses.
 This project has adopted the code of conduct defined by the **Contributor Covenant** to clarify expected behavior in our community.
