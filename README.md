@@ -7,13 +7,13 @@
 
 <div align="center">
 
-![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/KinsonDigital/CASL/prod-release-pr-status-check.yml?color=2F8840&label=Prod%20CI%20Build&logo=GitHub)
-![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/KinsonDigital/CASL/prev-release-pr-status-check.yml?color=2F8840&label=Preview%20CI%20Build&logo=GitHub)
+[![Prod Release PR Status Check](https://img.shields.io/github/actions/workflow/status/KinsonDigital/CASL/prod-release-pr-status-check.yml?color=2F8840&label=Prod%20CI%20Build&logo=GitHub)](https://github.com/KinsonDigital/CASL/actions/workflows/prod-release-pr-status-check.yml)
+[![Prev Release PR Status Check](https://img.shields.io/github/actions/workflow/status/KinsonDigital/CASL/prev-release-pr-status-check.yml?color=2F8840&label=Preview%20CI%20Build&logo=GitHub)](https://github.com/KinsonDigital/CASL/actions/workflows/prev-release-pr-status-check.yml)
 
-![Codecov](https://img.shields.io/codecov/c/github/KinsonDigital/CASL?color=2F8840&label=Code%20Coverage&logo=codecov)
+[![Codecov](https://img.shields.io/codecov/c/github/KinsonDigital/CASL?color=2F8840&label=Code%20Coverage&logo=codecov)](https://app.codecov.io/gh/KinsonDigital/CASL/tree/release%2Fv1.0.0)
 
 [![Latest Nuget Release](https://img.shields.io/nuget/vpre/kinsondigital.CASL?label=Latest%20Release&logo=nuget)](https://www.nuget.org/packages/KinsonDigital.CASL)
-![Nuget](https://img.shields.io/nuget/dt/KinsonDigital.CASL?color=0094FF&label=nuget%20downloads&logo=nuget)
+[![Nuget Downloads](https://img.shields.io/nuget/dt/KinsonDigital.CASL?color=0094FF&label=nuget%20downloads&logo=nuget)](https://www.nuget.org/stats/packages/KinsonDigital.CASL?groupby=Version)
 
 [![Good First GitHub Issues](https://img.shields.io/github/issues/kinsondigital/CASL/good%20first%20issue?color=7057ff&label=Good%20First%20Issues)](https://github.com/KinsonDigital/CASL/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22)
 [![Discord](https://img.shields.io/discord/481597721199902720?color=%23575CCB&label=chat%20on%20discord&logo=discord&logoColor=white)](https://discord.gg/qewu6fNgv7)
