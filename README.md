@@ -7,8 +7,8 @@
 
 <div align="center">
 
-[![Prod Release PR Status Check](https://img.shields.io/github/actions/workflow/status/KinsonDigital/CASL/prod-release-pr-status-check.yml?color=2F8840&label=Prod%20CI%20Build&logo=GitHub)](https://github.com/KinsonDigital/CASL/actions/workflows/prod-release-pr-status-check.yml)
-[![Prev Release PR Status Check](https://img.shields.io/github/actions/workflow/status/KinsonDigital/CASL/prev-release-pr-status-check.yml?color=2F8840&label=Preview%20CI%20Build&logo=GitHub)](https://github.com/KinsonDigital/CASL/actions/workflows/prev-release-pr-status-check.yml)
+![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/KinsonDigital/CASL/prod-release-pr-status-check.yml?color=2F8840&label=Prod%20CI%20Build&logo=GitHub)
+![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/KinsonDigital/CASL/prev-release-pr-status-check.yml?color=2F8840&label=Preview%20CI%20Build&logo=GitHub)
 
 [![Codecov](https://img.shields.io/codecov/c/github/KinsonDigital/CASL?color=2F8840&label=Code%20Coverage&logo=codecov)](https://app.codecov.io/gh/KinsonDigital/CASL/tree/release%2Fv1.0.0)
 
@@ -21,7 +21,7 @@
 
 <h2 style="font-weight:bold" align="center" >!! NOTICE !!</h2>
 
-This library is still under development and is not at v1.0.0 yet!!  However, all of the major features are available, so we encourage you to use the library and provide feedback.  That is what open source is all about. 🥳
+This library is still under development and is not at v1.0.0 yet!!  However, all of the major features are available, so we encourage you to use it and provide feedback.  That is what open source is all about. 🥳
 
 <h2 style="font-weight:bold" align="center">📖 About CASL 📖</h2>
 
@@ -38,28 +38,28 @@ Currently, this library can play **.ogg** and **.mp3** file formats.  There are 
 
 ### Playback Features
 
-- Play (normal speed)
+- Play (Normal Speed)
 - Play speed control
 - Pause
-- Stop
 - Relative library location
+- Stop
 - Loop control
 - Volume control
 - Playback positioning
   - Fast forward
   - Rewind
-  - Manual position set
+  - Manual set
 - Choosing audio hardware devices
 
 <h2 style="font-weight:bold;" align="center">🙏🏼 Contributing 🙏🏼</h2>
 
-Interested in contributing? If so, click [here](https://github.com/KinsonDigital/.github/blob/master/docs/CONTRIBUTING.md) to learn how to contribute your time or [here](https://github.com/sponsors/KinsonDigital) if you are interested in contributing your funds via a one-time or recurring donation.
+Interested in contributing? If so, click [here](https://github.com/KinsonDigital/.github/blob/master/docs/CONTRIBUTING.md) to learn how to contribute your time or [here](https://github.com/sponsors/KinsonDigital) if you are interested in contributing your funds via one-time or recurring donation.
 
 <h2 style="font-weight:bold;" align="center">🔧 Maintainers 🔧</h2>
 
-  [![twitter-logo](https://raw.githubusercontent.com/KinsonDigital/.github/master/Images/twitter-logo-16x16.svg)Calvin Wilkinson](https://twitter.com/KDCoder) (KinsonDigital GitHub Organization - Owner)
+[![twitter-logo](https://raw.githubusercontent.com/KinsonDigital/.github/master/Images/twitter-logo-16x16.svg)Calvin Wilkinson](https://twitter.com/KDCoder) (KinsonDigital GitHub Organization - Owner)
   
-  [![twitter-logo](https://raw.githubusercontent.com/KinsonDigital/.github/master/Images/twitter-logo-16x16.svg)Kristen Wilkinson](https://twitter.com/kswilky) (KinsonDigital GitHub Organization - Project Management, Documentation, Tester)
+[![twitter-logo](https://raw.githubusercontent.com/KinsonDigital/.github/master/Images/twitter-logo-16x16.svg)Kristen Wilkinson](https://twitter.com/kswilky) (KinsonDigital GitHub Organization - Project Management, Documentation, Tester)
 
 <br/>
 
@@ -67,7 +67,7 @@ Interested in contributing? If so, click [here](https://github.com/KinsonDigital
 
 <div align="center">
 
-[![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.0-4baaaa.svg?style=flat)](https://github.com/KinsonDigital/.github/blob/master/docs/code_of_conduct.md)
+[![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg?style=flat)](https://github.com/KinsonDigital/.github/blob/master/docs/code_of_conduct.md)
 [![GitHub](https://img.shields.io/github/license/kinsondigital/CASL)](https://github.com/KinsonDigital/CASL/blob/release/v1.0.0/LICENSE.md)
 </div>
 
