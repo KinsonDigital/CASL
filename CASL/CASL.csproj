@@ -29,6 +29,8 @@
     <PackageIconUrl />
     <PackageId>KinsonDigital.CASL</PackageId>
     <PackageIcon>casl-logo.png</PackageIcon>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <NoWarn>CS7035</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
@@ -40,18 +42,10 @@
     <Compile Remove="OpenAL\libs\**" />
     <EmbeddedResource Remove="OpenAL\libs\**" />
     <None Remove="OpenAL\libs\**" />
-    <None Include="..\Documentation\Images\casl-logo.ico">
-      <Pack>True</Pack>
-      <PackagePath />
-    </None>
-    <None Include="..\Documentation\Images\casl-logo.png">
-      <Pack>True</Pack>
-      <PackagePath />
-    </None>
-    <None Include="..\LICENSE.md">
-      <Pack>True</Pack>
-      <PackagePath />
-    </None>
+    <None Include="..\README.md" Pack="true" PackagePath="\"/>
+    <None Include="..\Documentation\Images\casl-logo.ico" Pack="true" PackagePath="\"/>
+    <None Include="..\Documentation\Images\casl-logo.png" Pack="true" PackagePath="\"/>
+    <None Include="..\LICENSE.md" Pack="true" PackagePath="\"/>
   </ItemGroup>
 
   <ItemGroup>

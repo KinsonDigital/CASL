@@ -1,5 +1,5 @@
 <div align="center">
-    <img align="center" src="./Documentation/Images/casl-logo.png" height="96">
+    <img align="center" src="https://raw.githubusercontent.com/KinsonDigital/CASL/release/v1.0.0/Documentation/Images/casl-logo.png" height="96">
     <br />
 </div>
 
