@@ -1,4 +1,3 @@
 {
   "extends": ["github>KinsonDigital/.github//config/renovate-config.json"]
 }
-  
