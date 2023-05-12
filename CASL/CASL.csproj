@@ -59,7 +59,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="System.IO.Abstractions" Version="13.2.33" />
+    <PackageReference Include="System.IO.Abstractions" Version="13.2.47" />
   </ItemGroup>
 
   <!--ADD STUFF TO WINDOWS NUGET PACKAGE-->
