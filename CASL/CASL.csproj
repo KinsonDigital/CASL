@@ -42,10 +42,10 @@
     <Compile Remove="OpenAL\libs\**" />
     <EmbeddedResource Remove="OpenAL\libs\**" />
     <None Remove="OpenAL\libs\**" />
-    <None Include="..\README.md" Pack="true" PackagePath="\"/>
-    <None Include="..\Documentation\Images\casl-logo.ico" Pack="true" PackagePath="\"/>
-    <None Include="..\Documentation\Images\casl-logo.png" Pack="true" PackagePath="\"/>
-    <None Include="..\LICENSE.md" Pack="true" PackagePath="\"/>
+    <None Include="..\README.md" Pack="true" PackagePath="\" />
+    <None Include="..\Documentation\Images\casl-logo.ico" Pack="true" PackagePath="\" />
+    <None Include="..\Documentation\Images\casl-logo.png" Pack="true" PackagePath="\" />
+    <None Include="..\LICENSE.md" Pack="true" PackagePath="\" />
   </ItemGroup>
 
   <ItemGroup>
@@ -57,18 +57,18 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="7.0.0">
+    <PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="7.0.1">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="MP3Sharp" Version="1.0.5" />
-    <PackageReference Include="NVorbis" Version="0.10.3" />
-    <PackageReference Include="SimpleInjector" Version="5.3.0" />
+    <PackageReference Include="NVorbis" Version="0.10.5" />
+    <PackageReference Include="SimpleInjector" Version="5.4.1" />
     <PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="System.IO.Abstractions" Version="19.1.5" />
+    <PackageReference Include="System.IO.Abstractions" Version="19.2.29" />
   </ItemGroup>
 
   <!--ADD STUFF TO WINDOWS NUGET PACKAGE-->
