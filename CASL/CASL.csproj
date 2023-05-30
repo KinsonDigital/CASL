@@ -68,7 +68,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="System.IO.Abstractions" Version="19.1.5" />
+    <PackageReference Include="System.IO.Abstractions" Version="19.2.29" />
   </ItemGroup>
 
   <!--ADD STUFF TO WINDOWS NUGET PACKAGE-->
