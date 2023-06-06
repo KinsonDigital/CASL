@@ -24,16 +24,12 @@ jobs:
 
     - name: Add Issue
       run: |
-        $filePath = "${{ github.event_path }}";
-        $content = Get-Content -Path $filePath;
-        Write-Output $content;
-        
-        echo "The issue number is ${{ github.event.issue.number }}"
-      # run: |
-      #   deno run `
-      #   --allow-read `
-      #   --allow-net=https://raw.githubusercontent.com `
-      #   "https://raw.githubusercontent.com/KinsonDigital/Infrastructure/v4.2.0/cicd/scripts/add-item-to-project.ts" `
-      #   CASL `
-
- 
+        deno run `
+        --allow-read `
+        --allow-net=https://raw.githubusercontent.com `
+        "https://raw.githubusercontent.com/KinsonDigital/Infrastructure/v4.2.0/cicd/scripts/add-item-to-project.ts" `
+        CASL `
+        ${{ github.event.issue.number }} `
+        issue `
+        KD-Team `
+        ${{ github.token }};
