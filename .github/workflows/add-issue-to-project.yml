@@ -24,7 +24,7 @@ jobs:
 
     - name: Add Issue
       run: |
-        $filePath = "./github/workflow/event.json";
+        $filePath = "${{ github.event_path }}";
         $content = Get-Content -Path $filePath;
         Write-Output $content;
         
