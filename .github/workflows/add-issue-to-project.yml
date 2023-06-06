@@ -28,8 +28,8 @@ jobs:
         --allow-read `
         --allow-net=api.github.com `
         "https://raw.githubusercontent.com/KinsonDigital/Infrastructure/v4.2.0/cicd/scripts/add-item-to-project.ts" `
-        CASL `
-        ${{ github.event.issue.number }} `
+        CASL ` # comment
+        ${{ github.event.issue.number }} ` # comment
         issue `
         KD-Team `
         ${{ secrets.CICD_TOKEN }};
