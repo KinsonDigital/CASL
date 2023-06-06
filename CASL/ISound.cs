@@ -4,11 +4,23 @@
 
 namespace CASL
 {
+    using System;
+
     /// <summary>
     /// A single sound that can be played, paused etc.
     /// </summary>
-    public interface ISound : IContent
+    public interface ISound : IDisposable
     {
+        /// <summary>
+        /// Gets the name of the sound.
+        /// </summary>
+        string Name { get; }
+
+        /// <summary>
+        /// Gets the fully qualified path to the sound file.
+        /// </summary>
+        string FilePath { get; }
+
         /// <summary>
         /// Gets or sets the volume of the sound.
         /// </summary>

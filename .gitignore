@@ -361,3 +361,9 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# Ignore JetBrains Rider files
+.idea
+
+# Ignore secrets file used for CICD build system
+local-secrets.json

@@ -1,123 +1,77 @@
-﻿// <copyright file="NativeDependencyManager.cs" company="KinsonDigital">
+// <copyright file="NativeDependencyManager.cs" company="KinsonDigital">
 // Copyright (c) KinsonDigital. All rights reserved.
 // </copyright>
 
 namespace CASL.NativeInterop
 {
     using System;
+    using System.Collections.Generic;
     using System.Collections.ObjectModel;
     using System.IO;
     using System.IO.Abstractions;
-    using System.Linq;
-    using CASL.Exceptions;
 
     /// <summary>
     /// Manages native dependency libraries.
     /// </summary>
     internal abstract class NativeDependencyManager : IDependencyManager
     {
-        private readonly IPlatform platform;
         private readonly IFile file;
         private readonly IPath path;
-        private readonly string[] libraryPaths = Array.Empty<string>();
-        private readonly string assemblyDirectory = string.Empty;
         private string[] nativeLibraries = Array.Empty<string>();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="NativeDependencyManager"/> class.
         /// </summary>
-        /// <param name="platform">Manages platform specific operations.</param>
         /// <param name="file">Manages file related operations.</param>
         /// <param name="path">Manages file paths.</param>
-        /// <param name="application">Gets information about the application.</param>
-        public NativeDependencyManager(IPlatform platform, IFile file, IPath path, IApplication application)
+        /// <param name="nativeLibPathResolver">Resolves native library paths.</param>
+        protected NativeDependencyManager(
+            IFile file,
+            IPath path,
+            IFilePathResolver nativeLibPathResolver)
         {
-            if (platform is null)
+            this.file = file ?? throw new ArgumentNullException(nameof(file), "The parameter must not be null.");
+            this.path = path ?? throw new ArgumentNullException(nameof(path), "The parameter must not be null.");
+
+            if (nativeLibPathResolver is null)
             {
-                throw new ArgumentNullException(nameof(platform), "The parameter must not be null.");
+                throw new ArgumentNullException(nameof(nativeLibPathResolver), "The parameter must not be null.");
             }
 
-            if (file is null)
-            {
-                throw new ArgumentNullException(nameof(file), "The parameter must not be null.");
-            }
-
-            if (path is null)
-            {
-                throw new ArgumentNullException(nameof(path), "The parameter must not be null.");
-            }
-
-            if (application is null)
-            {
-                throw new ArgumentNullException(nameof(application), "The parameter must not be null.");
-            }
-
-            this.platform = platform;
-            this.file = file;
-            this.path = path;
-
-            string architecture;
-
-            if (this.platform.Is32BitProcess())
-            {
-                architecture = "x86";
-            }
-            else if (this.platform.Is64BitProcess())
-            {
-                architecture = "x64";
-            }
-            else
-            {
-                throw new InvalidOperationException("Process Architecture Not Recognized.");
-            }
-
-            string osPlatform;
-
-            if (this.platform.IsWinPlatform())
-            {
-                osPlatform = "win";
-            }
-            else if (this.platform.IsPosixPlatform())
-            {
-                osPlatform = "linux";
-            }
-            else
-            {
-                throw new UnknownPlatformException("Unknown Operating System/Platform.");
-            }
-
-            var separator = this.path.DirectorySeparatorChar;
-            this.assemblyDirectory = $@"{this.path.GetDirectoryName(application.Location)}{separator}";
-            this.libraryPaths = new[] { this.assemblyDirectory };
-
-            NativeLibPath = $@"{this.assemblyDirectory}runtimes{separator}{osPlatform}-{architecture}{separator}native{separator}";
+            NativeLibDirPath = nativeLibPathResolver.GetDirPath().ToCrossPlatPath().TrimAllFromEnd('/');
         }
 
-        /// <inheritdoc/>
-        public ReadOnlyCollection<string> LibraryDirPaths => new (this.libraryPaths);
-
-        /// <inheritdoc/>
+        /// <summary>
+        /// Gets or sets the list of native library names that a library depends on.
+        /// </summary>
+        /// <remarks>
+        ///     This is not treated like a list of library paths.
+        ///     Any directory paths included with the library names will be ignored.
+        ///     File extensions are allowed but will be ignored.
+        /// </remarks>
         public ReadOnlyCollection<string> NativeLibraries
         {
             get => this.nativeLibraries.ToReadOnlyCollection();
             set
             {
-                if (value is null)
+                var result = new List<string>();
+
+                foreach (var lib in value)
                 {
-                    this.nativeLibraries = Array.Empty<string>();
+                    var extension = this.path.GetExtension(lib);
+
+                    result.Add($"{this.path.GetFileNameWithoutExtension(lib)}{extension}");
                 }
-                else
-                {
-                    this.nativeLibraries = value.ToList().ToArray();
-                }
+
+                this.nativeLibraries = result.ToArray();
             }
         }
 
         /// <inheritdoc/>
-        public string NativeLibPath { get; private set; } = string.Empty;
+        public string NativeLibDirPath { get; }
 
         /// <inheritdoc/>
-        public void SetupDependencies()
+        public void VerifyDependencies()
         {
             /* Check each dependency library file to see if it already exists in the
             * destination folder, and if it does not, move it from the runtimes
@@ -125,24 +79,11 @@ namespace CASL.NativeInterop
             */
             foreach (var library in NativeLibraries)
             {
-                var srcFilePath = $@"{NativeLibPath}{library}";
-                var destFilePath = $@"{this.assemblyDirectory}{library}";
+                var srcFilePath = $@"{NativeLibDirPath}/{library}";
 
-                if (this.file.Exists(destFilePath))
+                if (this.file.Exists(srcFilePath) is false)
                 {
-                    continue;
-                }
-                else
-                {
-                    // Check if the runtimes folder contains the library and if not, throws an exception
-                    if (this.file.Exists(srcFilePath))
-                    {
-                        this.file.Copy(srcFilePath, destFilePath, true);
-                    }
-                    else
-                    {
-                        throw new FileNotFoundException($"The native dependency library '{srcFilePath}' does not exist.");
-                    }
+                    throw new FileNotFoundException($"The native dependency library '{srcFilePath}' does not exist.");
                 }
             }
         }

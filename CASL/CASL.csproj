@@ -2,37 +2,50 @@
 
   <PropertyGroup>
     <OutputType>Library</OutputType>
-    <TargetFramework>net5.0</TargetFramework>
-    <LangVersion>9.0</LangVersion>
+    <TargetFramework>net7.0</TargetFramework>
+    <LangVersion>11.0</LangVersion>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <Nullable>enable</Nullable>
-    <Version>0.0.1</Version>
-    <FileVersion>0.0.1</FileVersion>
-    <ApplicationIcon />
+
+    <!--Update this for preview releases-->
+    <Version>1.0.0-preview.12</Version>
+
+    <!--Update this for preview releases-->
+    <FileVersion>1.0.0-preview.12</FileVersion>
+
+    <AssemblyVersion>1.0.0</AssemblyVersion>
+    <ApplicationIcon>casl-logo.ico</ApplicationIcon>
     <StartupObject />
-    <Configurations>Debug-WIN;Release-WIN;Debug-LINUX;Release-LINUX</Configurations>
+    <Configurations>Debug;Release</Configurations>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Authors>Calvin Wilkinson</Authors>
+    <Description>CASL is a simplistic cross-platform, .NET library for playing and managing sounds powered by OpenAL 1.1 using software rendering.</Description>
+    <Copyright>2021</Copyright>
+    <PackageLicenseFile>LICENSE.md</PackageLicenseFile>
+    <PackageProjectUrl>https://github.com/KinsonDigital/CASL</PackageProjectUrl>
+    <RepositoryType>GIT</RepositoryType>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <RepositoryUrl>https://github.com/KinsonDigital/CASL</RepositoryUrl>
+    <PackageIconUrl />
+    <PackageId>KinsonDigital.CASL</PackageId>
+    <PackageIcon>casl-logo.png</PackageIcon>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <NoWarn>CS7035</NoWarn>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug-WIN|AnyCPU'">
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug-LINUX|AnyCPU'">
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release-WIN|AnyCPU'">
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release-LINUX|AnyCPU'">
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-  </PropertyGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="$(AssemblyName)Tests" />
+    <InternalsVisibleTo Include="DynamicProxyGenAssembly2" />
+  </ItemGroup>
 
   <ItemGroup>
     <Compile Remove="OpenAL\libs\**" />
     <EmbeddedResource Remove="OpenAL\libs\**" />
     <None Remove="OpenAL\libs\**" />
+    <None Include="..\README.md" Pack="true" PackagePath="\" />
+    <None Include="..\Documentation\Images\casl-logo.ico" Pack="true" PackagePath="\" />
+    <None Include="..\Documentation\Images\casl-logo.png" Pack="true" PackagePath="\" />
+    <None Include="..\LICENSE.md" Pack="true" PackagePath="\" />
   </ItemGroup>
 
   <ItemGroup>
@@ -44,18 +57,18 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="5.0.3">
+    <PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="7.0.1">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="MP3Sharp" Version="1.0.5" />
-    <PackageReference Include="NVorbis" Version="0.10.3" />
-    <PackageReference Include="SimpleInjector" Version="5.3.0" />
+    <PackageReference Include="NVorbis" Version="0.10.5" />
+    <PackageReference Include="SimpleInjector" Version="5.4.1" />
     <PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="System.IO.Abstractions" Version="13.2.33" />
+    <PackageReference Include="System.IO.Abstractions" Version="19.2.29" />
   </ItemGroup>
 
   <!--ADD STUFF TO WINDOWS NUGET PACKAGE-->
@@ -65,10 +78,10 @@
       <!--WINDOWS-->
       <Content Include="$(ProjectDir)OpenAL\libs\win-x86\*.dll" Pack="true" PackagePath="\runtimes\win-x86\native" />
       <Content Include="$(ProjectDir)OpenAL\libs\win-x64\*.dll" Pack="true" PackagePath="\runtimes\win-x64\native" />
-      
+
       <!--LINUX-->
-      <Content Include="$(ProjectDir)OpenAL\libs\linux-x64\*.dll" Pack="true" PackagePath="\runtimes\linux-x64\native" />
+      <Content Include="$(ProjectDir)OpenAL\libs\linux-x64\*.so*" Pack="true" PackagePath="\runtimes\linux-x64\native" />
     </ItemGroup>
   </Target>
-  
+
 </Project>
