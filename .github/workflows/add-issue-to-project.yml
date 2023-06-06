@@ -24,12 +24,20 @@ jobs:
 
     - name: Add Issue
       run: |
+        <# Script Args:
+            Repo Name
+            Issue Number
+            Issue Type: 'issue' or 'pr'
+            Project To Add Issue To
+            Token
+        #>
+
         deno run `
         --allow-read `
         --allow-net=api.github.com `
         "https://raw.githubusercontent.com/KinsonDigital/Infrastructure/v4.2.0/cicd/scripts/add-item-to-project.ts" `
-        CASL ` # comment
-        ${{ github.event.issue.number }} ` # comment
+        CASL `
+        ${{ github.event.issue.number }} `
         issue `
         KD-Team `
         ${{ secrets.CICD_TOKEN }};
