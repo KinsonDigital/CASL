@@ -32,4 +32,4 @@ jobs:
         ${{ github.event.issue.number }} `
         issue `
         KD-Team `
-        ${{ github.token }};
+        ${{ secrets.CICD_TOKEN }};
