@@ -23,9 +23,12 @@ jobs:
         deno-version: v1.x
 
     - name: Add Issue
-      run: |
-        deno run `
-        --allow-read `
-        --allow-net=https://raw.githubusercontent.com `
-        "https://raw.githubusercontent.com/KinsonDigital/Infrastructure/v4.2.0/cicd/scripts/add-item-to-project.ts";
+      run: echo "The issue number is ${{ github.event.issue.number }}"
+      # run: |
+      #   deno run `
+      #   --allow-read `
+      #   --allow-net=https://raw.githubusercontent.com `
+      #   "https://raw.githubusercontent.com/KinsonDigital/Infrastructure/v4.2.0/cicd/scripts/add-item-to-project.ts" `
+      #   CASL `
+
  
