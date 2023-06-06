@@ -1,0 +1,29 @@
+name: Add Issue to Project
+
+
+defaults:
+  run:
+    shell: pwsh
+
+
+on:
+  issues:
+    types: opened
+
+
+jobs:
+  add_issue_to_project:
+    name: Add Issue to Project
+    runs-on: ubuntu-latest
+    steps:
+    - name: Set Up Deno
+      uses: denoland/setup-deno@v1
+      with:
+        deno-version: v1.x
+
+    - name: Add Issue
+      run: |
+        deno run `
+        --allow-net=https://raw.githubusercontent.com `
+        "https://raw.githubusercontent.com/KinsonDigital/Infrastructure/v4.1.0/cicd/scripts/add-item-to-project.ts";
+ 
