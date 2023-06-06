@@ -25,7 +25,7 @@ jobs:
     - name: Add Issue
       run: |
         deno run `
-        --allow-read `
+        --allow-read=./cicd/ `
         --allow-net=https://raw.githubusercontent.com `
         "https://raw.githubusercontent.com/KinsonDigital/Infrastructure/v4.1.0/cicd/scripts/add-item-to-project.ts";
  
