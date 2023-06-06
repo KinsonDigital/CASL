@@ -5,6 +5,13 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "PowerShell Launch Script",
+            "type": "PowerShell",
+            "request": "launch",
+            "script": "${workspaceFolder}/.github/workflows/main.ps1",
+            "cwd": "${cwd}\\.github\\workflows\\main.ps1"
+        },
+        {
             "name": ".NET Core Launch (console)",
             "type": "coreclr",
             "request": "launch",

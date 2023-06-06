@@ -23,7 +23,12 @@ jobs:
         deno-version: v1.x
 
     - name: Add Issue
-      run: echo "The issue number is ${{ github.event.issue.number }}"
+      run: |
+        $filePath = "./github/workflow/event.json";
+        $content = Get-Content -Path $filePath;
+        Write-Output $content;
+        
+        echo "The issue number is ${{ github.event.issue.number }}"
       # run: |
       #   deno run `
       #   --allow-read `
