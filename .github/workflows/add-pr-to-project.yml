@@ -1,0 +1,43 @@
+name: Add PR to Project
+
+
+defaults:
+  run:
+    shell: pwsh
+
+
+on:
+  workflow_dispatch:
+  pull_request:
+    types: opened
+
+
+jobs:
+  add_pr_to_project:
+    name: Add PR to Project
+    runs-on: ubuntu-latest
+    steps:
+    - name: Set Up Deno
+      uses: denoland/setup-deno@v1
+      with:
+        deno-version: v1.x
+
+    - name: Add PR
+      run: |
+        <# Script Args:
+            Repo Name
+            Issue Number
+            Issue Type: 'issue' or 'pr'
+            Project To Add PR To
+            Token
+        #>
+
+        deno run `
+        --allow-read `
+        --allow-net=api.github.com `
+        "https://raw.githubusercontent.com/KinsonDigital/Infrastructure/v4.2.0/cicd/scripts/add-item-to-project.ts" `
+        CASL `
+        ${{ github.event.pull_request.number }} `
+        issue `
+        KD-Team `
+        ${{ secrets.CICD_TOKEN }};
