@@ -35,9 +35,9 @@ jobs:
         deno run `
         --allow-read `
         --allow-net=api.github.com `
-        "https://raw.githubusercontent.com/KinsonDigital/Infrastructure/v4.2.0/cicd/scripts/add-item-to-project.ts" `
+        "https://raw.githubusercontent.com/KinsonDigital/Infrastructure/v4.3.0/cicd/scripts/add-item-to-project.ts" `
         CASL `
         ${{ github.event.number }} `
-        pr `
+        pull-request `
         KD-Team `
         ${{ secrets.CICD_TOKEN }};
