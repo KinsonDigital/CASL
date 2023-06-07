@@ -3,8 +3,8 @@
 // </copyright>
 
 namespace CASL.Exceptions
-{
-    using System;
+
+using System;
 
     /// <summary>
     /// Occurs when a string is null or empty.
@@ -41,4 +41,3 @@ namespace CASL.Exceptions
         {
         }
     }
-}

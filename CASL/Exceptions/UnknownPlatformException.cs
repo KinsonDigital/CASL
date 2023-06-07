@@ -3,8 +3,8 @@
 // </copyright>
 
 namespace CASL.Exceptions
-{
-    using System;
+
+using System;
 
     /// <summary>
     /// Occurs when an unknown platform has been encountered.
@@ -41,4 +41,3 @@ namespace CASL.Exceptions
         {
         }
     }
-}
