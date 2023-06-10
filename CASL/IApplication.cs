@@ -2,16 +2,15 @@
 // Copyright (c) KinsonDigital. All rights reserved.
 // </copyright>
 
-namespace CASL
+namespace CASL;
+
+/// <summary>
+/// Provides information about the running application.
+/// </summary>
+internal interface IApplication
 {
     /// <summary>
-    /// Provides information about the running application.
+    /// Gets the file path of the current application.
     /// </summary>
-    internal interface IApplication
-    {
-        /// <summary>
-        /// Gets the file path of the current application.
-        /// </summary>
-        string Location { get; }
-    }
+    string Location { get; }
 }

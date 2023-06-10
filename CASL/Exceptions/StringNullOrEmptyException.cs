@@ -2,42 +2,42 @@
 // Copyright (c) KinsonDigital. All rights reserved.
 // </copyright>
 
-namespace CASL.Exceptions
+namespace CASL.Exceptions;
 
 using System;
 
+/// <summary>
+/// Occurs when a string is null or empty.
+/// </summary>
+public class StringNullOrEmptyException : Exception
+{
     /// <summary>
-    /// Occurs when a string is null or empty.
+    /// Initializes a new instance of the <see cref="StringNullOrEmptyException"/> class.
     /// </summary>
-    public class StringNullOrEmptyException : Exception
+    public StringNullOrEmptyException()
+        : base("The string must not be null or empty.")
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="StringNullOrEmptyException"/> class.
-        /// </summary>
-        public StringNullOrEmptyException()
-            : base("The string must not be null or empty.")
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="StringNullOrEmptyException"/> class.
-        /// </summary>
-        /// <param name="message">The exception message.</param>
-        public StringNullOrEmptyException(string message)
-            : base(message)
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="StringNullOrEmptyException"/> class.
-        /// </summary>
-        /// <param name="message">The exception message.</param>
-        /// <param name="innerException">
-        ///     The exception that is the cause of the current exception, or a
-        ///     null reference if no inner exception is specified.
-        /// </param>
-        public StringNullOrEmptyException(string message, Exception innerException)
-            : base(message, innerException)
-        {
-        }
     }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="StringNullOrEmptyException"/> class.
+    /// </summary>
+    /// <param name="message">The exception message.</param>
+    public StringNullOrEmptyException(string message)
+        : base(message)
+    {
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="StringNullOrEmptyException"/> class.
+    /// </summary>
+    /// <param name="message">The exception message.</param>
+    /// <param name="innerException">
+    ///     The exception that is the cause of the current exception, or a
+    ///     null reference if no inner exception is specified.
+    /// </param>
+    public StringNullOrEmptyException(string message, Exception innerException)
+        : base(message, innerException)
+    {
+    }
+}
