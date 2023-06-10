@@ -2,36 +2,35 @@
 // Copyright (c) KinsonDigital. All rights reserved.
 // </copyright>
 
-namespace CASL
+namespace CASL;
+
+/// <summary>
+/// Represents the state of a single sound.
+/// </summary>
+internal struct SoundStats
 {
     /// <summary>
-    /// Represents the state of a single sound.
+    /// The OpenAL id of the sound source that this state links to.
     /// </summary>
-    internal struct SoundStats
-    {
-        /// <summary>
-        /// The OpenAL id of the sound source that this state links to.
-        /// </summary>
-        public uint SourceId;
+    public uint SourceId;
 
-        /// <summary>
-        /// The current time position of the sound.
-        /// </summary>
-        public float TimePosition;
+    /// <summary>
+    /// The current time position of the sound.
+    /// </summary>
+    public float TimePosition;
 
-        /// <summary>
-        /// The total number of seconds of the sound.
-        /// </summary>
-        public float TotalSeconds;
+    /// <summary>
+    /// The total number of seconds of the sound.
+    /// </summary>
+    public float TotalSeconds;
 
-        /// <summary>
-        /// The current playback state of the sound.
-        /// </summary>
-        public SoundState PlaybackState;
+    /// <summary>
+    /// The current playback state of the sound.
+    /// </summary>
+    public SoundState PlaybackState;
 
-        /// <summary>
-        /// The speed that the sound is playing at.
-        /// </summary>
-        public float PlaySpeed;
-    }
+    /// <summary>
+    /// The speed that the sound is playing at.
+    /// </summary>
+    public float PlaySpeed;
 }
