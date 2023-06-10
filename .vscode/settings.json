@@ -18,6 +18,8 @@
         "runsettings",
         "softprops",
         "stylecop",
-        "udio"
+        "udio",
+        "Vorbis",
+        "xunit"
     ]
 }
