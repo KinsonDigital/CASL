@@ -19,10 +19,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SolutionItems", "SolutionIt
 		LICENSE.md = LICENSE.md
 		README.md = README.md
 		.gitignore = .gitignore
-		code_of_conduct.md = code_of_conduct.md
-		CONTRIBUTING.MD = CONTRIBUTING.MD
-		.nuke\parameters.json = .nuke\parameters.json
-		.config\dotnet-tools.json = .config\dotnet-tools.json
 		BACKERS.md = BACKERS.md
 	EndProjectSection
 EndProject
