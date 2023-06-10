@@ -44,4 +44,3 @@ As with all software, there is always a chance for issues and bugs, especially f
 12. [#129](https://github.com/KinsonDigital/CASL/issues/129) - Updated the [actions/checkout](https://github.com/marketplace/actions/checkout) from GitHub actions from version _**v2.x.x**_ to _**v3.x.x**_ in all of the workflows.
 13. [#111](https://github.com/KinsonDigital/CASL/issues/111) - Moved the **internals visible** set up from the csharp file to the csproj file.
 14. [#39](https://github.com/KinsonDigital/CASL/issues/39) - Added the **README** file to the NuGet package.
-

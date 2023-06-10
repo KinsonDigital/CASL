@@ -2,89 +2,88 @@
 // Copyright (c) KinsonDigital. All rights reserved.
 // </copyright>
 
-namespace CASL.NativeInterop
+namespace CASL.NativeInterop;
+
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.IO;
+using System.IO.Abstractions;
+
+/// <summary>
+/// Manages native dependency libraries.
+/// </summary>
+internal abstract class NativeDependencyManager : IDependencyManager
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Collections.ObjectModel;
-    using System.IO;
-    using System.IO.Abstractions;
+    private readonly IFile file;
+    private readonly IPath path;
+    private string[] nativeLibraries = Array.Empty<string>();
 
     /// <summary>
-    /// Manages native dependency libraries.
+    /// Initializes a new instance of the <see cref="NativeDependencyManager"/> class.
     /// </summary>
-    internal abstract class NativeDependencyManager : IDependencyManager
+    /// <param name="file">Manages file related operations.</param>
+    /// <param name="path">Manages file paths.</param>
+    /// <param name="nativeLibPathResolver">Resolves native library paths.</param>
+    protected NativeDependencyManager(
+        IFile file,
+        IPath path,
+        IFilePathResolver nativeLibPathResolver)
     {
-        private readonly IFile file;
-        private readonly IPath path;
-        private string[] nativeLibraries = Array.Empty<string>();
+        this.file = file ?? throw new ArgumentNullException(nameof(file), "The parameter must not be null.");
+        this.path = path ?? throw new ArgumentNullException(nameof(path), "The parameter must not be null.");
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="NativeDependencyManager"/> class.
-        /// </summary>
-        /// <param name="file">Manages file related operations.</param>
-        /// <param name="path">Manages file paths.</param>
-        /// <param name="nativeLibPathResolver">Resolves native library paths.</param>
-        protected NativeDependencyManager(
-            IFile file,
-            IPath path,
-            IFilePathResolver nativeLibPathResolver)
+        if (nativeLibPathResolver is null)
         {
-            this.file = file ?? throw new ArgumentNullException(nameof(file), "The parameter must not be null.");
-            this.path = path ?? throw new ArgumentNullException(nameof(path), "The parameter must not be null.");
-
-            if (nativeLibPathResolver is null)
-            {
-                throw new ArgumentNullException(nameof(nativeLibPathResolver), "The parameter must not be null.");
-            }
-
-            NativeLibDirPath = nativeLibPathResolver.GetDirPath().ToCrossPlatPath().TrimAllFromEnd('/');
+            throw new ArgumentNullException(nameof(nativeLibPathResolver), "The parameter must not be null.");
         }
 
-        /// <summary>
-        /// Gets or sets the list of native library names that a library depends on.
-        /// </summary>
-        /// <remarks>
-        ///     This is not treated like a list of library paths.
-        ///     Any directory paths included with the library names will be ignored.
-        ///     File extensions are allowed but will be ignored.
-        /// </remarks>
-        public ReadOnlyCollection<string> NativeLibraries
+        NativeLibDirPath = nativeLibPathResolver.GetDirPath().ToCrossPlatPath().TrimAllFromEnd('/');
+    }
+
+    /// <summary>
+    /// Gets or sets the list of native library names that a library depends on.
+    /// </summary>
+    /// <remarks>
+    ///     This is not treated like a list of library paths.
+    ///     Any directory paths included with the library names will be ignored.
+    ///     File extensions are allowed but will be ignored.
+    /// </remarks>
+    public ReadOnlyCollection<string> NativeLibraries
+    {
+        get => this.nativeLibraries.ToReadOnlyCollection();
+        set
         {
-            get => this.nativeLibraries.ToReadOnlyCollection();
-            set
+            var result = new List<string>();
+
+            foreach (var lib in value)
             {
-                var result = new List<string>();
+                var extension = this.path.GetExtension(lib);
 
-                foreach (var lib in value)
-                {
-                    var extension = this.path.GetExtension(lib);
-
-                    result.Add($"{this.path.GetFileNameWithoutExtension(lib)}{extension}");
-                }
-
-                this.nativeLibraries = result.ToArray();
+                result.Add($"{this.path.GetFileNameWithoutExtension(lib)}{extension}");
             }
+
+            this.nativeLibraries = result.ToArray();
         }
+    }
 
-        /// <inheritdoc/>
-        public string NativeLibDirPath { get; }
+    /// <inheritdoc/>
+    public string NativeLibDirPath { get; }
 
-        /// <inheritdoc/>
-        public void VerifyDependencies()
+    /// <inheritdoc/>
+    public void VerifyDependencies()
+    {
+        /* Check each dependency library file to see if it already exists in the
+        * destination folder, and if it does not, move it from the runtimes
+        * folder to the destination execution folder
+        */
+        foreach (var library in NativeLibraries)
         {
-            /* Check each dependency library file to see if it already exists in the
-            * destination folder, and if it does not, move it from the runtimes
-            * folder to the destination execution folder
-            */
-            foreach (var library in NativeLibraries)
-            {
-                var srcFilePath = $@"{NativeLibDirPath}/{library}";
+            var srcFilePath = $@"{NativeLibDirPath}/{library}";
 
-                if (this.file.Exists(srcFilePath) is false)
-                {
-                    throw new FileNotFoundException($"The native dependency library '{srcFilePath}' does not exist.");
-                }
+            if (this.file.Exists(srcFilePath) is false)
+            {
+                throw new FileNotFoundException($"The native dependency library '{srcFilePath}' does not exist.");
             }
         }
     }
