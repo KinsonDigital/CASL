@@ -1,39 +1,47 @@
-name: ✅Build PR Status Check
-
-
-defaults:
-  run:
-    shell: pwsh
+name: ✅Build Status Check
 
 
 on:
   workflow_dispatch:
   pull_request:
     branches:
-      - develop
-      - preview/v*.*.*-preview.*
-      - release/v*.*.*
-      - master
+    - master
+    - preview
 
 
 jobs:
-  build_pr_status_check:
-    name: Build PR Status Check
+  determine_build_config:
+    name: Determine Build Configuration
     runs-on: ubuntu-latest
+    outputs:
+      build-config: ${{ steps.get-build-config.outputs.build-config }}
     steps:
-    - uses: actions/checkout@v3
+      - name: Get Build Config
+        id: get-build-config
+        shell: pwsh
+        run: |
+          # If the destination branch that the pull request is merging into is the master, do a release build
+          if ( "${{ github.base_ref }}" -eq "master") {
+            "build-config=Release" >> $env:GITHUB_OUTPUT;
+          } else { # Any other branch than master, do a debug build
+            "build-config=Debug" >> $env:GITHUB_OUTPUT;
+          }
 
-    - name: Restore DotNet Tools
-      run: dotnet tool restore
+  # Build Main Projects
+  build_project:
+    name: Build Project
+    needs: [determine_build_config]
+    uses: KinsonDigital/Infrastructure/.github/workflows/build-csharp-project.yml@v3.0.2
+    with:
+      project-name: "CASL"
+      build-config: ${{ needs.determine_build_config.outputs.build-config }}
+      net-sdk-version: 7.0.203
 
-    - name: Get Pull Request Number
-      id: get-pr-number
-      run: |
-        $pullRequestNumber = "${{ github.ref }}".Replace("refs/pull/", "").Replace("/merge", "");
-        Write-Host "Pull Request Number: $pullRequestNumber";
-        "pr-number=$pullRequestNumber" >> $env:GITHUB_OUTPUT;
-
-    - name: Run Build Status Check
-      run: dotnet cicd PRBuildStatusCheck --pull-request-number ${{ steps.get-pr-number.outputs.pr-number }}
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  build_tests_project:
+    name: Build Tests Project
+    needs: [determine_build_config]
+    uses: KinsonDigital/Infrastructure/.github/workflows/build-csharp-project.yml@v3.0.2
+    with:
+      project-name: "CASLTests"
+      build-config: ${{ needs.determine_build_config.outputs.build-config }}
+      net-sdk-version: 7.0.302
