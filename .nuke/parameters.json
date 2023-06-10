@@ -1,9 +1,0 @@
-{
-    "$schema": "./build.schema.json",
-    "Solution": "CASL.sln",
-    "RepoOwner": "KinsonDigital",
-    "RepoName": "CASL",
-    "ProjectName": "CASL",
-    "PreProcessReadMe": true,
-    "SkipNugetChecks": false
-}
