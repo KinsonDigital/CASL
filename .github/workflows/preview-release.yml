@@ -1,0 +1,25 @@
+name: 🚀Preview Release
+
+
+defaults:
+  run:
+    shell: pwsh
+
+
+on:
+  workflow_dispatch:
+
+
+jobs:
+  validate_branch:
+    name: Validate Branch
+    runs-on: ubuntu-latest
+    steps:
+    - name: Validate Branch
+      run: |
+        $branch = "${{ github.ref_name  }}"
+
+        if ($branch -ne "preview") {
+          Write-Host "The branch '$branch' is invalid. Preview releases can only run on 'preview' branches."
+          exit 1;
+        }
