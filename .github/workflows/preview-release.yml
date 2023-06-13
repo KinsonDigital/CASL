@@ -6,20 +6,61 @@ defaults:
     shell: pwsh
 
 
+env:
+  PROJECT_NAME: CASL
+
+
 on:
   workflow_dispatch:
 
 
 jobs:
-  validate_branch:
-    name: Validate Branch
+  # validate_branch:
+  #   name: Validate Branch
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #   - name: Validate Branch
+  #     run: |
+  #       $branch = "${{ github.ref_name  }}"
+
+  #       if ($branch -ne "preview") {
+  #         Write-Host "The branch '$branch' is invalid. Preview releases can only run on 'preview' branches."
+  #         exit 1;
+  #       }
+
+
+  get_version:
+    name: Get Version
+    outputs:
+      version: ${{ steps.get-version.outputs.version }}
     runs-on: ubuntu-latest
     steps:
-    - name: Validate Branch
-      run: |
-        $branch = "${{ github.ref_name  }}"
+    - name: Get Version From Project File
+      id: get-version
+      uses: KinsonDigital/VersionMiner@v1.0.0-preview.4
+      with:
+        repo-owner: KinsonDigital
+        repo-name: CASL
+        repo-token: ${{ secrets.CICD_TOKEN }}
+        branch-name: '${{ github.ref_name }}'
+        file-format: 'xml' # Not case sensitive
+        file-path: '${{ env.PROJECT_NAME }}/${{ env.PROJECT_NAME }}.csproj'
+        version-keys: Version
 
-        if ($branch -ne "preview") {
-          Write-Host "The branch '$branch' is invalid. Preview releases can only run on 'preview' branches."
-          exit 1;
-        }
+
+  validate_version:
+    name: Validate Version
+    runs-on: ubuntu-latest
+    needs: get_version
+    steps:
+    - name: Set Up Deno
+      uses: denoland/setup-deno@v1
+      with:
+        deno-version: v1.x
+
+    - name: Validate Version
+      run: |
+        deno run `
+          https://raw.githubusercontent.com/KinsonDigital/Infrastructure/v4.5.1/cicd/scripts/validate-version.ts `
+          "${{ needs.get_version.outputs.version }}" `
+          preview;
