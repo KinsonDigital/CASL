@@ -8,6 +8,7 @@ defaults:
 
 env:
   PROJECT_NAME: CASL
+  CICD_SCRIPTS_VERSION: v4.5.1
 
 
 on:
@@ -62,6 +63,6 @@ jobs:
     - name: Validate Version
       run: |
         deno run `
-          https://raw.githubusercontent.com/KinsonDigital/Infrastructure/v4.5.1/cicd/scripts/validate-version.ts `
+          https://raw.githubusercontent.com/KinsonDigital/Infrastructure/${{ env.CICD_SCRIPTS_VERSION }}/cicd/scripts/validate-version.ts `
           "${{ needs.get_version.outputs.version }}" `
           preview;
