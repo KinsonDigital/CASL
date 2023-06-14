@@ -43,7 +43,7 @@ jobs:
       with:
         repo-owner: KinsonDigital
         repo-name: CASL
-        repo-token: ${{ secrets.CICD_TOKEN }}
+        repo-token: ${{ secrets.CICD_REST_API }}
         branch-name: '${{ github.ref_name }}'
         file-format: 'xml' # Not case sensitive
         file-path: '${{ env.PROJECT_NAME }}/${{ env.PROJECT_NAME }}.csproj'
