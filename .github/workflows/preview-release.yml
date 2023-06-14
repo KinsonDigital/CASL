@@ -62,7 +62,35 @@ jobs:
 
     - name: Validate Version
       run: |
+        # Args: 1. Version 2. Version Type
+
+        $version = "${{ env.CICD_SCRIPTS_VERSION }}";
+        $scriptUrl = "https://raw.githubusercontent.com/KinsonDigital/Infrastructure";
+        $scriptUrl = "/$scriptUrl$version/cicd/scripts/validate-version.ts";
+
         deno run `
-          https://raw.githubusercontent.com/KinsonDigital/Infrastructure/${{ env.CICD_SCRIPTS_VERSION }}/cicd/scripts/validate-version.ts `
+          $scriptUrl `
           "${{ needs.get_version.outputs.version }}" `
           preview;
+
+
+  validate_tag:
+    name: Validate Tag
+    runs-on: ubuntu-latest
+    needs: get_version
+    steps:
+    - name: Validate Tag
+      run: |
+        # Args: 1. TagType  2. TagName 3. RepoName 4. Secret
+
+        $version = "${{ env.CICD_SCRIPTS_VERSION }}";
+        $scriptUrl = "https://raw.githubusercontent.com/KinsonDigital/Infrastructure";
+        $scriptUrl = "/$scriptUrl$version/cicd/scripts/validate-tag.ts";
+
+        deno run `
+          $scriptUrl `
+          preview `
+          "${{ needs.get_version.outputs.version }}" `
+          CASL `
+          ${{ secrets.CICD_REST_API }};
+
