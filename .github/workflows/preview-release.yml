@@ -13,6 +13,8 @@ env:
 
 on:
   workflow_dispatch:
+  push: # TODO: REMOVE ME 
+    branches: feature/215-create-release-workflow
 
 
 jobs:
@@ -24,6 +26,7 @@ jobs:
       run: |
         $branch = "${{ github.ref_name  }}"
 
+        # TODO: REENABLE
         # if ($branch -ne "preview") {
         #   Write-Host "The branch '$branch' is invalid. Preview releases can only run on 'preview' branches."
         #   exit 1;
@@ -65,8 +68,8 @@ jobs:
         # Args: 1. Version 2. Version Type
 
         $version = "${{ env.CICD_SCRIPTS_VERSION }}";
-        $scriptUrl = "https://raw.githubusercontent.com/KinsonDigital/Infrastructure";
-        $scriptUrl = "/$scriptUrl$version/cicd/scripts/validate-version.ts";
+        $scriptUrl = "https://raw.githubusercontent.com/KinsonDigital/Infrastructure/";
+        $scriptUrl = "$scriptUrl$version/cicd/scripts/validate-version.ts";
 
         deno run `
           $scriptUrl `
@@ -79,18 +82,25 @@ jobs:
     runs-on: ubuntu-latest
     needs: get_version
     steps:
+    - name: Set Up Deno
+      uses: denoland/setup-deno@v1
+      with:
+        deno-version: v1.x
+
     - name: Validate Tag
       run: |
         # Args: 1. TagType  2. TagName 3. RepoName 4. Secret
 
         $version = "${{ env.CICD_SCRIPTS_VERSION }}";
-        $scriptUrl = "https://raw.githubusercontent.com/KinsonDigital/Infrastructure";
-        $scriptUrl = "/$scriptUrl$version/cicd/scripts/validate-tag.ts";
+        $scriptUrl = "https://raw.githubusercontent.com/KinsonDigital/Infrastructure/";
+        $scriptUrl = "$scriptUrl$version/cicd/scripts/validate-tag.ts";
 
-        deno run `
-          $scriptUrl `
-          preview `
-          "${{ needs.get_version.outputs.version }}" `
-          CASL `
-          ${{ secrets.CICD_REST_API }};
+        # TODO: REENABLE
+        # deno run `
+        #   --allow-net `
+        #   $scriptUrl `
+        #   preview `
+        #   "${{ needs.get_version.outputs.version }}" `
+        #   CASL `
+        #   ${{ secrets.CICD_REST_API }};
 
