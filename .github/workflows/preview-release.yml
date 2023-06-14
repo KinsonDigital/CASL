@@ -15,18 +15,18 @@ on:
 
 
 jobs:
-  # validate_branch:
-  #   name: Validate Branch
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #   - name: Validate Branch
-  #     run: |
-  #       $branch = "${{ github.ref_name  }}"
+  validate_branch:
+    name: Validate Branch
+    runs-on: ubuntu-latest
+    steps:
+    - name: Validate Branch
+      run: |
+        $branch = "${{ github.ref_name  }}"
 
-  #       if ($branch -ne "preview") {
-  #         Write-Host "The branch '$branch' is invalid. Preview releases can only run on 'preview' branches."
-  #         exit 1;
-  #       }
+        # if ($branch -ne "preview") {
+        #   Write-Host "The branch '$branch' is invalid. Preview releases can only run on 'preview' branches."
+        #   exit 1;
+        # }
 
 
   get_version:
@@ -34,6 +34,7 @@ jobs:
     outputs:
       version: ${{ steps.get-version.outputs.version }}
     runs-on: ubuntu-latest
+    needs: validate_branch
     steps:
     - name: Get Version From Project File
       id: get-version
