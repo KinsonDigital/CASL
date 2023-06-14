@@ -8,7 +8,7 @@ defaults:
 
 env:
   PROJECT_NAME: CASL
-  CICD_SCRIPTS_VERSION: v4.5.2
+  CICD_SCRIPTS_VERSION: v4.5.3
 
 
 on:
@@ -103,4 +103,30 @@ jobs:
         #   "${{ needs.get_version.outputs.version }}" `
         #   CASL `
         #   ${{ secrets.CICD_REST_API }};
+
+
+  nuget_pkg_does_not_exist:
+    name: NuGet Package Does Not Exist
+    runs-on: ubuntu-latest
+    needs: get_version
+    steps:
+    - name: Set Up Deno
+      uses: denoland/setup-deno@v1
+      with:
+        deno-version: v1.x
+
+    - name: Package Does Not Exist
+      run: |
+        # Args: 1. PackageName  2. Version
+
+        $version = "${{ env.CICD_SCRIPTS_VERSION }}";
+        $scriptUrl = "https://raw.githubusercontent.com/KinsonDigital/Infrastructure/";
+        $scriptUrl = "$scriptUrl$version/cicd/scripts/nuget-pkg-does-not-exist.ts";
+
+        # TODO: REENABLE
+        deno run `
+          --allow-net `
+          $scriptUrl `
+          KinsonDigital.CASL `
+          "${{ needs.get_version.outputs.version }}";
 
