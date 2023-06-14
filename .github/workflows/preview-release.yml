@@ -8,7 +8,7 @@ defaults:
 
 env:
   PROJECT_NAME: CASL
-  CICD_SCRIPTS_VERSION: v4.5.1
+  CICD_SCRIPTS_VERSION: v4.5.2
 
 
 on:
