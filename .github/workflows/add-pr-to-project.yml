@@ -25,19 +25,22 @@ jobs:
     - name: Add PR
       run: |
         <# Script Args:
-            Repo Name
-            Issue Number
-            Issue Type: 'issue' or 'pr'
-            Project To Add PR To
-            Token
+          Repo Name
+          Issue Number
+          Issue Type: 'issue' or 'pr'
+          Project To Add PR To
+          Token
         #>
 
+        $scriptBaseUrl = "https://raw.githubusercontent.com/KinsonDigital/Infrastructure";
+        $scriptUrl = "$scriptBaseUrl/v4.3.0/cicd/scripts/add-item-to-project.ts";
+
         deno run `
-        --allow-read `
-        --allow-net=api.github.com `
-        "https://raw.githubusercontent.com/KinsonDigital/Infrastructure/v4.3.0/cicd/scripts/add-item-to-project.ts" `
-        CASL `
-        ${{ github.event.number }} `
-        pull-request `
-        KD-Team `
-        ${{ secrets.CICD_TOKEN }};
+          --allow-read `
+          --allow-net=api.github.com `
+          "$scriptUrl" `
+          "CASL" `
+          "${{ github.event.number }}" `
+          "pull-request" `
+          "KD-Team" `
+          "${{ secrets.CICD_REST_API }}";
