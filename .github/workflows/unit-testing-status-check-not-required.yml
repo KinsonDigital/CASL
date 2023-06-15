@@ -1,0 +1,23 @@
+name: ✅Unit Testing Status Check
+run-name: "Unit Testing Status Check (Not Required)"
+
+
+defaults:
+  run:
+    shell: pwsh
+
+
+on:
+  pull_request:
+    paths-ignore:
+      - "**.cs"
+      - "**.csproj"
+
+
+jobs:
+  unit_testing_status_check_not_required:
+    name: Unit Testing Status Check Not Required
+    runs-on: ubuntu-latest
+    steps:
+    - name: Print Message
+      run: 'echo "Status Check Not Required"'
