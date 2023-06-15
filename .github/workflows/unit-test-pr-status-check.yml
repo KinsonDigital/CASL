@@ -4,9 +4,8 @@ name: ✅Unit Testing Status Check
 on:
   workflow_dispatch:
   pull_request:
-    branches:
-    - master
-    - preview
+    branches: [master, preview]
+    paths: ["**.cs", "**.csproj"]
 
 
 jobs:
