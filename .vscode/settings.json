@@ -22,5 +22,20 @@
         "Vorbis",
         "xunit"
     ],
-    "dotnet.defaultSolution": "CASL.sln"
+    "dotnet.defaultSolution": "CASL.sln",
+    "[jsonc]": {
+        "editor.indentSize": 4,
+		"editor.insertSpaces": false,
+        "editor.detectIndentation": false,
+    },
+    "[csharp]": {
+        "editor.indentSize": 4,
+		"editor.insertSpaces": false,
+        "editor.detectIndentation": false,
+    },
+	"[yml]": {
+		"editor.indentSize": 2,
+		"editor.insertSpaces": true,
+        "editor.detectIndentation": false,
+    },
 }
