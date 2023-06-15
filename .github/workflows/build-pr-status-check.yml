@@ -28,7 +28,7 @@ jobs:
 
   # Build Main Projects
   build_project:
-    name: Build Project
+    name: Build Main Project
     needs: [determine_build_config]
     uses: KinsonDigital/Infrastructure/.github/workflows/build-csharp-project.yml@v4.3.0
     with:
