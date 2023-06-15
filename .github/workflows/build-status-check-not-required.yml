@@ -16,7 +16,7 @@ on:
 
 jobs:
   build_status_check_not_required:
-    name: Build Project Status Check (Not Required)
+    name: Build Status Check (Not Required)
     runs-on: ubuntu-latest
     steps:
     - name: Print Message
