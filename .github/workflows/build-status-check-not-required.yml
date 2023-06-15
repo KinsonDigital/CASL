@@ -15,15 +15,8 @@ on:
 
 
 jobs:
-  build_project:
+  build_status_check_not_required:
     name: Build Project Status Check (Not Required)
-    runs-on: ubuntu-latest
-    steps:
-    - name: Print Message
-      run: 'echo "Status Check Not Required"'
-
-  build_tests_project:
-    name: Build Tests Status Check (Not Required)
     runs-on: ubuntu-latest
     steps:
     - name: Print Message

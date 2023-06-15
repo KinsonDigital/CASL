@@ -15,7 +15,7 @@ on:
 
 
 jobs:
-  run_tests:
+  run_status_check_not_required:
     name: Unit Testing Status Check (Not Required)
     runs-on: ubuntu-latest
     steps:
