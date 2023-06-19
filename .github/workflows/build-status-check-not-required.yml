@@ -1,0 +1,24 @@
+name: ✅Build Status Check
+run-name: "Build Status Check (Not Required)"
+
+
+defaults:
+  run:
+    shell: pwsh
+
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths-ignore:
+      - "**.cs"
+      - "**.csproj"
+
+
+jobs:
+  build_status_check_not_required:
+    name: Build Status Check (Not Required)
+    runs-on: ubuntu-latest
+    steps:
+    - name: Print Message
+      run: 'echo "Status Check Not Required"'

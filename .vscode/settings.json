@@ -23,9 +23,19 @@
         "xunit"
     ],
     "dotnet.defaultSolution": "CASL.sln",
-    "[yaml]": {
+    "[jsonc]": {
+        "editor.indentSize": 4,
+		"editor.insertSpaces": false,
+        "editor.detectIndentation": false,
+    },
+    "[csharp]": {
+        "editor.indentSize": 4,
+		"editor.insertSpaces": false,
+        "editor.detectIndentation": false,
+    },
+	"[yml]": {
+		"editor.indentSize": 2,
 		"editor.insertSpaces": true,
-		"editor.tabSize": 2,
-	},
-	"editor.detectIndentation": false,
+        "editor.detectIndentation": false,
+    },
 }

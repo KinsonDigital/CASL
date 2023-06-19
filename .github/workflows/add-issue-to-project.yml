@@ -1,0 +1,46 @@
+name: 🤖Add Issue to Project
+
+
+defaults:
+  run:
+    shell: pwsh
+
+
+on:
+  workflow_dispatch:
+  issues:
+    types: opened
+
+
+jobs:
+  add_issue_to_project:
+    name: Add Issue to Project
+    runs-on: ubuntu-latest
+    steps:
+    - name: Set Up Deno
+      uses: denoland/setup-deno@v1
+      with:
+        deno-version: v1.x
+
+    - name: Add Issue
+      run: |
+        <# Script Args:
+          Repo Name
+          Issue Number
+          Issue Type: 'issue' or 'pr'
+          Project To Add Issue To
+          Token
+        #>
+
+        $scriptBaseUrl = "https://raw.githubusercontent.com/KinsonDigital/Infrastructure";
+        $scriptUrl = "$scriptBaseUrl/v4.3.0/cicd/scripts/add-item-to-project.ts";
+
+        deno run `
+          --allow-read `
+          --allow-net=api.github.com `
+          "$scriptUrl" `
+          "CASL" `
+          "${{ github.event.issue.number }}" `
+          "issue" `
+          "KD-Team" `
+          "${{ secrets.CICD_REST_API }}";

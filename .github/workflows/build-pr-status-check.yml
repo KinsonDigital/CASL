@@ -4,9 +4,8 @@ name: ✅Build Status Check
 on:
   workflow_dispatch:
   pull_request:
-    branches:
-    - master
-    - preview
+    branches: [master, preview]
+    paths: ["**.cs", "**.csproj"]
 
 
 jobs:
@@ -29,7 +28,7 @@ jobs:
 
   # Build Main Projects
   build_project:
-    name: Build Project
+    name: Build Main Project
     needs: [determine_build_config]
     uses: KinsonDigital/Infrastructure/.github/workflows/build-csharp-project.yml@v5.0.0
     with:
