@@ -1,0 +1,224 @@
+name: 🚀Preview Release
+
+
+defaults:
+  run:
+    shell: pwsh
+
+
+on:
+  workflow_dispatch:
+  push: # TODO: REMOVE ME 
+    branches: feature/215-create-release-workflow
+
+
+jobs:
+  validate_branch:
+    name: Validate Branch
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate Branch
+        run: |
+          $branch = "${{ github.ref_name  }}"
+
+          # TODO: REENABLE
+          # if ($branch -ne "preview") {
+          #   Write-Host "The branch '$branch' is invalid. Preview releases can only run on 'preview' branches."
+          #   exit 1;
+          # }
+
+
+  build_script_url:
+    name: Build Script URL
+    uses: KinsonDigital/Infrastructure/.github/workflows/create-script-url.yml@v5.0.0
+    with:
+        project-name: ${{ vars.PROJECT_NAME }}
+
+
+  validate_version:
+    name: Validate Version
+    needs: validate_branch
+    secrets: inherit
+    uses: KinsonDigital/Infrastructure/.github/workflows/validate-csharp-version.yml@v5.0.0
+    with:
+      project-name: "${{ vars.PROJECT_NAME }}"
+
+
+  validate_tag:
+    name: Validate Version
+    secrets: inherit
+    needs: validate_version
+    uses: KinsonDigital/Infrastructure/.github/workflows/validate-tag.yml@v5.0.0
+    with:
+      project-name: "${{ vars.PROJECT_NAME }}"
+      tag-name: "${{ needs.validate_version.outputs.version }}"
+
+
+  nuget_pkg_does_not_exist:
+    name: Validate NuGet Package Does Not Exist
+    needs: validate_version
+    uses: KinsonDigital/Infrastructure/.github/workflows/nuget-package-does-not-exist.yml@v5.0.0
+    with:
+      project-name: "${{ vars.PROJECT_NAME }}"
+      version: "${{ needs.validate_version.outputs.version }}"
+
+
+  validate_release_notes:
+    name: Validate Release Notes
+    secrets: inherit
+    needs: validate_version
+    uses: KinsonDigital/Infrastructure/.github/workflows/validate-release-notes.yml@v5.0.0
+    with:
+      project-name: "${{ vars.PROJECT_NAME}}"
+      version: "${{ needs.validate_version.outputs.version }}"
+      pr-label: "${{ vars.PR_INCLUDE_NOTES_LABEL }}"
+
+
+  validate_milestone_status:
+    name: Validate Milestone Status
+    secrets: inherit
+    needs: validate_version
+    uses: KinsonDigital/Infrastructure/.github/workflows/validate-milestone-status.yml@v5.0.0
+    with:
+      project-name: "${{ vars.PROJECT_NAME }}"
+      version: "${{ needs.validate_version.outputs.version }}"
+
+
+  validate_github_release:
+    name: GitHub Release Does Not Exist
+    secrets: inherit
+    needs: [validate_version]
+    uses: KinsonDigital/Infrastructure/.github/workflows/validate-github-release.yml@v5.0.0
+    with:
+      project-name: "${{ vars.PROJECT_NAME }}"
+      version: "${{ needs.validate_version.outputs.version }}"
+
+
+  determine_build_config:
+    name: Determine Build Configuration
+    runs-on: ubuntu-latest
+    needs: [validate_tag, nuget_pkg_does_not_exist, validate_milestone_status,
+      validate_release_notes, validate_github_release]
+    outputs:
+      build-config: ${{ steps.get-build-config.outputs.build-config }}
+    steps:
+      - name: Get Build Config
+        id: get-build-config
+        shell: pwsh
+        run: |
+          # If the destination branch that the pull request is merging into is the master, do a release build
+          if ( "${{ github.base_ref }}" -eq "master") {
+            "build-config=Release" >> $env:GITHUB_OUTPUT;
+          } else { # Any other branch than master, do a debug build
+            "build-config=Debug" >> $env:GITHUB_OUTPUT;
+          }
+
+
+  build_project:
+    name: Build Main Project
+    needs: determine_build_config
+    uses: KinsonDigital/Infrastructure/.github/workflows/build-csharp-project.yml@v5.0.0
+    with:
+      project-name: "${{ vars.PROJECT_NAME }}"
+      build-config: "${{ needs.determine_build_config.outputs.build-config }}"
+      net-sdk-version: "${{ vars.NET_SDK_VERSION }}"
+
+
+  run_tests:
+    name: Run Tests
+    needs: determine_build_config
+    uses: KinsonDigital/Infrastructure/.github/workflows/run-csharp-tests.yml@v5.0.0
+    with:
+      project-name: "${{ vars.PROJECT_NAME }}Tests"
+      build-config: "${{ needs.determine_build_config.outputs.build-config }}"
+      net-sdk-version: "${{ vars.NET_SDK_VERSION }}"
+
+
+  perform_release:
+    name: Perform Release
+    runs-on: ubuntu-latest
+    needs: [determine_build_config, validate_version, build_project, run_tests, build_script_url]
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: ${{ vars.NET_SDK_VERSION }}
+
+      - name: Setup Nuget
+        uses: NuGet/setup-nuget@v1
+
+      - name: Set Up Deno
+        uses: denoland/setup-deno@v1
+        with:
+          deno-version: v1.x
+
+      - name: Create Nuget Package
+        run: |
+          dotnet pack `
+            "${{ github.workspace }}/${{ vars.PROJECT_NAME }}/${{ vars.PROJECT_NAME }}.csproj" `
+            -o "${{ github.workspace }}" `
+            -c ${{ needs.determine_build_config.outputs.build-config }};
+
+      # TODO: REENABLE
+      # - name: Publish Nuget Package
+      #   run: |
+      #     dotnet nuget push `
+      #       "${{ github.workspace }}/${{ vars.ORGANIZATION_NAME }}.${{ vars.PROJECT_NAME }}.${{ needs.validate_version.outputs.version }}.nupkg" `
+      #       --api-key ${{ secrets.NUGET_ORG_API_KEY }} `
+      #       --source https://api.nuget.org/v3/index.json;
+
+      - name: Preview Release
+        uses: softprops/action-gh-release@v0.1.15
+        with: 
+          name: "🚀Preview Release - ${{ needs.validate_version.outputs.version }}" 
+          body_path: "${{ github.workspace }}/${{ vars.RELATIVE_RELEASE_NOTES_DIR_PATH }}/${{ vars.RELEASE_NOTES_FILE_NAME_PREFIX }}${{ needs.validate_version.outputs.version }}.md"
+          files: "${{ github.workspace }}/${{ vars.RELATIVE_RELEASE_NOTES_DIR_PATH }}/${{ vars.RELEASE_NOTES_FILE_NAME_PREFIX }}${{ needs.validate_version.outputs.version }}.md"
+          tag_name: "${{ needs.validate_version.outputs.version }}"
+          prerelease: true
+          draft: false
+
+      - name: Close Milestone
+        run: |
+          $scriptUrl = "${{ needs.build_script_url.outputs.script-url }}/close-milestone.ts";
+        
+          <# Deno Args:
+            1. ProjectName
+            2. MilestoneName - This is the version
+            3. GitHubToken
+          #>
+          deno run `
+            --allow-read --allow-net `
+            "$scriptUrl" `
+            "${{ vars.PROJECT_NAME }}" `
+            "${{ needs.validate_version.outputs.version }}" `
+            "${{ secrets.CICD_REST_API }}";
+
+      - name: Send Twitter Announcement
+        if: "${{ vars.TWITTER_BROADCAST_ENABLED }} == 'true' || ${{ vars.TWITTER_BROADCAST_ENABLED }} == 'TRUE'"
+        run: |
+          $scriptUrl = "${{ needs.build_script_url.outputs.script-url }}/send-release-tweet.ts";
+
+          <# Deno Args:
+            1. RepoOwner
+            2. ProjectName
+            3. Version
+            4. DiscordInviteCode
+            5. TwitterConsumerApiKey
+            6. TwitterConsumerApiSecret
+            7. TwitterAccessToken
+            8. TwitterAccessTokenSecret
+          #>
+          deno run `
+            --allow-read --allow-net --allow-env `
+            "$scriptUrl" `
+            "${{ vars.ORGANIZATION_NAME }}" `
+            "${{ vars.PROJECT_NAME }}" `
+            "${{ needs.validate_version.outputs.version }}" `
+            "${{ vars.DISCORD_INVITE_CODE }}" `
+            "${{ secrets.TWITTER_CONSUMER_API_KEY }}" `
+            "${{ secrets.TWITTER_CONSUMER_API_SECRET }}" `
+            "${{ secrets.TWITTER_ACCESS_TOKEN }}" `
+            "${{ secrets.TWITTER_ACCESS_TOKEN_SECRET }}";

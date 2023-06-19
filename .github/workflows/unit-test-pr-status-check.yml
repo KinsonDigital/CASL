@@ -31,7 +31,7 @@ jobs:
   run_tests:
     name: Run Tests
     needs: determine_build_config
-    uses: KinsonDigital/Infrastructure/.github/workflows/run-csharp-tests.yml@v4.3.0
+    uses: KinsonDigital/Infrastructure/.github/workflows/run-csharp-tests.yml@v5.0.0
     with:
       project-name: "CASLTests"
       build-config: ${{ needs.determine_build_config.outputs.build-config }}

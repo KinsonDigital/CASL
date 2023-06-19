@@ -31,7 +31,7 @@ jobs:
   build_project:
     name: Build Project
     needs: [determine_build_config]
-    uses: KinsonDigital/Infrastructure/.github/workflows/build-csharp-project.yml@v4.3.0
+    uses: KinsonDigital/Infrastructure/.github/workflows/build-csharp-project.yml@v5.0.0
     with:
       project-name: "CASL"
       build-config: ${{ needs.determine_build_config.outputs.build-config }}
@@ -40,7 +40,7 @@ jobs:
   build_tests_project:
     name: Build Tests Project
     needs: [determine_build_config]
-    uses: KinsonDigital/Infrastructure/.github/workflows/build-csharp-project.yml@v4.3.0
+    uses: KinsonDigital/Infrastructure/.github/workflows/build-csharp-project.yml@v5.0.0
     with:
       project-name: "CASLTests"
       build-config: ${{ needs.determine_build_config.outputs.build-config }}

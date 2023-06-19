@@ -22,5 +22,10 @@
         "Vorbis",
         "xunit"
     ],
-    "dotnet.defaultSolution": "CASL.sln"
+    "dotnet.defaultSolution": "CASL.sln",
+    "[yaml]": {
+		"editor.insertSpaces": true,
+		"editor.tabSize": 2,
+	},
+	"editor.detectIndentation": false,
 }

@@ -6,127 +6,58 @@ defaults:
     shell: pwsh
 
 
-env:
-  PROJECT_NAME: CASL
-  CICD_SCRIPTS_VERSION: v4.5.3
-
-
 on:
   workflow_dispatch:
-  push: # TODO: REMOVE ME 
-    branches: feature/215-create-release-workflow
+    inputs:
+      dry-run:
+        description: 'Check to run the workflow without creating a release'
+        required: false
+        default: false
+        type: boolean
 
 
 jobs:
-  validate_branch:
-    name: Validate Branch
+  determine_build_config:
+    name: Determine Build Configuration
     runs-on: ubuntu-latest
-    steps:
-    - name: Validate Branch
-      run: |
-        $branch = "${{ github.ref_name  }}"
-
-        # TODO: REENABLE
-        # if ($branch -ne "preview") {
-        #   Write-Host "The branch '$branch' is invalid. Preview releases can only run on 'preview' branches."
-        #   exit 1;
-        # }
-
-
-  get_version:
-    name: Get Version
     outputs:
-      version: ${{ steps.get-version.outputs.version }}
-    runs-on: ubuntu-latest
-    needs: validate_branch
+      build-config: "${{ steps.get-build-config.outputs.build-config }}"
     steps:
-    - name: Get Version From Project File
-      id: get-version
-      uses: KinsonDigital/VersionMiner@v1.0.0-preview.4
-      with:
-        repo-owner: KinsonDigital
-        repo-name: CASL
-        repo-token: ${{ secrets.CICD_REST_API }}
-        branch-name: '${{ github.ref_name }}'
-        file-format: 'xml' # Not case sensitive
-        file-path: '${{ env.PROJECT_NAME }}/${{ env.PROJECT_NAME }}.csproj'
-        version-keys: Version
+      - name: Get Build Config
+        id: get-build-config
+        shell: pwsh
+        run: |
+          # If the branch that the workflow is running on is the required branch for the release, do a release build
+          if ( "${{ github.base_ref }}" -eq "preview") {
+            "build-config=Release" >> $env:GITHUB_OUTPUT;
+            Write-Host "Release build created.";
+          } else { # Any other branch than the release branch, do a debug build
+            "build-config=Debug" >> $env:GITHUB_OUTPUT;
+            Write-Host "Debug build created.";
+          }
 
 
-  validate_version:
-    name: Validate Version
-    runs-on: ubuntu-latest
-    needs: get_version
-    steps:
-    - name: Set Up Deno
-      uses: denoland/setup-deno@v1
-      with:
-        deno-version: v1.x
+  run_preview_release:
+    name: Run Preview Release
+    needs: determine_build_config
+    uses: KinsonDigital/Infrastructure/.github/workflows/release.yml@v5.0.0
+    with:
+      project-name: "${{ vars.PROJECT_NAME}}"
+      run-branch: "${{ github.ref }}"
+      net-sdk-version: "${{ vars.NET_SDK_VERSION }}"
+      relative-release-notes-dir-path: "${{ vars.RELATIVE_RELEASE_NOTES_DIR_PATH }}"
+      release-notes-file-name-prefix: "${{ vars.RELEASE_NOTES_FILE_NAME_PREFIX }}"
+      build-config: "${{ needs.determine_build_config.outputs.build-config }}"
+      cicd-scripts-version: "${{ vars.CICD_SCRIPTS_VERSION }}"
+      pr-include-notes-label: "${{ vars.PR_INCLUDE_NOTES_LABEL }}"
+      send-release-tweet: ${{ vars.TWITTER_BROADCAST_ENABLED == 'true' }}
+      dry-run: ${{ inputs.dry-run }}
+    secrets:
+      cicd-rest-api: "${{ secrets.CICD_REST_API }}"
+      nuget-org-api-key: "${{ secrets.NUGET_ORG_API_KEY }}"
+      twitter-consumer-api-key: "${{ secrets.TWITTER_CONSUMER_API_KEY }}"
+      twitter-consumer-api-secret: "${{ secrets.TWITTER_CONSUMER_API_SECRET }}"
+      twitter-access-token: "${{ secrets.TWITTER_ACCESS_TOKEN }}"
+      twitter-access-token-secret: "${{ secrets.TWITTER_ACCESS_TOKEN_SECRET }}"
 
-    - name: Validate Version
-      run: |
-        # Args: 1. Version 2. Version Type
-
-        $version = "${{ env.CICD_SCRIPTS_VERSION }}";
-        $scriptUrl = "https://raw.githubusercontent.com/KinsonDigital/Infrastructure/";
-        $scriptUrl = "$scriptUrl$version/cicd/scripts/validate-version.ts";
-
-        deno run `
-          $scriptUrl `
-          "${{ needs.get_version.outputs.version }}" `
-          preview;
-
-
-  validate_tag:
-    name: Validate Tag
-    runs-on: ubuntu-latest
-    needs: [get_version, validate_version]
-    steps:
-    - name: Set Up Deno
-      uses: denoland/setup-deno@v1
-      with:
-        deno-version: v1.x
-
-    - name: Validate Tag
-      run: |
-        # Args: 1. TagType  2. TagName 3. RepoName 4. Secret
-
-        $version = "${{ env.CICD_SCRIPTS_VERSION }}";
-        $scriptUrl = "https://raw.githubusercontent.com/KinsonDigital/Infrastructure/";
-        $scriptUrl = "$scriptUrl$version/cicd/scripts/validate-tag.ts";
-
-        # TODO: REENABLE
-        # deno run `
-        #   --allow-net `
-        #   $scriptUrl `
-        #   preview `
-        #   "${{ needs.get_version.outputs.version }}" `
-        #   CASL `
-        #   ${{ secrets.CICD_REST_API }};
-
-
-  nuget_pkg_does_not_exist:
-    name: NuGet Package Does Not Exist
-    runs-on: ubuntu-latest
-    needs: [get_version, validate_version]
-    steps:
-    - name: Set Up Deno
-      uses: denoland/setup-deno@v1
-      with:
-        deno-version: v1.x
-
-    - name: Package Does Not Exist
-      run: |
-        # Args: 1. PackageName  2. Version
-
-        $version = "${{ env.CICD_SCRIPTS_VERSION }}";
-        $scriptUrl = "https://raw.githubusercontent.com/KinsonDigital/Infrastructure/";
-        $scriptUrl = "$scriptUrl$version/cicd/scripts/nuget-pkg-does-not-exist.ts";
-
-        # TODO: REENABLE
-        deno run `
-          --allow-net `
-          $scriptUrl `
-          KinsonDigital.CASL `
-          "${{ needs.get_version.outputs.version }}";
 
