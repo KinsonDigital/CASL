@@ -14,7 +14,7 @@ on:
 
 jobs:
   add_pr_to_project:
-    name: Add PR to Project
+    name: Add PR To Project
     runs-on: ubuntu-latest
     steps:
     - name: Set Up Deno
@@ -32,15 +32,14 @@ jobs:
           Token
         #>
 
-        $scriptBaseUrl = "https://raw.githubusercontent.com/KinsonDigital/Infrastructure";
-        $scriptUrl = "$scriptBaseUrl/v4.3.0/cicd/scripts/add-item-to-project.ts";
+        $scriptUrl = "${{ vars.SCRIPT_BASE_URL }}/${{ vars.CICD_SCRIPTS_VERSION }}/${{ vars.SCRIPT_RELATIVE_DIR_PATH }}/add-item-to-project.ts";
 
         deno run `
           --allow-read `
           --allow-net=api.github.com `
           "$scriptUrl" `
-          "CASL" `
+          "${{ vars.PROJECT_NAME }}" `
           "${{ github.event.number }}" `
           "pull-request" `
-          "KD-Team" `
+          "${{ vars.ORG_PROJECT_NAME }}" `
           "${{ secrets.CICD_REST_API }}";

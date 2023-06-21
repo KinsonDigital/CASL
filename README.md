@@ -1,6 +1,7 @@
 <div align="center">
-    <img align="center" src="https://raw.githubusercontent.com/KinsonDigital/CASL/release/v1.0.0/Documentation/Images/casl-logo.png" height="96">
+    <a href="#"><img align="center" src="https://raw.githubusercontent.com/KinsonDigital/CASL/release/v1.0.0/Documentation/Images/casl-logo.png" height="96"></a>
     <br />
+
 </div>
 
 <h1 style="border:0;font-weight:bold" align="center">CASL</h1>
