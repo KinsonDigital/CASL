@@ -375,7 +375,39 @@ public class Sound : ISound
     }
 
     /// <inheritdoc/>
-    public void Dispose() => Dispose(true);
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
+    /// <summary>
+    /// <inheritdoc cref="IDisposable.Dispose"/>
+    /// </summary>
+    /// <param name="disposing"><see langword="true"/> to dispose of managed resources.</param>
+    protected virtual void Dispose(bool disposing)
+    {
+        if (this.isDisposed)
+        {
+            return;
+        }
+
+        if (disposing)
+        {
+            this.oggDecoder.Dispose();
+            this.mp3Decoder.Dispose();
+            this.audioManager.DeviceChanging -= AudioManager_DeviceChanging;
+            this.audioManager.DeviceChanged -= AudioManager_DeviceChanged;
+        }
+
+        UnloadSoundData();
+
+        // ReSharper disable HeapView.DelegateAllocation
+        this.alInvoker.ErrorCallback -= ErrorCallback;
+
+        // ReSharper restore HeapView.DelegateAllocation
+        this.isDisposed = true;
+    }
 
     /// <summary>
     /// Maps the given audio <paramref name="format"/> to the <see cref="ALFormat"/> type equivalent.
@@ -399,32 +431,6 @@ public class Sound : ISound
     /// <param name="errorMsg">The OpenAL message.</param>
     [ExcludeFromCodeCoverage]
     private static void ErrorCallback(string errorMsg) => throw new AudioException(errorMsg);
-
-    /// <summary>
-    /// <inheritdoc cref="IDisposable.Dispose"/>
-    /// </summary>
-    /// <param name="disposing"><see langword="true"/> to dispose of managed resources.</param>
-    private void Dispose(bool disposing)
-    {
-        if (!this.isDisposed)
-        {
-            if (disposing)
-            {
-                this.oggDecoder.Dispose();
-                this.mp3Decoder.Dispose();
-                this.audioManager.DeviceChanging -= AudioManager_DeviceChanging;
-                this.audioManager.DeviceChanged -= AudioManager_DeviceChanged;
-            }
-
-            UnloadSoundData();
-
-            // ReSharper disable HeapView.DelegateAllocation
-            this.alInvoker.ErrorCallback -= ErrorCallback;
-
-            // ReSharper restore HeapView.DelegateAllocation
-            this.isDisposed = true;
-        }
-    }
 
     /// <summary>
     /// Initializes the sound.
