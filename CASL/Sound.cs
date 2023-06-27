@@ -1,4 +1,4 @@
-// <copyright file="Sound.cs" company="KinsonDigital">
+﻿// <copyright file="Sound.cs" company="KinsonDigital">
 // Copyright (c) KinsonDigital. All rights reserved.
 // </copyright>
 
@@ -8,12 +8,12 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using System.IO.Abstractions;
 using System.Linq;
-using CASL.Data;
+using Data;
 using CASL.Data.Exceptions;
-using CASL.Devices;
-using CASL.Devices.Factories;
-using CASL.Exceptions;
-using CASL.OpenAL;
+using Devices;
+using Devices.Factories;
+using Exceptions;
+using OpenAL;
 
 /// <summary>
 /// A single sound that can be played, paused etc.
