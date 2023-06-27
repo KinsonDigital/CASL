@@ -1,4 +1,4 @@
-name: ♻️Sync Issue To PR
+name: 🔄️Sync Issue To PR
 
 
 defaults:
@@ -36,8 +36,6 @@ jobs:
           echo "Requested By: ${{ github.event.sender.login }}";
           echo "PR Number: $prNumber";
           echo "Comment: $command";
-          echo "Default PR Reviewer: ${{ vars.DEFAULT_PR_REVIEWER }}";
-          echo "Relative PR Sync Template File Path: ${{ vars.RELATIVE_PR_SYNC_TEMPLATE_FILE_PATH }}";
 
           deno run `
             --allow-net `
@@ -47,6 +45,4 @@ jobs:
             "${{ github.event.sender.login }}" `
             "$prNumber" `
             "$command" `
-            "${{ vars.DEFAULT_PR_REVIEWER }}" `
-            "${{ vars.RELATIVE_PR_SYNC_TEMPLATE_FILE_PATH }}" `
             "${{ secrets.CICD_REST_API }}";
