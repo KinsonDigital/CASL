@@ -1,4 +1,4 @@
-﻿// <copyright file="Sound.cs" company="KinsonDigital">
+// <copyright file="Sound.cs" company="KinsonDigital">
 // Copyright (c) KinsonDigital. All rights reserved.
 // </copyright>
 
@@ -18,7 +18,7 @@ using CASL.OpenAL;
 /// <summary>
 /// A single sound that can be played, paused etc.
 /// </summary>
-public sealed class Sound : ISound
+public class Sound : ISound
 {
     private const char CrossPlatDirSeparatorChar = '/';
     private const string IsDisposedExceptionMessage = "The sound is disposed.  You must create another sound instance.";
