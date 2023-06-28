@@ -107,7 +107,7 @@ internal static partial class NativeMethods
     /// </para>
     /// </remarks>
     [LibraryImport("libdl.so.2", EntryPoint = "dlopen", SetLastError = true, StringMarshalling = StringMarshalling.Custom, StringMarshallingCustomType = typeof(System.Runtime.InteropServices.Marshalling.AnsiStringMarshaller))]
-    public static partial nint dlopen_POSIX(string fileName, int flags);
+    public static partial nint dlopen_POSIX(string fileName, UbuntuRTLDMode flags);
 
     /// <summary>
     /// Retrieves the most recent error message that occurred during dynamic loading operations.

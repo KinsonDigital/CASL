@@ -1,4 +1,4 @@
-﻿// <copyright file="Platform.cs" company="KinsonDigital">
+// <copyright file="Platform.cs" company="KinsonDigital">
 // Copyright (c) KinsonDigital. All rights reserved.
 // </copyright>
 
@@ -99,7 +99,6 @@ internal class Platform : IPlatform
     /// <inheritdoc/>
     public IntPtr LoadLibrary(string libPath)
     {
-        const int RTLD_NOW = 2;
         try
         {
             if (IsWinPlatform())
@@ -108,7 +107,7 @@ internal class Platform : IPlatform
             }
             else if (IsPosixPlatform())
             {
-                return NativeMethods.dlopen_POSIX(libPath, RTLD_NOW);
+                return NativeMethods.dlopen_POSIX(libPath, UbuntuRTLDMode.RTLD_NOW);
             }
             else
             {
