@@ -1,4 +1,4 @@
-// <copyright file="Platform.cs" company="KinsonDigital">
+﻿// <copyright file="Platform.cs" company="KinsonDigital">
 // Copyright (c) KinsonDigital. All rights reserved.
 // </copyright>
 
@@ -144,7 +144,7 @@ internal class Platform : IPlatform
         }
         else if (IsPosixPlatform())
         {
-            return NativeMethods.dlerror_POSIX().ToManagedUTF8String();
+            return NativeMethods.dlerror_POSIX().ToManagedUtf8String();
         }
         else
         {
