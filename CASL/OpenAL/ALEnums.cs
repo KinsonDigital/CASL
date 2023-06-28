@@ -6,7 +6,7 @@ namespace CASL.OpenAL;
 #pragma warning disable CA1069 // Enums values should not be duplicated
 /// <summary>
 /// Returned by AL.GetError.</summary>
-internal enum ALError : int
+internal enum ALError
 {
     /// <summary>
     /// No OpenAL Error.
@@ -53,7 +53,7 @@ internal enum ALError : int
 /// <summary>
 /// A list of valid Int32 GetSource parameters.
 /// </summary>
-internal enum ALGetSourcei : int
+internal enum ALGetSourcei
 {
     /// <summary>
     /// The playback position, expressed in bytes. AL_EXT_OFFSET Extension.
@@ -94,7 +94,7 @@ internal enum ALGetSourcei : int
 /// <summary>
 /// A list of valid 8-bit boolean Source/GetSource parameters.
 /// </summary>
-internal enum ALSourceb : int
+internal enum ALSourceb
 {
     /// <summary>
     /// Indicate that the Source has relative coordinates. Type: bool Range: [True, False]
@@ -125,7 +125,7 @@ internal enum ALSourceb : int
 /// <summary>
 /// A list of valid 32-bit Float Source/GetSource parameters.
 /// </summary>
-internal enum ALSourcef : int
+internal enum ALSourcef
 {
     /// <summary>
     /// Source specific reference distance. Type: float Range: [0.0f - float.PositiveInfinity] At 0.0f, no distance attenuation occurs. Type: float Default: 1.0f.
@@ -201,7 +201,7 @@ internal enum ALSourcef : int
 /// <summary>
 /// Source state information, can be retrieved by AL.Source() with ALSourcei.SourceState.
 /// </summary>
-internal enum ALSourceState : int
+internal enum ALSourceState
 {
     /// <summary>
     /// Default State when loaded, can be manually set with AL.SourceRewind().
@@ -227,7 +227,7 @@ internal enum ALSourceState : int
 /// <summary>
 /// Sound samples: Format specifier.
 /// </summary>
-internal enum ALFormat : int
+internal enum ALFormat
 {
     /// <summary>
     /// 1 Channel, 8 bits per sample.
@@ -388,7 +388,7 @@ internal enum ALFormat : int
 /// <summary>
 /// A list of valid Int32 Source parameters.
 /// </summary>
-internal enum ALSourcei : int
+internal enum ALSourcei
 {
     /// <summary>
     /// The playback position, expressed in bytes.
@@ -419,7 +419,7 @@ internal enum ALSourcei : int
 /// <summary>
 /// A list of valid Int32 GetBuffer parameters.
 /// </summary>
-internal enum ALGetBufferi : int
+internal enum ALGetBufferi
 {
     /// <summary>
     /// Sound sample's frequency, in units of hertz [Hz]. This is the number of samples per second. Half of the sample frequency marks the maximum significant frequency component.
@@ -445,7 +445,7 @@ internal enum ALGetBufferi : int
 /// <summary>
 /// A list of valid Math.Vector3 Source/GetSource parameters.
 /// </summary>
-internal enum ALSource3f : int
+internal enum ALSource3f
 {
     /// <summary>
     /// Specify the current location in three dimensional space. OpenAL, like OpenGL, uses a right handed coordinate system, where in a frontal default view X (thumb) points right, Y points up (index finger), and Z points towards the viewer/camera (middle finger). To switch from a left handed coordinate system, flip the sign on the Z coordinate. Listener position is always in the world coordinate system.
