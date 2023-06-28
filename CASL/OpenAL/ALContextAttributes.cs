@@ -136,7 +136,7 @@ internal class ALContextAttributes
                                          $"{GetAttrNameAndValue(nameof(StereoSources), StereoSources)}, " +
                                          $"{GetAttrNameAndValue(nameof(Refresh), Refresh)}, " +
                                          $"{GetAttrNameAndValue(nameof(Sync), Sync)}" +
-                                         $"{((this.additionalAttributes.Length <= 0) ? string.Empty : ", " + string.Join(", ", this.additionalAttributes))}";
+                                         $"{(this.additionalAttributes.Length <= 0 ? string.Empty : ", " + string.Join(", ", this.additionalAttributes))}";
 
     /// <summary>
     /// Returns the name and value of the given attribute <paramref name="value"/>.
