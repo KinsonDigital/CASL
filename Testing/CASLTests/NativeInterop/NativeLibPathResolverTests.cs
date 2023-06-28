@@ -17,9 +17,9 @@ public class NativeLibPathResolverTests
     private const string LinuxDirPath = "/user/bin/test-app";
     private const string MacOSXDirPath = "/Applications/test-app";
     private const string WinExtension = ".dll";
-    private const string PosixExtension = ".so";// MacOSX and Linux systems
+    private const string PosixExtension = ".so"; //MacOSX and Linux systems
     private const char WinSeparatorChar = '\\';
-    private const char PosixSeparatorChar = '/';// MacOSX and Linux systems
+    private const char PosixSeparatorChar = '/'; //MacOSX and Linux systems
     private readonly Mock<IPlatform> mockPlatform;
     private readonly Mock<IApplication> mockApp;
     private readonly Mock<IPath> mockPath;

@@ -30,7 +30,7 @@ public class NativeLibraryLoaderTests
     private const string LibNameWithoutExt = "test-lib";
     private const string WinLibNameWithExt = LibNameWithoutExt + WinExtension;
     private const string PosixLibNameWithExt = LibNameWithoutExt + PosixExtenstion;
-    private const char PosixSeparatorChar = '/';// MacOSX and Linux systems
+    private const char PosixSeparatorChar = '/'; //MacOSX and Linux systems
     private readonly Mock<IDependencyManager> mockDependencyManager;
     private readonly Mock<IPlatform> mockPlatform;
     private readonly Mock<IDirectory> mockDirectory;
