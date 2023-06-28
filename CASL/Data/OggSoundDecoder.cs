@@ -13,7 +13,7 @@ using Exceptions;
 /// <summary>
 /// Decodes OGG audio data files.
 /// </summary>
-internal class OggSoundDecoder : ISoundDecoder<float>
+internal sealed class OggSoundDecoder : ISoundDecoder<float>
 {
     private readonly IAudioDataStream<float> audioDataStream;
     private bool isDisposed;
@@ -71,24 +71,22 @@ internal class OggSoundDecoder : ISoundDecoder<float>
     }
 
     /// <inheritdoc/>
-    public void Dispose()
-    {
-        Dispose(true);
-        GC.SuppressFinalize(this);
-    }
+    public void Dispose() => Dispose(true);
 
     /// <inheritdoc cref="IDisposable.Dispose"/>
     /// <param name="disposing"><see langword="true"/> to dispose managed resources.</param>
-    protected virtual void Dispose(bool disposing)
+    private void Dispose(bool disposing)
     {
-        if (!this.isDisposed)
+        if (this.isDisposed)
         {
-            if (disposing)
-            {
-                this.audioDataStream.Dispose();
-            }
-
-            this.isDisposed = true;
+            return;
         }
+
+        if (disposing)
+        {
+            this.audioDataStream.Dispose();
+        }
+
+        this.isDisposed = true;
     }
 }
