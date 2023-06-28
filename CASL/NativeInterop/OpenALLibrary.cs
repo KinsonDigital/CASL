@@ -11,6 +11,8 @@ using Exceptions;
 /// </summary>
 internal class OpenALLibrary : ILibrary
 {
+    private const string WinLibName = "soft_oal.dll";
+    private const string PosixLibName = "libopenal.so";
     private readonly IPlatform platform;
 
     /// <summary>
@@ -26,11 +28,11 @@ internal class OpenALLibrary : ILibrary
         {
             if (this.platform.IsWinPlatform())
             {
-                return "soft_oal.dll";
+                return WinLibName;
             }
             else if (this.platform.IsPosixPlatform())
             {
-                return "libopenal.so";
+                return PosixLibName;
             }
             else
             {

@@ -11,6 +11,9 @@ using System.Runtime.InteropServices;
 /// </summary>
 internal static partial class NativeMethods
 {
+    private const string WinLibName = "kernel32.dll";
+    private const string PosixLibName = "libdl.so.2";
+
     /// <summary>
     /// Loads the specified module into the address space of the calling process. The specified module may cause other modules to be loaded.
     /// </summary>
@@ -39,7 +42,7 @@ internal static partial class NativeMethods
     ///     If the function succeeds, the return value is a handle to the module.
     ///     If the function fails, the return value is a null pointer.
     /// </returns>
-    [LibraryImport("kernel32.dll", EntryPoint = "LoadLibraryW", SetLastError = true, StringMarshalling = StringMarshalling.Utf16)]
+    [LibraryImport(WinLibName, EntryPoint = "LoadLibraryW", SetLastError = true, StringMarshalling = StringMarshalling.Utf16)]
     public static partial nint LoadLibrary_WIN(string lpFileName);
 
     /// <summary>
@@ -71,7 +74,7 @@ internal static partial class NativeMethods
     ///     https://learn.microsoft.com/en-us/windows/win32/api/libloaderapi/nf-libloaderapi-getprocaddress
     /// </para>
     /// </remarks>
-    [LibraryImport("kernel32.dll", EntryPoint = "GetProcAddress", SetLastError = true, StringMarshalling = StringMarshalling.Custom, StringMarshallingCustomType = typeof(System.Runtime.InteropServices.Marshalling.AnsiStringMarshaller))]
+    [LibraryImport(WinLibName, EntryPoint = "GetProcAddress", SetLastError = true, StringMarshalling = StringMarshalling.Custom, StringMarshallingCustomType = typeof(System.Runtime.InteropServices.Marshalling.AnsiStringMarshaller))]
     public static partial nint GetProcAddress_WIN(nint hModule, string procname);
 
     /*Useful Links:
@@ -106,7 +109,7 @@ internal static partial class NativeMethods
     ///     https://pubs.opengroup.org/onlinepubs/9699919799/functions/dlopen.html
     /// </para>
     /// </remarks>
-    [LibraryImport("libdl.so.2", EntryPoint = "dlopen", SetLastError = true, StringMarshalling = StringMarshalling.Custom, StringMarshallingCustomType = typeof(System.Runtime.InteropServices.Marshalling.AnsiStringMarshaller))]
+    [LibraryImport(PosixLibName, EntryPoint = "dlopen", SetLastError = true, StringMarshalling = StringMarshalling.Custom, StringMarshallingCustomType = typeof(System.Runtime.InteropServices.Marshalling.AnsiStringMarshaller))]
     public static partial nint dlopen_POSIX(string fileName, UbuntuRTLDMode flags);
 
     /// <summary>
@@ -121,7 +124,7 @@ internal static partial class NativeMethods
     ///     https://pubs.opengroup.org/onlinepubs/9699919799/functions/dlerror.html
     /// </para>
     /// </remarks>
-    [LibraryImport("libdl.so.2", EntryPoint = "dlerror", SetLastError = true)]
+    [LibraryImport(PosixLibName, EntryPoint = "dlerror", SetLastError = true)]
     public static partial nint dlerror_POSIX();
 
     /// <summary>
@@ -140,6 +143,6 @@ internal static partial class NativeMethods
     ///     https://pubs.opengroup.org/onlinepubs/9699919799/functions/dlsym.html
     /// </para>
     /// </remarks>
-    [LibraryImport("libdl.so.2", EntryPoint = "dlsym", SetLastError = true, StringMarshalling = StringMarshalling.Custom, StringMarshallingCustomType = typeof(System.Runtime.InteropServices.Marshalling.AnsiStringMarshaller))]
+    [LibraryImport(PosixLibName, EntryPoint = "dlsym", SetLastError = true, StringMarshalling = StringMarshalling.Custom, StringMarshallingCustomType = typeof(System.Runtime.InteropServices.Marshalling.AnsiStringMarshaller))]
     public static partial nint dlsym_POSIX(nint handle, string symbol);
 }
