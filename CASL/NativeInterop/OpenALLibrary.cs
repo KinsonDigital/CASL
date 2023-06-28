@@ -18,7 +18,7 @@ internal class OpenALLibrary : ILibrary
     /// <summary>
     /// Initializes a new instance of the <see cref="OpenALLibrary"/> class.
     /// </summary>
-    /// <param name="platform">Information about the platform.</param>
+    /// <param name="platform">Provides platform specific information.</param>
     public OpenALLibrary(IPlatform platform) => this.platform = platform;
 
     /// <inheritdoc/>

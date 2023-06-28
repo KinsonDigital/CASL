@@ -19,8 +19,8 @@ internal class NativeLibPathResolver : IFilePathResolver
     /// <summary>
     /// Initializes a new instance of the <see cref="NativeLibPathResolver"/> class.
     /// </summary>
-    /// <param name="platform">Holds information about the platform.</param>
-    /// <param name="path">Processes paths.</param>
+    /// <param name="platform">Provides platform specific information.</param>
+    /// <param name="path">Manages file paths.</param>
     /// <param name="application">Gets information about the application.</param>
     public NativeLibPathResolver(IPlatform platform, IPath path, IApplication application)
     {

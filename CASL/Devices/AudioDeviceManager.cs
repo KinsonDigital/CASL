@@ -32,7 +32,7 @@ internal sealed class AudioDeviceManager : IAudioDeviceManager
     /// <summary>
     /// Initializes a new instance of the <see cref="AudioDeviceManager"/> class.
     /// </summary>
-    /// <param name="alInvoker">Makes calls to OpenAL.</param>
+    /// <param name="alInvoker">Provides access to OpenAL.</param>
     public AudioDeviceManager(IOpenALInvoker alInvoker)
     {
         this.alInvoker = alInvoker;

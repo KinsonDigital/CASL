@@ -34,10 +34,10 @@ internal class NativeLibraryLoader : ILibraryLoader
     /// Initializes a new instance of the <see cref="NativeLibraryLoader"/> class.
     /// </summary>
     /// <param name="dependencyManager">Manages the native library's dependencies.</param>
-    /// <param name="platform">Gets required information about the platform.</param>
-    /// <param name="directory">Performs directory IO operations.</param>
-    /// <param name="file">Performs file IO operations.</param>
-    /// <param name="path">Process paths.</param>
+    /// <param name="platform">Provides platform specific information.</param>
+    /// <param name="directory">Performs operations with directories.</param>
+    /// <param name="file">Performs operations with files.</param>
+    /// <param name="path">Manages file paths.</param>
     /// <param name="library">The library to load.</param>
     public NativeLibraryLoader(
         IDependencyManager dependencyManager,
