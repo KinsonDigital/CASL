@@ -45,7 +45,7 @@ public class SoundDataTests
             Format = AudioFormat.Stereo16,
         };
 
-        var dataB = new SoundData<float>()
+        var dataB = new SoundData<float>
         {
             BufferData = new ReadOnlyCollection<float>(new[] { 1f }),
             SampleRate = 44100,
@@ -72,7 +72,7 @@ public class SoundDataTests
             Format = AudioFormat.Stereo16,
         };
 
-        var dataB = new SoundData<float>()
+        var dataB = new SoundData<float>
         {
             BufferData = new ReadOnlyCollection<float>(new[] { 1f }),
             SampleRate = 44100,
@@ -120,7 +120,7 @@ public class SoundDataTests
             Format = AudioFormat.Stereo16,
         };
 
-        object dataB = new SoundData<float>()
+        object dataB = new SoundData<float>
         {
             BufferData = new ReadOnlyCollection<float>(new[] { 1f }),
             SampleRate = 44100,

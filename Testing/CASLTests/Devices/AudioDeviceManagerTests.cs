@@ -227,7 +227,7 @@ public class AudioDeviceManagerTests
         // Act & Assert
         Assert.ThrowsWithMessage<SoundDataException>(() =>
         {
-            var soundSrc = new SoundSource()
+            var soundSrc = new SoundSource
             {
                 SourceId = 1234,
             };
@@ -246,7 +246,7 @@ public class AudioDeviceManagerTests
         // Act & Assert
         Assert.DoesNotThrow<Exception>(() =>
         {
-            var otherSoundSrc = new SoundSource()
+            var otherSoundSrc = new SoundSource
             {
                 SourceId = 4321,
             };
