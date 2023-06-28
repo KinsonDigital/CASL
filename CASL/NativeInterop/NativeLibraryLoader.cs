@@ -2,18 +2,21 @@
 // Copyright (c) KinsonDigital. All rights reserved.
 // </copyright>
 
+/*
+ * Refer to these links for more information
+ * 1. https://dev.to/jeikabu/loading-native-libraries-in-c-fh6
+ * 2. https://github.com/mhowlett/NNanomsg/blob/master/NNanomsg/Interop.cs#L193
+*/
+
+// ReSharper disable UnusedMember.Local
 namespace CASL.NativeInterop;
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.IO.Abstractions;
 using System.Linq;
 using Exceptions;
-
-/*Refer to these links for more information
-1. https://dev.to/jeikabu/loading-native-libraries-in-c-fh6
-2. https://github.com/mhowlett/NNanomsg/blob/master/NNanomsg/Interop.cs#L193
-*/
 
 /// <summary>
 /// Loads a native library and returns a pointer for the purpose of interoping with it.
@@ -146,20 +149,21 @@ internal class NativeLibraryLoader : ILibraryLoader
     /// <param name="possibleLibPath">The path to where the libraries might exist.</param>
     /// <param name="libraryName">The library name to process.</param>
     /// <returns>The latest version of the given <paramref name="libraryName"/>.</returns>
+    [SuppressMessage("csharpsquid", "S1144", Justification = "Not referenced internally but might be in the future.")]
     private string GetLatestPosixLibraryVersion(string possibleLibPath, string libraryName)
     {
         var libExtension = this.platform.GetPlatformLibFileExtension();
 
-        var libraryNameNoExt = libraryName;
+        libraryName = libraryName.ToLower();
 
         // Strip any extensions off of the name
-        while (this.path.HasExtension(libraryNameNoExt))
+        while (this.path.HasExtension(libraryName))
         {
-            libraryNameNoExt = this.path.GetFileNameWithoutExtension(libraryNameNoExt);
+            libraryName = this.path.GetFileNameWithoutExtension(libraryName);
         }
 
         var possibleLibs = (from n in this.directory.GetFiles(possibleLibPath)
-            where this.path.GetFileName(n).ToLower().Contains(libraryNameNoExt.ToLower())
+            where this.path.GetFileName(n).ToLower().Contains(libraryName.ToLower())
                   && this.path.GetFileName(n).ToLower().Contains(".so")
             select n).ToArray();
 
@@ -174,22 +178,24 @@ internal class NativeLibraryLoader : ILibraryLoader
         // Example: '.so.1' or '.so.2'
         foreach (var possibleLib in possibleLibs)
         {
-            if (possibleLib.Contains(".so."))
+            if (!possibleLib.Contains(".so."))
             {
-                var sections = possibleLib.Split(".so.");
+                continue;
+            }
 
-                var parseSuccess = int.TryParse(sections[1], out var libVersion);
+            var sections = possibleLib.Split(".so.");
 
-                if (parseSuccess && libVersion > largestVersion)
-                {
-                    largestVersion = libVersion;
-                }
+            var parseSuccess = int.TryParse(sections[1], out var libVersion);
+
+            if (parseSuccess && libVersion > largestVersion)
+            {
+                largestVersion = libVersion;
             }
         }
 
         var chosenLibName = largestVersion == -1u
             ? this.path.GetFileName(possibleLibs[0])
-            : $"{libraryNameNoExt}{libExtension}.{largestVersion}";
+            : $"{libraryName}{libExtension}.{largestVersion}";
 
         return chosenLibName;
     }

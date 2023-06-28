@@ -6,6 +6,7 @@
  * OpenAL documentation and other resources can be found at http://www.openal.org/documentation/
  */
 
+// ReSharper disable UnusedType.Local
 namespace CASL.OpenAL;
 
 using System.Diagnostics.CodeAnalysis;
@@ -20,8 +21,6 @@ using NativeInterop.Factories;
 [ExcludeFromCodeCoverage]
 internal class AL
 {
-    private static nint libraryPointer;
-
     private readonly ALGetError alGetError;
     private readonly ALGenBuffers alGenBuffers;
     private readonly ALGenSources alGenSources;
@@ -47,7 +46,7 @@ internal class AL
     /// <param name="delegateFactory">Creates delegates to the loaded native library functions.</param>
     public AL(ILibraryLoader libraryLoader, IDelegateFactory delegateFactory)
     {
-        libraryPointer = libraryLoader.LoadLibrary();
+        var libraryPointer = libraryLoader.LoadLibrary();
 
         if (libraryPointer == 0)
         {

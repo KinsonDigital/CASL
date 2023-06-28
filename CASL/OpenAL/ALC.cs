@@ -2,6 +2,7 @@
 // Copyright (c) KinsonDigital. All rights reserved.
 // </copyright>
 
+// ReSharper disable IdentifierTypo
 namespace CASL.OpenAL;
 
 using System.Diagnostics.CodeAnalysis;
@@ -14,10 +15,9 @@ using NativeInterop.Factories;
 /// Provides access to OpenAL context functions.
 /// </summary>
 [ExcludeFromCodeCoverage]
+[SuppressMessage("csharpsquid", "S101", Justification = "Naming left alone to match original OpenAL type names.")]
 internal class ALC
 {
-    private static nint libraryPointer;
-
     private readonly ALCGetError alcGetError;
     private readonly ALCOpenDevice alcOpenDevice;
     private readonly ALCCreateContext alcCreateContext;
@@ -35,7 +35,7 @@ internal class ALC
     /// <param name="delegateFactory">Creates delegates to the loaded native library functions.</param>
     public ALC(ILibraryLoader libraryLoader, IDelegateFactory delegateFactory)
     {
-        libraryPointer = libraryLoader.LoadLibrary();
+        var libraryPointer = libraryLoader.LoadLibrary();
 
         if (libraryPointer == 0)
         {
@@ -92,7 +92,7 @@ internal class ALC
     /// </summary>
     /// <param name="device">A pointer to the device to retrieve the error state from.</param>
     /// <returns>
-    ///     Errorcode Int32.
+    ///     The ALC error code.
     /// </returns>
     public AlcError GetError([In] ALDevice device) => this.alcGetError(device);
 

@@ -106,13 +106,16 @@ public class AssertExtensions : Assert
             Assert.True(false, $"Both lists must be null or not null to be equal.\nThe '{nameof(expectedItems)}' is not null and the '{nameof(actualItems)}' is null.");
         }
 
-        if (expectedItems.Count() != actualItems.Count())
+        var expectedItemsToCheck = expectedItems.ToArray();
+        var actualItemsToCheck = actualItems.ToArray();
+
+        if (expectedItemsToCheck.Count() != actualItemsToCheck.Count())
         {
             Assert.True(false, $"The quantity of items for '{nameof(expectedItems)}' and '{nameof(actualItems)}' do not match.");
         }
 
-        var expectedArrayItems = expectedItems.ToArray();
-        var actualArrayItems = actualItems.ToArray();
+        var expectedArrayItems = expectedItemsToCheck.ToArray();
+        var actualArrayItems = actualItemsToCheck.ToArray();
 
         for (var i = 0; i < expectedArrayItems.Length; i++)
         {

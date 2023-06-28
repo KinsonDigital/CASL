@@ -1,5 +1,5 @@
-﻿// <copyright file="NativeLibraryLoaderTests.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
+﻿// <copyright file="NativeLibraryLoaderTests.cs" company="KinsonDigital">
+// Copyright (c) KinsonDigital. All rights reserved.
 // </copyright>
 
 #pragma warning disable IDE0002 // Name can be simplified
@@ -40,7 +40,6 @@ public class NativeLibraryLoaderTests
     private string? libPath;
     private ReadOnlyCollection<string>? libDirPaths;
 
-    #region Constructors
     /// <summary>
     /// Initializes a new instance of the <see cref="NativeLibraryLoaderTests"/> class.
     /// </summary>
@@ -53,7 +52,6 @@ public class NativeLibraryLoaderTests
         this.mockPath = new Mock<IPath>();
         this.mockLibrary = new Mock<ILibrary>();
     }
-    #endregion
 
     #region Constructor Tests
     [Fact]

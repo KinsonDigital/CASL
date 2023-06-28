@@ -2,6 +2,7 @@
 // Copyright (c) KinsonDigital. All rights reserved.
 // </copyright>
 
+// ReSharper disable UnusedMember.Global
 namespace CASL.OpenAL;
 
 /// <summary>

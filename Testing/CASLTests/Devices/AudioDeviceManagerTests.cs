@@ -32,7 +32,6 @@ public class AudioDeviceManagerTests
     private readonly string oggFilePath;
     private readonly Mock<IOpenALInvoker> mockALInvoker;
     private readonly Mock<IPath> mockPath;
-    private readonly ALDevice device;
     private readonly ALContext context;
     private readonly uint srcId = 4321;
     private readonly uint bufferId = 9876;
@@ -43,7 +42,8 @@ public class AudioDeviceManagerTests
     public AudioDeviceManagerTests()
     {
         this.oggFilePath = @"C:/temp/Content/Sounds/sound.ogg";
-        this.device = new ALDevice(1234);
+
+        var device = new ALDevice(1234);
         this.context = new ALContext(5678);
 
         this.mockALInvoker = new Mock<IOpenALInvoker>();
@@ -52,8 +52,8 @@ public class AudioDeviceManagerTests
 
         this.mockALInvoker.Setup(m => m.GenSource()).Returns(this.srcId);
         this.mockALInvoker.Setup(m => m.GenBuffer()).Returns(this.bufferId);
-        this.mockALInvoker.Setup(m => m.OpenDevice(It.IsAny<string>())).Returns(this.device);
-        this.mockALInvoker.Setup(m => m.CreateContext(this.device, It.IsAny<ALContextAttributes>()))
+        this.mockALInvoker.Setup(m => m.OpenDevice(It.IsAny<string>())).Returns(device);
+        this.mockALInvoker.Setup(m => m.CreateContext(device, It.IsAny<ALContextAttributes>()))
             .Returns(this.context);
         this.mockALInvoker.Setup(m => m.MakeContextCurrent(this.context)).Returns(true);
 
@@ -156,10 +156,8 @@ public class AudioDeviceManagerTests
         this.mockALInvoker.Verify(m => m.GetDefaultDevice(), Times.Once());
     }
 
-    [Theory]
-    [InlineData(false)]
-    [InlineData(null)]
-    public void InitDevice_WithIssueMakingContextCurrent_ThrowsException(bool? makeContextCurrentResult)
+    [Fact]
+    public void InitDevice_WithIssueMakingContextCurrent_ThrowsException()
     {
         // Arrange
         // The MakeContextCurrent call does not take nullable bool.  This fixes that issue

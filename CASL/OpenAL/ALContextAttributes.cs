@@ -39,46 +39,44 @@ internal class ALContextAttributes
     }
 
     /// <summary>
-    /// Gets or sets the output buffer frequency in Hz.
+    /// Gets the output buffer frequency in Hz.
     /// This does not actually change any AL state. To apply these attributes see <see cref="ALC.CreateContext(ALDevice, int[])"/>.
     /// </summary>
-    public int? Frequency { get; set; }
+    public int? Frequency { get; init; }
 
     /// <summary>
-    /// Gets or sets the number of mono sources.
+    /// Gets the number of mono sources.
     /// This does not actually change any AL state. To apply these attributes see <see cref="ALC.CreateContext(ALDevice, int[])"/>.
     /// Not guaranteed to get exact number of mono sources when creating a context.
     /// </summary>
-    public int? MonoSources { get; set; }
+    public int? MonoSources { get; init; }
 
     /// <summary>
-    /// Gets or sets the number of stereo sources.
+    /// Gets the number of stereo sources.
     /// This does not actually change any AL state. To apply these attributes see <see cref="ALC.CreateContext(ALDevice, int[])"/>.
     /// Not guaranteed to get exact number of mono sources when creating a context.
     /// </summary>
-    public int? StereoSources { get; set; }
+    public int? StereoSources { get; init; }
 
     /// <summary>
-    /// Gets or sets the refresh interval in Hz.
+    /// Gets the refresh interval in Hz.
     /// This does not actually change any AL state. To apply these attributes see <see cref="ALC.CreateContext(ALDevice, int[])"/>.
     /// </summary>
-    public int? Refresh { get; set; }
+    public int? Refresh { get; init; }
 
     /// <summary>
-    /// Gets or sets if the context is synchronous.
+    /// Gets if the context is synchronous.
     /// This does not actually change any AL state. To apply these attributes see <see cref="ALC.CreateContext(ALDevice, int[])"/>.
     /// </summary>
-    public bool? Sync { get; set; }
+    public bool? Sync { get; init; }
 
     /// <summary>
     /// Gets or sets additional attributes.
     /// </summary>
-    public int[] AdditionalAttributes
+    public int[]? AdditionalAttributes
     {
         get => this.additionalAttributes;
-        set => this.additionalAttributes = value is null
-            ? Array.Empty<int>()
-            : this.additionalAttributes = value;
+        set => this.additionalAttributes = value ?? Array.Empty<int>();
     }
 
     /// <summary>
@@ -97,11 +95,13 @@ internal class ALContextAttributes
 
         void AddAttribute(int? value, AlcContextAttributes attribute)
         {
-            if (value != null)
+            if (value == null)
             {
-                attributeList[index++] = (int)attribute;
-                attributeList[index++] = value ?? default;
+                return;
             }
+
+            attributeList[index++] = (int)attribute;
+            attributeList[index++] = value.Value;
         }
 
         AddAttribute(Frequency, AlcContextAttributes.Frequency);
@@ -117,11 +117,10 @@ internal class ALContextAttributes
         if (this.additionalAttributes.Length > 0)
         {
             Array.Copy(this.additionalAttributes, 0, attributeList, index, this.additionalAttributes.Length);
-            index += this.additionalAttributes.Length;
         }
 
         // Add the trailing null byte.
-        attributeList[index++] = 0;
+        attributeList[^1] = 0;
 
         return attributeList;
     }

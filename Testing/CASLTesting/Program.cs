@@ -1,8 +1,8 @@
-﻿// <copyright file="Program.cs" company="KinsonDigital">
+// <copyright file="Program.cs" company="KinsonDigital">
 // Copyright (c) KinsonDigital. All rights reserved.
 // </copyright>
 
-namespace CASPLTesting;
+namespace CASLTesting;
 
 using System;
 using System.Collections.Generic;
@@ -14,7 +14,10 @@ using System.Threading.Tasks;
 using CASL;
 using CASL.Devices;
 
-public class Program
+/// <summary>
+/// The main entry point for the application..
+/// </summary>
+public static class Program
 {
     private const string AudioDirName = "AudioFiles";
     private static readonly string AudioFilePath = $@"{Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}{Path.DirectorySeparatorChar}{AudioDirName}{Path.DirectorySeparatorChar}";
@@ -29,7 +32,7 @@ public class Program
         var cancelTokenSrc = new CancellationTokenSource();
         var soundLibDirPath = AudioFilePath;
 
-        Sound? sound = null;
+        Sound? sound;
 
         string[] GetValidFiles(string path)
         {
@@ -148,7 +151,6 @@ public class Program
 
         ShowHelp();
 
-
         getTimeTask.Start();
 
         var command = Console.ReadLine()?.ToLower().Trim() ?? string.Empty;
@@ -226,7 +228,7 @@ public class Program
 
                     if (isNumber)
                     {
-                        var parseSuccess = int.TryParse(soundNumber.ToString(), out var chosenNumber);
+                        int.TryParse(soundNumber.ToString(), out var chosenNumber);
 
                         chosenSound = soundList[chosenNumber];
 
@@ -259,7 +261,7 @@ public class Program
                 }
                 else
                 {
-                    var parseResult = float.TryParse(sections[1], out var seconds);
+                    float.TryParse(sections[1], out var seconds);
 
                     sound.FastForward(seconds);
                 }
@@ -274,7 +276,7 @@ public class Program
                 }
                 else
                 {
-                    var parseResult = float.TryParse(sections[1], out var seconds);
+                    float.TryParse(sections[1], out var seconds);
 
                     sound.Rewind(seconds);
                 }
@@ -325,7 +327,7 @@ public class Program
                 }
                 else
                 {
-                    var parseResult = float.TryParse(sections[1], out var volume);
+                    float.TryParse(sections[1], out var volume);
 
                     if (volumeIncrease)
                     {
@@ -410,7 +412,7 @@ public class Program
                         }
                         else
                         {
-                            sound.SetTimePosition(minute * 60 + second);
+                            sound.SetTimePosition((minute * 60) + second);
                         }
                     }
                     else
@@ -474,7 +476,7 @@ public class Program
 
                     if (isNumber)
                     {
-                        var parseSuccess = int.TryParse(deviceNumber.ToString(), out var chosenNumber);
+                        int.TryParse(deviceNumber.ToString(), out var chosenNumber);
 
                         chosenDevice = deviceList[chosenNumber];
 

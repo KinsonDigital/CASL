@@ -2,10 +2,12 @@
 // Copyright (c) KinsonDigital. All rights reserved.
 // </copyright>
 
-namespace CASL.Data;
+namespace CASLTests.Data;
 
 using System.Collections.ObjectModel;
 using System.Linq;
+using CASL;
+using CASL.Data;
 using Xunit;
 
 /// <summary>
@@ -136,14 +138,13 @@ public class SoundDataTests
     }
 
     [Theory]
-    [InlineData(new[] { 1f }, 44100, 2, AudioFormat.Stereo16, 123, true)]
-    [InlineData(new[] { 1f, 2f }, 6000, 2, AudioFormat.Mono16, 123, false)]
+    [InlineData(new[] { 1f }, 44100, 2, AudioFormat.Stereo16, true)]
+    [InlineData(new[] { 1f, 2f }, 6000, 2, AudioFormat.Mono16, false)]
     public void Equals_WhenInvokingTypedParam_ReturnsCorrectResult(
         float[] bufferData,
         int sampleRate,
         int channels,
         AudioFormat format,
-        float totalSeconds,
         bool expected)
     {
         // Arrange

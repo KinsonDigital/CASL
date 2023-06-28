@@ -74,18 +74,12 @@ internal static class IoC
 
         // Register the proper data stream to be the implementation if the consumer is a certain decoder
         IoCContainer.RegisterConditional<IAudioDataStream<float>, OggAudioDataStream>(
-            context =>
-            {
-                return !context.HasConsumer || context.Consumer.ImplementationType == typeof(OggSoundDecoder);
-            }, true);
+            context => !context.HasConsumer || context.Consumer.ImplementationType == typeof(OggSoundDecoder), true);
 
         IoCContainer.Register<ISoundDecoder<float>, OggSoundDecoder>(true);
 
         IoCContainer.RegisterConditional<IAudioDataStream<byte>, Mp3AudioDataStream>(
-            context =>
-            {
-                return !context.HasConsumer || context.Consumer.ImplementationType == typeof(MP3SoundDecoder);
-            }, true);
+            context => !context.HasConsumer || context.Consumer.ImplementationType == typeof(MP3SoundDecoder), true);
 
         IoCContainer.Register<ISoundDecoder<byte>, MP3SoundDecoder>(true);
     }

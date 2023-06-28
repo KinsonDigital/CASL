@@ -2,7 +2,7 @@
 // Copyright (c) KinsonDigital. All rights reserved.
 // </copyright>
 
-namespace CASLTests.Audio;
+namespace CASLTests.Data;
 
 using System;
 using System.Collections.ObjectModel;
