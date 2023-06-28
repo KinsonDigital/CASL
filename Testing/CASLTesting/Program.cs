@@ -195,7 +195,7 @@ public class Program
                 WriteLine("Enter a number to choose from the list of sounds.", enterBlankBefore: true);
                 WriteLine("Enter 'q' to stop the load sound process.", enterBlankBefore: true);
 
-                for (int i = 0; i < soundList.Length; i++)
+                for (var i = 0; i < soundList.Length; i++)
                 {
                     TabbedWriteLine($"{i}: {Path.GetFileName(soundList[i])}");
                 }
