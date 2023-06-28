@@ -81,7 +81,7 @@ public class OggSoundDecoderTests
         this.mockDataStream.SetupGet(p => p.Channels).Returns(channels);
         this.mockDataStream.SetupGet(p => p.Format).Returns(format);
         this.mockDataStream.Setup(m => m.ReadSamples(It.IsAny<float[]>(), 0, It.IsAny<int>()))
-            .Returns<float[], int, int>((buffer, offset, count) =>
+            .Returns<float[], int, int>((buffer, _, _) =>
             {
                 // This prevents the while loop from continuing forever.
                 // This simulates that the data is finished being read
