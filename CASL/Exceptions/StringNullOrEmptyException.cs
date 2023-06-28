@@ -5,11 +5,14 @@
 namespace CASL.Exceptions;
 
 using System;
+using System.Runtime.Serialization;
+using System.Security;
 
-/// <summary>
+/// <summary>T
 /// Occurs when a string is null or empty.
 /// </summary>
-public class StringNullOrEmptyException : Exception
+[Serializable]
+public sealed class StringNullOrEmptyException : Exception
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="StringNullOrEmptyException"/> class.
@@ -38,6 +41,17 @@ public class StringNullOrEmptyException : Exception
     /// </param>
     public StringNullOrEmptyException(string message, Exception innerException)
         : base(message, innerException)
+    {
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="StringNullOrEmptyException"/> class.
+    /// </summary>
+    /// <param name="info">The <see cref="SerializationInfo"/> to populate the data.</param>
+    /// <param name="context">The destination (see <see cref="StreamingContext"/>) for this serialization.</param>
+    /// <exception cref="SecurityException">The caller does not have the required permissions.</exception>
+    private StringNullOrEmptyException(SerializationInfo info, StreamingContext context)
+        : base(info, context)
     {
     }
 }

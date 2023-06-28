@@ -5,11 +5,14 @@
 namespace CASL.Exceptions;
 
 using System;
+using System.Runtime.Serialization;
+using System.Security;
 
 /// <summary>
 /// Occurs when an audio related exception has occured.
 /// </summary>
-public class AudioException : Exception
+[Serializable]
+public sealed class AudioException : Exception
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="AudioException"/> class.
@@ -38,6 +41,17 @@ public class AudioException : Exception
     /// </param>
     public AudioException(string message, Exception innerException)
         : base(message, innerException)
+    {
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="AudioException"/> class.
+    /// </summary>
+    /// <param name="info">The <see cref="SerializationInfo"/> to populate the data.</param>
+    /// <param name="context">The destination (see <see cref="StreamingContext"/>) for this serialization.</param>
+    /// <exception cref="SecurityException">The caller does not have the required permissions.</exception>
+    private AudioException(SerializationInfo info, StreamingContext context)
+        : base(info, context)
     {
     }
 }

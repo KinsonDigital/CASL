@@ -5,11 +5,14 @@
 namespace CASL.Data.Exceptions;
 
 using System;
+using System.Runtime.Serialization;
+using System.Security;
 
 /// <summary>
 /// Occurs when an OpenAL sound sources does not exist.
 /// </summary>
-internal class SoundDataException : Exception
+[Serializable]
+public sealed class SoundDataException : Exception
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="SoundDataException"/> class.
@@ -38,6 +41,17 @@ internal class SoundDataException : Exception
     /// </param>
     public SoundDataException(string message, Exception innerException)
         : base(message, innerException)
+    {
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="SoundDataException"/> class.
+    /// </summary>
+    /// <param name="info">The <see cref="SerializationInfo"/> to populate the data.</param>
+    /// <param name="context">The destination (see <see cref="StreamingContext"/>) for this serialization.</param>
+    /// <exception cref="SecurityException">The caller does not have the required permissions.</exception>
+    private SoundDataException(SerializationInfo info, StreamingContext context)
+        : base(info, context)
     {
     }
 }

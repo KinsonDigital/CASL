@@ -5,11 +5,14 @@
 namespace CASL.Devices.Exceptions;
 
 using System;
+using System.Runtime.Serialization;
+using System.Security;
 
 /// <summary>
 /// Occurs when an audio device does not exist.
 /// </summary>
-public class AudioDeviceDoesNotExistException : Exception
+[Serializable]
+public sealed class AudioDeviceDoesNotExistException : Exception
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="AudioDeviceDoesNotExistException"/> class.
@@ -48,6 +51,17 @@ public class AudioDeviceDoesNotExistException : Exception
     /// </param>
     public AudioDeviceDoesNotExistException(string message, Exception innerException)
         : base(message, innerException)
+    {
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="AudioDeviceDoesNotExistException"/> class.
+    /// </summary>
+    /// <param name="info">The <see cref="SerializationInfo"/> to populate the data.</param>
+    /// <param name="context">The destination (see <see cref="StreamingContext"/>) for this serialization.</param>
+    /// <exception cref="SecurityException">The caller does not have the required permissions.</exception>
+    private AudioDeviceDoesNotExistException(SerializationInfo info, StreamingContext context)
+        : base(info, context)
     {
     }
 }

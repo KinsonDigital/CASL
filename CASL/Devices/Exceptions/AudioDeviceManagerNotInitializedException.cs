@@ -5,12 +5,15 @@
 namespace CASL.Devices.Exceptions;
 
 using System;
+using System.Runtime.Serialization;
+using System.Security;
 
 /// <summary>
 /// Occurs when the <see cref="AudioDeviceManager"/> has not been initialized.
 /// </summary>
 /// <remarks>This is done by invoking the <see cref="AudioDeviceManager.InitDevice(string?)"/> method.</remarks>
-internal class AudioDeviceManagerNotInitializedException : Exception
+[Serializable]
+public sealed class AudioDeviceManagerNotInitializedException : Exception
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="AudioDeviceManagerNotInitializedException"/> class.
@@ -39,6 +42,17 @@ internal class AudioDeviceManagerNotInitializedException : Exception
     /// </param>
     public AudioDeviceManagerNotInitializedException(string message, Exception innerException)
         : base(message, innerException)
+    {
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="AudioDeviceManagerNotInitializedException"/> class.
+    /// </summary>
+    /// <param name="info">The <see cref="SerializationInfo"/> to populate the data.</param>
+    /// <param name="context">The destination (see <see cref="StreamingContext"/>) for this serialization.</param>
+    /// <exception cref="SecurityException">The caller does not have the required permissions.</exception>
+    private AudioDeviceManagerNotInitializedException(SerializationInfo info, StreamingContext context)
+        : base(info, context)
     {
     }
 }
