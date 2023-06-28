@@ -1,5 +1,3 @@
-
-
 // <copyright file="OggSoundDecoderTests.cs" company="KinsonDigital">
 // Copyright (c) KinsonDigital. All rights reserved.
 // </copyright>
