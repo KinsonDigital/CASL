@@ -1,4 +1,4 @@
-// <copyright file="NativeLibPathResolver.cs" company="KinsonDigital">
+﻿// <copyright file="NativeLibPathResolver.cs" company="KinsonDigital">
 // Copyright (c) KinsonDigital. All rights reserved.
 // </copyright>
 
@@ -60,13 +60,13 @@ internal class NativeLibPathResolver : IFilePathResolver
     /// </summary>
     /// <param name="libFilePathOrFileName">The name of the library.</param>
     /// <returns>A resolved path with the name of the library.</returns>
-    /// <remarks>The <paramref name="libName"/> can be with or without a file extension.</remarks>
-    public string GetFilePath(string libName)
+    /// <remarks>The <paramref name="libFilePathOrFileName"/> can be with or without a file extension.</remarks>
+    public string GetFilePath(string libFilePathOrFileName)
     {
-        libName = this.path.HasExtension(libName)
-            ? $"{this.path.GetFileNameWithoutExtension(libName)}{this.platform.GetPlatformLibFileExtension()}"
-            : $"{libName}{this.platform.GetPlatformLibFileExtension()}";
+        libFilePathOrFileName = this.path.HasExtension(libFilePathOrFileName)
+            ? $"{this.path.GetFileNameWithoutExtension(libFilePathOrFileName)}{this.platform.GetPlatformLibFileExtension()}"
+            : $"{libFilePathOrFileName}{this.platform.GetPlatformLibFileExtension()}";
 
-        return $@"{GetDirPath()}{CrossPlatDirSeparatorChar}{libName}";
+        return $@"{GetDirPath()}{CrossPlatDirSeparatorChar}{libFilePathOrFileName}";
     }
 }
