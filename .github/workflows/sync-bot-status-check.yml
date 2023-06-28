@@ -49,7 +49,6 @@ jobs:
           echo "Event Name: $eventName";
           echo "Project Name: ${{ vars.PROJECT_NAME }}";
           echo "Issue Or PR Number: $issurOrPRNumber";
-          echo "Default PR Reviewer: ${{ vars.DEFAULT_PR_REVIEWER }}";
 
           if ($manuallyExecuted -and $issurOrPRNumber -eq "0") {
             echo "The issue or PR number must be a value greater than 0.";
@@ -61,7 +60,6 @@ jobs:
             "$scriptUrl" `
             "${{ vars.PROJECT_NAME }}" `
             "$issurOrPRNumber" `
-            "${{ vars.DEFAULT_PR_REVIEWER }}" `
             "$eventType" `
             "${{ secrets.CICD_REST_API }}";
 
@@ -88,7 +86,6 @@ jobs:
           echo "Event Name: $eventName";
           echo "Project Name: ${{ vars.PROJECT_NAME }}";
           echo "PR Number: $issurOrPRNumber";
-          echo "Default PR Reviewer: ${{ vars.DEFAULT_PR_REVIEWER }}";
           echo "Event Type: $eventType";
 
           if ($manuallyExecuted -and $issurOrPRNumber -eq "0") {
@@ -101,7 +98,5 @@ jobs:
             "$scriptUrl" `
             "${{ vars.PROJECT_NAME }}" `
             "$issurOrPRNumber" `
-            "${{ vars.DEFAULT_PR_REVIEWER }}" `
             "$eventType" `
             "${{ secrets.CICD_REST_API }}";
-          
