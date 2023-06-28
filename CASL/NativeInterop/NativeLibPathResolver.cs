@@ -1,4 +1,4 @@
-﻿// <copyright file="NativeLibPathResolver.cs" company="KinsonDigital">
+// <copyright file="NativeLibPathResolver.cs" company="KinsonDigital">
 // Copyright (c) KinsonDigital. All rights reserved.
 // </copyright>
 
@@ -55,10 +55,10 @@ internal class NativeLibPathResolver : IFilePathResolver
     }
 
     /// <summary>
-    /// Resolves the path to a library with the given <paramref name="libName"/>
+    /// Resolves the path to a library with the given <paramref name="libFilePathOrFileName"/>
     /// based on the operating system and process architecture.
     /// </summary>
-    /// <param name="libName">The name of the library.</param>
+    /// <param name="libFilePathOrFileName">The name of the library.</param>
     /// <returns>A resolved path with the name of the library.</returns>
     /// <remarks>The <paramref name="libName"/> can be with or without a file extension.</remarks>
     public string GetFilePath(string libName)

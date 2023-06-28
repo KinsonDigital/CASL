@@ -11,11 +11,11 @@ public interface IDelegateFactory
 {
     /// <summary>
     /// Creates a delegate of the given type <typeparamref name="TDelegate"/>
-    /// to a funciton pointed to by the given <paramref name="libraryPtr"/>.
+    /// to a function pointed to by the given <paramref name="libraryPtr"/>.
     /// </summary>
     /// <typeparam name="TDelegate">The type of delegate to return.</typeparam>
     /// <param name="libraryPtr">
-    ///     The pointer to the library containing the function execute with the created delgate.
+    ///     The pointer to the library containing the function execute with the created delegate.
     /// </param>
     /// <param name="procName">The name of the library function.</param>
     /// <returns>The delegate to the native library function.</returns>

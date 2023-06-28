@@ -13,7 +13,7 @@ using Xunit;
 using Xunit.Sdk;
 
 /// <summary>
-/// Provides helper methods for the <see cref="XUnit"/>'s <see cref="Assert"/> class.
+/// Provides helper methods for the <see cref="Xunit"/>'s <see cref="Assert"/> class.
 /// </summary>
 [ExcludeFromCodeCoverage]
 public class AssertExtensions : Assert
