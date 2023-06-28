@@ -14,7 +14,8 @@ using MP3Sharp;
 /// Streams mp3 audio data from a mp3 file.
 /// </summary>
 [ExcludeFromCodeCoverage]
-internal class Mp3AudioDataStream : IAudioDataStream<byte>
+[SuppressMessage("ReSharper", "ClassNeverInstantiated.Global", Justification = "Instantiated via reflection")]
+internal sealed class Mp3AudioDataStream : IAudioDataStream<byte>
 {
     // NOTE: the Mp3Sharp decoder library only deals with 16bit mp3 files.  Which is 99% of what is used now days anyways
     private MP3Stream? mp3Reader;
@@ -30,7 +31,7 @@ internal class Mp3AudioDataStream : IAudioDataStream<byte>
     /// </remarks>
     public string Filename
     {
-        get => this.fileName is null ? string.Empty : this.fileName;
+        get => this.fileName ?? string.Empty;
         set
         {
             if (string.IsNullOrEmpty(value))
@@ -105,25 +106,22 @@ internal class Mp3AudioDataStream : IAudioDataStream<byte>
     }
 
     /// <inheritdoc/>
-    public void Dispose()
-    {
-        // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-        Dispose(disposing: true);
-        GC.SuppressFinalize(this);
-    }
+    public void Dispose() => Dispose(disposing: true);
 
     /// <inheritdoc cref="IDisposable.Dispose"/>
     /// <param name="disposing"><see langword="true"/> to dispose of managed resources.</param>
-    protected virtual void Dispose(bool disposing)
+    private void Dispose(bool disposing)
     {
-        if (!this.isDisposed)
+        if (this.isDisposed)
         {
-            if (disposing)
-            {
-                this.mp3Reader?.Dispose();
-            }
-
-            this.isDisposed = true;
+            return;
         }
+
+        if (disposing)
+        {
+            this.mp3Reader?.Dispose();
+        }
+
+        this.isDisposed = true;
     }
 }
