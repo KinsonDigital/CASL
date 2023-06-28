@@ -100,4 +100,3 @@ jobs:
             "$issurOrPRNumber" `
             "$eventType" `
             "${{ secrets.CICD_REST_API }}";
-          
