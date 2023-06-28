@@ -6,9 +6,9 @@ namespace CASL.OpenAL;
 
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
-using CASL.Exceptions;
-using CASL.NativeInterop;
-using CASL.NativeInterop.Factories;
+using Exceptions;
+using NativeInterop;
+using NativeInterop.Factories;
 
 /// <summary>
 /// Provides access to OpenAL functions.

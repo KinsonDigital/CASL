@@ -1,4 +1,4 @@
-﻿// <copyright file="AudioDeviceManagerTests.cs" company="KinsonDigital">
+// <copyright file="AudioDeviceManagerTests.cs" company="KinsonDigital">
 // Copyright (c) KinsonDigital. All rights reserved.
 // </copyright>
 
@@ -19,7 +19,7 @@ using CASL.Devices.Exceptions;
 using CASL.OpenAL;
 using Moq;
 using Xunit;
-using Assert = CASLTests.Helpers.AssertExtensions;
+using Assert = Helpers.AssertExtensions;
 #pragma warning restore IDE0001 // Name can be simplified
 
 /// <summary>

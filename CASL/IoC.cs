@@ -6,11 +6,11 @@ namespace CASL;
 
 using System.Diagnostics.CodeAnalysis;
 using System.IO.Abstractions;
-using CASL.Data;
-using CASL.Devices;
-using CASL.NativeInterop;
-using CASL.NativeInterop.Factories;
-using CASL.OpenAL;
+using Data;
+using Devices;
+using NativeInterop;
+using NativeInterop.Factories;
+using OpenAL;
 using SimpleInjector;
 
 /// <summary>

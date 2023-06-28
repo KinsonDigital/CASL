@@ -4,7 +4,7 @@
 
 namespace CASL.NativeInterop;
 
-using CASL.Exceptions;
+using Exceptions;
 
 /// <summary>
 /// Represents the OpenAL library.

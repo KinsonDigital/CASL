@@ -1,4 +1,4 @@
-﻿// <copyright file="OpenALLibraryTests.cs" company="KinsonDigital">
+// <copyright file="OpenALLibraryTests.cs" company="KinsonDigital">
 // Copyright (c) KinsonDigital. All rights reserved.
 // </copyright>
 
@@ -10,7 +10,7 @@ using CASL.Exceptions;
 using CASL.NativeInterop;
 using Moq;
 using Xunit;
-using Assert = CASLTests.Helpers.AssertExtensions;
+using Assert = Helpers.AssertExtensions;
 #pragma warning restore IDE0001 // The name can be simplified
 
 /// <summary>
@@ -23,7 +23,7 @@ public class OpenALLibraryTests
     /// <summary>
     /// Initializes a new instance of the <see cref="OpenALLibraryTests"/> class.
     /// </summary>
-    public OpenALLibraryTests() => mockPlatform = new Mock<IPlatform>();
+    public OpenALLibraryTests() => this.mockPlatform = new Mock<IPlatform>();
 
     #region Prop Tests
     [Fact]
@@ -77,8 +77,8 @@ public class OpenALLibraryTests
     /// </summary>
     private void MockWindowsPlatform()
     {
-        mockPlatform.Setup(m => m.IsWinPlatform()).Returns(true);
-        mockPlatform.Setup(m => m.IsPosixPlatform()).Returns(false);
+        this.mockPlatform.Setup(m => m.IsWinPlatform()).Returns(true);
+        this.mockPlatform.Setup(m => m.IsPosixPlatform()).Returns(false);
     }
 
     /// <summary>
@@ -86,7 +86,7 @@ public class OpenALLibraryTests
     /// </summary>
     private void MockPosixPlatform()
     {
-        mockPlatform.Setup(m => m.IsWinPlatform()).Returns(false);
-        mockPlatform.Setup(m => m.IsPosixPlatform()).Returns(true);
+        this.mockPlatform.Setup(m => m.IsWinPlatform()).Returns(false);
+        this.mockPlatform.Setup(m => m.IsPosixPlatform()).Returns(true);
     }
 }

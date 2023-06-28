@@ -1,4 +1,4 @@
-﻿
+
 
 // <copyright file="OggSoundDecoderTests.cs" company="KinsonDigital">
 // Copyright (c) KinsonDigital. All rights reserved.
@@ -13,7 +13,7 @@ using CASL.Data;
 using CASL.Data.Exceptions;
 using Moq;
 using Xunit;
-using Assert = CASLTests.Helpers.AssertExtensions;
+using Assert = Helpers.AssertExtensions;
 
 /// <summary>
 /// Tests the <see cref="OggSoundDecoder"/> class.

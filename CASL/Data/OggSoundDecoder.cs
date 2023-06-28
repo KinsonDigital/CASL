@@ -8,7 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
-using CASL.Data.Exceptions;
+using Exceptions;
 
 /// <summary>
 /// Decodes OGG audio data files.
