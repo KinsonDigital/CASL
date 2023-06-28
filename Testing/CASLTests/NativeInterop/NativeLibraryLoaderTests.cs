@@ -297,7 +297,7 @@ public class NativeLibraryLoaderTests
 
         this.mockPath.Setup(m => m.HasExtension(WinLibNameWithExt)).Returns(true);
         this.mockPath.Setup(m => m.GetFileNameWithoutExtension(It.IsAny<string>()))
-            .Returns(WinLibNameWithExt.Replace(".dll", ""));
+            .Returns(WinLibNameWithExt.Replace(".dll", string.Empty));
 
         this.mockLibrary.SetupGet(p => p.LibraryName).Returns(WinLibNameWithExt);
     }

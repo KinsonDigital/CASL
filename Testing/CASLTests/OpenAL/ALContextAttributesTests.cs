@@ -179,7 +179,7 @@ public class ALContextAttributesTests
     public void ToString_WithAdditionalAttributes_CreatesCorrectString()
     {
         // Arrange
-        var expected = "";
+        var expected = string.Empty;
 
         expected += $"{nameof(AlcContextAttributes.Frequency)}: 111, ";
         expected += $"{nameof(AlcContextAttributes.MonoSources)}: 222, ";
@@ -203,7 +203,7 @@ public class ALContextAttributesTests
     public void ToString_WithNoAdditionalAttributes_CreatesCorrectString()
     {
         // Arrange
-        var expected = "";
+        var expected = string.Empty;
 
         expected += $"{nameof(AlcContextAttributes.Frequency)}: 111, ";
         expected += $"{nameof(AlcContextAttributes.MonoSources)}: 222, ";
