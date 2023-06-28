@@ -166,7 +166,6 @@ internal interface IOpenALInvoker
     /// <summary>
     /// This function returns a List of strings related to the context.
     /// </summary>
-    /// <param name="device">A pointer to the device to be queried.</param>
     /// <returns>A List of strings containing the names of the Devices.</returns>
     /// <remarks>
     ///     ALC_DEVICE_SPECIFIER will return the name of the specified output device if a

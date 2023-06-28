@@ -73,9 +73,7 @@ internal class MP3SoundDecoder : ISoundDecoder<byte>
         GC.SuppressFinalize(this);
     }
 
-    /// <summary>
-    /// <inheritdoc/>
-    /// </summary>
+    /// <inheritdoc cref="IDisposable.Dispose"/>
     /// <param name="disposing"><see langword="true"/> if the managed resources should be disposed.</param>
     protected virtual void Dispose(bool disposing)
     {

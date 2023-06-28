@@ -40,39 +40,38 @@ internal class ALContextAttributes
 
     /// <summary>
     /// Gets or sets the output buffer frequency in Hz.
-    /// This does not actually change any AL state. To apply these attributes see <see cref="ALC.CreateContext(ALDevice, ALContextAttributes)"/>.
+    /// This does not actually change any AL state. To apply these attributes see <see cref="ALC.CreateContext(ALDevice, int[])"/>.
     /// </summary>
     public int? Frequency { get; set; }
 
     /// <summary>
     /// Gets or sets the number of mono sources.
-    /// This does not actually change any AL state. To apply these attributes see <see cref="ALC.CreateContext(ALDevice, ALContextAttributes)"/>.
+    /// This does not actually change any AL state. To apply these attributes see <see cref="ALC.CreateContext(ALDevice, int[])"/>.
     /// Not guaranteed to get exact number of mono sources when creating a context.
     /// </summary>
     public int? MonoSources { get; set; }
 
     /// <summary>
     /// Gets or sets the number of stereo sources.
-    /// This does not actually change any AL state. To apply these attributes see <see cref="ALC.CreateContext(ALDevice, ALContextAttributes)"/>.
+    /// This does not actually change any AL state. To apply these attributes see <see cref="ALC.CreateContext(ALDevice, int[])"/>.
     /// Not guaranteed to get exact number of mono sources when creating a context.
     /// </summary>
     public int? StereoSources { get; set; }
 
     /// <summary>
-    /// Gets or sets the refrash interval in Hz.
-    /// This does not actually change any AL state. To apply these attributes see <see cref="ALC.CreateContext(ALDevice, ALContextAttributes)"/>.
+    /// Gets or sets the refresh interval in Hz.
+    /// This does not actually change any AL state. To apply these attributes see <see cref="ALC.CreateContext(ALDevice, int[])"/>.
     /// </summary>
     public int? Refresh { get; set; }
 
     /// <summary>
     /// Gets or sets if the context is synchronous.
-    /// This does not actually change any AL state. To apply these attributes see <see cref="ALC.CreateContext(ALDevice, ALContextAttributes)"/>.
+    /// This does not actually change any AL state. To apply these attributes see <see cref="ALC.CreateContext(ALDevice, int[])"/>.
     /// </summary>
     public bool? Sync { get; set; }
 
     /// <summary>
     /// Gets or sets additional attributes.
-    /// Will usually be the major and minor version numbers of the context. // FIXME: This needs verification. Docs say nothing about this.
     /// </summary>
     public int[] AdditionalAttributes
     {
@@ -84,9 +83,9 @@ internal class ALContextAttributes
 
     /// <summary>
     /// Converts these context attributes to a <see cref="ALC.CreateContext(ALDevice, int[])"/> compatible list.
-    /// Alternativly, consider using the more convenient <see cref="ALC.CreateContext(ALDevice, ALContextAttributes)"/> overload.
+    /// Alternatively, consider using the more convenient <see cref="ALC.CreateContext(ALDevice, int[])"/> overload.
     /// </summary>
-    /// <returns>The attibute list in the form of a span.</returns>
+    /// <returns>The attribute list in the form of a span.</returns>
     public int[] CreateAttributeArray()
     {
         // The number of members * 2 + additional attributes

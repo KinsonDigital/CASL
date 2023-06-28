@@ -112,9 +112,7 @@ internal class Mp3AudioDataStream : IAudioDataStream<byte>
         GC.SuppressFinalize(this);
     }
 
-    /// <summary>
-    /// <inheritdoc/>
-    /// </summary>
+    /// <inheritdoc cref="IDisposable.Dispose"/>
     /// <param name="disposing"><see langword="true"/> to dispose of managed resources.</param>
     protected virtual void Dispose(bool disposing)
     {

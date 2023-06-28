@@ -2,6 +2,10 @@
 // Copyright (c) KinsonDigital. All rights reserved.
 // </copyright>
 
+/* References:
+ * OpenAL documentation and other resources can be found at http://www.openal.org/documentation/
+ */
+
 namespace CASL.OpenAL;
 
 using System.Diagnostics.CodeAnalysis;

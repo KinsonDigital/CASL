@@ -77,9 +77,7 @@ internal class OggSoundDecoder : ISoundDecoder<float>
         GC.SuppressFinalize(this);
     }
 
-    /// <summary>
-    /// <inheritdoc/>
-    /// </summary>
+    /// <inheritdoc cref="IDisposable.Dispose"/>
     /// <param name="disposing"><see langword="true"/> to dispose managed resources.</param>
     protected virtual void Dispose(bool disposing)
     {

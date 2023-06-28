@@ -77,7 +77,7 @@ internal interface IPlatform
     bool Is64BitOS();
 
     /// <summary>
-    /// Returns the process architeture of the system.
+    /// Returns the process architecture of the system.
     /// </summary>
     /// <returns>The process architecture.</returns>
     Architecture GetProcessArchitecture();
