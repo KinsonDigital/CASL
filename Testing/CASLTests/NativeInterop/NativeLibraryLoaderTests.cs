@@ -225,8 +225,8 @@ public class NativeLibraryLoaderTests
     public void LoadLibrary_WhenInvoked_ReturnsLibraryPointer()
     {
         // Arrange
-        nint expected = 1234;
-        var libFilePath = $"{CrossPlatWinDirPath}/{WinLibNameWithExt}";
+        const IntPtr expected = 1234;
+        const string libFilePath = $"{CrossPlatWinDirPath}/{WinLibNameWithExt}";
         this.mockFile.Setup(m => m.Exists(libFilePath)).Returns(true);
         this.mockDependencyManager.SetupGet(p => p.NativeLibDirPath).Returns(WinDirPath);
         this.mockLibrary.SetupGet(p => p.LibraryName).Returns(WinLibNameWithExt);
@@ -305,8 +305,7 @@ public class NativeLibraryLoaderTests
     /// </summary>
     /// <returns>The instance to test.</returns>
     private NativeLibraryLoader CreateLoader()
-        => new NativeLibraryLoader(
-            this.mockDependencyManager.Object,
+        => new (this.mockDependencyManager.Object,
             this.mockPlatform.Object,
             this.mockDirectory.Object,
             this.mockFile.Object,

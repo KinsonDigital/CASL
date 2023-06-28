@@ -18,7 +18,7 @@ using Assert = Helpers.AssertExtensions;
 /// </summary>
 public class OpenALLibraryTests
 {
-    private Mock<IPlatform> mockPlatform;
+    private readonly Mock<IPlatform> mockPlatform;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="OpenALLibraryTests"/> class.

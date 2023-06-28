@@ -11,6 +11,9 @@ using CASL.NativeInterop;
 using Moq;
 using Xunit;
 
+/// <summary>
+/// Tests the <see cref="NativeLibPathResolver"/> class.
+/// </summary>
 public class NativeLibPathResolverTests
 {
     private const string WinDirPath = @"C:\Program Files\test-app";
@@ -23,6 +26,9 @@ public class NativeLibPathResolverTests
     private readonly Mock<IApplication> mockApp;
     private readonly Mock<IPath> mockPath;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="NativeLibPathResolverTests"/> class.
+    /// </summary>
     public NativeLibPathResolverTests()
     {
         this.mockPlatform = new Mock<IPlatform>();
