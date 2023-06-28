@@ -130,14 +130,14 @@ internal class AL
     /// <summary>
     /// Gets the OpenAL context API.
     /// </summary>
-    /// <returns>The api object.<returns>
+    /// <returns>The api object.</returns>
     public static AL GetApi() => IoC.Container.GetInstance<AL>();
 
     /// <summary>
     /// Error support. Obtain the most recent error generated in the AL state machine. When an error is detected by AL, a flag is set and the error code is recorded. Further errors, if they occur, do not affect this recorded code. When alGetError is called, the code is returned and the flag is cleared, so that a further error will again record its code.</summary>
     /// <returns>
-    /// The first error that occured. can be used with AL.GetString. Returns an Alenum representing the error state. When an OpenAL error occurs, the error state is set and will not be changed until the error state is retrieved using alGetError. Whenever alGetError is called, the error state is cleared and the last state (the current state when the call was made) is returned. To isolate error detection to a specific portion of code, alGetError should be called before the isolated section to clear the current error state.
-    /// <returns>
+    /// The first error that occured. can be used with AL.GetString. Returns an enum representing the error state. When an OpenAL error occurs, the error state is set and will not be changed until the error state is retrieved using alGetError. Whenever alGetError is called, the error state is cleared and the last state (the current state when the call was made) is returned. To isolate error detection to a specific portion of code, alGetError should be called before the isolated section to clear the current error state.
+    /// </returns>
     public ALError GetError() => this.alGetError();
 
     /// <summary>
@@ -160,7 +160,7 @@ internal class AL
     /// <param name="param">The property to be returned: Vendor, Version, Renderer and Extensions.</param>
     /// <returns>
     /// Returns a pointer to a null-terminated string.
-    /// <returns>
+    /// </returns>
     public string Get(ALGetString param) => this.alGet(param);
 
     /// <summary>
