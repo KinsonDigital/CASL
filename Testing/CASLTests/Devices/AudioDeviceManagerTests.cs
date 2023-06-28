@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO.Abstractions;
+using System.Linq;
 using CASL;
 using CASL.Data;
 using CASL.Data.Exceptions;
@@ -76,7 +77,7 @@ public class AudioDeviceManagerTests
     }
 
     [Fact]
-    public void DeviceNames_WhenGettingValueAfterBeingDisposed_ThrowsException()
+    public void GetDeviceNames_WhenGettingValueAfterBeingDisposed_ThrowsException()
     {
         // Arrange
         var manager = CreateManager();
@@ -85,12 +86,12 @@ public class AudioDeviceManagerTests
         // Act & Assert
         Assert.ThrowsWithMessage<AudioDeviceManagerNotInitializedException>(() =>
         {
-            _ = manager.DeviceNames;
+            _ = manager.GetDeviceNames();
         }, IsDisposedExceptionMessage);
     }
 
     [Fact]
-    public void DeviceNames_WhenGettingValue_ReturnsCorrectResult()
+    public void GetDeviceNames_WhenGettingValueBeforeBeingDisposed_ReturnsCorrectResult()
     {
         // Arrange
         var expected = new[] { "Device-1", "Device-2" };
@@ -100,7 +101,7 @@ public class AudioDeviceManagerTests
             .Returns(() => new[] { "Device-1", "Device-2" });
 
         // Act
-        var actual = manager.DeviceNames;
+        var actual = manager.GetDeviceNames().ToArray();
 
         // Assert
         Assert.Equal(expected, actual);
@@ -285,8 +286,8 @@ public class AudioDeviceManagerTests
         manager.RemoveSoundSource(3344u);
 
         // Assert
-        Assert.Single(manager.SoundSources);
-        Assert.Equal(1122u, manager.SoundSources[0].SourceId);
+        Assert.Single(manager.GetSoundSources().ToArray());
+        Assert.Equal(1122u, manager.GetSoundSources().ToArray()[0].SourceId);
     }
 
     [Fact]

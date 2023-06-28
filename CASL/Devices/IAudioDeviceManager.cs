@@ -5,6 +5,8 @@
 namespace CASL.Devices;
 
 using System;
+using System.Collections.Immutable;
+using Exceptions;
 
 /// <summary>
 /// Manages audio devices on the system using OpenAL.
@@ -27,15 +29,6 @@ internal interface IAudioDeviceManager : IDisposable
     bool IsInitialized { get; }
 
     /// <summary>
-    /// Gets the list of audio devices in the system.
-    /// </summary>
-    /// <exception cref="AudioDeviceManagerNotInitializedException">
-    ///     Occurs if this method is executed without initializing the <see cref="IAudioDeviceManager."/>.
-    ///     This can be done by invoking the <see cref="InitDevice(string?)"/>.
-    /// </exception>
-    string[] DeviceNames { get; }
-
-    /// <summary>
     /// Gets the name of the current audio device that is use.
     /// </summary>
     string DeviceInUse { get; }
@@ -43,7 +36,14 @@ internal interface IAudioDeviceManager : IDisposable
     /// <summary>
     /// Gets a list of the current sound sources.
     /// </summary>
-    SoundSource[] SoundSources { get; }
+    /// <returns>The list of sound sources.</returns>
+    ImmutableArray<SoundSource> GetSoundSources();
+
+    /// <summary>
+    /// Gets the list of audio devices in the system.
+    /// </summary>
+    /// <returns>The list of devices.</returns>
+    ImmutableArray<string> GetDeviceNames();
 
     /// <summary>
     /// Initializes an audio device that matches the given <paramref name="name"/>.
@@ -60,7 +60,7 @@ internal interface IAudioDeviceManager : IDisposable
     ///     bufferId: The OpenAL id of the sound buffer.
     /// </returns>
     /// <exception cref="AudioDeviceManagerNotInitializedException">
-    ///     Occurs if this method is executed without initializing the <see cref="IAudioDeviceManager."/>.
+    ///     Occurs if this method is executed without initializing the <see cref="InitDevice"/>() method.
     ///     This can be done by invoking the <see cref="InitDevice(string?)"/>.
     /// </exception>
     (uint srcId, uint bufferId) InitSound();
@@ -70,7 +70,7 @@ internal interface IAudioDeviceManager : IDisposable
     /// </summary>
     /// <param name="name">The name of the audio device to change to.</param>
     /// <exception cref="AudioDeviceManagerNotInitializedException">
-    ///     Occurs if this method is executed without initializing the <see cref="IAudioDeviceManager."/>.
+    ///     Occurs if this method is executed without initializing the <see cref="InitDevice"/>() method.
     ///     This can be done by invoking the <see cref="InitDevice(string?)"/>.
     /// </exception>
     /// <exception cref="AudioDeviceDoesNotExistException">
@@ -85,13 +85,6 @@ internal interface IAudioDeviceManager : IDisposable
     /// <remarks>
     ///     The sound source is found using the given params <see cref="SoundSource.SourceId"/> value.
     /// </remarks>
-    /// <exception cref="AudioDeviceManagerNotInitializedException">
-    ///     Occurs if this method is executed without initializing the <see cref="IAudioDeviceManager."/>.
-    ///     This can be done by invoking the <see cref="InitDevice(string?)"/>.
-    /// </exception>
-    /// <exception cref="SoundSourceDoesNotExistException">
-    ///     Occurs if the <see cref="SoundSource.SourceId"/> of the given param <paramref name="soundSrc"/> does not exist.
-    /// </exception>
     void UpdateSoundSource(SoundSource soundSrc);
 
     /// <summary>

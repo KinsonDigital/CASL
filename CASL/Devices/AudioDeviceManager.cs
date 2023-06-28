@@ -6,21 +6,22 @@ namespace CASL.Devices;
 
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using CASL.Data.Exceptions;
-using CASL.Devices.Exceptions;
+using Exceptions;
 using CASL.Exceptions;
-using CASL.OpenAL;
+using OpenAL;
 
 /// <summary>
 /// Manages audio devices on the system using OpenAL.
 /// </summary>
-internal class AudioDeviceManager : IAudioDeviceManager
+internal sealed class AudioDeviceManager : IAudioDeviceManager
 {
     private const string DeviceNamePrefix = "OpenAL Soft on "; // All device names returned are prefixed with this
     private readonly IOpenALInvoker alInvoker;
-    private readonly string isDisposedExceptionMessage = $"The '{nameof(AudioDeviceManager)}' has not been initialized.\nInvoked the '{nameof(AudioDeviceManager.InitDevice)}()' to initialize the device manager.";
+    private readonly string isDisposedExceptionMessage = $"The '{nameof(AudioDeviceManager)}' has not been initialized.\nInvoked the '{nameof(InitDevice)}()' to initialize the device manager.";
     private readonly Dictionary<uint, SoundSource> soundSources = new ();
     private readonly List<SoundStats> continuePlaybackCache = new ();
     private nint device;
@@ -45,63 +46,56 @@ internal class AudioDeviceManager : IAudioDeviceManager
     public event EventHandler<EventArgs>? DeviceChanged;
 
     /// <inheritdoc/>
-    public bool IsInitialized => !AudioIsNull() && !(this.alInvoker is null);
-
-    /// <inheritdoc/>
-    public string[] DeviceNames
-    {
-        get
-        {
-            if (!IsInitialized)
-            {
-                throw new AudioDeviceManagerNotInitializedException(this.isDisposedExceptionMessage);
-            }
-
-            var result = Array.Empty<string>();
-
-            if (this.alInvoker is not null)
-            {
-                result = this.alInvoker.GetDeviceList()
-                    .Select(n => n.Replace(DeviceNamePrefix, string.Empty, StringComparison.Ordinal)).ToArray();
-            }
-
-            return result;
-        }
-    }
+    public bool IsInitialized => !AudioIsNull();
 
     /// <inheritdoc/>
     public string DeviceInUse { get; private set; } = string.Empty;
 
     /// <inheritdoc/>
-    public SoundSource[] SoundSources => this.soundSources.Values.ToArray();
+    public ImmutableArray<SoundSource> GetSoundSources() => this.soundSources.Values.ToImmutableArray();
+
+    /// <inheritdoc/>
+    /// <returns>The list of device names.</returns>
+    /// <exception cref="AudioDeviceManagerNotInitializedException">
+    ///     Occurs if this method is executed without initializing the <see cref="IAudioDeviceManager.InitDevice"/>() method.
+    ///     This can be done by invoking the <see cref="InitDevice(string?)"/>.
+    /// </exception>
+    public ImmutableArray<string> GetDeviceNames()
+    {
+        if (!IsInitialized)
+        {
+            throw new AudioDeviceManagerNotInitializedException(this.isDisposedExceptionMessage);
+        }
+
+        var result = this.alInvoker.GetDeviceList()
+            .Select(n => n.Replace(DeviceNamePrefix, string.Empty, StringComparison.Ordinal)).ToArray();
+
+        return result.ToImmutableArray();
+    }
 
     /// <inheritdoc/>
     public void InitDevice(string? name = null)
     {
         var nameResult = name != null ? $"{DeviceNamePrefix}{name}" : name;
-        var setCurrentResult = false;
 
-        if (this.alInvoker is not null)
+        if (this.device == 0)
         {
-            if (this.device == 0)
-            {
-                this.device = this.alInvoker.OpenDevice(nameResult);
-            }
-
-            if (this.attributes is null)
-            {
-                this.attributes = new ALContextAttributes();
-            }
-
-            if (this.context.Handle == 0)
-            {
-                this.context = new ALContext(this.alInvoker.CreateContext(new ALDevice(this.device), this.attributes));
-            }
-
-            setCurrentResult = this.alInvoker.MakeContextCurrent(this.context);
-
-            DeviceInUse = this.alInvoker.GetDefaultDevice();
+            this.device = this.alInvoker.OpenDevice(nameResult);
         }
+
+        if (this.attributes is null)
+        {
+            this.attributes = new ALContextAttributes();
+        }
+
+        if (this.context.Handle == 0)
+        {
+            this.context = new ALContext(this.alInvoker.CreateContext(new ALDevice(this.device), this.attributes));
+        }
+
+        var setCurrentResult = this.alInvoker.MakeContextCurrent(this.context);
+
+        DeviceInUse = this.alInvoker.GetDefaultDevice();
 
         if (!setCurrentResult)
         {
@@ -121,13 +115,8 @@ internal class AudioDeviceManager : IAudioDeviceManager
         soundSrc.TotalSeconds = -1f;
         soundSrc.SourceId = 0;
 
-        var bufferId = 0u;
-
-        if (this.alInvoker is not null)
-        {
-            soundSrc.SourceId = this.alInvoker.GenSource();
-            bufferId = this.alInvoker.GenBuffer();
-        }
+        soundSrc.SourceId = this.alInvoker.GenSource();
+        var bufferId = this.alInvoker.GenBuffer();
 
         this.soundSources.Add(soundSrc.SourceId, soundSrc);
 
@@ -142,14 +131,14 @@ internal class AudioDeviceManager : IAudioDeviceManager
             throw new AudioDeviceManagerNotInitializedException(this.isDisposedExceptionMessage);
         }
 
-        if (!DeviceNames.Contains(name))
+        var deviceNames = GetDeviceNames();
+
+        if (!deviceNames.Contains(name))
         {
             throw new AudioDeviceDoesNotExistException("The audio device does not exist.", name);
         }
 
         this.DeviceChanging?.Invoke(this, EventArgs.Empty);
-
-        var availableDevices = DeviceNames;
 
         CacheSoundSources();
 
@@ -182,6 +171,13 @@ internal class AudioDeviceManager : IAudioDeviceManager
     }
 
     /// <inheritdoc/>
+    /// <exception cref="AudioDeviceManagerNotInitializedException">
+    ///     Occurs if this method is executed without initializing the <see cref="InitDevice"/>() method.
+    ///     This can be done by invoking the <see cref="InitDevice(string?)"/>.
+    /// </exception>
+    /// <exception cref="SoundDataException">
+    ///     Occurs if the <see cref="SoundSource.SourceId"/> of the given param <paramref name="soundSrc"/> does not exist.
+    /// </exception>
     public void UpdateSoundSource(SoundSource soundSrc)
     {
         if (!IsInitialized)
@@ -209,17 +205,18 @@ internal class AudioDeviceManager : IAudioDeviceManager
     }
 
     /// <inheritdoc/>
-    public void Dispose()
-    {
-        Dispose(true);
-        GC.SuppressFinalize(this);
-    }
+    public void Dispose() => Dispose(true);
 
     /// <summary>
-    /// <inheritdoc/>
+    /// Invoked when there is an OpenAL specific error.
     /// </summary>
-    /// <param name="disposing"><see langword="true"/> to disose of managed resources.</param>
-    protected virtual void Dispose(bool disposing)
+    /// <param name="errorMsg">The error message from OpenAL.</param>
+    [ExcludeFromCodeCoverage]
+    private static void ErrorCallback(string errorMsg) => throw new AudioException(errorMsg);
+
+    /// <inheritdoc cref="IDisposable.Dispose"/>
+    /// <param name="disposing"><see langword="true"/> to dispose of managed resources.</param>
+    private void Dispose(bool disposing)
     {
         if (this.isDisposed)
         {
@@ -237,13 +234,6 @@ internal class AudioDeviceManager : IAudioDeviceManager
 
         this.isDisposed = true;
     }
-
-    /// <summary>
-    /// Invoked when there is an OpenAL specific error.
-    /// </summary>
-    /// <param name="errorMsg">The error message from OpenAL.</param>
-    [ExcludeFromCodeCoverage]
-    private static void ErrorCallback(string errorMsg) => throw new AudioException(errorMsg);
 
     /// <summary>
     /// Destroys the current audio device.
@@ -279,9 +269,9 @@ internal class AudioDeviceManager : IAudioDeviceManager
         // Guarantee that the cache is clear
         this.continuePlaybackCache.Clear();
 
-        foreach (var soundSrcKVP in this.soundSources)
+        foreach (var (_, soundSrc) in this.soundSources)
         {
-            var sourceState = this.alInvoker.GetSourceState(soundSrcKVP.Value.SourceId);
+            var sourceState = this.alInvoker.GetSourceState(soundSrc.SourceId);
 
             if (sourceState != ALSourceState.Playing && sourceState != ALSourceState.Paused)
             {
@@ -289,20 +279,13 @@ internal class AudioDeviceManager : IAudioDeviceManager
             }
 
             SoundStats soundStats;
-            soundStats.SourceId = soundSrcKVP.Value.SourceId;
+            soundStats.SourceId = soundSrc.SourceId;
             soundStats.PlaybackState = default;
-            soundStats.TimePosition = GetCurrentTimePosition(soundSrcKVP.Value.SourceId);
-            soundStats.TotalSeconds = soundSrcKVP.Value.TotalSeconds;
-            soundStats.PlaySpeed = this.alInvoker.GetSource(soundSrcKVP.Value.SourceId, ALSourcef.Pitch);
+            soundStats.TimePosition = GetCurrentTimePosition(soundSrc.SourceId);
+            soundStats.TotalSeconds = soundSrc.TotalSeconds;
+            soundStats.PlaySpeed = this.alInvoker.GetSource(soundSrc.SourceId, ALSourcef.Pitch);
 
-            if (sourceState == ALSourceState.Playing)
-            {
-                soundStats.PlaybackState = SoundState.Playing;
-            }
-            else if (sourceState == ALSourceState.Paused)
-            {
-                soundStats.PlaybackState = SoundState.Paused;
-            }
+            soundStats.PlaybackState = sourceState == ALSourceState.Playing ? SoundState.Playing : SoundState.Paused;
 
             this.continuePlaybackCache.Add(soundStats);
         }
