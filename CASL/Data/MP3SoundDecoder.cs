@@ -12,7 +12,7 @@ using System.IO;
 /// <summary>
 /// Decodes MP3 audio data files.
 /// </summary>
-internal class MP3SoundDecoder : ISoundDecoder<byte>
+internal sealed class MP3SoundDecoder : ISoundDecoder<byte>
 {
     private readonly IAudioDataStream<byte> audioDataStream;
     private bool isDisposed;
@@ -66,25 +66,22 @@ internal class MP3SoundDecoder : ISoundDecoder<byte>
     }
 
     /// <inheritdoc/>
-    public void Dispose()
-    {
-        // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-        Dispose(disposing: true);
-        GC.SuppressFinalize(this);
-    }
+    public void Dispose() => Dispose(disposing: true);
 
     /// <inheritdoc cref="IDisposable.Dispose"/>
     /// <param name="disposing"><see langword="true"/> if the managed resources should be disposed.</param>
-    protected virtual void Dispose(bool disposing)
+    private void Dispose(bool disposing)
     {
-        if (!this.isDisposed)
+        if (this.isDisposed)
         {
-            if (disposing)
-            {
-                this.audioDataStream.Dispose();
-            }
-
-            this.isDisposed = true;
+            return;
         }
+
+        if (disposing)
+        {
+            this.audioDataStream.Dispose();
+        }
+
+        this.isDisposed = true;
     }
 }
