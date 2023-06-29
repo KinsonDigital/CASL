@@ -8,8 +8,8 @@
 
 <div align="center">
 
-![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/KinsonDigital/CASL/prod-release-pr-status-check.yml?color=2F8840&label=Prod%20CI%20Build&logo=GitHub)
-![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/KinsonDigital/CASL/prev-release-pr-status-check.yml?color=2F8840&label=Preview%20CI%20Build&logo=GitHub)
+![Build PR Status Check](https://img.shields.io/github/actions/workflow/status/KinsonDigital/CASL/build-pr-status-check.yml?label=%E2%9A%99%EF%B8%8FBuild&color=2F8840)
+![Unit Test PR Status Check](https://img.shields.io/github/actions/workflow/status/KinsonDigital/CASL/unit-test-pr-status-check.yml?label=%F0%9F%A7%AATests&color=2F8840)
 
 [![Codecov](https://img.shields.io/codecov/c/github/KinsonDigital/CASL?color=2F8840&label=Code%20Coverage&logo=codecov)](https://app.codecov.io/gh/KinsonDigital/CASL/tree/release%2Fv1.0.0)
 
