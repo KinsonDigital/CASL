@@ -6,11 +6,11 @@ namespace CASL;
 
 using System.Diagnostics.CodeAnalysis;
 using System.IO.Abstractions;
-using CASL.Data;
-using CASL.Devices;
-using CASL.NativeInterop;
-using CASL.NativeInterop.Factories;
-using CASL.OpenAL;
+using Data;
+using Devices;
+using NativeInterop;
+using NativeInterop.Factories;
+using OpenAL;
 using SimpleInjector;
 
 /// <summary>
@@ -74,18 +74,12 @@ internal static class IoC
 
         // Register the proper data stream to be the implementation if the consumer is a certain decoder
         IoCContainer.RegisterConditional<IAudioDataStream<float>, OggAudioDataStream>(
-            context =>
-            {
-                return !context.HasConsumer || context.Consumer.ImplementationType == typeof(OggSoundDecoder);
-            }, true);
+            context => !context.HasConsumer || context.Consumer.ImplementationType == typeof(OggSoundDecoder), true);
 
         IoCContainer.Register<ISoundDecoder<float>, OggSoundDecoder>(true);
 
         IoCContainer.RegisterConditional<IAudioDataStream<byte>, Mp3AudioDataStream>(
-            context =>
-            {
-                return !context.HasConsumer || context.Consumer.ImplementationType == typeof(MP3SoundDecoder);
-            }, true);
+            context => !context.HasConsumer || context.Consumer.ImplementationType == typeof(MP3SoundDecoder), true);
 
         IoCContainer.Register<ISoundDecoder<byte>, MP3SoundDecoder>(true);
     }

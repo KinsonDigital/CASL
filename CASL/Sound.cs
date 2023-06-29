@@ -36,7 +36,7 @@ public class Sound : ISound
     /// <summary>
     /// Initializes a new instance of the <see cref="Sound"/> class.
     /// </summary>
-    /// <param name="filePath">The path to the sound file..</param>
+    /// <param name="filePath">The path to the sound file.</param>
     [ExcludeFromCodeCoverage]
     public Sound(string filePath)
     {
@@ -64,7 +64,7 @@ public class Sound : ISound
     /// <param name="audioManager">Manages audio related operations.</param>
     /// <param name="oggDecoder">Decodes OGG audio files.</param>
     /// <param name="mp3Decoder">Decodes MP3 audio files.</param>
-    /// <param name="path">Manages paths.</param>
+    /// <param name="path">Manages file paths.</param>
     internal Sound(
         string filePath,
         IOpenALInvoker alInvoker,

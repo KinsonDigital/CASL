@@ -5,6 +5,7 @@
 namespace CASLTests.Exceptions;
 
 using System;
+using System.Runtime.Serialization;
 using CASL.Exceptions;
 using Xunit;
 

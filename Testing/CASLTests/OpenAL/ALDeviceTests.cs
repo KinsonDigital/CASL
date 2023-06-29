@@ -101,7 +101,7 @@ public class ALDeviceTests
     {
         // Arrange
         var deviceA = new ALDevice(1234);
-        object deviceB = new object();
+        var deviceB = new object();
 
         // Act
         var actual = deviceA.Equals(deviceB);

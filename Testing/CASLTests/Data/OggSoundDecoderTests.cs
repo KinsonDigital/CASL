@@ -1,5 +1,3 @@
-﻿
-
 // <copyright file="OggSoundDecoderTests.cs" company="KinsonDigital">
 // Copyright (c) KinsonDigital. All rights reserved.
 // </copyright>
@@ -13,7 +11,7 @@ using CASL.Data;
 using CASL.Data.Exceptions;
 using Moq;
 using Xunit;
-using Assert = CASLTests.Helpers.AssertExtensions;
+using Assert = Helpers.AssertExtensions;
 
 /// <summary>
 /// Tests the <see cref="OggSoundDecoder"/> class.
@@ -81,7 +79,7 @@ public class OggSoundDecoderTests
         this.mockDataStream.SetupGet(p => p.Channels).Returns(channels);
         this.mockDataStream.SetupGet(p => p.Format).Returns(format);
         this.mockDataStream.Setup(m => m.ReadSamples(It.IsAny<float[]>(), 0, It.IsAny<int>()))
-            .Returns<float[], int, int>((buffer, offset, count) =>
+            .Returns<float[], int, int>((buffer, _, _) =>
             {
                 // This prevents the while loop from continuing forever.
                 // This simulates that the data is finished being read

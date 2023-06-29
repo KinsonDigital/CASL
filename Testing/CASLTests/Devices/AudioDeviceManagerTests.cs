@@ -1,4 +1,4 @@
-﻿// <copyright file="AudioDeviceManagerTests.cs" company="KinsonDigital">
+// <copyright file="AudioDeviceManagerTests.cs" company="KinsonDigital">
 // Copyright (c) KinsonDigital. All rights reserved.
 // </copyright>
 
@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO.Abstractions;
+using System.Linq;
 using CASL;
 using CASL.Data;
 using CASL.Data.Exceptions;
@@ -18,7 +19,7 @@ using CASL.Devices.Exceptions;
 using CASL.OpenAL;
 using Moq;
 using Xunit;
-using Assert = CASLTests.Helpers.AssertExtensions;
+using Assert = Helpers.AssertExtensions;
 #pragma warning restore IDE0001 // Name can be simplified
 
 /// <summary>
@@ -31,7 +32,6 @@ public class AudioDeviceManagerTests
     private readonly string oggFilePath;
     private readonly Mock<IOpenALInvoker> mockALInvoker;
     private readonly Mock<IPath> mockPath;
-    private readonly ALDevice device;
     private readonly ALContext context;
     private readonly uint srcId = 4321;
     private readonly uint bufferId = 9876;
@@ -42,7 +42,8 @@ public class AudioDeviceManagerTests
     public AudioDeviceManagerTests()
     {
         this.oggFilePath = @"C:/temp/Content/Sounds/sound.ogg";
-        this.device = new ALDevice(1234);
+
+        var device = new ALDevice(1234);
         this.context = new ALContext(5678);
 
         this.mockALInvoker = new Mock<IOpenALInvoker>();
@@ -51,8 +52,8 @@ public class AudioDeviceManagerTests
 
         this.mockALInvoker.Setup(m => m.GenSource()).Returns(this.srcId);
         this.mockALInvoker.Setup(m => m.GenBuffer()).Returns(this.bufferId);
-        this.mockALInvoker.Setup(m => m.OpenDevice(It.IsAny<string>())).Returns(this.device);
-        this.mockALInvoker.Setup(m => m.CreateContext(this.device, It.IsAny<ALContextAttributes>()))
+        this.mockALInvoker.Setup(m => m.OpenDevice(It.IsAny<string>())).Returns(device);
+        this.mockALInvoker.Setup(m => m.CreateContext(device, It.IsAny<ALContextAttributes>()))
             .Returns(this.context);
         this.mockALInvoker.Setup(m => m.MakeContextCurrent(this.context)).Returns(true);
 
@@ -76,7 +77,7 @@ public class AudioDeviceManagerTests
     }
 
     [Fact]
-    public void DeviceNames_WhenGettingValueAfterBeingDisposed_ThrowsException()
+    public void GetDeviceNames_WhenGettingValueAfterBeingDisposed_ThrowsException()
     {
         // Arrange
         var manager = CreateManager();
@@ -85,12 +86,12 @@ public class AudioDeviceManagerTests
         // Act & Assert
         Assert.ThrowsWithMessage<AudioDeviceManagerNotInitializedException>(() =>
         {
-            _ = manager.DeviceNames;
+            _ = manager.GetDeviceNames();
         }, IsDisposedExceptionMessage);
     }
 
     [Fact]
-    public void DeviceNames_WhenGettingValue_ReturnsCorrectResult()
+    public void GetDeviceNames_WhenGettingValueBeforeBeingDisposed_ReturnsCorrectResult()
     {
         // Arrange
         var expected = new[] { "Device-1", "Device-2" };
@@ -100,7 +101,7 @@ public class AudioDeviceManagerTests
             .Returns(() => new[] { "Device-1", "Device-2" });
 
         // Act
-        var actual = manager.DeviceNames;
+        var actual = manager.GetDeviceNames().ToArray();
 
         // Assert
         Assert.Equal(expected, actual);
@@ -144,6 +145,7 @@ public class AudioDeviceManagerTests
     public void InitDevice_WhenInvoked_InitializesDevice()
     {
         // Arrange
+        this.mockALInvoker.Setup(m => m.GetDefaultDevice()).Returns("OpenAL Soft on test-device");
         var manager = CreateManager();
 
         // Act
@@ -153,12 +155,11 @@ public class AudioDeviceManagerTests
         this.mockALInvoker.Verify(m => m.OpenDevice("OpenAL Soft on test-device"), Times.Once());
         this.mockALInvoker.Verify(m => m.MakeContextCurrent(this.context), Times.Once());
         this.mockALInvoker.Verify(m => m.GetDefaultDevice(), Times.Once());
+        Assert.Equal("OpenAL Soft on test-device", manager.DeviceInUse);
     }
 
-    [Theory]
-    [InlineData(false)]
-    [InlineData(null)]
-    public void InitDevice_WithIssueMakingContextCurrent_ThrowsException(bool? makeContextCurrentResult)
+    [Fact]
+    public void InitDevice_WithIssueMakingContextCurrent_ThrowsException()
     {
         // Arrange
         // The MakeContextCurrent call does not take nullable bool.  This fixes that issue
@@ -226,7 +227,7 @@ public class AudioDeviceManagerTests
         // Act & Assert
         Assert.ThrowsWithMessage<SoundDataException>(() =>
         {
-            var soundSrc = new SoundSource()
+            var soundSrc = new SoundSource
             {
                 SourceId = 1234,
             };
@@ -245,7 +246,7 @@ public class AudioDeviceManagerTests
         // Act & Assert
         Assert.DoesNotThrow<Exception>(() =>
         {
-            var otherSoundSrc = new SoundSource()
+            var otherSoundSrc = new SoundSource
             {
                 SourceId = 4321,
             };
@@ -285,8 +286,8 @@ public class AudioDeviceManagerTests
         manager.RemoveSoundSource(3344u);
 
         // Assert
-        Assert.Single(manager.SoundSources);
-        Assert.Equal(1122u, manager.SoundSources[0].SourceId);
+        Assert.Single(manager.GetSoundSources().ToArray());
+        Assert.Equal(1122u, manager.GetSoundSources().ToArray()[0].SourceId);
     }
 
     [Fact]

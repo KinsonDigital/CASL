@@ -39,54 +39,51 @@ internal class ALContextAttributes
     }
 
     /// <summary>
-    /// Gets or sets the output buffer frequency in Hz.
-    /// This does not actually change any AL state. To apply these attributes see <see cref="ALC.CreateContext(ALDevice, ALContextAttributes)"/>.
+    /// Gets the output buffer frequency in Hz.
+    /// This does not actually change any AL state. To apply these attributes see <see cref="ALC.CreateContext(ALDevice, int[])"/>.
     /// </summary>
-    public int? Frequency { get; set; }
+    public int? Frequency { get; init; }
 
     /// <summary>
-    /// Gets or sets the number of mono sources.
-    /// This does not actually change any AL state. To apply these attributes see <see cref="ALC.CreateContext(ALDevice, ALContextAttributes)"/>.
+    /// Gets the number of mono sources.
+    /// This does not actually change any AL state. To apply these attributes see <see cref="ALC.CreateContext(ALDevice, int[])"/>.
     /// Not guaranteed to get exact number of mono sources when creating a context.
     /// </summary>
-    public int? MonoSources { get; set; }
+    public int? MonoSources { get; init; }
 
     /// <summary>
-    /// Gets or sets the number of stereo sources.
-    /// This does not actually change any AL state. To apply these attributes see <see cref="ALC.CreateContext(ALDevice, ALContextAttributes)"/>.
+    /// Gets the number of stereo sources.
+    /// This does not actually change any AL state. To apply these attributes see <see cref="ALC.CreateContext(ALDevice, int[])"/>.
     /// Not guaranteed to get exact number of mono sources when creating a context.
     /// </summary>
-    public int? StereoSources { get; set; }
+    public int? StereoSources { get; init; }
 
     /// <summary>
-    /// Gets or sets the refrash interval in Hz.
-    /// This does not actually change any AL state. To apply these attributes see <see cref="ALC.CreateContext(ALDevice, ALContextAttributes)"/>.
+    /// Gets the refresh interval in Hz.
+    /// This does not actually change any AL state. To apply these attributes see <see cref="ALC.CreateContext(ALDevice, int[])"/>.
     /// </summary>
-    public int? Refresh { get; set; }
+    public int? Refresh { get; init; }
 
     /// <summary>
-    /// Gets or sets if the context is synchronous.
-    /// This does not actually change any AL state. To apply these attributes see <see cref="ALC.CreateContext(ALDevice, ALContextAttributes)"/>.
+    /// Gets if the context is synchronous.
+    /// This does not actually change any AL state. To apply these attributes see <see cref="ALC.CreateContext(ALDevice, int[])"/>.
     /// </summary>
-    public bool? Sync { get; set; }
+    public bool? Sync { get; init; }
 
     /// <summary>
     /// Gets or sets additional attributes.
-    /// Will usually be the major and minor version numbers of the context. // FIXME: This needs verification. Docs say nothing about this.
     /// </summary>
-    public int[] AdditionalAttributes
+    public int[]? AdditionalAttributes
     {
         get => this.additionalAttributes;
-        set => this.additionalAttributes = value is null
-            ? Array.Empty<int>()
-            : this.additionalAttributes = value;
+        set => this.additionalAttributes = value ?? Array.Empty<int>();
     }
 
     /// <summary>
     /// Converts these context attributes to a <see cref="ALC.CreateContext(ALDevice, int[])"/> compatible list.
-    /// Alternativly, consider using the more convenient <see cref="ALC.CreateContext(ALDevice, ALContextAttributes)"/> overload.
+    /// Alternatively, consider using the more convenient <see cref="ALC.CreateContext(ALDevice, int[])"/> overload.
     /// </summary>
-    /// <returns>The attibute list in the form of a span.</returns>
+    /// <returns>The attribute list in the form of a span.</returns>
     public int[] CreateAttributeArray()
     {
         // The number of members * 2 + additional attributes
@@ -98,11 +95,13 @@ internal class ALContextAttributes
 
         void AddAttribute(int? value, AlcContextAttributes attribute)
         {
-            if (value != null)
+            if (value == null)
             {
-                attributeList[index++] = (int)attribute;
-                attributeList[index++] = value ?? default;
+                return;
             }
+
+            attributeList[index++] = (int)attribute;
+            attributeList[index++] = value.Value;
         }
 
         AddAttribute(Frequency, AlcContextAttributes.Frequency);
@@ -118,11 +117,10 @@ internal class ALContextAttributes
         if (this.additionalAttributes.Length > 0)
         {
             Array.Copy(this.additionalAttributes, 0, attributeList, index, this.additionalAttributes.Length);
-            index += this.additionalAttributes.Length;
         }
 
         // Add the trailing null byte.
-        attributeList[index++] = 0;
+        attributeList[^1] = 0;
 
         return attributeList;
     }
@@ -136,7 +134,7 @@ internal class ALContextAttributes
                                          $"{GetAttrNameAndValue(nameof(StereoSources), StereoSources)}, " +
                                          $"{GetAttrNameAndValue(nameof(Refresh), Refresh)}, " +
                                          $"{GetAttrNameAndValue(nameof(Sync), Sync)}" +
-                                         $"{((this.additionalAttributes.Length <= 0) ? string.Empty : ", " + string.Join(", ", this.additionalAttributes))}";
+                                         $"{(this.additionalAttributes.Length <= 0 ? string.Empty : ", " + string.Join(", ", this.additionalAttributes))}";
 
     /// <summary>
     /// Returns the name and value of the given attribute <paramref name="value"/>.

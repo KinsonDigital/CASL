@@ -92,7 +92,7 @@ public interface ISound : IDisposable
     void SetTimePosition(float seconds);
 
     /// <summary>
-    /// Rewinds the sound by the given amound of <paramref name="seconds"/>.
+    /// Rewinds the sound by the given amount of <paramref name="seconds"/>.
     /// </summary>
     /// <param name="seconds">The amount of seconds to rewind the song.</param>
     void Rewind(float seconds);

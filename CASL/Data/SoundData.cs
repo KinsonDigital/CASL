@@ -22,7 +22,6 @@ internal struct SoundData<T> : IEquatable<SoundData<T>>
     /// <param name="sampleRate">The sample rate.</param>
     /// <param name="channels">The total number of channels.</param>
     /// <param name="format">The audio format.</param>
-    /// <param name="totalSeconds">The total number of seconds of the sound.</param>
     public SoundData(T[] bufferData, int sampleRate, int channels, AudioFormat format)
         : this()
     {

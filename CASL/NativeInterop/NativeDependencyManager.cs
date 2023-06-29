@@ -22,7 +22,7 @@ internal abstract class NativeDependencyManager : IDependencyManager
     /// <summary>
     /// Initializes a new instance of the <see cref="NativeDependencyManager"/> class.
     /// </summary>
-    /// <param name="file">Manages file related operations.</param>
+    /// <param name="file">Performs operations with files.</param>
     /// <param name="path">Manages file paths.</param>
     /// <param name="nativeLibPathResolver">Resolves native library paths.</param>
     protected NativeDependencyManager(

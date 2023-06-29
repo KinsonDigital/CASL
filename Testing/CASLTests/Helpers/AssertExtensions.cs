@@ -13,9 +13,10 @@ using Xunit;
 using Xunit.Sdk;
 
 /// <summary>
-/// Provides helper methods for the <see cref="XUnit"/>'s <see cref="Assert"/> class.
+/// Provides helper methods for the <see cref="Xunit"/>'s <see cref="Assert"/> class.
 /// </summary>
 [ExcludeFromCodeCoverage]
+// ReSharper disable once ClassNeverInstantiated.Global
 public class AssertExtensions : Assert
 {
     /// <summary>
@@ -106,22 +107,25 @@ public class AssertExtensions : Assert
             Assert.True(false, $"Both lists must be null or not null to be equal.\nThe '{nameof(expectedItems)}' is not null and the '{nameof(actualItems)}' is null.");
         }
 
-        if (expectedItems.Count() != actualItems.Count())
+        var expectedItemsToCheck = expectedItems.ToArray();
+        var actualItemsToCheck = actualItems.ToArray();
+
+        if (expectedItemsToCheck.Count() != actualItemsToCheck.Count())
         {
             Assert.True(false, $"The quantity of items for '{nameof(expectedItems)}' and '{nameof(actualItems)}' do not match.");
         }
 
-        var expectedArrayItems = expectedItems.ToArray();
-        var actualArrayItems = actualItems.ToArray();
+        var expectedArrayItems = expectedItemsToCheck.ToArray();
+        var actualArrayItems = actualItemsToCheck.ToArray();
 
         for (var i = 0; i < expectedArrayItems.Length; i++)
         {
-            if ((expectedArrayItems[i] is null) && !(actualArrayItems[i] is null))
+            if (expectedArrayItems[i] is null && !(actualArrayItems[i] is null))
             {
                 Assert.True(false, $"Both the expected and actual item must both be null or not null to be equal.\n\nThe expected item at index '{i}' is null and the actual item at index '{i}' is not null.");
             }
 
-            if (expectedArrayItems[i] is not null && (actualArrayItems[i] is null))
+            if (expectedArrayItems[i] is not null && actualArrayItems[i] is null)
             {
                 Assert.True(false, $"Both the expected and actual item must both be null or not null to be equal.\n\nThe expected item at index '{i}' is not null and the actual item at index '{i}' is null.");
             }
@@ -136,7 +140,7 @@ public class AssertExtensions : Assert
     }
 
     /// <summary>
-    /// Asserts that all of the given <paramref name="items"/> are <see langword="true"/> which is dictacted
+    /// Asserts that all of the given <paramref name="items"/> are <see langword="true"/> which is dictated
     /// by the given <paramref name="arePredicate"/> predicate.
     /// </summary>
     /// <typeparam name="T">The type of item in the list of items.</typeparam>
@@ -171,38 +175,44 @@ public class AssertExtensions : Assert
     /// <param name="actual">The actual message to display if the condition is <see langword="false"/>.</param>
     public static void True(bool condition, string message, string expected = "", string actual = "")
     {
-        XunitException assertExcption;
+        XunitException assertException;
 
-        if (!string.IsNullOrEmpty(expected) && string.IsNullOrEmpty(actual))
+        switch (string.IsNullOrEmpty(expected))
         {
-            assertExcption = new XunitException(
-                $"Message: {message}\n" +
-                $"Expected: {expected}");
-        }
-        else if (string.IsNullOrEmpty(expected) && !string.IsNullOrEmpty(actual))
-        {
-            assertExcption = new XunitException(
-                $"Message: {message}\n" +
-                $"Actual: {actual}\n");
-        }
-        else if (!string.IsNullOrEmpty(expected) && !string.IsNullOrEmpty(actual))
-        {
-            assertExcption = new XunitException(
-                $"Message: {message}\n" +
-                $"Expected: {expected}\n" +
-                $"Actual:   {actual}");
-        }
-        else
-        {
-            assertExcption = new AssertActualExpectedException(
-                true,
-                condition,
-                message);
+            case false when !string.IsNullOrEmpty(actual):
+                assertException = new XunitException(
+                    $"Message: {message}\n" +
+                    $"Expected: {expected}\n" +
+                    $"Actual:   {actual}");
+                break;
+            case false when string.IsNullOrEmpty(actual):
+                assertException = new XunitException(
+                    $"Message: {message}\n" +
+                    $"Expected: {expected}");
+                break;
+            default:
+            {
+                if (string.IsNullOrEmpty(expected) && !string.IsNullOrEmpty(actual))
+                {
+                    assertException = new XunitException(
+                        $"Message: {message}\n" +
+                        $"Actual: {actual}\n");
+                }
+                else
+                {
+                    assertException = new AssertActualExpectedException(
+                        true,
+                        condition,
+                        message);
+                }
+
+                break;
+            }
         }
 
         if (condition is false)
         {
-            throw assertExcption;
+            throw assertException;
         }
     }
 
@@ -218,6 +228,7 @@ public class AssertExtensions : Assert
     ///     The last 2 <see langword="in"/> parameters T2 and T3 of type <see langword="int"/> of the <paramref name="action"/>
     ///     is the X and Y location within the <paramref name="collection"/> that failed the assertion.
     /// </remarks>
+    [SuppressMessage("csharpsquid", "S2368", Justification = "The purpose of this is to test the jagged array.")]
     public static void All<T>(T[,] collection, int width, int height, Action<T, int, int> action)
     {
         var actionInvoked = false;
@@ -277,7 +288,7 @@ public class AssertExtensions : Assert
     /// </summary>
     /// <typeparam name="T">The type of the event arguments to expect.</typeparam>
     /// <param name="attach">Code to attach the event handler.</param>
-    /// <param name="detach">Code to detatch the event handler.</param>
+    /// <param name="detach">Code to detach the event handler.</param>
     /// <param name="testCode">A delegate to the code to be tested.</param>
     public static void DoesNotRaise<T>(Action<EventHandler<T>> attach, Action<EventHandler<T>> detach, Action testCode)
         where T : EventArgs

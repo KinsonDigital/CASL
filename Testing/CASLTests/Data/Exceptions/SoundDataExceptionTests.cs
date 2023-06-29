@@ -2,7 +2,7 @@
 // Copyright (c) KinsonDigital. All rights reserved.
 // </copyright>
 
-namespace RaptorTests.Audio.Exceptions;
+namespace CASLTests.Data.Exceptions;
 
 using System;
 using CASL.Data.Exceptions;
