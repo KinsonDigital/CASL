@@ -28,7 +28,9 @@ on:
 jobs:
   sync_bot:
     name: Sync Bot
-    if: (github.event_name == 'issues') || (github.event_name == 'workflow_dispatch' && inputs.run-type == 'Sync Bot' && startsWith(github.head_ref, 'feature/'))
+    if: |
+      (github.event_name == 'issues') ||
+        (github.event_name == 'workflow_dispatch' && inputs.run-type == 'Sync Bot' && startsWith(github.head_ref, 'feature/'))
     runs-on: ubuntu-latest
     steps:
       - name: Set Up Deno
