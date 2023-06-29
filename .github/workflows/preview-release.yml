@@ -43,7 +43,7 @@ jobs:
     uses: KinsonDigital/Infrastructure/.github/workflows/release.yml@v5.0.0
     with:
       project-name: "${{ vars.PROJECT_NAME}}"
-      run-branch: "${{ github.ref }}"
+      run-branch: "${{ github.ref_name }}"
       net-sdk-version: "${{ vars.NET_SDK_VERSION }}"
       relative-release-notes-dir-path: "${{ vars.RELATIVE_RELEASE_NOTES_DIR_PATH }}"
       release-notes-file-name-prefix: "${{ vars.RELEASE_NOTES_FILE_NAME_PREFIX }}"
