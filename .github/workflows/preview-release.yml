@@ -40,7 +40,7 @@ jobs:
   run_preview_release:
     name: Run Preview Release
     needs: determine_build_config
-    uses: KinsonDigital/Infrastructure/.github/workflows/release.yml@v5.0.0
+    uses: KinsonDigital/Infrastructure/.github/workflows/release.yml@v5.0.1
     with:
       project-name: "${{ vars.PROJECT_NAME}}"
       run-branch: "${{ github.ref }}"

@@ -34,7 +34,7 @@ jobs:
   build_status_check:
     name: Build Status Check
     needs: [determine_build_config]
-    uses: KinsonDigital/Infrastructure/.github/workflows/build-csharp-project.yml@v5.0.0
+    uses: KinsonDigital/Infrastructure/.github/workflows/build-csharp-project.yml@v5.0.1
     with:
       project-name: "${{ vars.PROJECT_NAME }}"
       build-config: ${{ needs.determine_build_config.outputs.build-config }}
