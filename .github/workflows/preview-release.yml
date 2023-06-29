@@ -1,5 +1,5 @@
 name: 🚀Preview Release
-
+run-name: Preview Release ${{ inputs.dry-run == true && '- (Dry Run)' || '' }}
 
 defaults:
   run:
