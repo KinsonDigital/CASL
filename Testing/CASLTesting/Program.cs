@@ -179,6 +179,12 @@ public static class Program
                 {
                     var path = sections[1];
 
+                    // Make sure that the path does not start or end with single or double quotes
+                    path = path.StartsWith('\"') ? path[1..] : path;
+                    path = path.StartsWith('\'') ? path[1..] : path;
+                    path = path.EndsWith('\"') ? path[..^1] : path;
+                    path = path.EndsWith('\'') ? path[..^1] : path;
+
                     if (ValidMusicLibrary(path))
                     {
                         SetMusicLibDirPath(path);
