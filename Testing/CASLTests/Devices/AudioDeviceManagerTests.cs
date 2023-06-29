@@ -145,6 +145,7 @@ public class AudioDeviceManagerTests
     public void InitDevice_WhenInvoked_InitializesDevice()
     {
         // Arrange
+        this.mockALInvoker.Setup(m => m.GetDefaultDevice()).Returns("OpenAL Soft on test-device");
         var manager = CreateManager();
 
         // Act
@@ -154,6 +155,7 @@ public class AudioDeviceManagerTests
         this.mockALInvoker.Verify(m => m.OpenDevice("OpenAL Soft on test-device"), Times.Once());
         this.mockALInvoker.Verify(m => m.MakeContextCurrent(this.context), Times.Once());
         this.mockALInvoker.Verify(m => m.GetDefaultDevice(), Times.Once());
+        Assert.Equal("OpenAL Soft on test-device", manager.DeviceInUse);
     }
 
     [Fact]
