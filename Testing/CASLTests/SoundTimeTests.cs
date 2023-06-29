@@ -17,10 +17,10 @@ public class SoundTimeTests
     public void Ctor_WhenInvoked_ProperlySetsPropValues()
     {
         // Arrange
-        var expectedMilliseconds = 90000;
-        var expectedSeconds = 30;
-        var expectedMinutes = 1.5f;
-        var expectedTotalSeconds = 90;
+        const int expectedMilliseconds = 90000;
+        const int expectedSeconds = 30;
+        const float expectedMinutes = 1.5f;
+        const int expectedTotalSeconds = 90;
 
         // Act
         var time = new SoundTime(90);

@@ -7,18 +7,19 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <Nullable>enable</Nullable>
 
+    <!-- TODO: CHANGE THESE VERSION BACK TO PREVIEW.12 -->
     <!--Update this for preview releases-->
-    <Version>1.0.0-preview.12</Version>
+    <Version>1.0.0-preview.14</Version>
 
     <!--Update this for preview releases-->
-    <FileVersion>1.0.0-preview.12</FileVersion>
+    <FileVersion>1.0.0-preview.14</FileVersion>
 
     <AssemblyVersion>1.0.0</AssemblyVersion>
     <ApplicationIcon>casl-logo.ico</ApplicationIcon>
     <StartupObject />
     <Configurations>Debug;Release</Configurations>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <Authors>Calvin Wilkinson</Authors>
+    <Authors>Kinson Digital Team</Authors>
     <Description>CASL is a simplistic cross-platform, .NET library for playing and managing sounds powered by OpenAL 1.1 using software rendering.</Description>
     <Copyright>2021</Copyright>
     <PackageLicenseFile>LICENSE.md</PackageLicenseFile>
@@ -27,6 +28,7 @@
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <RepositoryUrl>https://github.com/KinsonDigital/CASL</RepositoryUrl>
     <PackageIconUrl />
+    <PackageLicenseUrl>https://github.com/KinsonDigital/CASL/blob/master/LICENSE.md</PackageLicenseUrl>
     <PackageId>KinsonDigital.CASL</PackageId>
     <PackageIcon>casl-logo.png</PackageIcon>
     <PackageReadmeFile>README.md</PackageReadmeFile>

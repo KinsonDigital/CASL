@@ -11,19 +11,24 @@ using CASL.NativeInterop;
 using Moq;
 using Xunit;
 
+/// <summary>
+/// Tests the <see cref="NativeLibPathResolver"/> class.
+/// </summary>
 public class NativeLibPathResolverTests
 {
     private const string WinDirPath = @"C:\Program Files\test-app";
     private const string LinuxDirPath = "/user/bin/test-app";
     private const string MacOSXDirPath = "/Applications/test-app";
     private const string WinExtension = ".dll";
-    private const string PosixExtension = ".so";// MacOSX and Linux systems
-    private const char WinSeparatorChar = '\\';
-    private const char PosixSeparatorChar = '/';// MacOSX and Linux systems
+    private const string PosixExtension = ".so"; //MacOSX and Linux systems
+    private const char PosixSeparatorChar = '/'; //MacOSX and Linux systems
     private readonly Mock<IPlatform> mockPlatform;
     private readonly Mock<IApplication> mockApp;
     private readonly Mock<IPath> mockPath;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="NativeLibPathResolverTests"/> class.
+    /// </summary>
     public NativeLibPathResolverTests()
     {
         this.mockPlatform = new Mock<IPlatform>();
@@ -33,14 +38,12 @@ public class NativeLibPathResolverTests
 
     #region Method Tests
     [Theory]
-    [InlineData(WinDirPath, WinExtension, true, WinSeparatorChar, Architecture.X64, false, "win-x64")]
-    [InlineData(WinDirPath, "",           false, WinSeparatorChar, Architecture.X64, false, "win-x64")]
-    [InlineData(WinDirPath, WinExtension, true, WinSeparatorChar, Architecture.X86, false, "win-x86")]
+    [InlineData(WinExtension, true, Architecture.X64, false, "win-x64")]
+    [InlineData("",           false, Architecture.X64, false, "win-x64")]
+    [InlineData(WinExtension, true, Architecture.X86, false, "win-x86")]
     public void GetPath_WhenWindows_ReturnsCorrectPath(
-        string appDirPath,
         string extension,
         bool hasExtension,
-        char separatorChar,
         Architecture arch,
         bool isWin10,
         string platform)
@@ -68,10 +71,9 @@ public class NativeLibPathResolverTests
     }
 
     [Theory]
-    [InlineData(LinuxDirPath, PosixExtension, PosixSeparatorChar, true, Architecture.X86, "osx")]
-    [InlineData(LinuxDirPath, PosixExtension, PosixSeparatorChar, false, Architecture.X64, "osx-x64")]
+    [InlineData(PosixExtension, PosixSeparatorChar, true, Architecture.X86, "osx")]
+    [InlineData(PosixExtension, PosixSeparatorChar, false, Architecture.X64, "osx-x64")]
     public void GetPath_WhenMacOSX_ReturnsCorrectPath(
-        string appDirPath,
         string extension,
         char separatorChar,
         bool is32BitProcess,
@@ -102,9 +104,8 @@ public class NativeLibPathResolverTests
     }
 
     [Theory]
-    [InlineData(MacOSXDirPath, PosixExtension, PosixSeparatorChar, false, Architecture.X64, "linux-x64")]
+    [InlineData(PosixExtension, PosixSeparatorChar, false, Architecture.X64, "linux-x64")]
     public void GetPath_WhenLinuxOS_ReturnsCorrectPath(
-        string appDirPath,
         string extension,
         char separatorChar,
         bool is32BitProcess,

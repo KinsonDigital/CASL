@@ -16,7 +16,7 @@ public class ExtensionMethodTests
     public void ToManagedUTF8String_WithNullPointer_ReturnsEmptyString()
     {
         // Act
-        var actual = IntPtr.Zero.ToManagedUTF8String();
+        var actual = IntPtr.Zero.ToManagedUtf8String();
 
         // Assert
         Assert.Equal(string.Empty, actual);
@@ -30,7 +30,7 @@ public class ExtensionMethodTests
         var stringDataPtr = Marshal.StringToHGlobalAnsi(testString);
 
         // Act
-        var actual = stringDataPtr.ToManagedUTF8String();
+        var actual = stringDataPtr.ToManagedUtf8String();
 
         // Assert
         Assert.Equal("hello world", actual);

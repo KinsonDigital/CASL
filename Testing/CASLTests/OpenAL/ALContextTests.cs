@@ -101,7 +101,7 @@ public class ALContextTests
     {
         // Arrange
         var contextA = new ALContext(1234);
-        object contextB = new object();
+        var contextB = new object();
 
         // Act
         var actual = contextA.Equals(contextB);

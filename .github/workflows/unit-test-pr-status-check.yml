@@ -1,12 +1,16 @@
 name: ✅Unit Testing Status Check
+run-name: ✅Unit Testing Status Check
+
+
+defaults:
+  run:
+    shell: pwsh
 
 
 on:
   workflow_dispatch:
   pull_request:
-    branches:
-    - master
-    - preview
+    branches: [master, preview]
 
 
 jobs:
@@ -18,7 +22,6 @@ jobs:
     steps:
     - name: Get Build Config
       id: get-build-config
-      shell: pwsh
       run: |
         # If the destination branch that the pull request is merging into is the master, do a release build
         if ("${{ github.base_ref }}" -eq "master") {
@@ -29,10 +32,10 @@ jobs:
 
 
   run_tests:
-    name: Run Tests
+    name: Unit Testing Status Check
     needs: determine_build_config
-    uses: KinsonDigital/Infrastructure/.github/workflows/run-csharp-tests.yml@v4.3.0
+    uses: KinsonDigital/Infrastructure/.github/workflows/run-csharp-tests.yml@v5.0.0
     with:
-      project-name: "CASLTests"
+      project-name: "${{ vars.PROJECT_NAME }}Tests"
       build-config: ${{ needs.determine_build_config.outputs.build-config }}
-      net-sdk-version: 7.0.302
+      net-sdk-version: "${{ vars.NET_SDK_VERSION }}"

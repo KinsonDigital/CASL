@@ -2,7 +2,7 @@
 // Copyright (c) KinsonDigital. All rights reserved.
 // </copyright>
 
-namespace CASLTests.Audio;
+namespace CASLTests.Data;
 
 using System;
 using System.Collections.ObjectModel;
@@ -63,7 +63,7 @@ public class MP3SoundDecoderTests
         this.mockDataStream.SetupGet(p => p.Channels).Returns(1);
         this.mockDataStream.SetupGet(p => p.Format).Returns(AudioFormat.Stereo16);
         this.mockDataStream.Setup(m => m.ReadSamples(bufferData, 0, It.IsAny<int>()))
-            .Returns<byte[], int, int>((buffer, offset, count) =>
+            .Returns<byte[], int, int>((buffer, _, _) =>
             {
                 fixed (byte* pBuffer = buffer)
                 {

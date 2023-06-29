@@ -12,9 +12,9 @@ internal interface IFilePathResolver
     /// <summary>
     /// Gets the path to the file with the given name.
     /// </summary>
-    /// <param name="fileName">The name of the file.</param>
+    /// <param name="libFilePathOrFileName">The name of the file.</param>
     /// <returns>The file name with a resolved path.</returns>
-    string GetFilePath(string fileName);
+    string GetFilePath(string libFilePathOrFileName);
 
     /// <summary>
     /// Gets the path to native libraries for an application.

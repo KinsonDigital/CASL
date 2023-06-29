@@ -2,8 +2,13 @@
 // Copyright (c) KinsonDigital. All rights reserved.
 // </copyright>
 
+#pragma warning disable IDE0002 // Name can be simplified
+
+namespace CASLTests;
+
 using System;
 using System.Collections.ObjectModel;
+using System.Diagnostics.CodeAnalysis;
 using System.IO.Abstractions;
 using CASL;
 using CASL.Data;
@@ -11,14 +16,9 @@ using CASL.Data.Exceptions;
 using CASL.Devices;
 using CASL.Exceptions;
 using CASL.OpenAL;
-using CASLTests.Helpers;
 using Moq;
 using Xunit;
-
-#pragma warning disable IDE0002 // Name can be simplified
-namespace CASLTests;
-
-using Assert = AssertExtensions;
+using Assert = Helpers.AssertExtensions;
 
 /// <summary>
 /// Tests the <see cref="Sound"/> class.
@@ -42,6 +42,7 @@ public class SoundTests
     /// <summary>
     /// Initializes a new instance of the <see cref="SoundTests"/> class.
     /// </summary>
+    [SuppressMessage("csharpsquid", "S1075", Justification = "Only used for testing")]
     public SoundTests()
     {
         const string soundsDirPath = "C:/temp/Content/Sounds";
@@ -987,6 +988,7 @@ public class SoundTests
     }
 
     [Fact]
+    [SuppressMessage("csharpsquid", "S3966", Justification = "Need to execute dispose twice for testing.")]
     public void Dispose_WhenInvoked_DisposesOfSound()
     {
         // Arrange
@@ -1024,6 +1026,7 @@ public class SoundTests
     }
 
     [Fact]
+    [SuppressMessage("csharpsquid", "S3966", Justification = "Need to execute dispose twice for testing.")]
     public void Dispose_WithInvalidSourceID_DoesNotAttemptSourceAndBufferDeletion()
     {
         // Arrange

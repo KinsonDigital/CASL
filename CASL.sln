@@ -29,14 +29,10 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "WorkFlows", "WorkFlows", "{5F701C8E-2B7C-427B-B16F-068BD369D2BF}"
 	ProjectSection(SolutionItems) = preProject
 		.github\workflows\build-pr-status-check.yml = .github\workflows\build-pr-status-check.yml
-		.github\workflows\feature-pr-status-check.yml = .github\workflows\feature-pr-status-check.yml
-		.github\workflows\hotfix-pr-status-check.yml = .github\workflows\hotfix-pr-status-check.yml
-		.github\workflows\prev-feature-pr-status-check.yml = .github\workflows\prev-feature-pr-status-check.yml
-		.github\workflows\prev-release.yml = .github\workflows\prev-release.yml
-		.github\workflows\prev-release-pr-status-check.yml = .github\workflows\prev-release-pr-status-check.yml
-		.github\workflows\prod-release.yml = .github\workflows\prod-release.yml
-		.github\workflows\prod-release-pr-status-check.yml = .github\workflows\prod-release-pr-status-check.yml
 		.github\workflows\unit-test-pr-status-check.yml = .github\workflows\unit-test-pr-status-check.yml
+		.github\workflows\preview-release.yml = .github\workflows\preview-release.yml
+		.github\workflows\sync-bot-status-check.yml = .github\workflows\sync-bot-status-check.yml
+		.github\workflows\sync-issue-to-pr.yml = .github\workflows\sync-issue-to-pr.yml
 	EndProjectSection
 EndProject
 Global

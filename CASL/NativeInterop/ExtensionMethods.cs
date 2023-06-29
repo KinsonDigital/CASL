@@ -19,7 +19,7 @@ internal static class ExtensionMethods
     /// </summary>
     /// <param name="ptrToStringData">The string to convert.</param>
     /// <returns>The string data pointed to by the <see langword="nint"/>.</returns>
-    public static string ToManagedUTF8String(this nint ptrToStringData)
+    public static string ToManagedUtf8String(this nint ptrToStringData)
     {
         var result = string.Empty;
 

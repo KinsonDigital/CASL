@@ -5,11 +5,15 @@
 namespace CASL.Devices.Exceptions;
 
 using System;
+using System.Diagnostics.CodeAnalysis;
+using System.Runtime.Serialization;
+using System.Security;
 
 /// <summary>
 /// Occurs when there is an issue initializing an audio device.
 /// </summary>
-public class InitializeDeviceException : Exception
+[Serializable]
+public sealed class InitializeDeviceException : Exception
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="InitializeDeviceException"/> class.
@@ -35,6 +39,18 @@ public class InitializeDeviceException : Exception
     /// <param name="innerException">The inner exception.</param>
     public InitializeDeviceException(string message, Exception innerException)
         : base(message, innerException)
+    {
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="InitializeDeviceException"/> class.
+    /// </summary>
+    /// <param name="info">The <see cref="SerializationInfo"/> to populate the data.</param>
+    /// <param name="context">The destination (see <see cref="StreamingContext"/>) for this serialization.</param>
+    /// <exception cref="SecurityException">The caller does not have the required permissions.</exception>
+    [ExcludeFromCodeCoverage(Justification = "No need to test empty private method.")]
+    private InitializeDeviceException(SerializationInfo info, StreamingContext context)
+        : base(info, context)
     {
     }
 }

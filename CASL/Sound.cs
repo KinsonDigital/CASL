@@ -8,17 +8,17 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using System.IO.Abstractions;
 using System.Linq;
-using CASL.Data;
+using Data;
 using CASL.Data.Exceptions;
-using CASL.Devices;
-using CASL.Devices.Factories;
-using CASL.Exceptions;
-using CASL.OpenAL;
+using Devices;
+using Devices.Factories;
+using Exceptions;
+using OpenAL;
 
 /// <summary>
 /// A single sound that can be played, paused etc.
 /// </summary>
-public sealed class Sound : ISound
+public class Sound : ISound
 {
     private const char CrossPlatDirSeparatorChar = '/';
     private const string IsDisposedExceptionMessage = "The sound is disposed.  You must create another sound instance.";
@@ -36,7 +36,7 @@ public sealed class Sound : ISound
     /// <summary>
     /// Initializes a new instance of the <see cref="Sound"/> class.
     /// </summary>
-    /// <param name="filePath">The path to the sound file..</param>
+    /// <param name="filePath">The path to the sound file.</param>
     [ExcludeFromCodeCoverage]
     public Sound(string filePath)
     {
@@ -64,7 +64,7 @@ public sealed class Sound : ISound
     /// <param name="audioManager">Manages audio related operations.</param>
     /// <param name="oggDecoder">Decodes OGG audio files.</param>
     /// <param name="mp3Decoder">Decodes MP3 audio files.</param>
-    /// <param name="path">Manages paths.</param>
+    /// <param name="path">Manages file paths.</param>
     internal Sound(
         string filePath,
         IOpenALInvoker alInvoker,
@@ -375,7 +375,39 @@ public sealed class Sound : ISound
     }
 
     /// <inheritdoc/>
-    public void Dispose() => Dispose(true);
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
+    /// <summary>
+    /// <inheritdoc cref="IDisposable.Dispose"/>
+    /// </summary>
+    /// <param name="disposing"><see langword="true"/> to dispose of managed resources.</param>
+    protected virtual void Dispose(bool disposing)
+    {
+        if (this.isDisposed)
+        {
+            return;
+        }
+
+        if (disposing)
+        {
+            this.oggDecoder.Dispose();
+            this.mp3Decoder.Dispose();
+            this.audioManager.DeviceChanging -= AudioManager_DeviceChanging;
+            this.audioManager.DeviceChanged -= AudioManager_DeviceChanged;
+        }
+
+        UnloadSoundData();
+
+        // ReSharper disable HeapView.DelegateAllocation
+        this.alInvoker.ErrorCallback -= ErrorCallback;
+
+        // ReSharper restore HeapView.DelegateAllocation
+        this.isDisposed = true;
+    }
 
     /// <summary>
     /// Maps the given audio <paramref name="format"/> to the <see cref="ALFormat"/> type equivalent.
@@ -399,32 +431,6 @@ public sealed class Sound : ISound
     /// <param name="errorMsg">The OpenAL message.</param>
     [ExcludeFromCodeCoverage]
     private static void ErrorCallback(string errorMsg) => throw new AudioException(errorMsg);
-
-    /// <summary>
-    /// <inheritdoc cref="IDisposable.Dispose"/>
-    /// </summary>
-    /// <param name="disposing"><see langword="true"/> to dispose of managed resources.</param>
-    private void Dispose(bool disposing)
-    {
-        if (!this.isDisposed)
-        {
-            if (disposing)
-            {
-                this.oggDecoder.Dispose();
-                this.mp3Decoder.Dispose();
-                this.audioManager.DeviceChanging -= AudioManager_DeviceChanging;
-                this.audioManager.DeviceChanged -= AudioManager_DeviceChanged;
-            }
-
-            UnloadSoundData();
-
-            // ReSharper disable HeapView.DelegateAllocation
-            this.alInvoker.ErrorCallback -= ErrorCallback;
-
-            // ReSharper restore HeapView.DelegateAllocation
-            this.isDisposed = true;
-        }
-    }
 
     /// <summary>
     /// Initializes the sound.

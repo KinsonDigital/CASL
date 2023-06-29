@@ -14,7 +14,8 @@ using NVorbis;
 /// Streams ogg audio data from a ogg file.
 /// </summary>
 [ExcludeFromCodeCoverage]
-public class OggAudioDataStream : IAudioDataStream<float>
+[SuppressMessage("ReSharper", "ClassNeverInstantiated.Global", Justification = "Instantiated via reflection")]
+internal sealed class OggAudioDataStream : IAudioDataStream<float>
 {
     private VorbisReader? vorbisReader;
     private string? fileName;
@@ -29,7 +30,7 @@ public class OggAudioDataStream : IAudioDataStream<float>
     /// </remarks>
     public string Filename
     {
-        get => this.fileName is null ? string.Empty : this.fileName;
+        get => this.fileName ?? string.Empty;
         set
         {
             if (string.IsNullOrEmpty(value))
@@ -133,26 +134,22 @@ public class OggAudioDataStream : IAudioDataStream<float>
     }
 
     /// <inheritdoc/>
-    public void Dispose()
-    {
-        Dispose(true);
-        GC.SuppressFinalize(this);
-    }
+    public void Dispose() => Dispose(true);
 
-    /// <summary>
-    /// <inheritdoc/>
-    /// </summary>
+    /// <inheritdoc cref="IDisposable.Dispose"/>
     /// <param name="disposing"><see langword="true"/> to dispose of managed resources.</param>
-    protected virtual void Dispose(bool disposing)
+    private void Dispose(bool disposing)
     {
-        if (!this.isDisposed)
+        if (this.isDisposed)
         {
-            if (disposing)
-            {
-                this.vorbisReader?.Dispose();
-            }
-
-            this.isDisposed = true;
+            return;
         }
+
+        if (disposing)
+        {
+            this.vorbisReader?.Dispose();
+        }
+
+        this.isDisposed = true;
     }
 }

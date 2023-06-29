@@ -5,9 +5,9 @@
 namespace CASL.Devices;
 
 using System;
+using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using CASL.Devices.Factories;
+using Factories;
 
 /// <summary>
 /// Manages the audio devices in the system.
@@ -15,12 +15,7 @@ using CASL.Devices.Factories;
 [ExcludeFromCodeCoverage]
 public static class AudioDevice
 {
-    private static readonly IAudioDeviceManager AudioManager;
-
-    /// <summary>
-    /// Initializes static members of the <see cref="AudioDevice"/> class.
-    /// </summary>
-    static AudioDevice() => AudioManager = AudioDeviceManagerFactory.CreateDeviceManager();
+    private static readonly IAudioDeviceManager AudioManager = AudioDeviceManagerFactory.CreateDeviceManager();
 
     /// <summary>
     /// Gets the name of the current audio device in use.
@@ -30,7 +25,7 @@ public static class AudioDevice
     /// <summary>
     /// Gets a list of all the audio devices in the system.
     /// </summary>
-    public static string[] AudioDevices => AudioManager.DeviceNames;
+    public static ImmutableArray<string> AudioDevices => AudioManager.GetDeviceNames();
 
     /// <summary>
     /// Changes the audio device for the sound to the given name.
@@ -38,7 +33,7 @@ public static class AudioDevice
     /// <param name="name">The name of the device.</param>
     public static void SetAudioDevice(string name)
     {
-        if (AudioManager.DeviceNames.Contains(name) is false)
+        if (AudioManager.GetDeviceNames().Contains(name) is false)
         {
             throw new ArgumentException("The device name is invalid.", name);
         }

@@ -1,5 +1,5 @@
-﻿// <copyright file="NativeLibraryLoaderTests.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
+﻿// <copyright file="NativeLibraryLoaderTests.cs" company="KinsonDigital">
+// Copyright (c) KinsonDigital. All rights reserved.
 // </copyright>
 
 #pragma warning disable IDE0002 // Name can be simplified
@@ -30,7 +30,7 @@ public class NativeLibraryLoaderTests
     private const string LibNameWithoutExt = "test-lib";
     private const string WinLibNameWithExt = LibNameWithoutExt + WinExtension;
     private const string PosixLibNameWithExt = LibNameWithoutExt + PosixExtenstion;
-    private const char PosixSeparatorChar = '/';// MacOSX and Linux systems
+    private const char PosixSeparatorChar = '/'; //MacOSX and Linux systems
     private readonly Mock<IDependencyManager> mockDependencyManager;
     private readonly Mock<IPlatform> mockPlatform;
     private readonly Mock<IDirectory> mockDirectory;
@@ -40,7 +40,6 @@ public class NativeLibraryLoaderTests
     private string? libPath;
     private ReadOnlyCollection<string>? libDirPaths;
 
-    #region Constructors
     /// <summary>
     /// Initializes a new instance of the <see cref="NativeLibraryLoaderTests"/> class.
     /// </summary>
@@ -53,7 +52,6 @@ public class NativeLibraryLoaderTests
         this.mockPath = new Mock<IPath>();
         this.mockLibrary = new Mock<ILibrary>();
     }
-    #endregion
 
     #region Constructor Tests
     [Fact]
@@ -227,8 +225,8 @@ public class NativeLibraryLoaderTests
     public void LoadLibrary_WhenInvoked_ReturnsLibraryPointer()
     {
         // Arrange
-        nint expected = 1234;
-        var libFilePath = $"{CrossPlatWinDirPath}/{WinLibNameWithExt}";
+        const IntPtr expected = 1234;
+        const string libFilePath = $"{CrossPlatWinDirPath}/{WinLibNameWithExt}";
         this.mockFile.Setup(m => m.Exists(libFilePath)).Returns(true);
         this.mockDependencyManager.SetupGet(p => p.NativeLibDirPath).Returns(WinDirPath);
         this.mockLibrary.SetupGet(p => p.LibraryName).Returns(WinLibNameWithExt);
@@ -297,7 +295,7 @@ public class NativeLibraryLoaderTests
 
         this.mockPath.Setup(m => m.HasExtension(WinLibNameWithExt)).Returns(true);
         this.mockPath.Setup(m => m.GetFileNameWithoutExtension(It.IsAny<string>()))
-            .Returns(WinLibNameWithExt.Replace(".dll", ""));
+            .Returns(WinLibNameWithExt.Replace(".dll", string.Empty));
 
         this.mockLibrary.SetupGet(p => p.LibraryName).Returns(WinLibNameWithExt);
     }
@@ -307,8 +305,7 @@ public class NativeLibraryLoaderTests
     /// </summary>
     /// <returns>The instance to test.</returns>
     private NativeLibraryLoader CreateLoader()
-        => new NativeLibraryLoader(
-            this.mockDependencyManager.Object,
+        => new (this.mockDependencyManager.Object,
             this.mockPlatform.Object,
             this.mockDirectory.Object,
             this.mockFile.Object,

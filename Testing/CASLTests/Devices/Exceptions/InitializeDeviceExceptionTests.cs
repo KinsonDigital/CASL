@@ -25,16 +25,6 @@ public class InitializeDeviceExceptionTests
     }
 
     [Fact]
-    public void Ctor_WhenInvokedWithSingleMessageParam_CorrectlySetsMesage()
-    {
-        // Act
-        var exception = new InitializeDeviceException("test-message");
-
-        // Assert
-        Assert.Equal("test-message", exception.Message);
-    }
-
-    [Fact]
     public void Ctor_WhenInvokedWithMessageAndDeviceNameParams_CorrectlySetsMessage()
     {
         // Act

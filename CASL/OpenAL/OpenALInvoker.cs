@@ -108,7 +108,7 @@ internal class OpenALInvoker : IOpenALInvoker
 
         InvokeErrorIfTrue(error != ALError.NoError, errorMessage);
 
-        return (uint)buffer;
+        return buffer;
     }
 
     /// <inheritdoc/>
@@ -122,7 +122,7 @@ internal class OpenALInvoker : IOpenALInvoker
 
         InvokeErrorIfTrue(error != ALError.NoError, errorMessage);
 
-        return (uint)source;
+        return source;
     }
 
     /// <inheritdoc/>

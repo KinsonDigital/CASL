@@ -4,6 +4,7 @@
 
 namespace CASLTests;
 
+using System;
 using System.Runtime.InteropServices;
 using CASL;
 using Xunit;
@@ -17,7 +18,7 @@ public class ExtensionMethodTests
     public void ToStrings_WithZeroPointer_ReturnsEmptyArray()
     {
         // Arrange
-        nint ptr = 0;
+        const IntPtr ptr = 0;
 
         // Act
         var actual = ptr.ToStrings();

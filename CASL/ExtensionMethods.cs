@@ -135,7 +135,7 @@ internal static class ExtensionMethods
     /// <summary>
     /// Converts the given <paramref name="path"/> to a cross platform path.
     /// </summary>
-    /// <param name="path">The file or directory path.</param>
+    /// <param name="path">Manages file paths.</param>
     /// <returns>The cross platform version of the <paramref name="path"/>.</returns>
     /// <returns>
     ///     This changes all '\' characters to '/' characters.
