@@ -16,6 +16,9 @@ on:
 jobs:
   sync_issue_to_pr:
     name: Start Sync Process
+    if: |
+      github.event_name == 'issue_comment' ||
+      github.event_name == 'pull_request' && startsWith(github.head_ref, 'feature/')
     runs-on: ubuntu-latest
     steps:
       - name: Set Up Deno
