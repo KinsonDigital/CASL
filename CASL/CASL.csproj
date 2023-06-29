@@ -28,7 +28,6 @@
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <RepositoryUrl>https://github.com/KinsonDigital/CASL</RepositoryUrl>
     <PackageIconUrl />
-    <PackageLicenseUrl>https://github.com/KinsonDigital/CASL/blob/master/LICENSE.md</PackageLicenseUrl>
     <PackageId>KinsonDigital.CASL</PackageId>
     <PackageIcon>casl-logo.png</PackageIcon>
     <PackageReadmeFile>README.md</PackageReadmeFile>

@@ -67,5 +67,5 @@ As with all software, there is always a chance for issues and bugs, especially f
 5. [#215](https://github.com/KinsonDigital/CASL/issues/215) - Created a new preview release workflow to replace the old [CICD](https://github.com/KinsonDigital/CICD) release system.
 6. [#196](https://github.com/KinsonDigital/CASL/issues/196) - Created new build and test status check workflows.
 7. [#168](https://github.com/KinsonDigital/CASL/issues/168) - Added rule to the solution-wide **.editorconfig** file.
-8. [#76](https://github.com/KinsonDigital/CASL/issues/76) - Updated NuGet package authors and package license URL.
+8. [#76](https://github.com/KinsonDigital/CASL/issues/76) - Updated NuGet package authors.
 9. [#120](https://github.com/KinsonDigital/CASL/issues/120) - Fixed various grammar and spelling issues with code documentation.
