@@ -10,7 +10,7 @@ defaults:
 on:
   workflow_dispatch:
   pull_request:
-    branches: [master, preview]
+    branches: [main, preview]
 
 
 jobs:
@@ -23,10 +23,10 @@ jobs:
       - name: Get Build Config
         id: get-build-config
         run: |
-          # If the destination branch that the pull request is merging into is the master, do a release build
-          if ( "${{ github.base_ref }}" -eq "master") {
+          # If the destination branch that the pull request is merging into is the main, do a release build
+          if ( "${{ github.base_ref }}" -eq "main") {
             "build-config=Release" >> $env:GITHUB_OUTPUT;
-          } else { # Any other branch than master, do a debug build
+          } else { # Any other branch than main, do a debug build
             "build-config=Debug" >> $env:GITHUB_OUTPUT;
           }
 
