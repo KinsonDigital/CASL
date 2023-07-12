@@ -1,5 +1,5 @@
 name: ✅Build Status Check
-run-name: ✅Build Status Check
+run-name: ✅Build Status Check ${{ github.base_ref == 'main' && '(Release Build)' || '(Debug Build)' }}
 
 
 defaults:
@@ -32,9 +32,9 @@ jobs:
 
 
   build_status_check:
-    name: Build Status Check
+    name: Building ${{ vars.PROJECT_NAME }}
     needs: [determine_build_config]
-    uses: KinsonDigital/Infrastructure/.github/workflows/build-csharp-project.yml@v5.0.0
+    uses: KinsonDigital/Infrastructure/.github/workflows/build-csharp-project.yml@v7.2.0
     with:
       project-name: "${{ vars.PROJECT_NAME }}"
       build-config: ${{ needs.determine_build_config.outputs.build-config }}
