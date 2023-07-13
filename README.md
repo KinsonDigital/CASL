@@ -1,5 +1,5 @@
 <div align="center">
-    <a href="#"><img align="center" src="https://raw.githubusercontent.com/KinsonDigital/CASL/release/v1.0.0/Documentation/Images/casl-logo.png" height="96"></a>
+    <a href="#"><img align="center" src="https://raw.githubusercontent.com/KinsonDigital/CASL/release/preview/Documentation/Images/casl-logo.png" height="96"></a>
     <br />
 
 </div>
@@ -11,7 +11,7 @@
 ![Build PR Status Check](https://img.shields.io/github/actions/workflow/status/KinsonDigital/CASL/build-pr-status-check.yml?label=%E2%9A%99%EF%B8%8FBuild&color=2F8840)
 ![Unit Test PR Status Check](https://img.shields.io/github/actions/workflow/status/KinsonDigital/CASL/unit-test-pr-status-check.yml?label=%F0%9F%A7%AATests&color=2F8840)
 
-[![Codecov](https://img.shields.io/codecov/c/github/KinsonDigital/CASL?color=2F8840&label=Code%20Coverage&logo=codecov)](https://app.codecov.io/gh/KinsonDigital/CASL/tree/release%2Fv1.0.0)
+[![Codecov](https://img.shields.io/codecov/c/github/KinsonDigital/CASL?color=2F8840&label=Code%20Coverage&logo=codecov)](https://app.codecov.io/gh/KinsonDigital/CASL/tree/release%2Fpreview)
 
 [![Latest Nuget Release](https://img.shields.io/nuget/vpre/kinsondigital.CASL?label=Latest%20Release&logo=nuget)](https://www.nuget.org/packages/KinsonDigital.CASL)
 [![Nuget Downloads](https://img.shields.io/nuget/dt/KinsonDigital.CASL?color=0094FF&label=nuget%20downloads&logo=nuget)](https://www.nuget.org/stats/packages/KinsonDigital.CASL?groupby=Version)
@@ -69,7 +69,7 @@ Interested in contributing? If so, click [here](https://github.com/KinsonDigital
 <div align="center">
 
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg?style=flat)](https://github.com/KinsonDigital/.github/blob/master/docs/code_of_conduct.md)
-[![GitHub](https://img.shields.io/github/license/kinsondigital/CASL)](https://github.com/KinsonDigital/CASL/blob/release/v1.0.0/LICENSE.md)
+[![GitHub](https://img.shields.io/github/license/kinsondigital/CASL)](https://github.com/KinsonDigital/CASL/blob/release/preview/LICENSE.md)
 </div>
 
 This software is distributed under the very permissive MIT license and all dependencies are distributed under MIT-compatible licenses.
