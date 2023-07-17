@@ -27,12 +27,12 @@ jobs:
           $scriptUrl = "${{ vars.SCRIPT_BASE_URL }}/${{ vars.CICD_SCRIPTS_VERSION }}/${{ vars.SCRIPT_RELATIVE_DIR_PATH}}/sync-bot-status-check.ts";
           $prNumber = "${{ github.event.number }}";
 
-          echo "Project Name: ${{ vars.PROJECT_NAME }}";
-          echo "PR Number: $prNumber";
-          echo "Event Type: pr";
+          Write-Host "::notice:Project Name: ${{ vars.PROJECT_NAME }}";
+          Write-Host "::notice:PR Number: $prNumber";
+          Write-Host "::notice:Event Type: pr";
 
           if ($manuallyExecuted -and $prNumber -eq "0") {
-            echo "The issue or PR number must be a value greater than 0.";
+            Write-Host "::notice:The issue or PR number must be a value greater than 0.";
             exit 1;
           }
 
@@ -48,4 +48,4 @@ jobs:
             "${{ vars.PROJECT_NAME }}" `
             "$prNumber" `
             "pr" `
-            "${{ secrets.CICD_REST_API }}";
+            "${{ secrets.CICD_TOKEN }}";
