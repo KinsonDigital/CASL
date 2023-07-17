@@ -37,10 +37,10 @@ jobs:
           # If the branch that the workflow is running on is the required branch for the release, do a release build
           if ( "${{ github.base_ref }}" -eq "main") {
             "build-config=Release" >> $env:GITHUB_OUTPUT;
-            echo "Release build created.";
+            Write-Host "::notice:Release build created.";
           } else { # Any other branch than the release branch, do a debug build
             "build-config=Debug" >> $env:GITHUB_OUTPUT;
-            echo "Debug build created.";
+            Write-Host "::notice:Debug build created.";
           }
 
 
