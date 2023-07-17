@@ -15,4 +15,4 @@ jobs:
       org-project-name: "${{ vars.ORG_PROJECT_NAME }}"
       project-name: "${{ vars.PROJECT_NAME }}"
     secrets:
-      cicd-pat: ${{ secrets.CICD_REST_API }}
+      cicd-pat: ${{ secrets.CICD_TOKEN }}
