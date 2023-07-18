@@ -1,0 +1,23 @@
+name: ✅Build Status Check
+run-name: ✅Build Status Check ${{ github.base_ref == 'main' && '(Release Build)' || '(Debug Build)' }}
+
+
+defaults:
+  run:
+    shell: pwsh
+
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main, preview]
+
+
+jobs:
+  build_status_check:
+    name: ${{ vars.PROJECT_NAME }} Build Status Check
+    uses: KinsonDigital/Infrastructure/.github/workflows/build-csharp-project.yml@v9.1.0
+    with:
+      project-name: "${{ vars.PROJECT_NAME }}"
+      build-config: Debug
+      net-sdk-version: "${{ vars.NET_SDK_VERSION }}"
