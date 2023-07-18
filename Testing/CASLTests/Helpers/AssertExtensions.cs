@@ -6,11 +6,8 @@
 namespace CASLTests.Helpers;
 
 using System;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 using Xunit;
-using Xunit.Sdk;
 
 /// <summary>
 /// Provides helper methods for the <see cref="Xunit"/>'s <see cref="Assert"/> class.
@@ -84,139 +81,6 @@ public class AssertExtensions : Assert
     }
 
     /// <summary>
-    /// Asserts that all of the individual <paramref name="expectedItems"/> and <paramref name="actualItems"/>
-    /// are equal on a per item basis.
-    /// </summary>
-    /// <typeparam name="T">The type of item in the lists.</typeparam>
-    /// <param name="expectedItems">The list of expected items.</param>
-    /// <param name="actualItems">The list of actual items to compare to the expected items.</param>
-    /// <remarks>
-    ///     Will fail assertion when one item is null and the other is not.
-    ///     Will fail assertion when the total number of <paramref name="expectedItems"/> does not match the total number of <paramref name="actualItems"/>.
-    /// </remarks>
-    public static void ItemsEqual<T>(IEnumerable<T> expectedItems, IEnumerable<T> actualItems)
-        where T : class
-    {
-        if (expectedItems is null && !(actualItems is null))
-        {
-            Assert.True(false, $"Both lists must be null or not null to be equal.\nThe '{nameof(expectedItems)}' is null and the '{nameof(actualItems)}' is not null.");
-        }
-
-        if (expectedItems is not null && actualItems is null)
-        {
-            Assert.True(false, $"Both lists must be null or not null to be equal.\nThe '{nameof(expectedItems)}' is not null and the '{nameof(actualItems)}' is null.");
-        }
-
-        var expectedItemsToCheck = expectedItems.ToArray();
-        var actualItemsToCheck = actualItems.ToArray();
-
-        if (expectedItemsToCheck.Count() != actualItemsToCheck.Count())
-        {
-            Assert.True(false, $"The quantity of items for '{nameof(expectedItems)}' and '{nameof(actualItems)}' do not match.");
-        }
-
-        var expectedArrayItems = expectedItemsToCheck.ToArray();
-        var actualArrayItems = actualItemsToCheck.ToArray();
-
-        for (var i = 0; i < expectedArrayItems.Length; i++)
-        {
-            if (expectedArrayItems[i] is null && !(actualArrayItems[i] is null))
-            {
-                Assert.True(false, $"Both the expected and actual item must both be null or not null to be equal.\n\nThe expected item at index '{i}' is null and the actual item at index '{i}' is not null.");
-            }
-
-            if (expectedArrayItems[i] is not null && actualArrayItems[i] is null)
-            {
-                Assert.True(false, $"Both the expected and actual item must both be null or not null to be equal.\n\nThe expected item at index '{i}' is not null and the actual item at index '{i}' is null.");
-            }
-
-            if (expectedArrayItems[i] != actualArrayItems[i])
-            {
-                Assert.True(false, $"The expected and actual item at index '{i}' are not equal.");
-            }
-        }
-
-        Assert.True(true);
-    }
-
-    /// <summary>
-    /// Asserts that all of the given <paramref name="items"/> are <see langword="true"/> which is dictated
-    /// by the given <paramref name="arePredicate"/> predicate.
-    /// </summary>
-    /// <typeparam name="T">The type of item in the list of items.</typeparam>
-    /// <param name="items">The list of items to assert.</param>
-    /// <param name="arePredicate">Fails the assertion when returning <see langword="false"/>.</param>
-    public static void AllItemsAre<T>(IEnumerable<T> items, Predicate<T> arePredicate)
-    {
-        if (arePredicate is null)
-        {
-            throw new ArgumentNullException(nameof(arePredicate), "The parameter must not be null.");
-        }
-
-        var itemsToCheck = items.ToArray();
-
-        for (var i = 0; i < itemsToCheck.Length; i++)
-        {
-            if (arePredicate(itemsToCheck[i]))
-            {
-                continue;
-            }
-
-            Assert.True(false, $"The item '{itemsToCheck[i]}' at index '{i}' returned false with the '{nameof(arePredicate)}'");
-        }
-    }
-
-    /// <summary>
-    /// Verifies that an expression is true.
-    /// </summary>
-    /// <param name="condition">The condition to be inspected.</param>
-    /// <param name="message">The message to be shown when the condition is <see langword="false"/>.</param>
-    /// <param name="expected">The expected message to display if the condition is <see langword="false"/>.</param>
-    /// <param name="actual">The actual message to display if the condition is <see langword="false"/>.</param>
-    public static void True(bool condition, string message, string expected = "", string actual = "")
-    {
-        XunitException assertException;
-
-        switch (string.IsNullOrEmpty(expected))
-        {
-            case false when !string.IsNullOrEmpty(actual):
-                assertException = new XunitException(
-                    $"Message: {message}\n" +
-                    $"Expected: {expected}\n" +
-                    $"Actual:   {actual}");
-                break;
-            case false when string.IsNullOrEmpty(actual):
-                assertException = new XunitException(
-                    $"Message: {message}\n" +
-                    $"Expected: {expected}");
-                break;
-            default:
-            {
-                if (string.IsNullOrEmpty(expected) && !string.IsNullOrEmpty(actual))
-                {
-                    assertException = new XunitException(
-                        $"Message: {message}\n" +
-                        $"Actual: {actual}\n");
-                }
-                else
-                {
-                    assertException = new AssertActualExpectedException(
-                        true,
-                        condition,
-                        message);
-                }
-
-                break;
-            }
-        }
-
-        if (condition is false)
-        {
-            throw assertException;
-        }
-    }
-
-    /// <summary>
     /// Verifies that all items in the collection pass when executed against the given action.
     /// </summary>
     /// <typeparam name="T">The type of object to be verified.</typeparam>
@@ -262,46 +126,5 @@ public class AssertExtensions : Assert
         }
 
         Assert.True(actionInvoked, $"No assertions were actually made in {nameof(AssertExtensions)}.{nameof(All)}<T>.  Are there any items?");
-    }
-
-    /// <summary>
-    /// Verifies that the two integers are equivalent.
-    /// </summary>
-    /// <param name="expected">The expected <see langword="int"/> value.</param>
-    /// <param name="actual">The actual <see langword="int"/> value.</param>
-    /// <param name="message">The message to be shown about the failed assertion.</param>
-    public static void Equals(int expected, int actual, string message)
-    {
-        var assertException = new AssertActualExpectedException(expected, actual, message);
-        try
-        {
-            Assert.Equal(expected, actual);
-        }
-        catch (Exception)
-        {
-            throw assertException;
-        }
-    }
-
-    /// <summary>
-    /// Verifies that an event with the exact event args is not raised.
-    /// </summary>
-    /// <typeparam name="T">The type of the event arguments to expect.</typeparam>
-    /// <param name="attach">Code to attach the event handler.</param>
-    /// <param name="detach">Code to detach the event handler.</param>
-    /// <param name="testCode">A delegate to the code to be tested.</param>
-    public static void DoesNotRaise<T>(Action<EventHandler<T>> attach, Action<EventHandler<T>> detach, Action testCode)
-        where T : EventArgs
-    {
-        try
-        {
-            Assert.Raises(attach, detach, testCode);
-
-            Assert.Equal("No event was raised", "An event was raised.");
-        }
-        catch (Exception ex)
-        {
-            Assert.Equal("(No event was raised)\r\nEventArgs\r\n(No event was raised)", ex.Message);
-        }
     }
 }
