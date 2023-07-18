@@ -33,13 +33,21 @@ jobs:
           $prNumber = $eventName -eq "pull_request" ? "${{ github.event.number }}" : "${{ github.event.issue.number }}";
           $command = $eventName -eq "issue_comment" ? "${{ github.event.comment.body }}" : "[initial-sync]";
           
-          echo "Event Name: $eventName";
-          echo "Organization Name: ${{ vars.ORGANIZATION_NAME }}";
-          echo "Project Name: ${{ vars.PROJECT_NAME }}";
-          echo "Requested By: ${{ github.event.sender.login }}";
-          echo "PR Number: $prNumber";
-          echo "Comment: $command";
+          Write-Host "::notice:Event Name: $eventName";
+          Write-Host "::notice:Organization Name: ${{ vars.ORGANIZATION_NAME }}";
+          Write-Host "::notice:Project Name: ${{ vars.PROJECT_NAME }}";
+          Write-Host "::notice:Requested By: ${{ github.event.sender.login }}";
+          Write-Host "::notice:PR Number: $prNumber";
+          Write-Host "::notice:Comment: $command";
 
+          <# Deno Args:
+            1. Organization name
+            2. Project name
+            3. Sync request by
+            4. Pull request number
+            5. Command - '[initial-sync]' or '[run-sync]'
+            6. PAT
+          #>
           deno run `
             --allow-net `
             "$scriptUrl" `
@@ -48,4 +56,4 @@ jobs:
             "${{ github.event.sender.login }}" `
             "$prNumber" `
             "$command" `
-            "${{ secrets.CICD_REST_API }}";
+            "${{ secrets.CICD_TOKEN }}";
