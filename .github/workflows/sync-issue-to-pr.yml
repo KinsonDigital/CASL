@@ -40,6 +40,14 @@ jobs:
           Write-Host "::notice:PR Number: $prNumber";
           Write-Host "::notice:Comment: $command";
 
+          <# Deno Args:
+            1. Organization name
+            2. Project name
+            3. Sync request by
+            4. Pull request number
+            5. Command - '[initial-sync]' or '[run-sync]'
+            6. PAT
+          #>
           deno run `
             --allow-net `
             "$scriptUrl" `
