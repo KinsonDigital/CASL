@@ -9,6 +9,11 @@ CASL Preview Release Notes - v1.0.0-preview.15
 As with all software, there is always a chance for issues and bugs, especially for preview releases, which is why your input is greatly appreciated. 🙏🏼
 </div>
 
+<h2 style="font-weight:bold" align="center">Nuget/Library Updates 📦</h2>
+
+1. [#243](https://github.com/KinsonDigital/CASL/pull/243) - chore(deps): update dependency xunit to v2.5.0
+2. [#244](https://github.com/KinsonDigital/CASL/pull/244) - chore(deps): update dependency xunit.runner.visualstudio to v2.5.0
+
 <h2 align="center" style="font-weight: bold;">Other 🪧</h2>
 
 1. [#245](https://github.com/KinsonDigital/CASL/issues/245) - Fix broken readme badge
