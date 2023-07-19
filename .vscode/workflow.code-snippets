@@ -18,6 +18,7 @@
 
 	"Workflow Job": {
 		"prefix": "workflow-job",
+		"scope": "yaml",
 		"body": [
 			"${1: job id}:",
             "\tname: ${2: display}",
@@ -30,6 +31,7 @@
 	},
 	"Set Up Deno Step": {
 		"prefix": "step-setup-deno",
+		"scope": "yaml",
 		"body": [
   			"- name: ${1:Set Up Deno}",
 			"\tuses: denoland/setup-deno@${2:v1}",
@@ -40,6 +42,7 @@
 	},
 	"Checkout Repo": {
 		"prefix": "repo-checkout",
+		"scope": "yaml",
 		"body": [
 			"- name: ${1: Checkout Repo}",
 			"\tuses: actions/checkout@${2: v3}"
