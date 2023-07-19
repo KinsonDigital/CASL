@@ -28,6 +28,9 @@ jobs:
     steps:
       - name: Validating Inputs
         run: |
+
+          Write-Host "::notice::${{ github.workspace }}";
+
           $projectName = "${{ vars.PROJECT_NAME }}";
           $releaseType = "${{ inputs.release-type }}".ToLower();
           $releaseVersion = "${{ inputs.release-version }}";
