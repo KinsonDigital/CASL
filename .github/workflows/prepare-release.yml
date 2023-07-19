@@ -55,16 +55,21 @@ jobs:
             exit 1;
           }
 
-
-          $versionRegex = "v[0-9]+\.[0-9]+\.[0-9]+(|-preview\.[0-9]+)";
           
-          # Verify that the version has valid syntax
-          if (($version -match $versionRegex)) {
-            Write-Host "::notice::The version is valid.";
+          if ($releaseType -eq "production") {
+            $prodVersionRegex = "v[0-9]+\.[0-9]+\.[0-9]+";
+
+            if ($releaseVersion -notmatch $prodVersionRegex) {
+              Write-Host "::error::The production release version input is not valid. Expected version format: 'v#.#.#'";
+              exit 1;
+            }
           } else {
-            $versionSyntax = $releaseType -eq "production" ? "v#.#.#" : "v#.#.#-preview.#";
-            Write-Host "::error::The version is not valid.`nThe version format is: '$versionSyntax";
-            exit 1;
+            $prevVersionRegex = "v[0-9]+\.[0-9]+\.[0-9]+-preview\.[0-9]+";
+
+            if ($releaseVersion -notmatch $prevVersionRegex) {
+              Write-Host "::error::The preview release version input is not valid. Expected version format: 'v#.#.#-preview.#'";
+              exit 1;
+            }
           }
 
 
