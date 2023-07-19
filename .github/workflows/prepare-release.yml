@@ -28,8 +28,6 @@ jobs:
     steps:
       - name: Validating Inputs
         run: |
-          Write-Host "::notice::${{ github.workspace }}";
-
           $projectName = "${{ vars.PROJECT_NAME }}";
           $releaseType = "${{ inputs.release-type }}".ToLower();
           $releaseVersion = "${{ inputs.release-version }}";
@@ -83,6 +81,5 @@ jobs:
       project-name: "${{ vars.PROJECT_NAME }}"
       release-type: "${{ inputs.release-type }}"
       release-version: "${{ inputs.release-version }}"
-      base-dir-path: "${{ github.workspace }}"
     secrets:
       cicd-pat: ${{ secrets.CICD_TOKEN }}
