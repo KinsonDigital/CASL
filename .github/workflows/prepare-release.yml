@@ -62,7 +62,7 @@ jobs:
           if (($version -match $prodVersionRegex) -or ($version -match $prevVersionRegex)) {
             Write-Host "::notice::The version is valid.";
           } else {
-            $versionSyntax = $releaseType == "production" ? "v#.#.#" : "v#.#.#-preview.#";
+            $versionSyntax = $releaseType -eq "production" ? "v#.#.#" : "v#.#.#-preview.#";
             Write-Host "::error::The version is not valid.\nThe version format is: '$versionSyntax";
             exit 1;
           }
@@ -70,6 +70,7 @@ jobs:
 
   prepare_release:
     name: Prepare ${{ inputs.release-type }} Release Of ${{ vars.PROJECT_NAME }}
+    needs: validate_inputs
     uses: KinsonDigital/Infrastructure/.github/workflows/prepare-release.yml@v10.0.0
     with:
       project-name: ${{ vars.PROJECT_NAME }}
