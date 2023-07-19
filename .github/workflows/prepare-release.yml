@@ -1,5 +1,5 @@
 name: 🚁Prepare Release
-run-name: 🚁Prepare Release (${{ inputs.release-type }})
+run-name: 🚁Prepare ${{ inputs.release-type }} Release (${{ inputs.release-version }})
 
 
 defaults:
@@ -56,15 +56,14 @@ jobs:
           }
 
 
-          $prodVersionRegex = "v[0-9]+\.[0-9]+\.[0-9]+";
-          $prevVersionRegex = "v[0-9]+\.[0-9]+\.[0-9]+-preview\.[0-9]+";
+          $versionRegex = "v[0-9]+\.[0-9]+\.[0-9]+(|-preview\.[0-9]+)";
           
           # Verify that the version has valid syntax
-          if (($version -match $prodVersionRegex) -or ($version -match $prevVersionRegex)) {
+          if (($version -match $versionRegex)) {
             Write-Host "::notice::The version is valid.";
           } else {
             $versionSyntax = $releaseType -eq "production" ? "v#.#.#" : "v#.#.#-preview.#";
-            Write-Host "::error::The version is not valid.\nThe version format is: '$versionSyntax";
+            Write-Host "::error::The version is not valid.`nThe version format is: '$versionSyntax";
             exit 1;
           }
 
