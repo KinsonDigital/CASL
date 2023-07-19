@@ -7,10 +7,10 @@
 
 <div align="center">
 
-![Build PR Status Check](https://img.shields.io/github/actions/workflow/status/KinsonDigital/CASL/build-pr-status-check.yml?label=%E2%9A%99%EF%B8%8FBuild&color=2F8840)
-![Unit Test PR Status Check](https://img.shields.io/github/actions/workflow/status/KinsonDigital/CASL/unit-test-pr-status-check.yml?label=%F0%9F%A7%AATests&color=2F8840)
+[![Build PR Status Check](https://img.shields.io/github/actions/workflow/status/KinsonDigital/CASL/build-status-check.yml?label=%E2%9A%99%EF%B8%8FBuild)](https://github.com/KinsonDigital/CASL/actions/workflows/build-status-check.yml)
+[![Unit Test PR Status Check](https://img.shields.io/github/actions/workflow/status/KinsonDigital/CASL/unit-test-status-check.yml?label=%F0%9F%A7%AATests)](https://github.com/KinsonDigital/CASL/actions/workflows/unit-test-status-check.yml)
 
-[![Codecov](https://img.shields.io/codecov/c/github/KinsonDigital/CASL?color=2F8840&label=Code%20Coverage&logo=codecov)](https://app.codecov.io/gh/KinsonDigital/CASL/tree/preview)
+[![Codecov](https://img.shields.io/codecov/c/github/KinsonDigital/CASL?label=Code%20Coverage&logo=codecov)](https://app.codecov.io/gh/KinsonDigital/CASL/tree/preview)
 
 [![Latest Nuget Release](https://img.shields.io/nuget/vpre/kinsondigital.CASL?label=Latest%20Release&logo=nuget)](https://www.nuget.org/packages/KinsonDigital.CASL)
 [![Nuget Downloads](https://img.shields.io/nuget/dt/KinsonDigital.CASL?color=0094FF&label=nuget%20downloads&logo=nuget)](https://www.nuget.org/stats/packages/KinsonDigital.CASL?groupby=Version)
@@ -21,7 +21,7 @@
 
 <h2 style="font-weight:bold" align="center" >!! NOTICE !!</h2>
 
-This library is still under development and is not at v1.0.0 yet!!  However, all of the major features are available, so we encourage you to use it and provide feedback.  That is what open source is all about. 🥳
+This library is still under development and is not at v1.0.0 yet!!  However, all of the major features are available, so we encourage you to use them and provide feedback.  That is what open source is all about. 🥳
 
 <h2 style="font-weight:bold" align="center">📖 About CASL 📖</h2>
 
@@ -53,7 +53,7 @@ Currently, this library can play **.ogg** and **.mp3** file formats.  There are 
 
 <h2 style="font-weight:bold;" align="center">🙏🏼 Contributing 🙏🏼</h2>
 
-Interested in contributing? If so, click [here](https://github.com/KinsonDigital/.github/blob/master/docs/CONTRIBUTING.md) to learn how to contribute your time or [here](https://github.com/sponsors/KinsonDigital) if you are interested in contributing your funds via one-time or recurring donation.
+Interested in contributing? If so, click [here](https://github.com/KinsonDigital/.github/blob/master/docs/CONTRIBUTING.md) to learn how to contribute your time or [here](https://github.com/sponsors/KinsonDigital) if you are interested in contributing your funds via a one-time or recurring donation.
 
 <h2 style="font-weight:bold;" align="center">🔧 Maintainers 🔧</h2>
 
@@ -68,7 +68,7 @@ Interested in contributing? If so, click [here](https://github.com/KinsonDigital
 <div align="center">
 
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg?style=flat)](https://github.com/KinsonDigital/.github/blob/master/docs/code_of_conduct.md)
-[![GitHub](https://img.shields.io/github/license/kinsondigital/CASL)](https://github.com/KinsonDigital/CASL/blob/release/preview/LICENSE.md)
+[![GitHub](https://img.shields.io/github/license/kinsondigital/CASL)](https://github.com/KinsonDigital/CASL/blob/preview/LICENSE.md)
 </div>
 
 This software is distributed under the very permissive MIT license and all dependencies are distributed under MIT-compatible licenses.
