@@ -1,4 +1,5 @@
 name: 🚁Prepare Release
+run-name: 🚁Prepare Release (${{ inputs.release-type }})
 
 
 defaults:
