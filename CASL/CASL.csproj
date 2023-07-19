@@ -7,7 +7,6 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <Nullable>enable</Nullable>
 
-    <!-- TODO: CHANGE THESE VERSION BACK TO PREVIEW.12 -->
     <!--Update this for preview releases-->
     <Version>1.0.0-preview.15</Version>
 
