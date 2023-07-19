@@ -20,19 +20,21 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SolutionItems", "SolutionIt
 		README.md = README.md
 		.gitignore = .gitignore
 		BACKERS.md = BACKERS.md
+		renovate.json = renovate.json
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CASLTests", "Testing\CASLTests\CASLTests.csproj", "{2F67B7C0-7BA4-4EDD-8B0C-38793A3DE77C}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "GitHub", "GitHub", "{FFFF8DB0-CCCC-4014-8752-79CDF9397C52}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "WorkFlows", "WorkFlows", "{5F701C8E-2B7C-427B-B16F-068BD369D2BF}"
 	ProjectSection(SolutionItems) = preProject
-		.github\workflows\build-pr-status-check.yml = .github\workflows\build-pr-status-check.yml
-		.github\workflows\unit-test-pr-status-check.yml = .github\workflows\unit-test-pr-status-check.yml
-		.github\workflows\preview-release.yml = .github\workflows\preview-release.yml
-		.github\workflows\sync-bot-status-check.yml = .github\workflows\sync-bot-status-check.yml
+		.github\workflows\add-new--issue-to-project.yml = .github\workflows\add-new--issue-to-project.yml
+		.github\workflows\build-status-check.yml = .github\workflows\build-status-check.yml
+		.github\workflows\prepare-release.yml = .github\workflows\prepare-release.yml
+		.github\workflows\release.yml = .github\workflows\release.yml
+		.github\workflows\sync-bot.yml = .github\workflows\sync-bot.yml
 		.github\workflows\sync-issue-to-pr.yml = .github\workflows\sync-issue-to-pr.yml
+		.github\workflows\sync-status-check.yml = .github\workflows\sync-status-check.yml
+		.github\workflows\unit-test-status-check.yml = .github\workflows\unit-test-status-check.yml
 	EndProjectSection
 EndProject
 Global
@@ -60,7 +62,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{1DC6781C-60A4-478A-9FCF-AB23A9CF111A} = {1D5152DF-EF10-45CD-87F0-436CFAB60002}
 		{2F67B7C0-7BA4-4EDD-8B0C-38793A3DE77C} = {1D5152DF-EF10-45CD-87F0-436CFAB60002}
-		{5F701C8E-2B7C-427B-B16F-068BD369D2BF} = {FFFF8DB0-CCCC-4014-8752-79CDF9397C52}
+		{5F701C8E-2B7C-427B-B16F-068BD369D2BF} = {A1E4FF06-D30B-4DB5-800A-63FF7D7B39E2}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {71FA48B2-788D-4680-AEE1-64B047BE83DE}
