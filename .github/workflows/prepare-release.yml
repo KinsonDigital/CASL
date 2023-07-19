@@ -28,7 +28,6 @@ jobs:
     steps:
       - name: Validating Inputs
         run: |
-
           Write-Host "::notice::${{ github.workspace }}";
 
           $projectName = "${{ vars.PROJECT_NAME }}";
@@ -81,9 +80,9 @@ jobs:
     needs: validate_inputs
     uses: KinsonDigital/Infrastructure/.github/workflows/prepare-release.yml@v10.0.0
     with:
-      project-name: ${{ vars.PROJECT_NAME }}
-      release-type: ${{ inputs.release-type }}
-      release-version: ${{ inputs.release-version }}
-      base-dir-path: ${{ github.workspace }}
+      project-name: "${{ vars.PROJECT_NAME }}"
+      release-type: "${{ inputs.release-type }}"
+      release-version: "${{ inputs.release-version }}"
+      base-dir-path: "${{ github.workspace }}"
     secrets:
       cicd-pat: ${{ secrets.CICD_TOKEN }}
