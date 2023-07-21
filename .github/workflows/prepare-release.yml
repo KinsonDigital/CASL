@@ -37,14 +37,14 @@ jobs:
             Write-Host "::error::The project name input cannot be empty.";
             exit 1;
           }
-          
-          
+
+
           if ($releaseType -eq "") {
             Write-Host "::error::The release type input cannot be empty.";
             exit 1;
           }
-          
-          
+
+
           if ($releaseType -ne 'preview' -and $releaseType -ne 'roduction') {
             Write-Host "::error::The release type input must be either 'Preview' or 'Production'.";
             exit 1;
