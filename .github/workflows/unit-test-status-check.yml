@@ -1,5 +1,5 @@
 name: ✅Unit Testing Status Check
-run-name: ✅Unit Testing Status Check ${{ github.base_ref == 'main' && '(Release Build)' || '(Debug Build)' }}
+run-name: ✅Unit Testing Status Check (${{ github.base_ref }} branch)
 
 
 defaults:
@@ -8,7 +8,6 @@ defaults:
 
 
 on:
-  workflow_dispatch:
   pull_request:
     branches: [main, preview]
 
