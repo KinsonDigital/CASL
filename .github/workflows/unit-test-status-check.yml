@@ -1,5 +1,5 @@
 name: ✅Unit Testing Status Check
-run-name: ✅Unit Testing Status Check ${{ github.base_ref == 'main' && '(Release Build)' || '(Debug Build)' }}
+run-name: ✅Unit Testing Status Check (${{ github.base_ref }} branch)
 
 
 defaults:
@@ -8,7 +8,6 @@ defaults:
 
 
 on:
-  workflow_dispatch:
   pull_request:
     branches: [main, preview]
 
@@ -16,7 +15,7 @@ on:
 jobs:
   run_tests:
     name: ${{ vars.PROJECT_NAME }} Test Status Check
-    uses: KinsonDigital/Infrastructure/.github/workflows/run-csharp-tests.yml@v10.0.0
+    uses: KinsonDigital/Infrastructure/.github/workflows/run-csharp-tests.yml@v10.0.1
     with:
       project-name: "${{ vars.PROJECT_NAME }}Tests"
       build-config: Debug

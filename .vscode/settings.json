@@ -23,21 +23,21 @@
         "xunit"
     ],
     "dotnet.defaultSolution": "CASL.sln",
-    "[typescript]": {
-		"editor.insertSpaces": false,
-		"editor.tabSize": 4,
+    "[csharp]": {
+		"editor.insertSpaces": true,
+		"editor.indentSize": 4,
     },
 	"[yaml]": {
 		"editor.insertSpaces": true,
-		"editor.tabSize": 2,
+		"editor.indentSize": 2,
 	},
 	"[jsonc]": {
 		"editor.insertSpaces": false,
-		"editor.tabSize": 4,
+		"editor.indentSize": 4,
 	},
 	"editor.detectIndentation": false,
 	"[github-actions-workflow]": {
-		"editor.tabSize": 2,
+		"editor.indentSize": 2,
 		"editor.insertSpaces": true
 	}
 }
