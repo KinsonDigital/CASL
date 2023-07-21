@@ -22,60 +22,58 @@ on:
 
 
 jobs:
-  validate_inputs:
-    name: Validate Workflow Inputs
+  print_validate_workflow:
+    name: Print & Validate Prepare Release Workflow
     runs-on: ubuntu-latest
     steps:
-      - name: Validating Inputs
-        run: |
-          $projectName = "${{ vars.PROJECT_NAME }}";
-          $releaseType = "${{ inputs.release-type }}".ToLower();
-          $releaseVersion = "${{ inputs.release-version }}";
+      - name: Print Environment Variables
+        run: Get-ChildItem -Path Env:* | Sort-Object Name
 
-          if ($projectName -eq "") {
+      - name: Validate Workflow Inputs
+        run: |
+          $releaseType = "${{ inputs.release-type }}".ToLower();
+          
+          if ("${{ vars.PROJECT_NAME }}".Trim() -eq "") {
             Write-Host "::error::The project name input cannot be empty.";
             exit 1;
           }
-
-
+          
+          
           if ($releaseType -eq "") {
             Write-Host "::error::The release type input cannot be empty.";
             exit 1;
           }
-
-
+          
+          
           if ($releaseType -ne 'preview' -and $releaseType -ne 'roduction') {
             Write-Host "::error::The release type input must be either 'Preview' or 'Production'.";
             exit 1;
           }
-
+          
+          $releaseVersion = "${{ inputs.release-version }}".Trim().ToLower();
 
           if ($releaseVersion -eq "") {
-            Write-Host "::error::The release version input cannot be empty.";
+            Write-Host "::error::The 'release-version' workflow input cannot be empty.";
             exit 1;
           }
 
+
+          $prodVersionRegex = "v[0-9]+\.[0-9]+\.[0-9]+";
+          $prevVersionRegex = "v[0-9]+\.[0-9]+\.[0-9]+-preview\.[0-9]+";
           
-          if ($releaseType -eq "production") {
-            $prodVersionRegex = "v[0-9]+\.[0-9]+\.[0-9]+";
-
-            if ($releaseVersion -notmatch $prodVersionRegex) {
-              Write-Host "::error::The production release version input is not valid. Expected version format: 'v#.#.#'";
-              exit 1;
-            }
+          # Verify that the version has valid syntax
+          if (($releaseVersion -match $prodVersionRegex) -or ($releaseVersion -match $prevVersionRegex)) {
+            Write-Host "::notice::The 'release-version' workflow input is valid.";
           } else {
-            $prevVersionRegex = "v[0-9]+\.[0-9]+\.[0-9]+-preview\.[0-9]+";
-
-            if ($releaseVersion -notmatch $prevVersionRegex) {
-              Write-Host "::error::The preview release version input is not valid. Expected version format: 'v#.#.#-preview.#'";
-              exit 1;
-            }
+            $versionSyntax = $releaseType == "production" ? "v#.#.#" : "v#.#.#-preview.#";
+            Write-Host "::error::The 'release-version' workflow input is not valid.  Expected format: '$versionSyntax";
+            exit 1;
           }
 
 
   prepare_release:
     name: Prepare ${{ inputs.release-type }} Release Of ${{ vars.PROJECT_NAME }}
-    needs: validate_inputs
+    needs: print_validate_workflow
     uses: KinsonDigital/Infrastructure/.github/workflows/prepare-release.yml@v10.0.0
     with:
       project-name: "${{ vars.PROJECT_NAME }}"
