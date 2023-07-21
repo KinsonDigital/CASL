@@ -23,7 +23,7 @@
         "xunit"
     ],
     "dotnet.defaultSolution": "CASL.sln",
-    "[typescript]": {
+    "[csharp]": {
 		"editor.insertSpaces": false,
 		"editor.tabSize": 4,
     },
