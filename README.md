@@ -1,6 +1,6 @@
 <div align="center">
 
-![asdf](https://raw.githubusercontent.com/KinsonDigital/CASL/preview/Documentation/Images/casl-logo.png)
+![asdf](https://raw.githubusercontent.com/KinsonDigital/CASL/preview/Images/casl-logo.png)
 </div>
 
 <h1 style="border:0;font-weight:bold" align="center">CASL</h1>
