@@ -5,6 +5,7 @@
 namespace CASLTests.OpenAL;
 
 using CASL.OpenAL;
+using FluentAssertions;
 using Xunit;
 
 /// <summary>
@@ -53,7 +54,7 @@ public class ALDeviceTests
         var actual = left == right;
 
         // Assert
-        Assert.True(actual);
+        actual.Should().BeTrue();
     }
 
     [Fact]
@@ -67,7 +68,7 @@ public class ALDeviceTests
         var actual = left != right;
 
         // Assert
-        Assert.True(actual);
+        actual.Should().BeTrue();
     }
     #endregion
 
@@ -93,7 +94,7 @@ public class ALDeviceTests
         var actual = deviceA.Equals(deviceB);
 
         // Assert
-        Assert.True(actual);
+        actual.Should().BeTrue();
     }
 
     [Fact]
@@ -107,7 +108,7 @@ public class ALDeviceTests
         var actual = deviceA.Equals(deviceB);
 
         // Assert
-        Assert.False(actual);
+        actual.Should().BeFalse();
     }
 
     [Fact]
@@ -121,7 +122,7 @@ public class ALDeviceTests
         var actual = deviceA.Equals(deviceB);
 
         // Assert
-        Assert.True(actual);
+        actual.Should().BeTrue();
     }
     #endregion
 }

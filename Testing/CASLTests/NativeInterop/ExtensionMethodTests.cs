@@ -7,6 +7,7 @@ namespace CASLTests.NativeInterop;
 using System;
 using System.Runtime.InteropServices;
 using CASL.NativeInterop;
+using FluentAssertions;
 using Xunit;
 
 public class ExtensionMethodTests
@@ -19,21 +20,21 @@ public class ExtensionMethodTests
         var actual = IntPtr.Zero.ToManagedUtf8String();
 
         // Assert
-        Assert.Equal(string.Empty, actual);
+        actual.Should().BeEmpty();
     }
 
     [Fact]
     public void ToManagedUTF8String_WhenInvoked_ReturnsCorrectResult()
     {
         // Arrange
-        var testString = "hello world";
+        const string testString = "hello world";
         var stringDataPtr = Marshal.StringToHGlobalAnsi(testString);
 
         // Act
         var actual = stringDataPtr.ToManagedUtf8String();
 
         // Assert
-        Assert.Equal("hello world", actual);
+        actual.Should().Be("hello world");
     }
 
     [Fact]
@@ -46,7 +47,7 @@ public class ExtensionMethodTests
         var actual = testItems.ToReadOnlyCollection();
 
         // Assert
-        Assert.Equal(new[] { "item-1", "item-2" }, actual);
+        actual.Should().BeEquivalentTo("item-1", "item-2");
     }
     #endregion
 }
