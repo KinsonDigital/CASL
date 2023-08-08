@@ -16,6 +16,7 @@ using CASL.Data.Exceptions;
 using CASL.Devices;
 using CASL.Exceptions;
 using CASL.OpenAL;
+using FluentAssertions;
 using Moq;
 using Xunit;
 using Assert = Helpers.AssertExtensions;
@@ -107,11 +108,12 @@ public class SoundTests
                 return result;
             });
 
-        // Act & Assert
-        Assert.ThrowsWithMessage<SoundDataException>(() =>
-        {
-            _ = CreateSound(this.oggContentFilePath);
-        }, "No audio data exists.");
+        // Act
+        var act = () => _ = CreateSound(this.oggContentFilePath);
+
+        // Assert
+        act.Should().Throw<SoundDataException>()
+            .WithMessage("No audio data exists.");
     }
 
     [Fact]
@@ -127,11 +129,12 @@ public class SoundTests
                 return result;
             });
 
-        // Act & Assert
-        Assert.ThrowsWithMessage<SoundDataException>(() =>
-        {
-            _ = CreateSound(this.mp3ContentFilePath);
-        }, "No audio data exists.");
+        // Act
+        var act = () => _ = CreateSound(this.mp3ContentFilePath);
+
+        // Assert
+        act.Should().Throw<SoundDataException>()
+            .WithMessage("No audio data exists.");
     }
 
     [Theory]
@@ -183,11 +186,11 @@ public class SoundTests
                 return result;
             });
 
-        // Act & Assert
-        Assert.ThrowsWithMessage<AudioException>(() =>
-        {
-            _ = CreateSound(this.oggContentFilePath);
-        }, "Invalid or unknown audio format.");
+        // Act
+        var act = () => _ = CreateSound(this.oggContentFilePath);
+
+        act.Should().Throw<AudioException>()
+            .WithMessage("Invalid or unknown audio format.");
     }
 
     [Fact]
@@ -220,17 +223,18 @@ public class SoundTests
         // Arrange
         this.mockPath.Setup(m => m.GetExtension(It.IsAny<string?>())).Returns(".wav");
 
-        // Act & Assert
-        Assert.ThrowsWithMessage<AudioException>(() =>
-        {
-            _ = new Sound(
+        // Act
+        var act = () => _ = new Sound(
                 @"C:\temp\Content\Sounds\sound.wav",
                 this.mockALInvoker.Object,
                 this.mockAudioManager.Object,
                 this.mockOggDecoder.Object,
                 this.mockMp3Decoder.Object,
                 this.mockPath.Object);
-        }, "The file extension '.wav' is not supported file type.");
+
+        // Assert
+        act.Should().Throw<AudioException>()
+            .WithMessage("The file extension '.wav' is not supported file type.");
     }
     #endregion
 
@@ -239,35 +243,35 @@ public class SoundTests
     public void Name_WhenGettingValue_ReturnsCorrectResult()
     {
         // Act
-        var sound = CreateSound(this.oggContentFilePath);
+        var sut = CreateSound(this.oggContentFilePath);
 
         // Assert
-        Assert.Equal("sound", sound.Name);
+        sut.Name.Should().Be("sound");
     }
 
     [Fact]
     public void IsLooping_WhenGettingValueWhileDisposed_ThrowsException()
     {
         // Arrange
-        var sound = CreateSound(this.oggContentFilePath);
+        var sut = CreateSound(this.oggContentFilePath);
+        sut.Dispose();
 
-        // Act & Assert
-        sound.Dispose();
+        // Act
+        var act = () => _ = sut.IsLooping;
 
-        Assert.ThrowsWithMessage<InvalidOperationException>(() =>
-        {
-            _ = sound.IsLooping;
-        }, "The sound is disposed.  You must create another sound instance.");
+        // Assert
+        act.Should().Throw<InvalidOperationException>()
+            .WithMessage("The sound is disposed.  You must create another sound instance.");
     }
 
     [Fact]
     public void IsLooping_WhenGettingValue_GetsSoundLoopingValue()
     {
         // Arrange
-        var sound = CreateSound(this.oggContentFilePath);
+        var sut = CreateSound(this.oggContentFilePath);
 
         // Act
-        _ = sound.IsLooping;
+        _ = sut.IsLooping;
 
         // Assert
         this.mockALInvoker.Verify(m => m.GetSource(SrcId, ALSourceb.Looping), Times.Once());
@@ -277,14 +281,14 @@ public class SoundTests
     public void IsLooping_WhenSettingValueWhileSIgnoringOpenALCalls_ReturnsFalse()
     {
         // Arrange
-        var sound = CreateSound(this.oggContentFilePath);
+        var sut = CreateSound(this.oggContentFilePath);
         this.mockAudioManager.Raise(manager => manager.DeviceChanging += null, EventArgs.Empty);
 
         // Act
-        var actual = sound.IsLooping;
+        var actual = sut.IsLooping;
 
         // Assert
-        Assert.False(actual);
+        actual.Should().BeFalse();
         this.mockALInvoker.Verify(m => m.GetSource(It.IsAny<uint>(), It.IsAny<ALSourceb>()), Times.Never());
     }
 
@@ -292,25 +296,25 @@ public class SoundTests
     public void IsLooping_WhenSettingValueWhileDisposed_ThrowsException()
     {
         // Arrange
-        var sound = CreateSound(this.oggContentFilePath);
+        var sut = CreateSound(this.oggContentFilePath);
+        sut.Dispose();
 
-        // Act & Assert
-        sound.Dispose();
+        // Act
+        var act = () => sut.IsLooping = true;
 
-        Assert.ThrowsWithMessage<InvalidOperationException>(() =>
-        {
-            sound.IsLooping = true;
-        }, "The sound is disposed.  You must create another sound instance.");
+        // Assert
+        act.Should().Throw<InvalidOperationException>()
+            .WithMessage("The sound is disposed.  You must create another sound instance.");
     }
 
     [Fact]
     public void IsLooping_WhenSettingValue_SetsSoundLoopingSetting()
     {
         // Arrange
-        var sound = CreateSound(this.oggContentFilePath);
+        var sut = CreateSound(this.oggContentFilePath);
 
         // Act
-        sound.IsLooping = true;
+        sut.IsLooping = true;
 
         // Assert
         this.mockALInvoker.Verify(m => m.Source(SrcId, ALSourceb.Looping, true), Times.Once());
@@ -320,11 +324,11 @@ public class SoundTests
     public void IsLooping_WhenSettingValueWhileIgnoringOpenALCalls_DoesNotAttemptToLoopSound()
     {
         // Arrange
-        var sound = CreateSound(this.oggContentFilePath);
+        var sut = CreateSound(this.oggContentFilePath);
         this.mockAudioManager.Raise(manager => manager.DeviceChanging += null, EventArgs.Empty);
 
         // Act
-        sound.IsLooping = true;
+        sut.IsLooping = true;
 
         // Assert
         this.mockALInvoker.Verify(m => m.Source(It.IsAny<uint>(), It.IsAny<ALSourceb>(), true), Times.Never());
@@ -334,25 +338,25 @@ public class SoundTests
     public void Volume_WhenGettingValueWhileDisposed_ThrowsException()
     {
         // Arrange
-        var sound  = CreateSound(this.oggContentFilePath);
+        var sut  = CreateSound(this.oggContentFilePath);
+        sut.Dispose();
 
-        // Act & Assert
-        sound.Dispose();
+        // Act
+        var act = () => _ = sut.Volume;
 
-        Assert.ThrowsWithMessage<InvalidOperationException>(() =>
-        {
-            _ = sound.Volume;
-        }, "The sound is disposed.  You must create another sound instance.");
+        // Assert
+        act.Should().Throw<InvalidOperationException>()
+            .WithMessage("The sound is disposed.  You must create another sound instance.");
     }
 
     [Fact]
     public void Volume_WhenGettingValue_GetsSoundVolume()
     {
         // Arrange
-        var sound = CreateSound(this.oggContentFilePath);
+        var sut = CreateSound(this.oggContentFilePath);
 
         // Act
-        _ = sound.Volume;
+        _ = sut.Volume;
 
         // Assert
         this.mockALInvoker.Verify(m => m.GetSource(SrcId, ALSourcef.Gain), Times.Once());
@@ -362,15 +366,15 @@ public class SoundTests
     public void Volume_WhenSettingValueWhileDisposed_ThrowsException()
     {
         // Arrange
-        var sound = CreateSound(this.oggContentFilePath);
+        var sut = CreateSound(this.oggContentFilePath);
+        sut.Dispose();
 
-        // Act & Assert
-        sound.Dispose();
+        // Act
+        var act = () => sut.Volume = 0.5f;
 
-        Assert.ThrowsWithMessage<InvalidOperationException>(() =>
-        {
-            sound.Volume = 0.5f;
-        }, "The sound is disposed.  You must create another sound instance.");
+        // Assert
+        act.Should().Throw<InvalidOperationException>()
+            .WithMessage("The sound is disposed.  You must create another sound instance.");
     }
 
     [Theory]
@@ -381,10 +385,10 @@ public class SoundTests
     public void Volume_WhenSettingValue_SetsSoundVolume(float volume, float expected)
     {
         // Arrange
-        var sound = CreateSound(this.oggContentFilePath);
+        var sut = CreateSound(this.oggContentFilePath);
 
         // Act
-        sound.Volume = volume;
+        sut.Volume = volume;
 
         // Assert
         this.mockALInvoker.Verify(m => m.Source(SrcId, ALSourcef.Gain, expected), Times.Once());
@@ -394,11 +398,11 @@ public class SoundTests
     public void Volume_WhenGettingValueWhileIgnoringOpenALCalls_ReturnsZero()
     {
         // Arrange
-        var sound = CreateSound(this.oggContentFilePath);
+        var sut = CreateSound(this.oggContentFilePath);
         this.mockAudioManager.Raise(manager => manager.DeviceChanging += null, EventArgs.Empty);
 
         // Act
-        _ = sound.Volume;
+        _ = sut.Volume;
 
         // Assert
         this.mockALInvoker.Verify(m => m.GetSource(It.IsAny<uint>(), It.IsAny<ALSourcef>()), Times.Never());
@@ -408,11 +412,11 @@ public class SoundTests
     public void Volume_WhenSettingValueWhileIgnoringOpenALCalls_DoesNotAttemptToSetSoundVolume()
     {
         // Arrange
-        var sound = CreateSound(this.oggContentFilePath);
+        var sut = CreateSound(this.oggContentFilePath);
         this.mockAudioManager.Raise(manager => manager.DeviceChanging += null, EventArgs.Empty);
 
         // Act
-        sound.Volume = 50f;
+        sut.Volume = 50f;
 
         // Assert
         this.mockALInvoker.Verify(m => m.Source(It.IsAny<uint>(), It.IsAny<ALSourcef>(), It.IsAny<float>()), Times.Never());
@@ -424,85 +428,87 @@ public class SoundTests
         // Arrange
         var expected = new SoundTime(90);
         this.mockALInvoker.Setup(m => m.GetSource(SrcId, ALSourcef.SecOffset)).Returns(90f);
-        var sound = CreateSound(this.oggContentFilePath);
+        var sut = CreateSound(this.oggContentFilePath);
 
         // Act
-        var actual = sound.Position;
+        var actual = sut.Position;
 
         // Assert
         this.mockALInvoker.Verify(m => m.GetSource(SrcId, ALSourcef.SecOffset), Times.Once());
-        Assert.Equal(expected, actual);
+        actual.Should().Be(expected);
     }
 
     [Fact]
     public void Position_WhenGettingValueWhileUnloaded_ThrowsException()
     {
         // Arrange
-        var sound = CreateSound(this.oggContentFilePath);
-        sound.Dispose();
+        var sut = CreateSound(this.oggContentFilePath);
+        sut.Dispose();
 
-        // Act & Assert
-        Assert.ThrowsWithMessage<InvalidOperationException>(() =>
-        {
-            _ = sound.Position;
-        }, "The sound is disposed.  You must create another sound instance.");
+        // Act
+        var act = () => _ = sut.Position;
+
+        // Assert
+        act.Should().Throw<InvalidOperationException>()
+            .WithMessage("The sound is disposed.  You must create another sound instance.");
     }
 
     [Fact]
     public void Position_WhenGettingValueWhileIgnoringOpenALCalls_ReturnsZero()
     {
         // Arrange
-        var sound = CreateSound(this.oggContentFilePath);
+        var sut = CreateSound(this.oggContentFilePath);
         this.mockAudioManager.Raise(manager => manager.DeviceChanging += null, EventArgs.Empty);
         var expected = new SoundTime(0);
 
         // Act
-        var actual = sound.Position;
+        var actual = sut.Position;
 
         // Assert
-        Assert.Equal(expected, actual);
+        actual.Should().Be(expected);
     }
 
     [Fact]
     public void Length_WhenGettingValue_ReturnsCorrectResult()
     {
         // Arrange
-        var sound = CreateSound(this.oggContentFilePath);
+        var sut = CreateSound(this.oggContentFilePath);
         var expected = new SoundTime(266.00076f);
 
         // Act
-        var actual = sound.Length;
+        var actual = sut.Length;
 
         // Assert
-        Assert.Equal(expected.TotalSeconds, actual.TotalSeconds);
+        actual.TotalSeconds.Should().Be(expected.TotalSeconds);
     }
 
     [Fact]
     public void State_WhenGettingValueWhileUnloaded_ThrowsException()
     {
         // Arrange
-        var sound = CreateSound(this.oggContentFilePath);
-        sound.Dispose();
+        var sut = CreateSound(this.oggContentFilePath);
+        sut.Dispose();
 
-        // Act & Assert
-        Assert.ThrowsWithMessage<InvalidOperationException>(() =>
-        {
-            _ = sound.State;
-        }, "The sound is disposed.  You must create another sound instance.");
+        // Act
+        var act = () => _ = sut.State;
+
+        // Assert
+        act.Should().Throw<InvalidOperationException>()
+            .WithMessage("The sound is disposed.  You must create another sound instance.");
     }
 
     [Fact]
     public void State_WhenGettingValueWhileIgnoringOpenALCalls_ReturnsAsStopped()
     {
         // Arrange
-        var sound = CreateSound(this.oggContentFilePath);
+        var sut = CreateSound(this.oggContentFilePath);
         this.mockAudioManager.Raise(manager => manager.DeviceChanging += null, EventArgs.Empty);
 
         // Act
-        var actual = sound.State;
+        var actual = sut.State;
 
         // Assert
-        Assert.Equal(SoundState.Stopped, actual);
+        actual.Should().Be(SoundState.Stopped);
     }
 
     [Theory]
@@ -521,55 +527,57 @@ public class SoundTests
 
         // Arrange
         this.mockALInvoker.Setup(m => m.GetSourceState(SrcId)).Returns((ALSourceState)openALState);
-        var sound = CreateSound(this.oggContentFilePath);
+        var sut = CreateSound(this.oggContentFilePath);
 
         // Act
-        var actual = sound.State;
+        var actual = sut.State;
 
         // Assert
-        Assert.Equal(expected, actual);
+        actual.Should().Be(expected);
     }
 
     [Fact]
     public void State_WithInvalidOpenALSourceState_ThrowsException()
     {
         // Arrange
-        var sound = CreateSound(this.oggContentFilePath);
+        var sut = CreateSound(this.oggContentFilePath);
         this.mockALInvoker.Setup(m => m.GetSourceState(SrcId)).Returns(0f);
 
-        // Act & Assert
-        Assert.ThrowsWithMessage<AudioException>(() =>
-        {
-            _ = sound.State;
-        }, "The OpenAL sound state of 'ALSourceState: 0' is not valid.");
+        // Act
+        var act = () => _ = sut.State;
+
+        // Assert
+        act.Should().Throw<AudioException>()
+            .WithMessage("The OpenAL sound state of 'ALSourceState: 0' is not valid.");
     }
 
     [Fact]
     public void PlaySpeed_WhenGettingValueWhileUnloaded_ThrowsException()
     {
         // Arrange
-        var sound = CreateSound(this.oggContentFilePath);
-        sound.Dispose();
+        var sut = CreateSound(this.oggContentFilePath);
+        sut.Dispose();
 
-        // Act & Assert
-        Assert.ThrowsWithMessage<InvalidOperationException>(() =>
-        {
-            _ = sound.PlaySpeed;
-        }, "The sound is disposed.  You must create another sound instance.");
+        // Act
+        var act = () => _ = sut.PlaySpeed;
+
+        // Assert
+        act.Should().Throw<InvalidOperationException>()
+            .WithMessage("The sound is disposed.  You must create another sound instance.");
     }
 
     [Fact]
     public void PlaySpeed_WhenIgnoringOpenALCalls_ReturnsZero()
     {
         // Arrange
-        var sound = CreateSound(this.oggContentFilePath);
+        var sut = CreateSound(this.oggContentFilePath);
         this.mockAudioManager.Raise(manager => manager.DeviceChanging += null, EventArgs.Empty);
 
         // Act
-        var actual = sound.PlaySpeed;
+        var actual = sut.PlaySpeed;
 
         // Assert
-        Assert.Equal(0f, actual);
+        actual.Should().Be(0f);
     }
 
     [Theory]
@@ -579,11 +587,11 @@ public class SoundTests
     public void PlaySpeed_WhenSettingValue_ReturnsCorrectResult(float speedValue, float expectedResult)
     {
         // Arrange
-        var sound = CreateSound(this.oggContentFilePath);
+        var sut = CreateSound(this.oggContentFilePath);
 
         // Act
-        sound.PlaySpeed = speedValue;
-        _ = sound.PlaySpeed;
+        sut.PlaySpeed = speedValue;
+        _ = sut.PlaySpeed;
 
         // Assert
         this.mockALInvoker.Verify(m => m.GetSource(SrcId, ALSourcef.Pitch), Times.Once());
@@ -594,11 +602,11 @@ public class SoundTests
     public void PlaySpeed_WhenIgnoringOpenALCalls_DoesNotMakeOpenALCalls()
     {
         // Arrange
-        var sound = CreateSound(this.oggContentFilePath);
+        var sut = CreateSound(this.oggContentFilePath);
         this.mockAudioManager.Raise(manager => manager.DeviceChanging += null, EventArgs.Empty);
 
         // Act
-        sound.PlaySpeed = 1f;
+        sut.PlaySpeed = 1f;
 
         // Assert
         this.mockALInvoker.Verify(m => m.Source(It.IsAny<uint>(), It.IsAny<ALSourcef>(), It.IsAny<float>()), Times.Never());
@@ -610,15 +618,15 @@ public class SoundTests
     public void Play_WhenDisposed_ThrowsException()
     {
         // Arrange
-        var sound = CreateSound(this.oggContentFilePath);
+        var sut = CreateSound(this.oggContentFilePath);
+        sut.Dispose();
 
-        // Act & Assert
-        sound.Dispose();
+        // Act
+        var act = () => sut.Play();
 
-        Assert.ThrowsWithMessage<InvalidOperationException>(() =>
-        {
-            sound.Play();
-        }, "The sound is disposed.  You must create another sound instance.");
+        // Assert
+        act.Should().Throw<InvalidOperationException>()
+            .WithMessage("The sound is disposed.  You must create another sound instance.");
     }
 
     [Fact]
@@ -626,10 +634,10 @@ public class SoundTests
     {
         // Arrange
         this.mockALInvoker.Setup(m => m.GetSourceState(SrcId)).Returns(ALSourceState.Stopped);
-        var sound = CreateSound(this.oggContentFilePath);
+        var sut = CreateSound(this.oggContentFilePath);
 
         // Act
-        sound.Play();
+        sut.Play();
 
         // Assert
         this.mockALInvoker.Verify(m => m.SourcePlay(SrcId), Times.Once());
@@ -640,10 +648,10 @@ public class SoundTests
     {
         // Arrange
         this.mockALInvoker.Setup(m => m.GetSourceState(SrcId)).Returns(ALSourceState.Playing);
-        var sound = CreateSound(this.oggContentFilePath);
+        var sut = CreateSound(this.oggContentFilePath);
 
         // Act
-        sound.Play();
+        sut.Play();
 
         // Assert
         this.mockALInvoker.Verify(m => m.SourcePlay(It.IsAny<uint>()), Times.Never());
@@ -653,13 +661,13 @@ public class SoundTests
     public void Play_WhenIgnoringOpenALCalls_DoesNotAttemptToPlaySound()
     {
         // Arrange
-        var sound = CreateSound(this.oggContentFilePath);
+        var sut = CreateSound(this.oggContentFilePath);
 
         this.mockALInvoker.Setup(m => m.GetSourceState(SrcId)).Returns(ALSourceState.Playing);
         this.mockAudioManager.Raise(manager => manager.DeviceChanging += null, EventArgs.Empty);
 
         // Act
-        sound.Play();
+        sut.Play();
 
         // Assert
         this.mockALInvoker.Verify(m => m.SourcePlay(It.IsAny<uint>()), Times.Never());
@@ -669,24 +677,25 @@ public class SoundTests
     public void Pause_WhenDisposed_ThrowsException()
     {
         // Arrange
-        var sound = CreateSound(this.oggContentFilePath);
-        sound.Dispose();
+        var sut = CreateSound(this.oggContentFilePath);
+        sut.Dispose();
 
-        // Act & Assert
-        Assert.ThrowsWithMessage<InvalidOperationException>(() =>
-        {
-            sound.Pause();
-        }, "The sound is disposed.  You must create another sound instance.");
+        // Act
+        var act = () => sut.Pause();
+
+        // Assert
+        act.Should().Throw<InvalidOperationException>()
+            .WithMessage("The sound is disposed.  You must create another sound instance.");
     }
 
     [Fact]
     public void Pause_WhenInvoked_PausesSound()
     {
         // Arrange
-        var sound = CreateSound(this.oggContentFilePath);
+        var sut = CreateSound(this.oggContentFilePath);
 
         // Act
-        sound.Pause();
+        sut.Pause();
 
         // Assert
         this.mockALInvoker.Verify(m => m.SourcePause(SrcId), Times.Once());
@@ -696,11 +705,11 @@ public class SoundTests
     public void Pause_WhenIgnoringOpenALCalls_DoesNotAttemptToPauseSound()
     {
         // Arrange
-        var sound = CreateSound(this.oggContentFilePath);
+        var sut = CreateSound(this.oggContentFilePath);
         this.mockAudioManager.Raise(manager => manager.DeviceChanging += null, EventArgs.Empty);
 
         // Act
-        sound.Pause();
+        sut.Pause();
 
         // Assert
         this.mockALInvoker.Verify(m => m.SourcePause(It.IsAny<uint>()), Times.Never());
@@ -710,25 +719,25 @@ public class SoundTests
     public void Stop_WhenDisposed_ThrowsException()
     {
         // Arrange
-        var sound = CreateSound(this.oggContentFilePath);
+        var sut = CreateSound(this.oggContentFilePath);
+        sut.Dispose();
 
-        // Act & Assert
-        sound.Dispose();
+        // Act
+        var act = () => sut.Stop();
 
-        Assert.ThrowsWithMessage<InvalidOperationException>(() =>
-        {
-            sound.Stop();
-        }, "The sound is disposed.  You must create another sound instance.");
+        // Assert
+        act.Should().Throw<InvalidOperationException>()
+            .WithMessage("The sound is disposed.  You must create another sound instance.");
     }
 
     [Fact]
     public void Stop_WhenInvoked_StopsSound()
     {
         // Arrange
-        var sound = CreateSound(this.oggContentFilePath);
+        var sut = CreateSound(this.oggContentFilePath);
 
         // Act
-        sound.Stop();
+        sut.Stop();
 
         // Assert
         this.mockALInvoker.Verify(m => m.SourceStop(SrcId), Times.Once());
@@ -738,11 +747,11 @@ public class SoundTests
     public void Stop_WhenIgnoringOpenALCalls_DoesNotAttemptToStopSound()
     {
         // Arrange
-        var sound = CreateSound(this.oggContentFilePath);
+        var sut = CreateSound(this.oggContentFilePath);
         this.mockAudioManager.Raise(manager => manager.DeviceChanging += null, EventArgs.Empty);
 
         // Act
-        sound.Stop();
+        sut.Stop();
 
         // Assert
         this.mockALInvoker.Verify(m => m.SourceStop(It.IsAny<uint>()), Times.Never());
@@ -752,25 +761,25 @@ public class SoundTests
     public void Reset_WhenDisposed_ThrowsException()
     {
         // Arrange
-        var sound = CreateSound(this.oggContentFilePath);
+        var sut = CreateSound(this.oggContentFilePath);
+        sut.Dispose();
 
-        // Act & Assert
-        sound.Dispose();
+        // Act
+        var act = () => sut.Reset();
 
-        Assert.ThrowsWithMessage<InvalidOperationException>(() =>
-        {
-            sound.Reset();
-        }, "The sound is disposed.  You must create another sound instance.");
+        // Assert
+        act.Should().Throw<InvalidOperationException>()
+            .WithMessage("The sound is disposed.  You must create another sound instance.");
     }
 
     [Fact]
     public void Reset_WhenInvoked_ResetsSound()
     {
         // Arrange
-        var sound = CreateSound(this.oggContentFilePath);
+        var sut = CreateSound(this.oggContentFilePath);
 
         // Act
-        sound.Reset();
+        sut.Reset();
 
         // Assert
         this.mockALInvoker.Verify(m => m.SourceRewind(SrcId), Times.Once());
@@ -780,11 +789,11 @@ public class SoundTests
     public void Reset_WhenIgnoringOpenALCalls_DoesNotAttemptToResetSound()
     {
         // Arrange
-        var sound = CreateSound(this.oggContentFilePath);
+        var sut = CreateSound(this.oggContentFilePath);
         this.mockAudioManager.Raise(manager => manager.DeviceChanging += null, EventArgs.Empty);
 
         // Act
-        sound.Reset();
+        sut.Reset();
 
         // Assert
         this.mockALInvoker.Verify(m => m.SourceRewind(It.IsAny<uint>()), Times.Never());
@@ -794,15 +803,15 @@ public class SoundTests
     public void SetTimePosition_WhenDisposed_ThrowsException()
     {
         // Arrange
-        var sound = CreateSound(this.oggContentFilePath);
+        var sut = CreateSound(this.oggContentFilePath);
+        sut.Dispose();
 
-        // Act & Assert
-        sound.Dispose();
+        // Act
+        var act = () => sut.SetTimePosition(5);
 
-        Assert.ThrowsWithMessage<InvalidOperationException>(() =>
-        {
-            sound.SetTimePosition(5);
-        }, "The sound is disposed.  You must create another sound instance.");
+        // Assert
+        act.Should().Throw<InvalidOperationException>()
+            .WithMessage("The sound is disposed.  You must create another sound instance.");
     }
 
     [Theory]
@@ -824,10 +833,10 @@ public class SoundTests
 
                 return result;
             });
-        var sound = CreateSound(this.oggContentFilePath);
+        var sut = CreateSound(this.oggContentFilePath);
 
         // Act
-        sound.SetTimePosition(seconds);
+        sut.SetTimePosition(seconds);
 
         // Assert
         this.mockALInvoker.Verify(m => m.Source(SrcId, ALSourcef.SecOffset, expected), Times.Once());
@@ -837,11 +846,11 @@ public class SoundTests
     public void SetTimePosition_WithIgnoringOpenALCalls_DoesNotAttemptToSetTimePosition()
     {
         // Arrange
-        var sound = CreateSound(this.oggContentFilePath);
+        var sut = CreateSound(this.oggContentFilePath);
         this.mockAudioManager.Raise(manager => manager.DeviceChanging += null, EventArgs.Empty);
 
         // Act
-        sound.SetTimePosition(1f);
+        sut.SetTimePosition(1f);
 
         // Assert
         this.mockALInvoker.Verify(m => m.Source(It.IsAny<uint>(), It.IsAny<ALSourcef>(), It.IsAny<float>()), Times.Never());
@@ -851,12 +860,12 @@ public class SoundTests
     public void Rewind_WhenTimeIsPastBeginningOfSound_ResetsAndPlaysSound()
     {
         // Arrange
-        var sound = CreateSound(this.oggContentFilePath);
+        var sut = CreateSound(this.oggContentFilePath);
         this.mockALInvoker.Setup(m => m.GetSourceState(SrcId)).Returns(ALSourceState.Stopped);
         this.mockALInvoker.Setup(m => m.GetSource(SrcId, ALSourcef.SecOffset)).Returns(10f);
 
         // Act
-        sound.Rewind(20f);
+        sut.Rewind(20f);
 
         // Assert
         this.mockALInvoker.Verify(m => m.SourceRewind(SrcId), Times.Once());
@@ -871,10 +880,10 @@ public class SoundTests
         MockSoundLength(25);
         this.mockALInvoker.Setup(m => m.GetSource(SrcId, ALSourcef.SecOffset))
             .Returns(15f);
-        var sound = CreateSound(this.oggContentFilePath);
+        var sut = CreateSound(this.oggContentFilePath);
 
         // Act
-        sound.Rewind(10f);
+        sut.Rewind(10f);
 
         // Assert
         this.mockALInvoker.Verify(m => m.Source(SrcId, ALSourcef.SecOffset, 5f), Times.Once());
@@ -884,11 +893,11 @@ public class SoundTests
     public void Rewind_WhenIgnoringOpenALCalls_DoesNotAttemptToRewindSound()
     {
         // Arrange
-        var sound = CreateSound(this.oggContentFilePath);
+        var sut = CreateSound(this.oggContentFilePath);
         this.mockAudioManager.Raise(manager => manager.DeviceChanging += null, EventArgs.Empty);
 
         // Act
-        sound.Rewind(10f);
+        sut.Rewind(10f);
 
         // Assert
         this.mockALInvoker.Verify(m => m.Source(It.IsAny<uint>(), ALSourcef.SecOffset, It.IsAny<float>()), Times.Never());
@@ -901,10 +910,10 @@ public class SoundTests
         MockSoundLength(10);
         this.mockALInvoker.Setup(m => m.GetSource(SrcId, ALSourcef.SecOffset)).Returns(10f);
 
-        var sound = CreateSound(this.oggContentFilePath);
+        var sut = CreateSound(this.oggContentFilePath);
 
         // Act
-        sound.FastForward(20f);
+        sut.FastForward(20f);
 
         // Assert
         this.mockALInvoker.Verify(m => m.SourceRewind(SrcId), Times.Once());
@@ -915,11 +924,11 @@ public class SoundTests
     public void FastForward_WhenIgnoringOpenALCalls_DoesNotAttemptToResetSound()
     {
         // Arrange
-        var sound = CreateSound(this.oggContentFilePath);
+        var sut = CreateSound(this.oggContentFilePath);
         this.mockAudioManager.Raise(manager => manager.DeviceChanging += null, EventArgs.Empty);
 
         // Act
-        sound.FastForward(20f);
+        sut.FastForward(20f);
 
         // Assert
         this.mockALInvoker.Verify(m => m.SourceRewind(It.IsAny<uint>()), Times.Never());
@@ -945,10 +954,10 @@ public class SoundTests
         });
 
         this.mockALInvoker.Setup(m => m.GetSource(SrcId, ALSourcef.SecOffset)).Returns(30f);
-        var sound = CreateSound(this.oggContentFilePath);
+        var sut = CreateSound(this.oggContentFilePath);
 
         // Act
-        sound.FastForward(10f);
+        sut.FastForward(10f);
 
         // Assert
         this.mockALInvoker.Verify(m => m.Source(SrcId, ALSourcef.SecOffset, 40f), Times.Once());
@@ -992,11 +1001,11 @@ public class SoundTests
     public void Dispose_WhenInvoked_DisposesOfSound()
     {
         // Arrange
-        var sound = CreateSound(this.oggContentFilePath);
+        var sut = CreateSound(this.oggContentFilePath);
 
         // Act
-        sound.Dispose();
-        sound.Dispose();
+        sut.Dispose();
+        sut.Dispose();
 
         // Assert
         this.mockOggDecoder.Verify(m => m.Dispose(), Times.Once());
@@ -1013,11 +1022,11 @@ public class SoundTests
     public void Dispose_WhenIgnoringOpenALCalls_DoesNotAttemptToUnloadData()
     {
         // Arrange
-        var sound = CreateSound(this.oggContentFilePath);
+        var sut = CreateSound(this.oggContentFilePath);
         this.mockAudioManager.Raise(manager => manager.DeviceChanging += null, EventArgs.Empty);
 
         // Act
-        sound.Dispose();
+        sut.Dispose();
 
         // Assert
         this.mockALInvoker.Verify(m => m.DeleteSource(It.IsAny<uint>()), Times.Never());
@@ -1031,11 +1040,11 @@ public class SoundTests
     {
         // Arrange
         this.mockAudioManager.Setup(m => m.InitSound()).Returns((0u, BufferId));
-        var sound = CreateSound(this.oggContentFilePath);
+        var sut = CreateSound(this.oggContentFilePath);
 
         // Act
-        sound.Dispose();
-        sound.Dispose();
+        sut.Dispose();
+        sut.Dispose();
 
         // Assert
         this.mockALInvoker.Verify(m => m.DeleteSource(SrcId), Times.Never());
