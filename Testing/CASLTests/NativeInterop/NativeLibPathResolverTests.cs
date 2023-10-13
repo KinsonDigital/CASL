@@ -10,6 +10,7 @@ using CASL;
 using CASL.NativeInterop;
 using Moq;
 using Xunit;
+using FluentAssertions;
 
 /// <summary>
 /// Tests the <see cref="NativeLibPathResolver"/> class.
@@ -67,7 +68,7 @@ public class NativeLibPathResolverTests
         var actual = resolver.GetFilePath(libName);
 
         // Assert
-        Assert.Equal(expected, actual);
+        actual.Should().Be(expected);
     }
 
     [Theory]
@@ -100,7 +101,7 @@ public class NativeLibPathResolverTests
         var actual = resolver.GetFilePath(libName);
 
         // Assert
-        Assert.Equal(expected, actual);
+        actual.Should().Be(expected);
     }
 
     [Theory]
@@ -132,7 +133,7 @@ public class NativeLibPathResolverTests
         var actual = resolver.GetFilePath(libName);
 
         // Assert
-        Assert.Equal(expected, actual);
+        actual.Should().Be(expected);
     }
     #endregion
 
