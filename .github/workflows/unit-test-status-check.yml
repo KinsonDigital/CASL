@@ -20,3 +20,5 @@ jobs:
       project-name: "${{ vars.PROJECT_NAME }}Tests"
       build-config: Debug
       net-sdk-version: "${{ vars.NET_SDK_VERSION }}"
+      checkout-repository: ${{ github.repository }}
+      checkout-ref: ${{ github.head_ref }}
