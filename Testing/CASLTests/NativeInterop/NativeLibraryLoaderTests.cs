@@ -15,7 +15,6 @@ using CASL.NativeInterop;
 using FluentAssertions;
 using Moq;
 using Xunit;
-using Assert = Helpers.AssertExtensions;
 #pragma warning restore IDE0001 // Name can be simplified
 
 /// <summary>
