@@ -171,12 +171,6 @@ public class NativeDependencyManagerTests
         var manager = CreateManager();
         manager.NativeLibraries = new ReadOnlyCollection<string>(new[] { "lib.dll" }.ToList());
 
-        // Act & Assert
-        Assert.DoesNotThrow<FileNotFoundException>(() =>
-        {
-            manager.VerifyDependencies();
-        });
-
         // Act
         var act = manager.VerifyDependencies;
 

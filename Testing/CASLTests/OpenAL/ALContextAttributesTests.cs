@@ -152,7 +152,7 @@ public class ALContextAttributesTests
             444,
             (int)AlcContextAttributes.Sync,
             1,
-            // Assert additional fake attributes (indices 10 and 11)
+            // Assert additional fake attributes
             555,
             666,
             // Assert trailing byte
