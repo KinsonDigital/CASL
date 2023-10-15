@@ -12,6 +12,7 @@ using System.IO;
 using System.IO.Abstractions;
 using CASL.Exceptions;
 using CASL.NativeInterop;
+using FluentAssertions;
 using Moq;
 using Xunit;
 using Assert = Helpers.AssertExtensions;
@@ -57,97 +58,103 @@ public class NativeLibraryLoaderTests
     [Fact]
     public void Ctor_WithNullDependencyManager_ThrowsException()
     {
-        //Act & Assert
-        Assert.ThrowsWithMessage<ArgumentNullException>(() =>
-        {
-            _ = new NativeLibraryLoader(
+        // Act
+        var act = () => new NativeLibraryLoader(
                 null,
                 this.mockPlatform.Object,
                 this.mockDirectory.Object,
                 this.mockFile.Object,
                 this.mockPath.Object,
                 this.mockLibrary.Object);
-        }, "The parameter must not be null. (Parameter 'dependencyManager')");
+
+        // Assert
+        act.Should().Throw<ArgumentNullException>()
+            .WithMessage("The parameter must not be null. (Parameter 'dependencyManager')");
     }
 
     [Fact]
     public void Ctor_WithNullPlatform_ThrowsException()
     {
-        //Act & Assert
-        Assert.ThrowsWithMessage<ArgumentNullException>(() =>
-        {
-            _ = new NativeLibraryLoader(
+        // Act
+        var act = () => new NativeLibraryLoader(
                 this.mockDependencyManager.Object,
                 null,
                 this.mockDirectory.Object,
                 this.mockFile.Object,
                 this.mockPath.Object,
                 this.mockLibrary.Object);
-        }, "The parameter must not be null. (Parameter 'platform')");
+
+        // Assert
+        act.Should().Throw<ArgumentNullException>()
+            .WithMessage("The parameter must not be null. (Parameter 'platform')");
     }
 
     [Fact]
     public void Ctor_WithNullDirectoryObject_ThrowsException()
     {
-        //Act & Assert
-        Assert.ThrowsWithMessage<ArgumentNullException>(() =>
-        {
-            _ = new NativeLibraryLoader(
+        // Act
+        var act = () => new NativeLibraryLoader(
                 this.mockDependencyManager.Object,
                 this.mockPlatform.Object,
                 null,
                 this.mockFile.Object,
                 this.mockPath.Object,
                 this.mockLibrary.Object);
-        }, "The parameter must not be null. (Parameter 'directory')");
+
+        // Assert
+        act.Should().Throw<ArgumentNullException>()
+            .WithMessage("The parameter must not be null. (Parameter 'directory')");
     }
 
     [Fact]
     public void Ctor_WithNullFileObject_ThrowsException()
     {
-        //Act & Assert
-        Assert.ThrowsWithMessage<ArgumentNullException>(() =>
-        {
-            _ = new NativeLibraryLoader(
+        // Act
+        var act = () => new NativeLibraryLoader(
                 this.mockDependencyManager.Object,
                 this.mockPlatform.Object,
                 this.mockDirectory.Object,
                 null,
                 this.mockPath.Object,
                 this.mockLibrary.Object);
-        }, "The parameter must not be null. (Parameter 'file')");
+
+        // Assert
+        act.Should().Throw<ArgumentNullException>()
+            .WithMessage("The parameter must not be null. (Parameter 'file')");
     }
 
     [Fact]
     public void Ctor_WithNullPath_ThrowsException()
     {
-        //Act & Assert
-        Assert.ThrowsWithMessage<ArgumentNullException>(() =>
-        {
-            _ = new NativeLibraryLoader(
+        // Act
+        var act = () => new NativeLibraryLoader(
                 this.mockDependencyManager.Object,
                 this.mockPlatform.Object,
                 this.mockDirectory.Object,
                 this.mockFile.Object,
                 null,
                 this.mockLibrary.Object);
-        }, "The parameter must not be null. (Parameter 'path')");
+
+        // Assert
+        act.Should().Throw<ArgumentNullException>()
+            .WithMessage("The parameter must not be null. (Parameter 'path')");
     }
 
     [Fact]
     public void Ctor_WithNullLibrary_ThrowsException()
     {
-        //Act & Assert
-        Assert.ThrowsWithMessage<ArgumentNullException>(() =>
-        {
-            _ = new NativeLibraryLoader(
+        // Act
+        var act = () => new NativeLibraryLoader(
                 this.mockDependencyManager.Object,
                 this.mockPlatform.Object,
                 this.mockDirectory.Object,
                 this.mockFile.Object,
                 this.mockPath.Object,
                 null);
-        }, "The parameter must not be null. (Parameter 'library')");
+
+        // Assert
+        act.Should().Throw<ArgumentNullException>()
+            .WithMessage("The parameter must not be null. (Parameter 'library')");
     }
 
     [Fact]
@@ -157,11 +164,12 @@ public class NativeLibraryLoaderTests
         MockPlatformAsWindows();
         this.mockLibrary.SetupGet(p => p.LibraryName).Returns(string.Empty);
 
-        // Act & Assert
-        Assert.ThrowsWithMessage<ArgumentNullException>(() =>
-        {
-            _ = CreateLoader();
-        }, "The parameter must not be null or empty. (Parameter 'libraryName')");
+        // Act
+        var act = CreateLoader;
+
+        // Assert
+        act.Should().Throw<ArgumentNullException>()
+            .WithMessage("The parameter must not be null or empty. (Parameter 'libraryName')");
     }
 
     [Theory]
@@ -181,7 +189,7 @@ public class NativeLibraryLoaderTests
         var loader = CreateLoader();
 
         //Assert
-        Xunit.Assert.Equal(WinLibNameWithExt, loader.LibraryName);
+        loader.LibraryName.Should().Be(WinLibNameWithExt);
     }
     #endregion
 
@@ -214,11 +222,12 @@ public class NativeLibraryLoaderTests
 
         var loader = CreateLoader();
 
-        //Act & Assert
-        Assert.ThrowsWithMessage<LoadLibraryException>(() =>
-        {
-            loader.LoadLibrary();
-        }, $"{systemError}\n\nLibrary Path: '{expectedPath}'");
+        // Act
+        var act = loader.LoadLibrary;
+
+        // Assert
+        act.Should().Throw<LoadLibraryException>()
+            .WithMessage($"{systemError}\n\nLibrary Path: '{expectedPath}'");
     }
 
     [Fact]
@@ -244,7 +253,7 @@ public class NativeLibraryLoaderTests
         var actual = loader.LoadLibrary();
 
         // Assert
-        Xunit.Assert.Equal(expected, actual);
+        actual.Should().Be(expected);
     }
 
     [Fact]
@@ -265,11 +274,12 @@ public class NativeLibraryLoaderTests
 
         var loader = CreateLoader();
 
-        // Act & Assert
-        Assert.ThrowsWithMessage<FileNotFoundException>(() =>
-        {
-            _ = loader.LoadLibrary();
-        }, $"Could not find the library '{WinLibNameWithExt}' in directory path '{CrossPlatWinDirPath}'");
+        // Act
+        var act = loader.LoadLibrary;
+
+        // Assert
+        act.Should().Throw<FileNotFoundException>()
+            .WithMessage($"Could not find the library '{WinLibNameWithExt}' in directory path '{CrossPlatWinDirPath}'");
     }
     #endregion
 
