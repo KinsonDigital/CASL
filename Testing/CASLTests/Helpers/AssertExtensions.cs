@@ -8,6 +8,7 @@ namespace CASLTests.Helpers;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using Xunit;
+using FluentAssertions;
 
 /// <summary>
 /// Provides helper methods for the <see cref="Xunit"/>'s <see cref="Assert"/> class.
@@ -26,7 +27,7 @@ public class AssertExtensions : Assert
     public static void ThrowsWithMessage<T>(Action testCode, string expectedMessage)
         where T : Exception
     {
-        Assert.Equal(expectedMessage, Assert.Throws<T>(testCode).Message);
+        Assert.Throws<T>(testCode).Message.Should().Be(expectedMessage);
     }
 
     /// <summary>
@@ -48,7 +49,8 @@ public class AssertExtensions : Assert
         }
         catch (T)
         {
-            Assert.True(false, $"Expected the exception {typeof(T).Name} to not be thrown.");
+            var flag = false;
+            flag.Should().BeTrue($"Expected the exception {typeof(T).Name} to not be thrown.");
         }
     }
 
@@ -71,11 +73,13 @@ public class AssertExtensions : Assert
         {
             if (ex.GetType() == typeof(NullReferenceException))
             {
-                Assert.True(false, $"Expected not to raise a {nameof(NullReferenceException)} exception.");
+                var flag = false;
+                flag.Should().BeTrue($"Expected not to raise a {nameof(NullReferenceException)} exception.");
             }
             else
             {
-                Assert.True(true);
+                var flag = true;
+                flag.Should().BeTrue();
             }
         }
     }
@@ -106,7 +110,7 @@ public class AssertExtensions : Assert
             }
         }
 
-        Assert.True(actionInvoked, $"No assertions were actually made in {nameof(AssertExtensions)}.{nameof(All)}<T>.  Are there any items?");
+        actionInvoked.Should().BeTrue($"No assertions were actually made in {nameof(AssertExtensions)}.{nameof(All)}<T>.  Are there any items?");
     }
 
     /// <summary>
@@ -125,6 +129,6 @@ public class AssertExtensions : Assert
             action(collection[i], i);
         }
 
-        Assert.True(actionInvoked, $"No assertions were actually made in {nameof(AssertExtensions)}.{nameof(All)}<T>.  Are there any items?");
+        actionInvoked.Should().BeTrue($"No assertions were actually made in {nameof(AssertExtensions)}.{nameof(All)}<T>.  Are there any items?");
     }
 }
