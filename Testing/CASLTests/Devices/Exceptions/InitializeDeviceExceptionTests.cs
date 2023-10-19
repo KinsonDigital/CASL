@@ -7,6 +7,7 @@ namespace CASLTests.Devices.Exceptions;
 using System;
 using CASL.Devices.Exceptions;
 using Xunit;
+using FluentAssertions;
 
 /// <summary>
 /// Tests the <see cref="InitializeDeviceException"/> class.
@@ -21,31 +22,35 @@ public class InitializeDeviceExceptionTests
         var exception = new InitializeDeviceException();
 
         // Assert
-        Assert.Equal("There was an issue initializing the audio device.", exception.Message);
+        var expectedMessage = "There was an issue initializing the audio device.";
+        exception.Message.Should().Be(expectedMessage);
     }
 
     [Fact]
     public void Ctor_WhenInvokedWithMessageAndDeviceNameParams_CorrectlySetsMessage()
     {
         // Act
-        var exception = new InitializeDeviceException("test-message");
+        var exceptionMessage = "test-message";
+        var exception = new InitializeDeviceException(exceptionMessage);
 
         // Assert
-        Assert.Equal("test-message", exception.Message);
+        exception.Message.Should().Be(exceptionMessage);
     }
 
     [Fact]
     public void Ctor_WhenInvokedWithMessageAndInnerException_ThrowsException()
     {
         // Arrange
-        var innerException = new Exception("inner-exception");
+        var innerExceptionMessage = "inner-exception";
+        var innerException = new Exception(innerExceptionMessage);
 
         // Act
-        var deviceException = new InitializeDeviceException("test-exception", innerException);
+        var exceptionMessage = "test-exception";
+        var deviceException = new InitializeDeviceException(exceptionMessage, innerException);
 
         // Assert
-        Assert.Equal("inner-exception", deviceException.InnerException.Message);
-        Assert.Equal("test-exception", deviceException.Message);
+        deviceException.InnerException.Message.Should().Be(innerExceptionMessage);
+        deviceException.Message.Should().Be(exceptionMessage);
     }
     #endregion
 }
