@@ -7,6 +7,7 @@ namespace CASLTests.Exceptions;
 using System;
 using CASL.Exceptions;
 using Xunit;
+using FluentAssertions;
 
 /// <summary>
 /// Tests the <see cref="AudioException"/> class.
@@ -21,31 +22,34 @@ public class AudioExceptionTests
         var exception = new AudioException();
 
         // Assert
-        Assert.Equal("An audio exception has occurred.", exception.Message);
+        exception.Message.Should().Be("An audio exception has occurred.");
     }
 
     [Fact]
     public void Ctor_WhenInvokedWithSingleMessageParam_CorrectlySetsMesage()
     {
         // Act
-        var exception = new AudioException("test-message");
+        var exceptionMessage = "test-message";
+        var exception = new AudioException(exceptionMessage);
 
         // Assert
-        Assert.Equal("test-message", exception.Message);
+        exception.Message.Should().Be(exceptionMessage);
     }
 
     [Fact]
     public void Ctor_WhenInvokedWithMessageAndInnerException_ThrowsException()
     {
         // Arrange
-        var innerException = new Exception("inner-exception");
+        var innerExceptionMessage = "inner-exception";
+        var innerException = new Exception(innerExceptionMessage);
 
         // Act
-        var deviceException = new AudioException("test-exception", innerException);
+        var exceptionMessage = "test-exception";
+        var deviceException = new AudioException(exceptionMessage, innerException);
 
         // Assert
-        Assert.Equal("inner-exception", deviceException.InnerException.Message);
-        Assert.Equal("test-exception", deviceException.Message);
+        deviceException.InnerException.Message.Should().Be(innerExceptionMessage);
+        deviceException.Message.Should().Be(exceptionMessage);
     }
     #endregion
 }
