@@ -6,6 +6,7 @@ namespace CASLTests.Exceptions;
 
 using System;
 using CASL.Exceptions;
+using FluentAssertions;
 using Xunit;
 
 /// <summary>
@@ -21,31 +22,36 @@ public class LoadLibraryExceptionTests
         var exception = new LoadLibraryException();
 
         // Assert
-        Assert.Equal("There was an issue loading the library.", exception.Message);
+        var expectedExceptionMessage = "There was an issue loading the library.";
+        exception.Message.Should().Be(expectedExceptionMessage);
+        
     }
 
     [Fact]
     public void Ctor_WhenInvokedWithSingleMessageParam_CorrectlySetsMesage()
     {
         // Act
-        var exception = new LoadLibraryException("test-message");
+        var exceptionMessage = "test-message";
+        var exception = new LoadLibraryException(exceptionMessage);
 
         // Assert
-        Assert.Equal("test-message", exception.Message);
+        exception.Message.Should().Be(exceptionMessage);
     }
 
     [Fact]
     public void Ctor_WhenInvokedWithMessageAndInnerException_ThrowsException()
     {
         // Arrange
-        var innerException = new Exception("inner-exception");
+        var innerExceptionMessage = "inner-exception";
+        var innerException = new Exception(innerExceptionMessage);
 
         // Act
-        var deviceException = new LoadLibraryException("test-exception", innerException);
+        var exceptionMessage = "test-exception";
+        var deviceException = new LoadLibraryException(exceptionMessage, innerException);
 
         // Assert
-        Assert.Equal("inner-exception", deviceException.InnerException.Message);
-        Assert.Equal("test-exception", deviceException.Message);
+        deviceException.InnerException.Message.Should().Be(innerExceptionMessage);
+        deviceException.Message.Should().Be(exceptionMessage);
     }
     #endregion
 }
