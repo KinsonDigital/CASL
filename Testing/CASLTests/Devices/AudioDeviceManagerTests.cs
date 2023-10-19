@@ -20,6 +20,7 @@ using CASL.OpenAL;
 using Moq;
 using Xunit;
 using Assert = Helpers.AssertExtensions;
+using FluentAssertions;
 #pragma warning restore IDE0001 // Name can be simplified
 
 /// <summary>
@@ -73,7 +74,7 @@ public class AudioDeviceManagerTests
         var actual = manager.IsInitialized;
 
         // Assert
-        Assert.True(actual);
+        actual.Should().BeTrue();
     }
 
     [Fact]
@@ -83,11 +84,11 @@ public class AudioDeviceManagerTests
         var manager = CreateManager();
         manager.Dispose();
 
-        // Act & Assert
-        Assert.ThrowsWithMessage<AudioDeviceManagerNotInitializedException>(() =>
-        {
-            _ = manager.GetDeviceNames();
-        }, IsDisposedExceptionMessage);
+        // Act
+        var action = manager.GetDeviceNames;
+
+        // Assert
+        action.Should().Throw<AudioDeviceManagerNotInitializedException>().WithMessage(IsDisposedExceptionMessage);
     }
 
     [Fact]
@@ -104,7 +105,7 @@ public class AudioDeviceManagerTests
         var actual = manager.GetDeviceNames().ToArray();
 
         // Assert
-        Assert.Equal(expected, actual);
+        actual.Should().BeEquivalentTo(expected);
     }
 
     [Fact]
@@ -118,8 +119,7 @@ public class AudioDeviceManagerTests
         var actual = attributes.AdditionalAttributes;
 
         // Assert
-        Assert.NotNull(actual);
-        Assert.Empty(actual);
+        actual.Should().NotBeNull().And.BeEmpty();
     }
 
     [Fact]
@@ -133,10 +133,7 @@ public class AudioDeviceManagerTests
         var actual = attributes.AdditionalAttributes;
 
         // Assert
-        Assert.NotNull(actual);
-        Assert.Equal(2, actual.Length);
-        Assert.Equal(111, actual[0]);
-        Assert.Equal(222, actual[1]);
+        actual.Should().NotBeNull().And.HaveCount(2).And.ContainInOrder(111, 222);
     }
     #endregion
 
@@ -155,7 +152,7 @@ public class AudioDeviceManagerTests
         this.mockALInvoker.Verify(m => m.OpenDevice("OpenAL Soft on test-device"), Times.Once());
         this.mockALInvoker.Verify(m => m.MakeContextCurrent(this.context), Times.Once());
         this.mockALInvoker.Verify(m => m.GetDefaultDevice(), Times.Once());
-        Assert.Equal("OpenAL Soft on test-device", manager.DeviceInUse);
+        manager.DeviceInUse.Should().Be("OpenAL Soft on test-device");
     }
 
     [Fact]
@@ -166,11 +163,11 @@ public class AudioDeviceManagerTests
         this.mockALInvoker.Setup(m => m.MakeContextCurrent(this.context)).Returns(false);
         var manager = CreateManager();
 
-        // Act & Assert
-        Assert.ThrowsWithMessage<InitializeDeviceException>(() =>
-        {
-            manager.InitDevice("test-device");
-        }, "There was an issue initializing the audio device.");
+        // Act
+        var action = () => manager.InitDevice("test-device");
+
+        // Assert
+        action.Should().Throw<InitializeDeviceException>().WithMessage("There was an issue initializing the audio device.");
     }
 
     [Fact]
@@ -180,11 +177,11 @@ public class AudioDeviceManagerTests
         var manager = CreateManager();
         manager.Dispose();
 
-        // Act & Assert
-        Assert.ThrowsWithMessage<AudioDeviceManagerNotInitializedException>(() =>
-        {
-            manager.InitSound();
-        }, IsDisposedExceptionMessage);
+        // Act
+        var action = manager.InitSound;
+
+        // Assert
+        action.Should().Throw<AudioDeviceManagerNotInitializedException>().WithMessage(IsDisposedExceptionMessage);
     }
 
     [Fact]
@@ -198,8 +195,8 @@ public class AudioDeviceManagerTests
         var (actualSourceId, actualBufferId) = manager.InitSound();
 
         // Assert
-        Assert.Equal(this.srcId, actualSourceId);
-        Assert.Equal(this.bufferId, actualBufferId);
+        actualSourceId.Should().Be(this.srcId);
+        actualBufferId.Should().Be(this.bufferId);
         this.mockALInvoker.Verify(m => m.GenSource(), Times.Once());
         this.mockALInvoker.Verify(m => m.GenBuffer(), Times.Once());
     }
@@ -210,11 +207,11 @@ public class AudioDeviceManagerTests
         // Arrange
         var manager = CreateManager();
 
-        // Act & Assert
-        Assert.ThrowsWithMessage<AudioDeviceManagerNotInitializedException>(() =>
-        {
-            manager.UpdateSoundSource(It.IsAny<SoundSource>());
-        }, IsDisposedExceptionMessage);
+        // Act
+        var action = () => manager.UpdateSoundSource(It.IsAny<SoundSource>());
+
+        // Assert
+        action.Should().Throw<AudioDeviceManagerNotInitializedException>().WithMessage(IsDisposedExceptionMessage);
     }
 
     [Fact]
@@ -224,15 +221,19 @@ public class AudioDeviceManagerTests
         var manager = CreateManager();
         manager.InitDevice();
 
-        // Act & Assert
-        Assert.ThrowsWithMessage<SoundDataException>(() =>
+        // Act
+        var action = () =>
         {
             var soundSrc = new SoundSource
             {
                 SourceId = 1234,
             };
             manager.UpdateSoundSource(soundSrc);
-        }, $"The sound source with the source id '1234' does not exist.");
+        };
+
+        // Assert
+        var expectedExceptionMessage = $"The sound source with the source id '1234' does not exist.";
+        action.Should().Throw<SoundDataException>().WithMessage(expectedExceptionMessage);
     }
 
     [Fact]
@@ -243,15 +244,18 @@ public class AudioDeviceManagerTests
         manager.InitDevice();
         manager.InitSound();
 
-        // Act & Assert
-        Assert.DoesNotThrow<Exception>(() =>
+        // Act
+        var action = () =>
         {
             var otherSoundSrc = new SoundSource
             {
                 SourceId = 4321,
             };
             manager.UpdateSoundSource(otherSoundSrc);
-        });
+        };
+
+        // Assert
+        action.Should().NotThrow<Exception>();
     }
 
     [Fact]
@@ -260,11 +264,12 @@ public class AudioDeviceManagerTests
         // Arrange
         var manager = CreateManager();
 
-        // Act & Assert
-        Assert.ThrowsWithMessage<AudioDeviceManagerNotInitializedException>(() =>
-        {
-            manager.RemoveSoundSource(It.IsAny<uint>());
-        }, "The 'AudioDeviceManager' has not been initialized.\nInvoked the 'InitDevice()' to initialize the device manager.");
+        // Act
+        var action = () => manager.RemoveSoundSource(It.IsAny<uint>());
+
+        // Assert
+        var expectedExceptionMessage = "The 'AudioDeviceManager' has not been initialized.\nInvoked the 'InitDevice()' to initialize the device manager.";
+        action.Should().Throw<AudioDeviceManagerNotInitializedException>().WithMessage(expectedExceptionMessage);
     }
 
     [Fact]
@@ -286,8 +291,7 @@ public class AudioDeviceManagerTests
         manager.RemoveSoundSource(3344u);
 
         // Assert
-        Assert.Single(manager.GetSoundSources().ToArray());
-        Assert.Equal(1122u, manager.GetSoundSources().ToArray()[0].SourceId);
+        manager.GetSoundSources().Select(s => s.SourceId).Should().ContainSingle().Which.Should().Be(1122u);
     }
 
     [Fact]
@@ -296,11 +300,11 @@ public class AudioDeviceManagerTests
         // Arrange
         var manager = CreateManager();
 
-        // Act & Assert
-        Assert.ThrowsWithMessage<AudioDeviceManagerNotInitializedException>(() =>
-        {
-            manager.ChangeDevice("test-device");
-        }, IsDisposedExceptionMessage);
+        // Act
+        var action = () => manager.ChangeDevice("test-device");
+
+        // Assert
+        action.Should().Throw<AudioDeviceManagerNotInitializedException>().WithMessage(IsDisposedExceptionMessage);
     }
 
     [Fact]
@@ -313,11 +317,12 @@ public class AudioDeviceManagerTests
         var manager = CreateManager();
         manager.InitDevice();
 
-        // Act & Assert
-        Assert.ThrowsWithMessage<AudioDeviceDoesNotExistException>(() =>
-        {
-            manager.ChangeDevice("test-device-1");
-        }, "Device Name: test-device-1\nThe audio device does not exist.");
+        // Act
+        var action = () => manager.ChangeDevice("test-device-1");
+
+        // Assert
+        var expectedExceptionMessage = "Device Name: test-device-1\nThe audio device does not exist.";
+        action.Should().Throw<AudioDeviceDoesNotExistException>().WithMessage(expectedExceptionMessage);
     }
 
     [Theory]
@@ -437,17 +442,13 @@ public class AudioDeviceManagerTests
         var manager = CreateManager();
         manager.InitDevice();
 
-        // Act & Assert
-        Assert.Raises<EventArgs>((e) =>
-        {
-            manager.DeviceChanged += e;
-        }, (e) =>
-        {
-            manager.DeviceChanged -= e;
-        }, () =>
-        {
-            manager.ChangeDevice("test-device");
-        });
+        // Act
+        var eventRaised = false;
+        manager.DeviceChanged += (sender, args) => eventRaised = true;
+        manager.ChangeDevice("test-device");
+
+        // Assert
+        eventRaised.Should().BeTrue();
     }
 
     [Fact]
