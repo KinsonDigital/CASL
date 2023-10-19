@@ -7,6 +7,7 @@ namespace CASLTests.Devices.Exceptions;
 using CASL.Devices.Exceptions;
 using System;
 using Xunit;
+using FluentAssertions;
 
 /// <summary>
 /// Tests the <see cref="AudioDeviceManagerNotInitializedException"/> class.
@@ -21,31 +22,35 @@ public class AudioDeviceManagerNotInitializedExceptionTests
         var exception = new AudioDeviceManagerNotInitializedException();
 
         // Assert
-        Assert.Equal("The audio device manager has not been initialized.", exception.Message);
+        var expectedMessage = "The audio device manager has not been initialized.";
+        exception.Message.Should().Be(expectedMessage);
     }
 
     [Fact]
     public void Ctor_WhenInvokedWithSingleMessageParam_CorrectlySetsMesage()
     {
         // Act
-        var exception = new AudioDeviceManagerNotInitializedException("test-message");
+        var exceptionMessage = "test-message";
+        var exception = new AudioDeviceManagerNotInitializedException(exceptionMessage);
 
         // Assert
-        Assert.Equal("test-message", exception.Message);
+        exception.Message.Should().Be(exceptionMessage);
     }
 
     [Fact]
     public void Ctor_WhenInvokedWithMessageAndInnerException_ThrowsException()
     {
         // Arrange
-        var innerException = new Exception("inner-exception");
+        var innerExceptionMessage = "inner-exception";
+        var innerException = new Exception(innerExceptionMessage);
 
         // Act
-        var deviceException = new AudioDeviceManagerNotInitializedException("test-exception", innerException);
+        var exceptionMessage = "test-exception";
+        var deviceException = new AudioDeviceManagerNotInitializedException(exceptionMessage, innerException);
 
         // Assert
-        Assert.Equal("inner-exception", deviceException.InnerException.Message);
-        Assert.Equal("test-exception", deviceException.Message);
+        deviceException.InnerException.Message.Should().Be(innerExceptionMessage);
+        deviceException.Message.Should().Be(exceptionMessage);
     }
     #endregion
 }
