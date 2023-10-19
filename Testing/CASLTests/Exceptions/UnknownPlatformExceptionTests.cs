@@ -7,6 +7,7 @@ namespace CASLTests.Exceptions;
 using System;
 using CASL.Exceptions;
 using Xunit;
+using FluentAssertions;
 
 /// <summary>
 /// Tests the <see cref="UnknownPlatformException"/> class.
@@ -21,31 +22,35 @@ public class UnknownPlatformExceptionTests
         var exception = new UnknownPlatformException();
 
         // Assert
-        Assert.Equal("The platform is unknown.", exception.Message);
+        var expectedExceptionMessage = "The platform is unknown.";
+        exception.Message.Should().Be(expectedExceptionMessage);
     }
 
     [Fact]
     public void Ctor_WhenInvokedWithSingleMessageParam_CorrectlySetsMesage()
     {
         // Act
-        var exception = new UnknownPlatformException("test-message");
+        var exceptionMessage = "test-message";
+        var exception = new UnknownPlatformException(exceptionMessage);
 
         // Assert
-        Assert.Equal("test-message", exception.Message);
+        exception.Message.Should().Be(exceptionMessage);
     }
 
     [Fact]
     public void Ctor_WhenInvokedWithMessageAndInnerException_ThrowsException()
     {
         // Arrange
-        var innerException = new Exception("inner-exception");
+        var innerExceptionMessage = "inner-exception";
+        var innerException = new Exception(innerExceptionMessage);
 
         // Act
-        var deviceException = new UnknownPlatformException("test-exception", innerException);
+        var exceptionMessage = "test-exception";
+        var deviceException = new UnknownPlatformException(exceptionMessage, innerException);
 
         // Assert
-        Assert.Equal("inner-exception", deviceException.InnerException.Message);
-        Assert.Equal("test-exception", deviceException.Message);
+        deviceException.InnerException.Message.Should().Be(innerExceptionMessage);
+        deviceException.Message.Should().Be(exceptionMessage);
     }
     #endregion
 }
