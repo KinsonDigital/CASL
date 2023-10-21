@@ -59,6 +59,7 @@ public class ALContextAttributesTests
         var actual = contextAttributes.CreateAttributeArray();
 
         // Assert
+        actual.Should().HaveCount(11);
         actual.Should().ContainInOrder(
             (int)AlcContextAttributes.Frequency,
             111,
@@ -86,7 +87,6 @@ public class ALContextAttributesTests
         // Assert
         actual.Should().HaveCount(11);
         actual.Should().ContainInOrder(
-            11,
             (int)AlcContextAttributes.Frequency,
             111,
             (int)AlcContextAttributes.StereoSources,
