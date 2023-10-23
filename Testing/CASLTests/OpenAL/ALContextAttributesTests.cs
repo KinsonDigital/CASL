@@ -6,6 +6,7 @@ namespace CASLTests.OpenAL;
 
 using CASL.OpenAL;
 using Xunit;
+using FluentAssertions;
 
 /// <summary>
 /// Tests the <see cref="ALContextAttributes"/> class.
@@ -20,12 +21,12 @@ public class ALContextAttributesTests
         var actual = new ALContextAttributes();
 
         // Assert
-        Assert.Null(actual.Frequency);
-        Assert.Null(actual.MonoSources);
-        Assert.Null(actual.StereoSources);
-        Assert.Null(actual.Refresh);
-        Assert.Null(actual.Sync);
-        Assert.Empty(actual.AdditionalAttributes);
+        actual.Frequency.Should().BeNull();
+        actual.MonoSources.Should().BeNull();
+        actual.StereoSources.Should().BeNull();
+        actual.Refresh.Should().BeNull();
+        actual.Sync.Should().BeNull();
+        actual.AdditionalAttributes.Should().BeEmpty();
     }
 
     [Fact]
@@ -35,12 +36,12 @@ public class ALContextAttributesTests
         var actual = new ALContextAttributes(11, 22, 33, 44, true);
 
         // Assert
-        Assert.Equal(11, actual.Frequency);
-        Assert.Equal(22, actual.MonoSources);
-        Assert.Equal(33, actual.StereoSources);
-        Assert.Equal(44, actual.Refresh);
-        Assert.True(actual.Sync);
-        Assert.Empty(actual.AdditionalAttributes);
+        actual.Frequency.Should().Be(11);
+        actual.MonoSources.Should().Be(22);
+        actual.StereoSources.Should().Be(33);
+        actual.Refresh.Should().Be(44);
+        actual.Sync.Should().BeTrue();
+        actual.AdditionalAttributes.Should().BeEmpty();
     }
     #endregion
 
@@ -58,24 +59,20 @@ public class ALContextAttributesTests
         var actual = contextAttributes.CreateAttributeArray();
 
         // Assert
-        Assert.Equal(11, actual.Length);
-        Assert.Equal((int)AlcContextAttributes.Frequency, actual[0]);
-        Assert.Equal(111, actual[1]);
-
-        Assert.Equal((int)AlcContextAttributes.MonoSources, actual[2]);
-        Assert.Equal(222, actual[3]);
-
-        Assert.Equal((int)AlcContextAttributes.StereoSources, actual[4]);
-        Assert.Equal(333, actual[5]);
-
-        Assert.Equal((int)AlcContextAttributes.Refresh, actual[6]);
-        Assert.Equal(444, actual[7]);
-
-        Assert.Equal(expectedAttrValue, actual[8]);
-        Assert.Equal(expectedIntValue, actual[9]);
-
-        // Assert the trailing byte
-        Assert.Equal(0, actual[10]);
+        actual.Should().HaveCount(11);
+        actual.Should().ContainInOrder(
+            (int)AlcContextAttributes.Frequency,
+            111,
+            (int)AlcContextAttributes.MonoSources,
+            222,
+            (int)AlcContextAttributes.StereoSources,
+            333,
+            (int)AlcContextAttributes.Refresh,
+            444,
+            expectedAttrValue,
+            expectedIntValue,
+            // Assert the trailing byte
+            0);
     }
 
     [Fact]
@@ -88,25 +85,21 @@ public class ALContextAttributesTests
         var actual = contextAttributes.CreateAttributeArray();
 
         // Assert
-        Assert.Equal(11, actual.Length);
-        Assert.Equal((int)AlcContextAttributes.Frequency, actual[0]);
-        Assert.Equal(111, actual[1]);
-
-        Assert.Equal((int)AlcContextAttributes.StereoSources, actual[2]);
-        Assert.Equal(333, actual[3]);
-
-        Assert.Equal((int)AlcContextAttributes.Refresh, actual[4]);
-        Assert.Equal(444, actual[5]);
-
-        Assert.Equal((int)AlcContextAttributes.Sync, actual[6]);
-        Assert.Equal(1, actual[7]);
-
-        // Assert missing attribute 'mono sources'
-        Assert.Equal(0, actual[8]);
-        Assert.Equal(0, actual[9]);
-
-        // Assert the trailing byte
-        Assert.Equal(0, actual[10]);
+        actual.Should().HaveCount(11);
+        actual.Should().ContainInOrder(
+            (int)AlcContextAttributes.Frequency,
+            111,
+            (int)AlcContextAttributes.StereoSources,
+            333,
+            (int)AlcContextAttributes.Refresh,
+            444,
+            (int)AlcContextAttributes.Sync,
+            1,
+            // Assert missing attribute 'mono sources'
+            0,
+            0,
+            // Assert the trailing byte
+            0);
     }
 
     [Fact]
@@ -119,25 +112,21 @@ public class ALContextAttributesTests
         var actual = contextAttributes.CreateAttributeArray();
 
         // Assert
-        Assert.Equal(11, actual.Length);
-        Assert.Equal((int)AlcContextAttributes.Frequency, actual[0]);
-        Assert.Equal(111, actual[1]);
-
-        Assert.Equal((int)AlcContextAttributes.MonoSources, actual[2]);
-        Assert.Equal(222, actual[3]);
-
-        Assert.Equal((int)AlcContextAttributes.StereoSources, actual[4]);
-        Assert.Equal(333, actual[5]);
-
-        Assert.Equal((int)AlcContextAttributes.Refresh, actual[6]);
-        Assert.Equal(444, actual[7]);
-
-        // Assert that the sync attribute is zero
-        Assert.Equal(0, actual[8]);
-        Assert.Equal(0, actual[9]);
-
-        // Assert the trailing byte
-        Assert.Equal(0, actual[10]);
+        actual.Should().HaveCount(11);
+        actual.Should().ContainInOrder(
+            (int)AlcContextAttributes.Frequency,
+            111,
+            (int)AlcContextAttributes.MonoSources,
+            222,
+            (int)AlcContextAttributes.StereoSources,
+            333,
+            (int)AlcContextAttributes.Refresh,
+            444,
+            // Assert values at index 8 and 9 (sync bytes) are zero
+            0,
+            0,
+            // Assert trailing byte is zero
+            0);
     }
 
     [Fact]
@@ -151,28 +140,23 @@ public class ALContextAttributesTests
         var actual = contextAttributes.CreateAttributeArray();
 
         // Assert
-        Assert.Equal(13, actual.Length);
-        Assert.Equal((int)AlcContextAttributes.Frequency, actual[0]);
-        Assert.Equal(111, actual[1]);
-
-        Assert.Equal((int)AlcContextAttributes.MonoSources, actual[2]);
-        Assert.Equal(222, actual[3]);
-
-        Assert.Equal((int)AlcContextAttributes.StereoSources, actual[4]);
-        Assert.Equal(333, actual[5]);
-
-        Assert.Equal((int)AlcContextAttributes.Refresh, actual[6]);
-        Assert.Equal(444, actual[7]);
-
-        Assert.Equal((int)AlcContextAttributes.Sync, actual[8]);
-        Assert.Equal(1, actual[9]);
-
-        // Assert additional fake attributes
-        Assert.Equal(555, actual[10]);
-        Assert.Equal(666, actual[11]);
-
-        // Assert the trailing byte
-        Assert.Equal(0, actual[12]);
+        actual.Should().HaveCount(13);
+        actual.Should().ContainInOrder(
+            (int)AlcContextAttributes.Frequency,
+            111,
+            (int)AlcContextAttributes.MonoSources,
+            222,
+            (int)AlcContextAttributes.StereoSources,
+            333,
+            (int)AlcContextAttributes.Refresh,
+            444,
+            (int)AlcContextAttributes.Sync,
+            1,
+            // Assert additional fake attributes
+            555,
+            666,
+            // Assert trailing byte
+            0);
     }
 
     [Fact]
@@ -196,7 +180,7 @@ public class ALContextAttributesTests
         var actual = contextAttributes.ToString();
 
         // Assert
-        Assert.Equal(expected, actual);
+        actual.Should().Be(expected);
     }
 
     [Fact]
@@ -217,7 +201,7 @@ public class ALContextAttributesTests
         var actual = contextAttributes.ToString();
 
         // Assert
-        Assert.Equal(expected, actual);
+        actual.Should().Be(expected);
     }
     #endregion
 }
