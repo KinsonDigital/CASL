@@ -30,13 +30,13 @@ public class StringNullOrEmptyExceptionTests
     public void Ctor_WhenInvokedWithSingleMessageParam_CorrectlySetsMesage()
     {
         // Arrange
-        var exceptionMessage = "test-message";
+        var expected = "test-message";
 
         // Act
-        var exception = new StringNullOrEmptyException(exceptionMessage);
+        var exception = new StringNullOrEmptyException(expected);
 
         // Assert
-        exception.Message.Should().Be(exceptionMessage);
+        exception.Message.Should().Be(expected);
     }
 
     [Fact]

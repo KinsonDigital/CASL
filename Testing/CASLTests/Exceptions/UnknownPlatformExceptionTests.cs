@@ -30,13 +30,13 @@ public class UnknownPlatformExceptionTests
     public void Ctor_WhenInvokedWithSingleMessageParam_CorrectlySetsMesage()
     {
         // Arrange
-        var exceptionMessage = "test-message";
+        var expected = "test-message";
 
         // Act
-        var exception = new UnknownPlatformException(exceptionMessage);
+        var exception = new UnknownPlatformException(expected);
 
         // Assert
-        exception.Message.Should().Be(exceptionMessage);
+        exception.Message.Should().Be(expected);
     }
 
     [Fact]
