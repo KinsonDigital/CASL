@@ -29,8 +29,10 @@ public class StringNullOrEmptyExceptionTests
     [Fact]
     public void Ctor_WhenInvokedWithSingleMessageParam_CorrectlySetsMesage()
     {
-        // Act
+        // Arrange
         var exceptionMessage = "test-message";
+
+        // Act
         var exception = new StringNullOrEmptyException(exceptionMessage);
 
         // Assert
