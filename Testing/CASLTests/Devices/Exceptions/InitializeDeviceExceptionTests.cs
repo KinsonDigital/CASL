@@ -18,12 +18,14 @@ public class InitializeDeviceExceptionTests
     [Fact]
     public void Ctor_WhenInvokedWithNoParam_CorrectlySetsMessage()
     {
+        // Arrange
+        var expected = "There was an issue initializing the audio device.";
+
         // Act
         var exception = new InitializeDeviceException();
 
         // Assert
-        var expectedMessage = "There was an issue initializing the audio device.";
-        exception.Message.Should().Be(expectedMessage);
+        exception.Message.Should().Be(expected);
     }
 
     [Fact]
@@ -41,16 +43,16 @@ public class InitializeDeviceExceptionTests
     public void Ctor_WhenInvokedWithMessageAndInnerException_ThrowsException()
     {
         // Arrange
-        var innerExceptionMessage = "inner-exception";
-        var innerException = new Exception(innerExceptionMessage);
+        var expectedInnerExceptionMessage = "inner-exception";
+        var expectedExceptionMessage = "test-exception";
+        var innerException = new Exception(expectedInnerExceptionMessage);
 
         // Act
-        var exceptionMessage = "test-exception";
-        var deviceException = new InitializeDeviceException(exceptionMessage, innerException);
+        var deviceException = new InitializeDeviceException(expectedExceptionMessage, innerException);
 
         // Assert
-        deviceException.InnerException.Message.Should().Be(innerExceptionMessage);
-        deviceException.Message.Should().Be(exceptionMessage);
+        deviceException.InnerException.Message.Should().Be(expectedInnerExceptionMessage);
+        deviceException.Message.Should().Be(expectedExceptionMessage);
     }
     #endregion
 }

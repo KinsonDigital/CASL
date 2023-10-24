@@ -28,28 +28,30 @@ public class AudioExceptionTests
     [Fact]
     public void Ctor_WhenInvokedWithSingleMessageParam_CorrectlySetsMesage()
     {
+        // Arrange
+        var expected = "test-message";
+
         // Act
-        var exceptionMessage = "test-message";
-        var exception = new AudioException(exceptionMessage);
+        var exception = new AudioException(expected);
 
         // Assert
-        exception.Message.Should().Be(exceptionMessage);
+        exception.Message.Should().Be(expected);
     }
 
     [Fact]
     public void Ctor_WhenInvokedWithMessageAndInnerException_ThrowsException()
     {
         // Arrange
-        var innerExceptionMessage = "inner-exception";
-        var innerException = new Exception(innerExceptionMessage);
+        var expectedInnerExceptionMessage = "inner-exception";
+        var expectedExceptionMessage = "test-exception";
+        var innerException = new Exception(expectedInnerExceptionMessage);
 
         // Act
-        var exceptionMessage = "test-exception";
-        var deviceException = new AudioException(exceptionMessage, innerException);
+        var deviceException = new AudioException(expectedExceptionMessage, innerException);
 
         // Assert
-        deviceException.InnerException.Message.Should().Be(innerExceptionMessage);
-        deviceException.Message.Should().Be(exceptionMessage);
+        deviceException.InnerException.Message.Should().Be(expectedInnerExceptionMessage);
+        deviceException.Message.Should().Be(expectedExceptionMessage);
     }
     #endregion
 }
