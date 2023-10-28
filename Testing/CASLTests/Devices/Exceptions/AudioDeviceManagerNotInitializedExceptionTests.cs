@@ -7,6 +7,7 @@ namespace CASLTests.Devices.Exceptions;
 using CASL.Devices.Exceptions;
 using System;
 using Xunit;
+using FluentAssertions;
 
 /// <summary>
 /// Tests the <see cref="AudioDeviceManagerNotInitializedException"/> class.
@@ -21,31 +22,37 @@ public class AudioDeviceManagerNotInitializedExceptionTests
         var exception = new AudioDeviceManagerNotInitializedException();
 
         // Assert
-        Assert.Equal("The audio device manager has not been initialized.", exception.Message);
+        var expectedMessage = "The audio device manager has not been initialized.";
+        exception.Message.Should().Be(expectedMessage);
     }
 
     [Fact]
-    public void Ctor_WhenInvokedWithSingleMessageParam_CorrectlySetsMesage()
+    public void Ctor_WhenInvokedWithSingleMessageParam_CorrectlySetsMessage()
     {
+        // Arrange
+        var expected = "test-message";
+
         // Act
-        var exception = new AudioDeviceManagerNotInitializedException("test-message");
+        var exception = new AudioDeviceManagerNotInitializedException(expected);
 
         // Assert
-        Assert.Equal("test-message", exception.Message);
+        exception.Message.Should().Be(expected);
     }
 
     [Fact]
     public void Ctor_WhenInvokedWithMessageAndInnerException_ThrowsException()
     {
         // Arrange
-        var innerException = new Exception("inner-exception");
+        var expectedInnerExceptionMessage = "inner-exception";
+        var expectedExceptionMessage = "test-exception";
+        var innerException = new Exception(expectedInnerExceptionMessage);
 
         // Act
-        var deviceException = new AudioDeviceManagerNotInitializedException("test-exception", innerException);
+        var deviceException = new AudioDeviceManagerNotInitializedException(expectedExceptionMessage, innerException);
 
         // Assert
-        Assert.Equal("inner-exception", deviceException.InnerException.Message);
-        Assert.Equal("test-exception", deviceException.Message);
+        deviceException.InnerException.Message.Should().Be(expectedInnerExceptionMessage);
+        deviceException.Message.Should().Be(expectedExceptionMessage);
     }
     #endregion
 }
