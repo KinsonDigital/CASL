@@ -10,7 +10,7 @@ using CASL;
 using CASL.Data;
 using Moq;
 using Xunit;
-using Assert = Helpers.AssertExtensions;
+using FluentAssertions;
 
 /// <summary>
 /// Tests the <see cref="MP3SoundDecoder"/> class.
@@ -33,11 +33,11 @@ public class MP3SoundDecoderTests
         // Arrange
         var decoder = new MP3SoundDecoder(this.mockDataStream.Object);
 
-        // Act & Assert
-        Assert.ThrowsWithMessage<ArgumentException>(() =>
-        {
-            decoder.LoadData(fileName);
-        }, "The param must not be null or empty. (Parameter 'fileName')");
+        // Act
+        var action = () => decoder.LoadData(fileName);
+
+        // Assert
+        action.Should().Throw<ArgumentException>().WithMessage("The param must not be null or empty. (Parameter 'fileName')");
     }
 
     [Fact]
@@ -46,11 +46,11 @@ public class MP3SoundDecoderTests
         // Arrange
         var decoder = new MP3SoundDecoder(this.mockDataStream.Object);
 
-        // Act & Assert
-        Assert.ThrowsWithMessage<ArgumentException>(() =>
-        {
-            decoder.LoadData("sound.wav");
-        }, "The file name must have an mp3 file extension. (Parameter 'fileName')");
+        // Act
+        var action = () => decoder.LoadData("sound.wav");
+
+        // Assert
+        action.Should().Throw<ArgumentException>().WithMessage("The file name must have an mp3 file extension. (Parameter 'fileName')");
     }
 
     [Fact]
@@ -87,7 +87,7 @@ public class MP3SoundDecoderTests
         var actual = decoder.LoadData("sound.mp3");
 
         // Assert
-        Assert.Equal(expected, actual);
+        actual.Should().Be(expected);
         this.mockDataStream.Verify(m => m.ReadSamples(new byte[] { 10, 20 }, 0, 2), Times.Exactly(2));
     }
 
