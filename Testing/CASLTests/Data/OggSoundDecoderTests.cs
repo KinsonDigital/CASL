@@ -11,7 +11,6 @@ using CASL.Data;
 using CASL.Data.Exceptions;
 using Moq;
 using Xunit;
-using Assert = Helpers.AssertExtensions;
 using FluentAssertions;
 
 /// <summary>
