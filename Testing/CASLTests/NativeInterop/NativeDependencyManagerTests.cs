@@ -16,6 +16,7 @@ using CASL.NativeInterop;
 using Moq;
 using Xunit;
 using Assert = Helpers.AssertExtensions;
+using FluentAssertions;
 #pragma warning restore IDE0001 // Name can be simplified
 
 /// <summary>
@@ -41,40 +42,43 @@ public class NativeDependencyManagerTests
     [Fact]
     public void Ctor_WhenInvokedWithNullFile_ThrowsException()
     {
-        // Act & Assert
-        Assert.ThrowsWithMessage<ArgumentNullException>(() =>
-        {
-            _ = new OpenALDependencyManager(
+        // Act
+        var act = () => new OpenALDependencyManager(
                 null,
                 this.mockPath.Object,
                 this.mockPathResolver.Object);
-        }, "The parameter must not be null. (Parameter 'file')");
+
+        // Assert
+        act.Should().Throw<ArgumentNullException>()
+            .WithMessage("The parameter must not be null. (Parameter 'file')");
     }
 
     [Fact]
     public void Ctor_WhenInvokedWithNullPath_ThrowsException()
     {
-        // Act & Assert
-        Assert.ThrowsWithMessage<ArgumentNullException>(() =>
-        {
-            _ = new OpenALDependencyManager(
+        // Act
+        var act = () => new OpenALDependencyManager(
                 this.mockFile.Object,
                 null,
                 this.mockPathResolver.Object);
-        }, "The parameter must not be null. (Parameter 'path')");
+
+        // Assert
+        act.Should().Throw<ArgumentNullException>()
+            .WithMessage("The parameter must not be null. (Parameter 'path')");
     }
 
     [Fact]
     public void Ctor_WhenInvokedWithNullPathResolver_ThrowsException()
     {
-        // Act & Assert
-        Assert.ThrowsWithMessage<ArgumentNullException>(() =>
-        {
-            _ = new OpenALDependencyManager(
+        // Act
+        var act = () => new OpenALDependencyManager(
                 this.mockFile.Object,
                 this.mockPath.Object,
                 null);
-        }, "The parameter must not be null. (Parameter 'nativeLibPathResolver')");
+
+        // Assert
+        act.Should().Throw<ArgumentNullException>()
+            .WithMessage("The parameter must not be null. (Parameter 'nativeLibPathResolver')");
     }
     #endregion
 
@@ -98,8 +102,8 @@ public class NativeDependencyManagerTests
         var actual = manager.NativeLibraries;
 
         // Assert
-        Xunit.Assert.Single(actual);
-        Xunit.Assert.Equal("test-native-lib", actual[0]);
+        actual.Should().HaveCount(1);
+        actual.First().Should().Be(libNameWithoutExtension);
     }
 
     [Theory]
@@ -122,7 +126,7 @@ public class NativeDependencyManagerTests
         var actual = sut.NativeLibDirPath;
 
         // Assert
-        Xunit.Assert.Equal(expected, actual);
+        actual.Should().Be(expected);
     }
     #endregion
 
@@ -143,11 +147,12 @@ public class NativeDependencyManagerTests
         var manager = CreateManager();
         manager.NativeLibraries = new ReadOnlyCollection<string>(new[] { "lib.dll" }.ToList());
 
-        // Act & Assert
-        Assert.ThrowsWithMessage<FileNotFoundException>(() =>
-        {
-            manager.VerifyDependencies();
-        }, $"The native dependency library '{srcDirPath}/lib.dll' does not exist.");
+        // Act
+        var act = manager.VerifyDependencies;
+
+        // Assert
+        act.Should().Throw<FileNotFoundException>()
+            .WithMessage($"The native dependency library '{srcDirPath}/lib.dll' does not exist.");
     }
 
     [Fact]
@@ -166,11 +171,11 @@ public class NativeDependencyManagerTests
         var manager = CreateManager();
         manager.NativeLibraries = new ReadOnlyCollection<string>(new[] { "lib.dll" }.ToList());
 
-        // Act & Assert
-        Assert.DoesNotThrow<FileNotFoundException>(() =>
-        {
-            manager.VerifyDependencies();
-        });
+        // Act
+        var act = manager.VerifyDependencies;
+
+        // Assert
+        act.Should().NotThrow<FileNotFoundException>();
     }
     #endregion
 

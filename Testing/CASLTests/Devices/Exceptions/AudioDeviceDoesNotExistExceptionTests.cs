@@ -25,7 +25,7 @@ public class AudioDeviceDoesNotExistExceptionTests
     }
 
     [Fact]
-    public void Ctor_WhenInvokedWithSingleMessageParam_CorrectlySetsMesage()
+    public void Ctor_WhenInvokedWithSingleMessageParam_CorrectlySetsMessage()
     {
         // Act
         var exception = new AudioDeviceDoesNotExistException("test-message");

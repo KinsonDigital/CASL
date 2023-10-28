@@ -10,7 +10,7 @@ using CASL.Exceptions;
 using CASL.NativeInterop;
 using Moq;
 using Xunit;
-using Assert = Helpers.AssertExtensions;
+using FluentAssertions;
 #pragma warning restore IDE0001 // The name can be simplified
 
 /// <summary>
@@ -37,7 +37,7 @@ public class OpenALLibraryTests
         var actual = library.LibraryName;
 
         // Assert
-        Assert.Equal("soft_oal.dll", actual);
+        actual.Should().Be("soft_oal.dll");
     }
 
     [Fact]
@@ -51,7 +51,7 @@ public class OpenALLibraryTests
         var actual = library.LibraryName;
 
         // Assert
-        Assert.Equal("libopenal.so", actual);
+        actual.Should().Be("libopenal.so");
     }
 
     [Fact]
@@ -64,11 +64,12 @@ public class OpenALLibraryTests
 
         var library = new OpenALLibrary(this.mockPlatform.Object);
 
-        // Act & Assert
-        Assert.ThrowsWithMessage<UnknownPlatformException>(() =>
-        {
-            _ = library.LibraryName;
-        }, "The platform 'unknown-platform' is unknown.");
+        // Act
+        var act = () => library.LibraryName;
+
+        // Assert
+        act.Should().Throw<UnknownPlatformException>()
+            .WithMessage("The platform 'unknown-platform' is unknown.");
     }
     #endregion
 

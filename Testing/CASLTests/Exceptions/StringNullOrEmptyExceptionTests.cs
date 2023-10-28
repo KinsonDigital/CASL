@@ -7,6 +7,7 @@ namespace CASLTests.Exceptions;
 using System;
 using CASL.Exceptions;
 using Xunit;
+using FluentAssertions;
 
 /// <summary>
 /// Tests the <see cref="StringNullOrEmptyException"/> class.
@@ -21,31 +22,37 @@ public class StringNullOrEmptyExceptionTests
         var exception = new StringNullOrEmptyException();
 
         // Assert
-        Assert.Equal("The string must not be null or empty.", exception.Message);
+        var expectedExceptionMessage = "The string must not be null or empty.";
+        exception.Message.Should().Be(expectedExceptionMessage);
     }
 
     [Fact]
-    public void Ctor_WhenInvokedWithSingleMessageParam_CorrectlySetsMesage()
+    public void Ctor_WhenInvokedWithSingleMessageParam_CorrectlySetsMessage()
     {
+        // Arrange
+        var expected = "test-message";
+
         // Act
-        var exception = new StringNullOrEmptyException("test-message");
+        var exception = new StringNullOrEmptyException(expected);
 
         // Assert
-        Assert.Equal("test-message", exception.Message);
+        exception.Message.Should().Be(expected);
     }
 
     [Fact]
     public void Ctor_WhenInvokedWithMessageAndInnerException_ThrowsException()
     {
         // Arrange
+        var innerExceptionMessage = "inner-exception";
         var innerException = new Exception("inner-exception");
 
         // Act
+        var exceptionMessage = "test-exception";
         var deviceException = new StringNullOrEmptyException("test-exception", innerException);
 
         // Assert
-        Assert.Equal("inner-exception", deviceException.InnerException.Message);
-        Assert.Equal("test-exception", deviceException.Message);
+        deviceException.InnerException.Message.Should().Be(innerExceptionMessage);
+        deviceException.Message.Should().Be(exceptionMessage);
     }
     #endregion
 }
