@@ -9,6 +9,7 @@ using System.Linq;
 using CASL;
 using CASL.Data;
 using Xunit;
+using FluentAssertions;
 
 /// <summary>
 /// Tests the <see cref="SoundData{T}"/> struct.
@@ -27,10 +28,10 @@ public class SoundDataTests
             AudioFormat.Stereo16);
 
         // Assert
-        Assert.Equal(new[] { 1f }, data.BufferData.ToArray());
-        Assert.Equal(44100, data.SampleRate);
-        Assert.Equal(2, data.Channels);
-        Assert.Equal(AudioFormat.Stereo16, data.Format);
+        data.BufferData.ToArray().Should().BeEquivalentTo(new[] { 1f });
+        data.SampleRate.Should().Be(44100);
+        data.Channels.Should().Be(2);
+        data.Format.Should().Be(AudioFormat.Stereo16);
     }
     #endregion
 
@@ -59,7 +60,7 @@ public class SoundDataTests
         var actual = dataA == dataB;
 
         // Assert
-        Assert.True(actual);
+        actual.Should().BeTrue();
     }
 
     [Fact]
@@ -86,7 +87,7 @@ public class SoundDataTests
         var actual = dataA != dataB;
 
         // Assert
-        Assert.False(actual);
+        actual.Should().BeFalse();
     }
 
     [Fact]
@@ -107,7 +108,7 @@ public class SoundDataTests
         var actual = dataA.Equals(dataB);
 
         // Assert
-        Assert.False(actual);
+        actual.Should().BeFalse();
     }
 
     [Fact]
@@ -134,7 +135,7 @@ public class SoundDataTests
         var actual = dataA.Equals(dataB);
 
         // Assert
-        Assert.True(actual);
+        actual.Should().BeTrue();
     }
 
     [Theory]
@@ -168,7 +169,7 @@ public class SoundDataTests
         var actual = dataA.Equals(dataB);
 
         // Assert
-        Assert.Equal(expected, actual);
+        actual.Should().Be(expected);
     }
     #endregion
 }
