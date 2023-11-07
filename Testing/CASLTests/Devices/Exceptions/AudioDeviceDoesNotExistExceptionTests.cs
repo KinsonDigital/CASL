@@ -47,7 +47,7 @@ public class AudioDeviceDoesNotExistExceptionTests
         // Arrange
         var expectedDeviceName = "device";
         var expectedMessage = "test-message";
-        var expectedExceptionMessage = $"DeviceName: {expectedDeviceName}\n{expectedMessage}";
+        var expectedExceptionMessage = $"Device Name: {expectedDeviceName}\n{expectedMessage}";
 
         // Act
         var exception = new AudioDeviceDoesNotExistException(expectedMessage, expectedDeviceName);
