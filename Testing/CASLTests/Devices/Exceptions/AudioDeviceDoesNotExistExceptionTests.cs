@@ -7,6 +7,7 @@ namespace CASLTests.Devices.Exceptions;
 using CASL.Devices.Exceptions;
 using System;
 using Xunit;
+using FluentAssertions;
 
 /// <summary>
 /// Tests the <see cref="AudioDeviceDoesNotExistException"/> class.
@@ -17,45 +18,59 @@ public class AudioDeviceDoesNotExistExceptionTests
     [Fact]
     public void Ctor_WhenInvokedWithNoParam_CorrectlySetsMessage()
     {
+        // Arrange
+        var expected = "The audio device does not exist.";
+
         // Act
         var exception = new AudioDeviceDoesNotExistException();
 
         // Assert
-        Assert.Equal("The audio device does not exist.", exception.Message);
+        exception.Message.Should().Be(expected);
     }
 
     [Fact]
     public void Ctor_WhenInvokedWithSingleMessageParam_CorrectlySetsMessage()
     {
+        // Arrange
+        var expected  = "test-message";
+
         // Act
-        var exception = new AudioDeviceDoesNotExistException("test-message");
+        var exception = new AudioDeviceDoesNotExistException(expected);
 
         // Assert
-        Assert.Equal("test-message", exception.Message);
+        exception.Message.Should().Be(expected);
     }
 
     [Fact]
     public void Ctor_WhenInvokedWithMessageAndDeviceNameParams_CorrectlySetsMessage()
     {
+        // Arrange
+        var expectedDeviceName = "device";
+        var expectedMessage = "test-message";
+        var expectedExceptionMessage = $"Device Name: {expectedDeviceName}\n{expectedMessage}";
+
         // Act
-        var exception = new AudioDeviceDoesNotExistException("test-message", "device");
+        var exception = new AudioDeviceDoesNotExistException(expectedMessage, expectedDeviceName);
 
         // Assert
-        Assert.Equal("Device Name: device\ntest-message", exception.Message);
+        exception.Message.Should().Be(expectedExceptionMessage);
+
     }
 
     [Fact]
     public void Ctor_WhenInvokedWithMessageAndInnerException_ThrowsException()
     {
         // Arrange
-        var innerException = new Exception("inner-exception");
+        var expectedMessage =  "test-exception";
+        var expectedInnerMessage = "inner-exception";
+        var innerException = new Exception(expectedInnerMessage);
 
         // Act
-        var deviceException = new AudioDeviceDoesNotExistException("test-exception", innerException);
+        var deviceException = new AudioDeviceDoesNotExistException(expectedMessage, innerException);
 
         // Assert
-        Assert.Equal("inner-exception", deviceException.InnerException.Message);
-        Assert.Equal("test-exception", deviceException.Message);
+        deviceException.InnerException.Message.Should().Be(expectedInnerMessage);
+        deviceException.Message.Should().Be(expectedMessage);
     }
     #endregion
 }

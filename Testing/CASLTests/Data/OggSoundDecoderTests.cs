@@ -11,7 +11,7 @@ using CASL.Data;
 using CASL.Data.Exceptions;
 using Moq;
 using Xunit;
-using Assert = Helpers.AssertExtensions;
+using FluentAssertions;
 
 /// <summary>
 /// Tests the <see cref="OggSoundDecoder"/> class.
@@ -34,11 +34,11 @@ public class OggSoundDecoderTests
         // Arrange
         var decoder = new OggSoundDecoder(this.mockDataStream.Object);
 
-        // Act & Assert
-        Assert.ThrowsWithMessage<ArgumentException>(() =>
-        {
-            decoder.LoadData(fileName);
-        }, "The param must not be null or empty. (Parameter 'fileName')");
+        // Act
+        var action = () => decoder.LoadData(fileName);
+
+        // Assert
+        action.Should().Throw<ArgumentException>().WithMessage("The param must not be null or empty. (Parameter 'fileName')");
     }
 
     [Fact]
@@ -47,11 +47,11 @@ public class OggSoundDecoderTests
         // Arrange
         var decoder = new OggSoundDecoder(this.mockDataStream.Object);
 
-        // Act & Assert
-        Assert.ThrowsWithMessage<ArgumentException>(() =>
-        {
-            decoder.LoadData("sound.wav");
-        }, "The file name must have an ogg file extension. (Parameter 'fileName')");
+        // Act
+        var action = () => decoder.LoadData("sound.wav");
+
+        // Assert
+        action.Should().Throw<ArgumentException>().WithMessage("The file name must have an ogg file extension. (Parameter 'fileName')");
     }
 
     [Fact]
@@ -61,11 +61,11 @@ public class OggSoundDecoderTests
         this.mockDataStream.SetupGet(p => p.Channels).Returns(1234);
         var decoder = new OggSoundDecoder(this.mockDataStream.Object);
 
-        // Act & Assert
-        Assert.ThrowsWithMessage<SoundDataException>(() =>
-        {
-            decoder.LoadData("sound.ogg");
-        }, "Only supported formats are Mono 32-bit and Stereo 32-bit.");
+        // Act
+        var action = () => decoder.LoadData("sound.ogg");
+
+        // Assert
+        action.Should().Throw<SoundDataException>().WithMessage("Only supported formats are Mono 32-bit and Stereo 32-bit.");
     }
 
     [Theory]
@@ -120,7 +120,7 @@ public class OggSoundDecoderTests
         var actual = decoder.LoadData("sound.ogg");
 
         // Assert
-        Assert.Equal(expected, actual);
+        actual.Should().Be(expected);
         this.mockDataStream.Verify(m => m.ReadSamples(It.IsAny<float[]>(), 0, channels), Times.Exactly(2));
     }
 
