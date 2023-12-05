@@ -8,10 +8,10 @@
     <Nullable>enable</Nullable>
 
     <!--Update this for preview releases-->
-    <Version>1.0.0-preview.16</Version>
+    <Version>1.0.0-preview.17</Version>
 
     <!--Update this for preview releases-->
-    <FileVersion>1.0.0-preview.16</FileVersion>
+    <FileVersion>1.0.0-preview.17</FileVersion>
 
     <AssemblyVersion>1.0.0</AssemblyVersion>
     <ApplicationIcon>casl-logo.ico</ApplicationIcon>
