@@ -27,12 +27,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CASLTests", "Testing\CASLTe
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "WorkFlows", "WorkFlows", "{5F701C8E-2B7C-427B-B16F-068BD369D2BF}"
 	ProjectSection(SolutionItems) = preProject
-		.github\workflows\add-new--issue-to-project.yml = .github\workflows\add-new--issue-to-project.yml
+		.github\workflows\add-new-item-to-project.yml = .github\workflows\add-new-item-to-project.yml
 		.github\workflows\build-status-check.yml = .github\workflows\build-status-check.yml
 		.github\workflows\prepare-release.yml = .github\workflows\prepare-release.yml
 		.github\workflows\release.yml = .github\workflows\release.yml
 		.github\workflows\sync-bot.yml = .github\workflows\sync-bot.yml
-		.github\workflows\sync-issue-to-pr.yml = .github\workflows\sync-issue-to-pr.yml
+		.github\workflows\sync-pr-to-issue.yml = .github\workflows\sync-pr-to-issue.yml
 		.github\workflows\sync-status-check.yml = .github\workflows\sync-status-check.yml
 		.github\workflows\unit-test-status-check.yml = .github\workflows\unit-test-status-check.yml
 	EndProjectSection
