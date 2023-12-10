@@ -19,7 +19,6 @@ using CASL.Devices.Exceptions;
 using CASL.OpenAL;
 using Moq;
 using Xunit;
-using Assert = Helpers.AssertExtensions;
 using FluentAssertions;
 #pragma warning restore IDE0001 // Name can be simplified
 
@@ -460,11 +459,11 @@ public class AudioDeviceManagerTests
         var manager = CreateManager();
         manager.InitDevice();
 
-        // Act & Assert
-        Assert.DoesNotThrowNullReference(() =>
-        {
-            manager.ChangeDevice("test-device");
-        });
+        // Act
+        var action = () => manager.ChangeDevice("test-device");
+
+        // Assert
+        action.Should().NotThrow<NullReferenceException>();
     }
 
     [Fact]
