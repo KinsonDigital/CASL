@@ -19,7 +19,6 @@ using CASL.OpenAL;
 using FluentAssertions;
 using Moq;
 using Xunit;
-using Assert = Helpers.AssertExtensions;
 
 /// <summary>
 /// Tests the <see cref="Sound"/> class.
