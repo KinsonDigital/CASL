@@ -11,6 +11,7 @@
 [![Unit Test PR Status Check](https://img.shields.io/github/actions/workflow/status/KinsonDigital/CASL/unit-test-status-check.yml?label=%F0%9F%A7%AATests)](https://github.com/KinsonDigital/CASL/actions/workflows/unit-test-status-check.yml)
 
 [![Codecov](https://img.shields.io/codecov/c/github/KinsonDigital/CASL?label=Code%20Coverage&logo=codecov)](https://app.codecov.io/gh/KinsonDigital/CASL/tree/preview)
+[![RepoRater](https://repo-rater.eddiehub.io/api/badge?owner=KinsonDigital&name=Velaptor)](https://repo-rater.eddiehub.io/rate?owner=KinsonDigital&name=Velaptor)
 
 [![Latest Nuget Release](https://img.shields.io/nuget/vpre/kinsondigital.CASL?label=Latest%20Release&logo=nuget)](https://www.nuget.org/packages/KinsonDigital.CASL)
 [![Nuget Downloads](https://img.shields.io/nuget/dt/KinsonDigital.CASL?color=0094FF&label=nuget%20downloads&logo=nuget)](https://www.nuget.org/stats/packages/KinsonDigital.CASL?groupby=Version)
@@ -24,6 +25,7 @@
 This library is still under development and is not at v1.0.0 yet!!  However, all of the major features are available, so we encourage you to use them and provide feedback.  That is what open source is all about. 🥳
 
 <h2 style="font-weight:bold" align="center">📖 About CASL 📖</h2>
+<h4 style="font-weight:bold;" align="left" >⭐ Don't forget to give us a star! ⭐</h4>
 
 **CASL** (pronounced Castle), is an acronym for (C)ross-platform (A)udio and (S)ound (L)ibrary and uses the latest possible dotnet version. **CASL** plays and manages sounds powered by **OpenAL 1.1**, using software rendering, which is accomplished by using low-level bindings to the native **OpenAL** library.  
 
