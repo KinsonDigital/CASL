@@ -11,6 +11,7 @@
 [![Unit Test PR Status Check](https://img.shields.io/github/actions/workflow/status/KinsonDigital/CASL/unit-test-status-check.yml?label=%F0%9F%A7%AATests)](https://github.com/KinsonDigital/CASL/actions/workflows/unit-test-status-check.yml)
 
 [![Codecov](https://img.shields.io/codecov/c/github/KinsonDigital/CASL?label=Code%20Coverage&logo=codecov)](https://app.codecov.io/gh/KinsonDigital/CASL/tree/preview)
+[![RepoRater](https://repo-rater.eddiehub.io/api/badge?owner=KinsonDigital&name=Velaptor)](https://repo-rater.eddiehub.io/rate?owner=KinsonDigital&name=Velaptor)
 
 [![Latest Nuget Release](https://img.shields.io/nuget/vpre/kinsondigital.CASL?label=Latest%20Release&logo=nuget)](https://www.nuget.org/packages/KinsonDigital.CASL)
 [![Nuget Downloads](https://img.shields.io/nuget/dt/KinsonDigital.CASL?color=0094FF&label=nuget%20downloads&logo=nuget)](https://www.nuget.org/stats/packages/KinsonDigital.CASL?groupby=Version)
