@@ -25,6 +25,7 @@
 This library is still under development and is not at v1.0.0 yet!!  However, all of the major features are available, so we encourage you to use them and provide feedback.  That is what open source is all about. 🥳
 
 <h2 style="font-weight:bold" align="center">📖 About CASL 📖</h2>
+<h4 style="font-weight:bold;" align="left" >⭐ Don't forget to give us a star! ⭐</h4>
 
 **CASL** (pronounced Castle), is an acronym for (C)ross-platform (A)udio and (S)ound (L)ibrary and uses the latest possible dotnet version. **CASL** plays and manages sounds powered by **OpenAL 1.1**, using software rendering, which is accomplished by using low-level bindings to the native **OpenAL** library.  
 
