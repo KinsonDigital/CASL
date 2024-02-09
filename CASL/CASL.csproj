@@ -63,7 +63,8 @@
     </PackageReference>
     <PackageReference Include="MP3Sharp" Version="1.0.5" />
     <PackageReference Include="NVorbis" Version="0.10.5" />
-    <PackageReference Include="SimpleInjector" Version="5.4.4" />
+    <PackageReference Include="Silk.NET.OpenAL" Version="2.20.0" />
+    <PackageReference Include="SimpleInjector" Version="5.4.2" />
     <PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
