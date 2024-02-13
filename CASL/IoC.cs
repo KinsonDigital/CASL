@@ -66,8 +66,9 @@ internal static class IoC
     /// </summary>
     private static void SetupAudio()
     {
-        IoCContainer.Register<ALC>(Lifestyle.Singleton);
-        IoCContainer.Register<AL>(Lifestyle.Singleton);
+        // TODO: Delete These
+        // IoCContainer.Register<ALC>(Lifestyle.Singleton);
+        // IoCContainer.Register<AL>(Lifestyle.Singleton);
         IoCContainer.Register<IOpenALInvoker, OpenALInvoker>(Lifestyle.Singleton);
 
         IoCContainer.Register<IAudioDeviceManager, AudioDeviceManager>(Lifestyle.Singleton);

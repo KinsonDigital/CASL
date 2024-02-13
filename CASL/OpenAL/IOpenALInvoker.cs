@@ -6,6 +6,11 @@ namespace CASL.OpenAL;
 
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
+using Silk.NET.OpenAL;
+using Silk.NET.OpenAL.Extensions.EXT;
+
+// TODO: Go through the code docs and spruce them up a bit
 
 /// <summary>
 /// Invokes OpenAL functions.
@@ -33,7 +38,7 @@ internal interface IOpenALInvoker
     ///     to a specific portion of code, alGetError should be called before the isolated
     ///     section to clear the current error state.
     /// </returns>
-    ALError GetError();
+    AudioError GetError();
 
     /// <summary>
     /// This function creates a context using a specified device.
@@ -45,7 +50,7 @@ internal interface IOpenALInvoker
     ///     The attribute list can be NULL, or a zero terminated list of integer pairs composed
     ///     of valid ALC attribute tokens and requested values.
     /// </remarks>
-    ALContext CreateContext(ALDevice device, ALContextAttributes attributes);
+    Context CreateContext(Device device, ALContextAttributes attributes);
 
     /// <summary>
     /// This function opens a device by name.
@@ -55,14 +60,14 @@ internal interface IOpenALInvoker
     ///     Returns a pointer to the opened device. The return
     ///     value will be NULL if there is an error.
     /// </returns>
-    ALDevice OpenDevice(string? deviceName);
+    Device OpenDevice(string? deviceName);
 
     /// <summary>
     /// This function makes a specified context the current context.
     /// </summary>
     /// <param name="context">A pointer to the new context.</param>
     /// <returns>Returns <see langword="true"/> on success, or <see langword="false"/> on failure.</returns>
-    bool MakeContextCurrent(ALContext context);
+    bool MakeContextCurrent(Context context);
 
     /// <summary>
     ///     This function generates one buffer only, which contain audio data (see AL.BufferData).
@@ -80,13 +85,6 @@ internal interface IOpenALInvoker
     uint GenSource();
 
     /// <summary>
-    /// This function retrieves an OpenAL string property.
-    /// </summary>
-    /// <param name="param">The human-readable error string to be returned.</param>
-    /// <returns>Returns a pointer to a null-terminated string.</returns>
-    string GetErrorString(ALError param);
-
-    /// <summary>
     /// This function retrieves an integer property of a source.
     /// </summary>
     /// <param name="sid">Source name whose attribute is being retrieved.</param>
@@ -95,7 +93,7 @@ internal interface IOpenALInvoker
     ///     Buffer, SourceState, BuffersQueued, BuffersProcessed.
     /// </param>
     /// <returns>A pointer to the integer value being retrieved.</returns>
-    int GetSource(uint sid, ALGetSourcei param);
+    int GetSourceProperty(uint sid, GetSourceInteger param);
 
     /// <summary>
     /// This function retrieves a bool property of a source.
@@ -103,7 +101,7 @@ internal interface IOpenALInvoker
     /// <param name="sid">Source name whose attribute is being retrieved.</param>
     /// <param name="param">The name of the attribute to get: ALSourceb.SourceRelative, Looping.</param>
     /// <returns>A pointer to the bool value being retrieved.</returns>
-    bool GetSource(uint sid, ALSourceb param);
+    bool GetSourceProperty(uint sid, SourceBoolean param);
 
     /// <summary>
     /// This function retrieves a floating-point property of a source.
@@ -115,7 +113,7 @@ internal interface IOpenALInvoker
     ///     EfxAirAbsorptionFactor, EfxRoomRolloffFactor, EfxConeOuterGainHighFrequency.
     /// </param>
     /// <returns>A pointer to the floating-point value being retrieved.</returns>
-    float GetSource(uint sid, ALSourcef param);
+    float GetSourceProperty(uint sid, SourceFloat param);
 
     /// <summary>
     /// <inheritdoc cref="AL.GetBuffer"/>
@@ -123,21 +121,21 @@ internal interface IOpenALInvoker
     /// <param name="bid">Buffer name whose attribute is being retrieved.</param>
     /// <param name="param">The name of the attribute to be retrieved: ALGetBufferi.Frequency, Bits, Channels, Size, and the currently hidden AL_DATA (dangerous).</param>
     /// <returns>The buffer stat.</returns>
-    int GetBuffer(uint bid, ALGetBufferi param);
+    int GetBuffer(uint bid, GetBufferInteger param);
 
     /// <summary>
     /// This function retrieves an integer property of a source.
     /// </summary>
     /// <param name="sid">Source name whose attribute is being retrieved.</param>
     /// <returns>The source state.</returns>
-    ALSourceState GetSourceState(uint sid);
+    SourceState GetSourceState(uint sid);
 
     /// <summary>
     /// This function retrieves a context's device pointer.
     /// </summary>
     /// <param name="context">A pointer to a context.</param>
     /// <returns>Returns a pointer to the specified context's device.</returns>
-    ALDevice GetContextsDevice(ALContext context);
+    Device GetContextsDevice(Context context);
 
     /// <summary>
     /// This strings related to the context.
@@ -161,7 +159,7 @@ internal interface IOpenALInvoker
     ///     returns a list of available context extensions, with each extension separated
     ///     by a space and the list terminated by a NULL character.
     /// </remarks>
-    string GetString(ALDevice device, AlcGetString param);
+    string GetString(Device device, GetContextString param);
 
     /// <summary>
     /// This function returns a List of strings related to the context.
@@ -178,7 +176,7 @@ internal interface IOpenALInvoker
     ///     returns a list of available context extensions, with each extension separated
     ///     by a space and the list terminated by a NULL character.
     /// </remarks>
-    IList<string> GetDeviceList();
+    ImmutableArray<string> GetDeviceList();
 
     /// <summary>
     /// Gets the name of the default audio device.
@@ -192,53 +190,69 @@ internal interface IOpenALInvoker
     ///     types as well.
     /// </summary>
     /// <typeparam name="TBuffer">The type of the data buffer.</typeparam>
-    /// <param name="bid">Buffer Handle/Name to be filled with buffer.</param>
+    /// <param name="buffer">Buffer Handle/Name to be filled with buffer.</param>
+    /// <param name="format">
+    /// Format type from among the following: ALFormat.Mono8,
+    /// ALFormat.Mono16, ALFormat.Stereo8, ALFormat.Stereo16.
+    /// </param>
+    /// <param name="data">The audio data.</param>
+    /// <param name="freq">The frequency of the audio data.</param>
+    void BufferData<TBuffer>(uint buffer, BufferFormat format, TBuffer[] data, int freq)
+        where TBuffer : unmanaged;
+
+    /// <summary>
+    ///     This function fills a buffer with audio buffer. All the predefined formats are
+    ///     PCM buffer, but this function may be used by extensions to load other buffer
+    ///     types as well.
+    /// </summary>
+    /// <typeparam name="TBuffer">The type of the data buffer.</typeparam>
+    /// <param name="buffer">Buffer Handle/Name to be filled with buffer.</param>
     /// <param name="format">
     ///     Format type from among the following: ALFormat.Mono8,
     ///     ALFormat.Mono16, ALFormat.Stereo8, ALFormat.Stereo16.
     /// </param>
-    /// <param name="buffer">The audio buffer.</param>
+    /// <param name="data">The audio data.</param>
     /// <param name="freq">The frequency of the audio data.</param>
-    void BufferData<TBuffer>(uint bid, ALFormat format, TBuffer[] buffer, int freq)
+    void BufferData<TBuffer>(uint buffer, FloatBufferFormat format, TBuffer[] data, int freq)
         where TBuffer : unmanaged;
 
     /// <summary>
-    /// Binds a Buffer to a Source handle.
+    /// Binds a buffer to a source.
     /// </summary>
     /// <param name="source">Source name to attach the Buffer to.</param>
     /// <param name="buffer">Buffer name which is attached to the source.</param>
-    void BindBufferToSource(uint source, int buffer);
+    void SetSourceProperty(uint source, int buffer);
 
     /// <summary>
     /// This function sets an integer property of a source.
     /// </summary>
-    /// <param name="sid">Source name whose attribute is being set.</param>
+    /// <param name="source">Source name whose attribute is being set.</param>
     /// <param name="param">
     ///     The name of the attribute to set: ALSourcei.SourceRelative, ConeInnerAngle, ConeOuterAngle,
     ///     Looping, Buffer, SourceState.
     /// </param>
     /// <param name="value">The value to set the attribute to.</param>
-    void Source(uint sid, ALSourcei param, int value);
+    void SetSourceProperty(uint source, SourceInteger param, int value);
 
     /// <summary>
     /// This function sets an bool property of a source.
     /// </summary>
-    /// <param name="sid">Source name whose attribute is being set.</param>
+    /// <param name="source">Source name whose attribute is being set.</param>
     /// <param name="param">The name of the attribute to set: ALSourceb.SourceRelative, Looping.</param>
     /// <param name="value">The value to set the attribute to.</param>
-    void Source(uint sid, ALSourceb param, bool value);
+    void SetSourceProperty(uint source, SourceBoolean param, bool value);
 
     /// <summary>
     /// This function sets a floating-point property of a source.
     /// </summary>
-    /// <param name="sid">Source name whose attribute is being set.</param>
+    /// <param name="source">Source name whose attribute is being set.</param>
     /// <param name="param">
     ///     The name of the attribute to set: ALSourcef.Pitch, Gain, MinGain, MaxGain, MaxDistance,
     ///     RolloffFactor, ConeOuterGain, ConeInnerAngle, ConeOuterAngle, SecOffset, ReferenceDistance,
     ///     EfxAirAbsorptionFactor, EfxRoomRolloffFactor, EfxConeOuterGainHighFrequency.
     /// </param>
     /// <param name="value">The value to set the attribute to.</param>
-    void Source(uint sid, ALSourcef param, float value);
+    void SetSourceProperty(uint source, SourceFloat param, float value);
 
     /// <summary>
     ///     This function plays, replays or resumes a source. The playing source will have
@@ -247,28 +261,28 @@ internal interface IOpenALInvoker
     ///     buffer(s) are done playing, the source will progress to the ALSourceState.Stopped
     ///     state.
     /// </summary>
-    /// <param name="sid">The name of the source to be played.</param>
-    void SourcePlay(uint sid);
+    /// <param name="source">The name of the source to be played.</param>
+    void SourcePlay(uint source);
 
     /// <summary>
     ///     This function pauses a source. The paused source will have its state changed
     ///     to ALSourceState.Paused.
     /// </summary>
-    /// <param name="sid">The name of the source to be paused.</param>
-    void SourcePause(uint sid);
+    /// <param name="source">The name of the source to be paused.</param>
+    void SourcePause(uint source);
 
     /// <summary>
     ///     This function stops a source. The stopped source will have it's state changed
     ///     to ALSourceState.Stopped.
     /// </summary>
-    /// <param name="sid">The name of the source to be stopped.</param>
-    void SourceStop(uint sid);
+    /// <param name="source">The name of the source to be stopped.</param>
+    void SourceStop(uint source);
 
     /// <summary>
     ///     This function stops the source and sets its state to ALSourceState.Initial.
     /// </summary>
-    /// <param name="sid">The name of the source to be rewound.</param>
-    void SourceRewind(uint sid);
+    /// <param name="source">The name of the source to be rewound.</param>
+    void SourceRewind(uint source);
 
     /// <summary>
     /// This function closes a device by name.
@@ -278,7 +292,7 @@ internal interface IOpenALInvoker
     ///     <see langword="true"/> will be returned on success or <see langword="false"/> on failure. Closing a device will fail
     ///     if the device contains any contexts or buffers.
     /// </returns>
-    bool CloseDevice(ALDevice device);
+    bool CloseDevice(Device device);
 
     /// <summary>
     ///     This function deletes one buffer only, freeing the resources used by the buffer.
@@ -299,5 +313,5 @@ internal interface IOpenALInvoker
     /// This function destroys a context.
     /// </summary>
     /// <param name="context">A pointer to the new context.</param>
-    void DestroyContext(ALContext context);
+    void DestroyContext(Context context);
 }

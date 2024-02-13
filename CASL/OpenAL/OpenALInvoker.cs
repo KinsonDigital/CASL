@@ -5,8 +5,22 @@
 namespace CASL.OpenAL;
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
+using Silk.NET.OpenAL;
+using Silk.NET.OpenAL.Extensions.Enumeration;
+using Silk.NET.OpenAL.Extensions.EXT;
+
+// TODO: Remove these after the CASL low level types have been removed
+using SilkAL = Silk.NET.OpenAL.AL;
+using SilkALC = Silk.NET.OpenAL.ALContext;
+
+// TODO: Need to go into each method and make sure to call the GetError first, then call the AL function, then call error again
+// This is to make sure that any previous errors are cleared first before calling the AL function.  Create a private ClearError()
+// method to do this to make it clear.  This will of course just call geterror.
+// Also, we need to implement the ability to only check for errors in debug mode for performance reasons when using release mode
 
 /// <summary>
 /// Invokes OpenAL functions.
@@ -14,82 +28,105 @@ using System.Diagnostics.CodeAnalysis;
 [ExcludeFromCodeCoverage]
 internal class OpenALInvoker : IOpenALInvoker
 {
-    private readonly ALC alc;
-    private readonly AL al;
+    private readonly SilkAL al;
+    private readonly SilkALC alc;
+
+    // private readonly ALC alc;
+    // private readonly AL al;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="OpenALInvoker"/> class.
     /// </summary>
     public OpenALInvoker()
     {
-        this.alc = ALC.GetApi();
-        this.al = AL.GetApi();
+        this.al = SilkAL.GetApi();
+        this.alc = SilkALC.GetApi();
     }
 
     /// <inheritdoc/>
     public event Action<string>? ErrorCallback;
 
     /// <inheritdoc/>
-    public ALError GetError() => this.al.GetError();
+    public AudioError GetError() => this.al.GetError();
 
     /// <inheritdoc/>
-    public ALContext CreateContext(ALDevice device, ALContextAttributes attributes)
+    public Context CreateContext(Device device, ALContextAttributes attributes)
     {
-        var contextResult = this.alc.CreateContext(device, attributes.CreateAttributeArray());
-        var error = this.alc.GetError(device);
-
-        var errorMessage = Enum.GetName(typeof(AlcError), error);
-
-        InvokeErrorIfTrue(error != AlcError.NoError, errorMessage);
-
-        return contextResult;
-    }
-
-    /// <inheritdoc/>
-    public ALDevice OpenDevice(string? deviceName)
-    {
-        var deviceResult = this.alc.OpenDevice(deviceName);
-        var error = this.alc.GetError(deviceResult);
-
-        var errorMessage = Enum.GetName(typeof(AlcError), error);
-
-        InvokeErrorIfTrue(error != AlcError.NoError, errorMessage);
-
-        return deviceResult;
-    }
-
-    /// <inheritdoc/>
-    public bool MakeContextCurrent(ALContext context)
-    {
-        bool result;
-
-        // If the context is null, then the attempt is to destroy the context
-        if (context == ALContext.Null())
+        unsafe
         {
-            result = this.alc.MakeContextCurrent(context);
+            Context* contextResult;
 
-            if (!result)
+            var attrArray = attributes.CreateAttributeArray();
+
+            fixed (int* attrArrayPtr = attrArray)
             {
-                InvokeErrorIfTrue(true, "Issue destroying the context.");
+                contextResult = this.alc.CreateContext(&device, attrArrayPtr);
             }
+
+            var error = this.alc.GetError(&device);
+
+            var errorMessage = Enum.GetName(typeof(ContextError), error);
+
+            InvokeErrorIfTrue(error != ContextError.NoError, errorMessage);
+
+            return *contextResult;
         }
-        else
+    }
+
+    /// <inheritdoc/>
+    public Device OpenDevice(string deviceName)
+    {
+        ArgumentNullException.ThrowIfNull(deviceName); // TODO: Test this
+
+        unsafe
         {
-            result = this.alc.MakeContextCurrent(context);
+            var deviceResult = this.alc.OpenDevice(deviceName);
+            var error = this.alc.GetError(deviceResult);
 
-            var device = GetContextsDevice(context);
+            var errorMessage = Enum.GetName(typeof(ContextError), error);
 
-            var error = this.alc.GetError(device);
+            InvokeErrorIfTrue(error != ContextError.NoError, errorMessage);
 
-            if (result)
+            return *deviceResult;
+        }
+    }
+
+    /// <inheritdoc/>
+    public bool MakeContextCurrent(Context context)
+    {
+        var result = false;
+
+        unsafe
+        {
+            var contextPtr = &context;
+
+            if (contextPtr == null)
             {
-                var errorMessage = Enum.GetName(typeof(AlcError), error);
-                InvokeErrorIfTrue(error != AlcError.NoError, errorMessage);
+                // TODO: Test this out by sending in a null context.  This will have to be done by creating a
+                // null Context* pointer first and then dereferencing it before sending it in
+                var errorMsg = $"The parameter '{nameof(context)}' points to a null device.";
+                errorMsg += $"\nIf you want to destroy the context, then use the '{nameof(DestroyContext)}' method.";
+
+                InvokeErrorIfTrue(true, errorMsg);
             }
             else
             {
-                // Throw an error that the context could not be made current
-                InvokeErrorIfTrue(true, $"Context with handle '{context.Handle}' could not be made current.");
+                result = this.alc.MakeContextCurrent(contextPtr);
+
+                var device = GetContextsDevice(*contextPtr);
+
+                var error = this.alc.GetError(&device);
+
+                if (result)
+                {
+                    var errorMessage = Enum.GetName(typeof(ContextError), error);
+                    InvokeErrorIfTrue(error != ContextError.NoError, errorMessage);
+                }
+                else
+                {
+                    // Throw an error that the context could not be made current
+                    InvokeErrorIfTrue(true, $"Context with handle '{new IntPtr(contextPtr)}' could not be made current.");
+                }
             }
         }
 
@@ -99,291 +136,362 @@ internal class OpenALInvoker : IOpenALInvoker
     /// <inheritdoc/>
     public uint GenBuffer()
     {
-        var buffer = 0u;
-        this.al.GenBuffers(1, ref buffer);
+        unsafe
+        {
+            var buffer = 0u;
+            this.al.GenBuffers(1, &buffer);
 
-        var error = GetError();
+            var error = GetError();
 
-        var errorMessage = Enum.GetName(typeof(ALError), error);
+            var errorMessage = Enum.GetName(typeof(AudioError), error);
 
-        InvokeErrorIfTrue(error != ALError.NoError, errorMessage);
+            InvokeErrorIfTrue(error != AudioError.NoError, errorMessage);
 
-        return buffer;
+            return buffer;
+        }
     }
 
     /// <inheritdoc/>
     public uint GenSource()
     {
-        var source = 0u;
-        this.al.GenSources(1, ref source);
-
-        var error = GetError();
-        var errorMessage = Enum.GetName(typeof(ALError), error);
-
-        InvokeErrorIfTrue(error != ALError.NoError, errorMessage);
-
-        return source;
-    }
-
-    /// <inheritdoc/>
-    public string GetErrorString(ALError param) => this.al.Get((ALGetString)param);
-
-    /// <inheritdoc/>
-    public int GetSource(uint sid, ALGetSourcei param)
-    {
-        this.al.GetSource(sid, param, out var result);
-
-        var error = GetError();
-        var errorMessage = Enum.GetName(typeof(ALError), error);
-
-        InvokeErrorIfTrue(error != ALError.NoError, errorMessage);
-
-        return result;
-    }
-
-    /// <inheritdoc/>
-    public bool GetSource(uint sid, ALSourceb param)
-    {
-        this.al.GetSource(sid, (ALGetSourcei)param, out var result);
-
-        var error = GetError();
-        var errorMessage = Enum.GetName(typeof(ALError), error);
-
-        InvokeErrorIfTrue(error != ALError.NoError, errorMessage);
-
-        return result != 0;
-    }
-
-    /// <inheritdoc/>
-    public float GetSource(uint sid, ALSourcef param)
-    {
-        this.al.GetSource(sid, param, out var value);
-
-        var error = GetError();
-        var errorMessage = Enum.GetName(typeof(ALError), error);
-
-        InvokeErrorIfTrue(error != ALError.NoError, errorMessage);
-
-        return value;
-    }
-
-    /// <inheritdoc/>
-    public int GetBuffer(uint bid, ALGetBufferi param)
-    {
-        this.al.GetBuffer(bid, param, out var value);
-
-        var error = GetError();
-        var errorMessage = Enum.GetName(typeof(ALError), error);
-
-        InvokeErrorIfTrue(error != ALError.NoError, errorMessage);
-
-        return value;
-    }
-
-    /// <inheritdoc/>
-    public ALSourceState GetSourceState(uint sid)
-    {
-        this.al.GetSource(sid, ALGetSourcei.SourceState, out var result);
-
-        return (ALSourceState)result;
-    }
-
-    /// <inheritdoc/>
-    public ALDevice GetContextsDevice(ALContext context)
-    {
-        var deviceResult = this.alc.GetContextsDevice(context);
-
-        var error = this.alc.GetError(deviceResult);
-        var errorMessage = Enum.GetName(typeof(AlcError), error);
-
-        InvokeErrorIfTrue(error != AlcError.NoError, errorMessage);
-
-        return deviceResult;
-    }
-
-    /// <inheritdoc/>
-    public string GetString(ALDevice device, AlcGetString param)
-    {
-        var result = this.alc.GetString(device, param);
-        var error = this.alc.GetError(device);
-
-        var errorMessage = Enum.GetName(typeof(AlcError), error);
-
-        InvokeErrorIfTrue(error != AlcError.NoError, errorMessage);
-
-        return result;
-    }
-
-    /// <inheritdoc/>
-    public IList<string> GetDeviceList()
-    {
         unsafe
         {
-            var nullDevice = new ALDevice(0);
+            var source = 0u;
+            this.al.GenSources(1, &source);
 
-            var stringsStart = this.alc.GetStringPtr(nullDevice, (AlcGetString)AlcGetStringList.AllDevicesSpecifier);
-            var error = this.alc.GetError(nullDevice);
-            var errorMessage = Enum.GetName(typeof(AlcError), error);
+            var error = GetError();
+            var errorMessage = Enum.GetName(typeof(AudioError), error);
 
-            InvokeErrorIfTrue(error != AlcError.NoError, errorMessage);
+            InvokeErrorIfTrue(error != AudioError.NoError, errorMessage);
 
-            return ((nint)stringsStart).ToStrings();
+            return source;
         }
     }
 
     /// <inheritdoc/>
-    public string GetDefaultDevice() => GetString(new ALDevice(0), AlcGetString.DefaultDeviceSpecifier);
+    public int GetSourceProperty(uint sid, GetSourceInteger param)
+    {
+        this.al.GetSourceProperty(sid, param, out var result);
+
+        var error = GetError();
+        var errorMessage = Enum.GetName(typeof(AudioError), error);
+
+        InvokeErrorIfTrue(error != AudioError.NoError, errorMessage);
+
+        return result;
+    }
 
     /// <inheritdoc/>
-    public void BufferData<TBuffer>(uint bid, ALFormat format, TBuffer[] buffer, int freq)
-        where TBuffer : unmanaged
+    public bool GetSourceProperty(uint sid, SourceBoolean param)
+    {
+        this.al.GetSourceProperty(sid, param, out var result);
+
+        var error = GetError();
+        var errorMessage = Enum.GetName(typeof(AudioError), error);
+
+        InvokeErrorIfTrue(error != AudioError.NoError, errorMessage);
+
+        return result;
+    }
+
+    /// <inheritdoc/>
+    public float GetSourceProperty(uint sid, SourceFloat param)
+    {
+        this.al.GetSourceProperty(sid, param, out var value);
+
+        var error = GetError();
+        var errorMessage = Enum.GetName(typeof(AudioError), error);
+
+        InvokeErrorIfTrue(error != AudioError.NoError, errorMessage);
+
+        return value;
+    }
+
+    /// <inheritdoc/>
+    public int GetBuffer(uint bid, GetBufferInteger param)
+    {
+        this.al.GetBufferProperty(bid, param, out var value);
+
+        var error = GetError();
+        var errorMessage = Enum.GetName(typeof(AudioError), error);
+
+        InvokeErrorIfTrue(error != AudioError.NoError, errorMessage);
+
+        return value;
+    }
+
+    /// <inheritdoc/>
+    public SourceState GetSourceState(uint sid)
+    {
+        this.al.GetSourceProperty(sid, GetSourceInteger.SourceState, out var result);
+
+        return (SourceState)result;
+    }
+
+    /// <inheritdoc/>
+    public Device GetContextsDevice(Context context)
     {
         unsafe
         {
-            fixed (TBuffer* b = buffer)
+            var deviceResult = this.alc.GetContextsDevice(&context);
+
+            var error = this.alc.GetError(deviceResult);
+            var errorMessage = Enum.GetName(typeof(ContextError), error);
+
+            InvokeErrorIfTrue(error != ContextError.NoError, errorMessage);
+
+            return *deviceResult;
+        }
+    }
+
+    /// <inheritdoc/>
+    public string GetString(Device device, GetContextString param)
+    {
+        unsafe
+        {
+            var result = this.alc.GetContextProperty(&device, param);
+            var error = this.alc.GetError(&device);
+
+            var errorMessage = Enum.GetName(typeof(ContextError), error);
+
+            InvokeErrorIfTrue(error != ContextError.NoError, errorMessage);
+
+            return result;
+        }
+    }
+
+    /// <inheritdoc/>
+    public ImmutableArray<string> GetDeviceList()
+    {
+        // TODO: Manually test this out!!
+        const string extensionName = "ALC_ENUMERATE_ALL_EXT";
+
+        var deviceListResult = new List<string>();
+
+        unsafe
+        {
+            var device = this.alc.OpenDevice(string.Empty);
+
+            // Check if the device enumeration extension is available
+            if (this.alc.IsExtensionPresent(device, extensionName))
             {
-                this.al.BufferData(bid, format, b, buffer.Length * sizeof(TBuffer), freq);
+                // Get the enumeration extension
+                var getExtensionUnsuccessful = !this.alc.TryGetExtension<Enumeration>(device, out var ext);
+
+                if (getExtensionUnsuccessful)
+                {
+                    InvokeErrorIfTrue(true, $"The OpenAL context extension {extensionName} could not be retrieved.");
+
+                    // TODO: Look into this warning
+                    Array.Empty<string>();
+                }
+
+                // Get a list of all available device specifiers
+                foreach (var deviceName in ext.GetStringList(GetEnumerationContextStringList.DeviceSpecifiers))
+                {
+                    if (!string.IsNullOrEmpty(deviceName))
+                    {
+                        deviceListResult.Add(deviceName);
+                    }
+                }
+            }
+        }
+
+        return deviceListResult.ToImmutableArray();
+    }
+
+    /// <inheritdoc/>
+    public string GetDefaultDevice()
+    {
+        // TODO: Need to manually test this out
+        // The hope here is based on the OpenAL docs, we can just send in a null device and it will return the default device
+        // https://www.openal.org/documentation/OpenAL_Programmers_Guide.pdf#page=132&zoom=100,0,0
+
+        unsafe
+        {
+            var defaultDeviceName = this.alc.GetContextProperty(null, GetContextString.DeviceSpecifier);
+
+            return defaultDeviceName;
+        }
+    }
+
+    /// <inheritdoc/>
+    public void BufferData<TBuffer>(uint buffer, BufferFormat format, TBuffer[] data, int freq)
+        where TBuffer : unmanaged
+    {
+        // TODO: NEeds testing.  BufferFormat does not have a stereo 32bit float value.  Need to look into this
+
+        unsafe
+        {
+            fixed (TBuffer* b = data)
+            {
+                this.al.BufferData(buffer, format, b, data.Length * sizeof(TBuffer), freq);
             }
         }
 
         var error = GetError();
-        var errorMessage = Enum.GetName(typeof(ALError), error);
+        var errorMessage = Enum.GetName(typeof(AudioError), error);
 
-        InvokeErrorIfTrue(error != ALError.NoError, errorMessage);
+        InvokeErrorIfTrue(error != AudioError.NoError, errorMessage);
     }
 
     /// <inheritdoc/>
-    public void BindBufferToSource(uint source, int buffer)
+    public void BufferData<TBuffer>(uint buffer, FloatBufferFormat format, TBuffer[] data, int freq)
+        where TBuffer : unmanaged
     {
-        this.al.Source(source, ALSourcei.Buffer, buffer);
+        this.al.BufferData(buffer, format, data, freq);
 
         var error = GetError();
-        var errorMessage = Enum.GetName(typeof(ALError), error);
+        var errorMessage = Enum.GetName(typeof(AudioError), error);
 
-        InvokeErrorIfTrue(error != ALError.NoError, errorMessage);
+        InvokeErrorIfTrue(error != AudioError.NoError, errorMessage);
     }
 
     /// <inheritdoc/>
-    public void Source(uint sid, ALSourcei param, int value)
+    public void SetSourceProperty(uint source, int buffer)
     {
-        this.al.Source(sid, param, value);
+        this.al.SetSourceProperty(source, SourceInteger.Buffer, buffer);
 
         var error = GetError();
-        var errorMessage = Enum.GetName(typeof(ALError), error);
+        var errorMessage = Enum.GetName(typeof(AudioError), error);
 
-        InvokeErrorIfTrue(error != ALError.NoError, errorMessage);
+        InvokeErrorIfTrue(error != AudioError.NoError, errorMessage);
     }
 
     /// <inheritdoc/>
-    public void Source(uint sid, ALSourceb param, bool value)
+    public void SetSourceProperty(uint source, SourceInteger param, int value)
     {
-        this.al.Source(sid, param, value);
+        this.al.SetSourceProperty(source, param, value);
 
         var error = GetError();
-        var errorMessage = Enum.GetName(typeof(ALError), error);
+        var errorMessage = Enum.GetName(typeof(AudioError), error);
 
-        InvokeErrorIfTrue(error != ALError.NoError, errorMessage);
+        InvokeErrorIfTrue(error != AudioError.NoError, errorMessage);
     }
 
     /// <inheritdoc/>
-    public void Source(uint sid, ALSourcef param, float value)
+    public void SetSourceProperty(uint source, SourceBoolean param, bool value)
     {
-        this.al.Source(sid, param, value);
+        this.al.SetSourceProperty(source, param, value);
 
         var error = GetError();
-        var errorMessage = Enum.GetName(typeof(ALError), error);
+        var errorMessage = Enum.GetName(typeof(AudioError), error);
 
-        InvokeErrorIfTrue(error != ALError.NoError, errorMessage);
+        InvokeErrorIfTrue(error != AudioError.NoError, errorMessage);
     }
 
     /// <inheritdoc/>
-    public void SourcePlay(uint sid)
+    public void SetSourceProperty(uint source, SourceFloat param, float value)
     {
-        this.al.SourcePlay(sid);
+        this.al.SetSourceProperty(source, param, value);
 
         var error = GetError();
-        var errorMessage = Enum.GetName(typeof(ALError), error);
+        var errorMessage = Enum.GetName(typeof(AudioError), error);
 
-        InvokeErrorIfTrue(error != ALError.NoError, errorMessage);
+        InvokeErrorIfTrue(error != AudioError.NoError, errorMessage);
     }
 
     /// <inheritdoc/>
-    public void SourcePause(uint sid)
+    public void SourcePlay(uint source)
     {
-        this.al.SourcePause(sid);
+        this.al.SourcePlay(source);
 
         var error = GetError();
-        var errorMessage = Enum.GetName(typeof(ALError), error);
+        var errorMessage = Enum.GetName(typeof(AudioError), error);
 
-        InvokeErrorIfTrue(error != ALError.NoError, errorMessage);
+        InvokeErrorIfTrue(error != AudioError.NoError, errorMessage);
     }
 
     /// <inheritdoc/>
-    public void SourceStop(uint sid)
+    public void SourcePause(uint source)
     {
-        this.al.SourceStop(sid);
+        this.al.SourcePause(source);
 
         var error = GetError();
-        var errorMessage = Enum.GetName(typeof(ALError), error);
+        // TODO: When getting the error message, let's build a ref table of each audio error for perf reasons
+        var errorMessage = Enum.GetName(typeof(AudioError), error);
 
-        InvokeErrorIfTrue(error != ALError.NoError, errorMessage);
+        InvokeErrorIfTrue(error != AudioError.NoError, errorMessage);
     }
 
     /// <inheritdoc/>
-    public void SourceRewind(uint sid)
+    public void SourceStop(uint source)
     {
-        this.al.SourceRewind(sid);
+        this.al.SourceStop(source);
 
         var error = GetError();
-        var errorMessage = Enum.GetName(typeof(ALError), error);
+        var errorMessage = Enum.GetName(typeof(AudioError), error);
 
-        InvokeErrorIfTrue(error != ALError.NoError, errorMessage);
+        InvokeErrorIfTrue(error != AudioError.NoError, errorMessage);
     }
 
     /// <inheritdoc/>
-    public bool CloseDevice(ALDevice device)
+    public void SourceRewind(uint source)
     {
-        var closeResult = this.alc.CloseDevice(device);
-        var error = this.alc.GetError(device);
-        var errorMessage = Enum.GetName(typeof(AlcError), error);
+        this.al.SourceRewind(source);
 
-        InvokeErrorIfTrue(error != AlcError.NoError, errorMessage);
+        var error = GetError();
+        var errorMessage = Enum.GetName(typeof(AudioError), error);
 
-        return closeResult;
+        InvokeErrorIfTrue(error != AudioError.NoError, errorMessage);
+    }
+
+    /// <inheritdoc/>
+    public bool CloseDevice(Device device)
+    {
+        unsafe
+        {
+            var closeResult = this.alc.CloseDevice(&device);
+            var error = this.alc.GetError(&device);
+            var errorMessage = Enum.GetName(typeof(ContextError), error);
+
+            InvokeErrorIfTrue(error != ContextError.NoError, errorMessage);
+
+            return closeResult;
+        }
     }
 
     /// <inheritdoc/>
     public void DeleteBuffer(uint buffer)
     {
-        this.al.DeleteBuffers(1, ref buffer);
+        unsafe
+        {
+            this.al.DeleteBuffers(1, &buffer);
+        }
 
         var error = GetError();
-        var errorMessage = Enum.GetName(typeof(ALError), error);
+        var errorMessage = Enum.GetName(typeof(AudioError), error);
 
-        InvokeErrorIfTrue(error != ALError.NoError, errorMessage);
+        InvokeErrorIfTrue(error != AudioError.NoError, errorMessage);
     }
 
     /// <inheritdoc/>
     public void DeleteSource(uint source)
     {
-        this.al.DeleteSources(1, ref source);
+        unsafe
+        {
+            this.al.DeleteSources(1, &source);
+        }
 
         var error = GetError();
-        var errorMessage = Enum.GetName(typeof(ALError), error);
+        var errorMessage = Enum.GetName(typeof(AudioError), error);
 
-        InvokeErrorIfTrue(error != ALError.NoError, errorMessage);
+        InvokeErrorIfTrue(error != AudioError.NoError, errorMessage);
     }
 
     /// <inheritdoc/>
-    public void DestroyContext(ALContext context)
+    public void DestroyContext(Context context)
     {
-        var device = GetContextsDevice(context);
+        unsafe
+        {
+            var device = GetContextsDevice(context);
+            this.alc.DestroyContext(&context);
 
-        this.alc.DestroyContext(context);
-        var error = this.alc.GetError(device);
-        var errorMessage = Enum.GetName(typeof(AlcError), error);
+            var error = this.alc.GetError(&device);
+            var errorMessage = Enum.GetName(typeof(ContextError), error);
 
-        InvokeErrorIfTrue(error != AlcError.NoError, errorMessage);
+            InvokeErrorIfTrue(error != ContextError.NoError, errorMessage);
+        }
     }
 
     /// <summary>

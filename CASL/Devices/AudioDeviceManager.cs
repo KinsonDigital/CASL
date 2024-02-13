@@ -9,10 +9,12 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using CASL.Data.Exceptions;
 using Exceptions;
-using CASL.Exceptions;
 using OpenAL;
+using Silk.NET.OpenAL;
+using AudioException = CASL.Exceptions.AudioException;
 
 /// <summary>
 /// Manages audio devices on the system using OpenAL.
@@ -24,10 +26,12 @@ internal sealed class AudioDeviceManager : IAudioDeviceManager
     private readonly string isDisposedExceptionMessage = $"The '{nameof(AudioDeviceManager)}' has not been initialized.\nInvoked the '{nameof(InitDevice)}()' to initialize the device manager.";
     private readonly Dictionary<uint, SoundSource> soundSources = new ();
     private readonly List<SoundStats> continuePlaybackCache = new ();
-    private nint device;
-    private ALContext context;
+    private Device device;
+    private Context context;
     private ALContextAttributes? attributes;
+    private bool isInitialized;
     private bool isDisposed;
+    private bool deviceInitialized;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="AudioDeviceManager"/> class.
@@ -46,7 +50,7 @@ internal sealed class AudioDeviceManager : IAudioDeviceManager
     public event EventHandler<EventArgs>? DeviceChanged;
 
     /// <inheritdoc/>
-    public bool IsInitialized => !AudioIsNull();
+    public bool IsInitialized => this.isInitialized;
 
     /// <inheritdoc/>
     public string DeviceInUse { get; private set; } = string.Empty;
@@ -76,9 +80,9 @@ internal sealed class AudioDeviceManager : IAudioDeviceManager
     /// <inheritdoc/>
     public void InitDevice(string? name = null)
     {
-        var nameResult = name != null ? $"{DeviceNamePrefix}{name}" : name;
+        var nameResult = string.IsNullOrEmpty(name) ? string.Empty : $"{DeviceNamePrefix}{name}";
 
-        if (this.device == 0)
+        if (!this.isInitialized)
         {
             this.device = this.alInvoker.OpenDevice(nameResult);
         }
@@ -88,9 +92,9 @@ internal sealed class AudioDeviceManager : IAudioDeviceManager
             this.attributes = new ALContextAttributes();
         }
 
-        if (this.context.Handle == 0)
+        if (!this.isInitialized)
         {
-            this.context = new ALContext(this.alInvoker.CreateContext(new ALDevice(this.device), this.attributes));
+            this.context = this.alInvoker.CreateContext(this.device, this.attributes);
         }
 
         var setCurrentResult = this.alInvoker.MakeContextCurrent(this.context);
@@ -101,6 +105,8 @@ internal sealed class AudioDeviceManager : IAudioDeviceManager
         {
             throw new InitializeDeviceException();
         }
+
+        this.isInitialized = true;
     }
 
     /// <inheritdoc/>
@@ -156,7 +162,7 @@ internal sealed class AudioDeviceManager : IAudioDeviceManager
             SetTimePosition(cachedState.SourceId, cachedState.TimePosition, cachedState.TotalSeconds);
 
             // Set the play speed
-            this.alInvoker.Source(cachedState.SourceId, ALSourcef.Pitch, cachedState.PlaySpeed);
+            this.alInvoker.SetSourceProperty(cachedState.SourceId, SourceFloat.Pitch, cachedState.PlaySpeed);
 
             // Set the state of the sound
             if (cachedState.PlaybackState == SoundState.Playing)
@@ -244,12 +250,15 @@ internal sealed class AudioDeviceManager : IAudioDeviceManager
     /// </remarks>
     private void DestroyDevice()
     {
-        this.alInvoker.MakeContextCurrent(ALContext.Null());
-        this.alInvoker.DestroyContext(this.context);
-        this.context = ALContext.Null();
+        // TODO: This might not work.  it was suppose to be null. This call used to destroy the context do to the null param,
+        // but what is the point of that if the next line of code after destroys the context?
+        // this.alInvoker.MakeContextCurrent(ALContext.Null());
 
-        this.alInvoker.CloseDevice(new ALDevice(this.device));
-        this.device = ALDevice.Null();
+        this.alInvoker.DestroyContext(this.context);
+        this.context = default;
+
+        this.alInvoker.CloseDevice(this.device);
+        this.device = default;
 
         this.attributes = null;
     }
@@ -273,7 +282,7 @@ internal sealed class AudioDeviceManager : IAudioDeviceManager
         {
             var sourceState = this.alInvoker.GetSourceState(soundSrc.SourceId);
 
-            if (sourceState != ALSourceState.Playing && sourceState != ALSourceState.Paused)
+            if (sourceState != SourceState.Playing && sourceState != SourceState.Paused)
             {
                 continue;
             }
@@ -283,26 +292,20 @@ internal sealed class AudioDeviceManager : IAudioDeviceManager
             soundStats.PlaybackState = default;
             soundStats.TimePosition = GetCurrentTimePosition(soundSrc.SourceId);
             soundStats.TotalSeconds = soundSrc.TotalSeconds;
-            soundStats.PlaySpeed = this.alInvoker.GetSource(soundSrc.SourceId, ALSourcef.Pitch);
+            soundStats.PlaySpeed = this.alInvoker.GetSourceProperty(soundSrc.SourceId, SourceFloat.Pitch);
 
-            soundStats.PlaybackState = sourceState == ALSourceState.Playing ? SoundState.Playing : SoundState.Paused;
+            soundStats.PlaybackState = sourceState == SourceState.Playing ? SoundState.Playing : SoundState.Paused;
 
             this.continuePlaybackCache.Add(soundStats);
         }
     }
 
     /// <summary>
-    /// Returns a value indicating if the audio device and context are null.
-    /// </summary>
-    /// <returns><see langword="true"/> if the device and context are null.</returns>
-    private bool AudioIsNull() => this.device == ALDevice.Null() && this.context == ALContext.Null() && this.attributes is null;
-
-    /// <summary>
     /// Gets the current position of the sound in the value of seconds.
     /// </summary>
     /// <param name="srcId">The OpenAL source id.</param>
     /// <returns>The position in seconds.</returns>
-    private float GetCurrentTimePosition(uint srcId) => this.alInvoker.GetSource(srcId, ALSourcef.SecOffset);
+    private float GetCurrentTimePosition(uint srcId) => this.alInvoker.GetSourceProperty(srcId, SourceFloat.SecOffset);
 
     /// <summary>
     /// Sets the time position of the sound to the given <paramref name="seconds"/> value.
@@ -321,6 +324,6 @@ internal sealed class AudioDeviceManager : IAudioDeviceManager
 
         seconds = seconds > totalSeconds ? totalSeconds : seconds;
 
-        this.alInvoker.Source(srcId, ALSourcef.SecOffset, seconds);
+        this.alInvoker.SetSourceProperty(srcId, SourceFloat.SecOffset, seconds);
     }
 }

@@ -14,11 +14,12 @@ using CASL;
 using CASL.Data;
 using CASL.Data.Exceptions;
 using CASL.Devices;
-using CASL.Exceptions;
 using CASL.OpenAL;
 using FluentAssertions;
 using Moq;
+using Silk.NET.OpenAL;
 using Xunit;
+using AudioException = CASL.Exceptions.AudioException;
 
 /// <summary>
 /// Tests the <see cref="Sound"/> class.
@@ -166,7 +167,7 @@ public class SoundTests
 
         // Assert
         this.mockOggDecoder.Verify(m => m.LoadData(this.oggContentFilePath), Times.Once());
-        this.mockALInvoker.Verify(m => m.BufferData(BufferId, (ALFormat)expected, new[] { 1f, 2f }, 44100), Times.Once());
+        this.mockALInvoker.Verify(m => m.BufferData(BufferId, (BufferFormat)expected, new[] { 1f, 2f }, 44100), Times.Once());
     }
 
     [Fact]
@@ -213,7 +214,7 @@ public class SoundTests
 
         // Assert
         this.mockMp3Decoder.Verify(m => m.LoadData(this.mp3ContentFilePath), Times.Once());
-        this.mockALInvoker.Verify(m => m.BufferData(BufferId, ALFormat.Stereo16, new byte[] { 1, 2 }, 44100), Times.Once());
+        this.mockALInvoker.Verify(m => m.BufferData(BufferId, BufferFormat.Stereo16, new byte[] { 1, 2 }, 44100), Times.Once());
     }
 
     [Fact]
@@ -273,7 +274,7 @@ public class SoundTests
         _ = sut.IsLooping;
 
         // Assert
-        this.mockALInvoker.Verify(m => m.GetSource(SrcId, ALSourceb.Looping), Times.Once());
+        this.mockALInvoker.Verify(m => m.GetSourceProperty(SrcId, SourceBoolean.Looping), Times.Once());
     }
 
     [Fact]
@@ -288,7 +289,7 @@ public class SoundTests
 
         // Assert
         actual.Should().BeFalse();
-        this.mockALInvoker.Verify(m => m.GetSource(It.IsAny<uint>(), It.IsAny<ALSourceb>()), Times.Never());
+        this.mockALInvoker.Verify(m => m.GetSourceProperty(It.IsAny<uint>(), It.IsAny<SourceBoolean>()), Times.Never());
     }
 
     [Fact]
@@ -316,7 +317,7 @@ public class SoundTests
         sut.IsLooping = true;
 
         // Assert
-        this.mockALInvoker.Verify(m => m.Source(SrcId, ALSourceb.Looping, true), Times.Once());
+        this.mockALInvoker.Verify(m => m.SetSourceProperty(SrcId, SourceBoolean.Looping, true), Times.Once());
     }
 
     [Fact]
@@ -330,7 +331,7 @@ public class SoundTests
         sut.IsLooping = true;
 
         // Assert
-        this.mockALInvoker.Verify(m => m.Source(It.IsAny<uint>(), It.IsAny<ALSourceb>(), true), Times.Never());
+        this.mockALInvoker.Verify(m => m.SetSourceProperty(It.IsAny<uint>(), It.IsAny<SourceBoolean>(), true), Times.Never());
     }
 
     [Fact]
@@ -358,7 +359,7 @@ public class SoundTests
         _ = sut.Volume;
 
         // Assert
-        this.mockALInvoker.Verify(m => m.GetSource(SrcId, ALSourcef.Gain), Times.Once());
+        this.mockALInvoker.Verify(m => m.GetSourceProperty(SrcId, SourceFloat.Gain), Times.Once());
     }
 
     [Fact]
@@ -390,7 +391,7 @@ public class SoundTests
         sut.Volume = volume;
 
         // Assert
-        this.mockALInvoker.Verify(m => m.Source(SrcId, ALSourcef.Gain, expected), Times.Once());
+        this.mockALInvoker.Verify(m => m.SetSourceProperty(SrcId, SourceFloat.Gain, expected), Times.Once());
     }
 
     [Fact]
@@ -404,7 +405,7 @@ public class SoundTests
         _ = sut.Volume;
 
         // Assert
-        this.mockALInvoker.Verify(m => m.GetSource(It.IsAny<uint>(), It.IsAny<ALSourcef>()), Times.Never());
+        this.mockALInvoker.Verify(m => m.GetSourceProperty(It.IsAny<uint>(), It.IsAny<SourceFloat>()), Times.Never());
     }
 
     [Fact]
@@ -418,7 +419,7 @@ public class SoundTests
         sut.Volume = 50f;
 
         // Assert
-        this.mockALInvoker.Verify(m => m.Source(It.IsAny<uint>(), It.IsAny<ALSourcef>(), It.IsAny<float>()), Times.Never());
+        this.mockALInvoker.Verify(m => m.SetSourceProperty(It.IsAny<uint>(), It.IsAny<SourceFloat>(), It.IsAny<float>()), Times.Never());
     }
 
     [Fact]
@@ -426,14 +427,14 @@ public class SoundTests
     {
         // Arrange
         var expected = new SoundTime(90);
-        this.mockALInvoker.Setup(m => m.GetSource(SrcId, ALSourcef.SecOffset)).Returns(90f);
+        this.mockALInvoker.Setup(m => m.GetSourceProperty(SrcId, SourceFloat.SecOffset)).Returns(90f);
         var sut = CreateSound(this.oggContentFilePath);
 
         // Act
         var actual = sut.Position;
 
         // Assert
-        this.mockALInvoker.Verify(m => m.GetSource(SrcId, ALSourcef.SecOffset), Times.Once());
+        this.mockALInvoker.Verify(m => m.GetSourceProperty(SrcId, SourceFloat.SecOffset), Times.Once());
         actual.Should().Be(expected);
     }
 
@@ -525,7 +526,7 @@ public class SoundTests
          */
 
         // Arrange
-        this.mockALInvoker.Setup(m => m.GetSourceState(SrcId)).Returns((ALSourceState)openALState);
+        this.mockALInvoker.Setup(m => m.GetSourceState(SrcId)).Returns((SourceState)openALState);
         var sut = CreateSound(this.oggContentFilePath);
 
         // Act
@@ -593,8 +594,8 @@ public class SoundTests
         _ = sut.PlaySpeed;
 
         // Assert
-        this.mockALInvoker.Verify(m => m.GetSource(SrcId, ALSourcef.Pitch), Times.Once());
-        this.mockALInvoker.Verify(m => m.Source(SrcId, ALSourcef.Pitch, expectedResult), Times.Once());
+        this.mockALInvoker.Verify(m => m.GetSourceProperty(SrcId, SourceFloat.Pitch), Times.Once());
+        this.mockALInvoker.Verify(m => m.SetSourceProperty(SrcId, SourceFloat.Pitch, expectedResult), Times.Once());
     }
 
     [Fact]
@@ -608,7 +609,7 @@ public class SoundTests
         sut.PlaySpeed = 1f;
 
         // Assert
-        this.mockALInvoker.Verify(m => m.Source(It.IsAny<uint>(), It.IsAny<ALSourcef>(), It.IsAny<float>()), Times.Never());
+        this.mockALInvoker.Verify(m => m.SetSourceProperty(It.IsAny<uint>(), It.IsAny<SourceFloat>(), It.IsAny<float>()), Times.Never());
     }
     #endregion
 
@@ -632,7 +633,7 @@ public class SoundTests
     public void Play_WhenInvoked_PlaysSound()
     {
         // Arrange
-        this.mockALInvoker.Setup(m => m.GetSourceState(SrcId)).Returns(ALSourceState.Stopped);
+        this.mockALInvoker.Setup(m => m.GetSourceState(SrcId)).Returns(SourceState.Stopped);
         var sut = CreateSound(this.oggContentFilePath);
 
         // Act
@@ -646,14 +647,14 @@ public class SoundTests
     public void Play_WhenAlreadyPlaying_DoesNotAttemptToPlaySoundAgain()
     {
         // Arrange
-        this.mockALInvoker.Setup(m => m.GetSourceState(SrcId)).Returns(ALSourceState.Playing);
+        this.mockALInvoker.Setup(m => m.GetSourceState(SrcId)).Returns(SourceState.Playing);
         var sut = CreateSound(this.oggContentFilePath);
 
         // Act
         sut.Play();
 
         // Assert
-        this.mockALInvoker.Verify(m => m.SourcePlay(It.IsAny<uint>()), Times.Never());
+        this.mockALInvoker.Verify(m => m.GetSourceState(It.IsAny<uint>()), Times.Never());
     }
 
     [Fact]
@@ -662,7 +663,7 @@ public class SoundTests
         // Arrange
         var sut = CreateSound(this.oggContentFilePath);
 
-        this.mockALInvoker.Setup(m => m.GetSourceState(SrcId)).Returns(ALSourceState.Playing);
+        this.mockALInvoker.Setup(m => m.GetSourceState(SrcId)).Returns(SourceState.Playing);
         this.mockAudioManager.Raise(manager => manager.DeviceChanging += null, EventArgs.Empty);
 
         // Act
@@ -838,7 +839,7 @@ public class SoundTests
         sut.SetTimePosition(seconds);
 
         // Assert
-        this.mockALInvoker.Verify(m => m.Source(SrcId, ALSourcef.SecOffset, expected), Times.Once());
+        this.mockALInvoker.Verify(m => m.SetSourceProperty(SrcId, SourceFloat.SecOffset, expected), Times.Once());
     }
 
     [Fact]
@@ -852,7 +853,7 @@ public class SoundTests
         sut.SetTimePosition(1f);
 
         // Assert
-        this.mockALInvoker.Verify(m => m.Source(It.IsAny<uint>(), It.IsAny<ALSourcef>(), It.IsAny<float>()), Times.Never());
+        this.mockALInvoker.Verify(m => m.SetSourceProperty(It.IsAny<uint>(), It.IsAny<SourceFloat>(), It.IsAny<float>()), Times.Never());
     }
 
     [Fact]
@@ -860,8 +861,8 @@ public class SoundTests
     {
         // Arrange
         var sut = CreateSound(this.oggContentFilePath);
-        this.mockALInvoker.Setup(m => m.GetSourceState(SrcId)).Returns(ALSourceState.Stopped);
-        this.mockALInvoker.Setup(m => m.GetSource(SrcId, ALSourcef.SecOffset)).Returns(10f);
+        this.mockALInvoker.Setup(m => m.GetSourceState(SrcId)).Returns(SourceState.Stopped);
+        this.mockALInvoker.Setup(m => m.GetSourceProperty(SrcId, SourceFloat.SecOffset)).Returns(10f);
 
         // Act
         sut.Rewind(20f);
@@ -869,7 +870,7 @@ public class SoundTests
         // Assert
         this.mockALInvoker.Verify(m => m.SourceRewind(SrcId), Times.Once());
         this.mockALInvoker.Verify(m => m.SourcePlay(SrcId), Times.Once());
-        this.mockALInvoker.Verify(m => m.Source(It.IsAny<uint>(), It.IsAny<ALSourcef>(), It.IsAny<float>()), Times.Never());
+        this.mockALInvoker.Verify(m => m.SetSourceProperty(It.IsAny<uint>(), It.IsAny<SourceFloat>(), It.IsAny<float>()), Times.Never());
     }
 
     [Fact]
@@ -877,7 +878,7 @@ public class SoundTests
     {
         // Arrange
         MockSoundLength(25);
-        this.mockALInvoker.Setup(m => m.GetSource(SrcId, ALSourcef.SecOffset))
+        this.mockALInvoker.Setup(m => m.GetSourceProperty(SrcId, SourceFloat.SecOffset))
             .Returns(15f);
         var sut = CreateSound(this.oggContentFilePath);
 
@@ -885,7 +886,7 @@ public class SoundTests
         sut.Rewind(10f);
 
         // Assert
-        this.mockALInvoker.Verify(m => m.Source(SrcId, ALSourcef.SecOffset, 5f), Times.Once());
+        this.mockALInvoker.Verify(m => m.SetSourceProperty(SrcId, SourceFloat.SecOffset, 5f), Times.Once());
     }
 
     [Fact]
@@ -899,7 +900,7 @@ public class SoundTests
         sut.Rewind(10f);
 
         // Assert
-        this.mockALInvoker.Verify(m => m.Source(It.IsAny<uint>(), ALSourcef.SecOffset, It.IsAny<float>()), Times.Never());
+        this.mockALInvoker.Verify(m => m.SetSourceProperty(It.IsAny<uint>(), SourceFloat.SecOffset, It.IsAny<float>()), Times.Never());
     }
 
     [Fact]
@@ -907,7 +908,7 @@ public class SoundTests
     {
         // Arrange
         MockSoundLength(10);
-        this.mockALInvoker.Setup(m => m.GetSource(SrcId, ALSourcef.SecOffset)).Returns(10f);
+        this.mockALInvoker.Setup(m => m.GetSourceProperty(SrcId, SourceFloat.SecOffset)).Returns(10f);
 
         var sut = CreateSound(this.oggContentFilePath);
 
@@ -916,7 +917,7 @@ public class SoundTests
 
         // Assert
         this.mockALInvoker.Verify(m => m.SourceRewind(SrcId), Times.Once());
-        this.mockALInvoker.Verify(m => m.Source(It.IsAny<uint>(), It.IsAny<ALSourcef>(), It.IsAny<float>()), Times.Never());
+        this.mockALInvoker.Verify(m => m.SetSourceProperty(It.IsAny<uint>(), It.IsAny<SourceFloat>(), It.IsAny<float>()), Times.Never());
     }
 
     [Fact]
@@ -931,7 +932,7 @@ public class SoundTests
 
         // Assert
         this.mockALInvoker.Verify(m => m.SourceRewind(It.IsAny<uint>()), Times.Never());
-        this.mockALInvoker.Verify(m => m.Source(It.IsAny<uint>(), It.IsAny<ALSourcef>(), It.IsAny<float>()), Times.Never());
+        this.mockALInvoker.Verify(m => m.SetSourceProperty(It.IsAny<uint>(), It.IsAny<SourceFloat>(), It.IsAny<float>()), Times.Never());
     }
 
     [Fact]
@@ -952,14 +953,14 @@ public class SoundTests
             return result;
         });
 
-        this.mockALInvoker.Setup(m => m.GetSource(SrcId, ALSourcef.SecOffset)).Returns(30f);
+        this.mockALInvoker.Setup(m => m.GetSourceProperty(SrcId, SourceFloat.SecOffset)).Returns(30f);
         var sut = CreateSound(this.oggContentFilePath);
 
         // Act
         sut.FastForward(10f);
 
         // Assert
-        this.mockALInvoker.Verify(m => m.Source(SrcId, ALSourcef.SecOffset, 40f), Times.Once());
+        this.mockALInvoker.Verify(m => m.SetSourceProperty(SrcId, SourceFloat.SecOffset, 40f), Times.Once());
     }
 
     [Fact]
@@ -992,7 +993,7 @@ public class SoundTests
         // Assert
         // NOTE: The first invoke is during Sound construction, the second is when changing audio devices
         this.mockOggDecoder.Verify(m => m.LoadData(this.oggContentFilePath), Times.Exactly(2));
-        this.mockALInvoker.Verify(m => m.BufferData(BufferId, ALFormat.Stereo16, new[] { 1f, 2f }, 44100), Times.Exactly(2));
+        this.mockALInvoker.Verify(m => m.BufferData(BufferId, BufferFormat.Stereo16, new[] { 1f, 2f }, 44100), Times.Exactly(2));
     }
 
     [Fact]
@@ -1079,9 +1080,9 @@ public class SoundTests
 
         var size = (int)(totalSeconds * bytesPerSec);
 
-        this.mockALInvoker.Setup(m => m.GetBuffer(BufferId, ALGetBufferi.Size)).Returns(size);
-        this.mockALInvoker.Setup(m => m.GetBuffer(BufferId, ALGetBufferi.Channels)).Returns(channels);
-        this.mockALInvoker.Setup(m => m.GetBuffer(BufferId, ALGetBufferi.Bits)).Returns(bitDepth);
-        this.mockALInvoker.Setup(m => m.GetBuffer(BufferId, ALGetBufferi.Frequency)).Returns(freq);
+        this.mockALInvoker.Setup(m => m.GetBuffer(BufferId, GetBufferInteger.Size)).Returns(size);
+        this.mockALInvoker.Setup(m => m.GetBuffer(BufferId, GetBufferInteger.Channels)).Returns(channels);
+        this.mockALInvoker.Setup(m => m.GetBuffer(BufferId, GetBufferInteger.Bits)).Returns(bitDepth);
+        this.mockALInvoker.Setup(m => m.GetBuffer(BufferId, GetBufferInteger.Frequency)).Returns(freq);
     }
 }

@@ -8,6 +8,7 @@ namespace CASLTests.Devices;
 #pragma warning disable IDE0001 // Name can be simplified
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Collections.ObjectModel;
 using System.IO.Abstractions;
 using System.Linq;
@@ -20,6 +21,8 @@ using CASL.OpenAL;
 using Moq;
 using Xunit;
 using FluentAssertions;
+using Silk.NET.OpenAL;
+
 #pragma warning restore IDE0001 // Name can be simplified
 
 /// <summary>
@@ -32,7 +35,7 @@ public class AudioDeviceManagerTests
     private readonly string oggFilePath;
     private readonly Mock<IOpenALInvoker> mockALInvoker;
     private readonly Mock<IPath> mockPath;
-    private readonly ALContext context;
+    private readonly Context context;
     private readonly uint srcId = 4321;
     private readonly uint bufferId = 9876;
 
@@ -43,8 +46,8 @@ public class AudioDeviceManagerTests
     {
         this.oggFilePath = @"C:/temp/Content/Sounds/sound.ogg";
 
-        var device = new ALDevice(1234);
-        this.context = new ALContext(5678);
+        var device = new Device();
+        this.context = new Context();
 
         this.mockALInvoker = new Mock<IOpenALInvoker>();
 
@@ -311,7 +314,7 @@ public class AudioDeviceManagerTests
     {
         // Arrange
         this.mockALInvoker.Setup(m => m.GetDeviceList())
-            .Returns(new[] { "test-device" });
+            .Returns(new[] { "test-device" }.ToImmutableArray());
 
         var manager = CreateManager();
         manager.InitDevice();
@@ -335,10 +338,10 @@ public class AudioDeviceManagerTests
         MockSoundLength(totalSeconds);
 
         this.mockALInvoker.Setup(m => m.GetDeviceList())
-            .Returns(new[] { "test-device" });
+            .Returns(new[] { "test-device" }.ToImmutableArray);
         this.mockALInvoker.Setup(m => m.GetSourceState(this.srcId))
-            .Returns(ALSourceState.Playing);
-        this.mockALInvoker.Setup(m => m.GetSource(this.srcId, ALSourcef.SecOffset)).Returns(timePosition);
+            .Returns(SourceState.Playing);
+        this.mockALInvoker.Setup(m => m.GetSourceProperty(this.srcId, SourceFloat.SecOffset)).Returns(timePosition);
 
         var mockOggDecoder = new Mock<ISoundDecoder<float>>();
         mockOggDecoder.Setup(m => m.LoadData(It.IsAny<string>()))
@@ -370,8 +373,8 @@ public class AudioDeviceManagerTests
 
         // Assert
         this.mockALInvoker.Verify(m => m.GetSourceState(this.srcId), Times.Once());
-        this.mockALInvoker.Verify(m => m.GetSource(this.srcId, ALSourcef.SecOffset), Times.Once());
-        this.mockALInvoker.Verify(m => m.Source(this.srcId, ALSourcef.SecOffset, expected), Times.Once());
+        this.mockALInvoker.Verify(m => m.GetSourceProperty(this.srcId, SourceFloat.SecOffset), Times.Once());
+        this.mockALInvoker.Verify(m => m.SetSourceProperty(this.srcId, SourceFloat.SecOffset, expected), Times.Once());
     }
 
     [Theory]
@@ -392,10 +395,10 @@ public class AudioDeviceManagerTests
          */
         // Arrange
         this.mockALInvoker.Setup(m => m.GetDeviceList())
-            .Returns(new[] { "test-device" });
+            .Returns(new[] { "test-device" }.ToImmutableArray);
         this.mockALInvoker.Setup(m => m.GetSourceState(this.srcId))
-            .Returns((ALSourceState)srcState);
-        this.mockALInvoker.Setup(m => m.GetSource(this.srcId, ALGetSourcei.SampleOffset))
+            .Returns((SourceState)srcState);
+        this.mockALInvoker.Setup(m => m.GetSourceProperty(this.srcId, GetSourceInteger.SampleOffset))
             .Returns(sampleOffset); // End result will be calculated to the time position that the sound is currently at
 
         var mockOggDecoder = new Mock<ISoundDecoder<float>>();
@@ -429,7 +432,7 @@ public class AudioDeviceManagerTests
 
         // Assert
         this.mockALInvoker.Verify(m => m.GetSourceState(this.srcId), Times.Exactly(srcStateInvokeCount));
-        this.mockALInvoker.Verify(m => m.GetSource(this.srcId, ALSourcef.SecOffset), Times.Exactly(currentTimePositionInvokeCount));
+        this.mockALInvoker.Verify(m => m.GetSourceProperty(this.srcId, SourceFloat.SecOffset), Times.Exactly(currentTimePositionInvokeCount));
     }
 
     [Fact]
@@ -437,7 +440,7 @@ public class AudioDeviceManagerTests
     {
         // Arrange
         this.mockALInvoker.Setup(m => m.GetDeviceList())
-            .Returns(new[] { "test-device" });
+            .Returns(new[] { "test-device" }.ToImmutableArray);
         var manager = CreateManager();
         manager.InitDevice();
 
@@ -454,7 +457,7 @@ public class AudioDeviceManagerTests
     public void ChangeDevice_WithNoNoDeviceChangedEventSubscription_DoesNotThrowException()
     {
         // Arrange
-        this.mockALInvoker.Setup(m => m.GetDeviceList()).Returns(new[] { "test-device" });
+        this.mockALInvoker.Setup(m => m.GetDeviceList()).Returns(new[] { "test-device" }.ToImmutableArray);
 
         var manager = CreateManager();
         manager.InitDevice();
@@ -478,7 +481,7 @@ public class AudioDeviceManagerTests
         manager.Dispose();
 
         // Assert
-        this.mockALInvoker.Verify(m => m.MakeContextCurrent(ALContext.Null()), Times.Once());
+        this.mockALInvoker.Verify(m => m.MakeContextCurrent(default), Times.Once());
     }
     #endregion
 
@@ -506,9 +509,9 @@ public class AudioDeviceManagerTests
 
         var size = (int)(totalSeconds * bytesPerSec);
 
-        this.mockALInvoker.Setup(m => m.GetBuffer(this.bufferId, ALGetBufferi.Size)).Returns(size);
-        this.mockALInvoker.Setup(m => m.GetBuffer(this.bufferId, ALGetBufferi.Channels)).Returns(channels);
-        this.mockALInvoker.Setup(m => m.GetBuffer(this.bufferId, ALGetBufferi.Bits)).Returns(bitDepth);
-        this.mockALInvoker.Setup(m => m.GetBuffer(this.bufferId, ALGetBufferi.Frequency)).Returns(freq);
+        this.mockALInvoker.Setup(m => m.GetBuffer(this.bufferId, GetBufferInteger.Size)).Returns(size);
+        this.mockALInvoker.Setup(m => m.GetBuffer(this.bufferId, GetBufferInteger.Channels)).Returns(channels);
+        this.mockALInvoker.Setup(m => m.GetBuffer(this.bufferId, GetBufferInteger.Bits)).Returns(bitDepth);
+        this.mockALInvoker.Setup(m => m.GetBuffer(this.bufferId, GetBufferInteger.Frequency)).Returns(freq);
     }
 }

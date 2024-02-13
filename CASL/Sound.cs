@@ -12,8 +12,10 @@ using Data;
 using CASL.Data.Exceptions;
 using Devices;
 using Devices.Factories;
-using Exceptions;
 using OpenAL;
+using Silk.NET.OpenAL;
+using Silk.NET.OpenAL.Extensions.EXT;
+using AudioException = Exceptions.AudioException;
 
 /// <summary>
 /// A single sound that can be played, paused etc.
@@ -109,7 +111,7 @@ public class Sound : ISound
             // Get the current volume between 0.0 and 1.0
             return this.ignoreOpenALCalls
                 ? 0
-                : this.alInvoker.GetSource(this.srcId, ALSourcef.Gain) * 100f;
+                : this.alInvoker.GetSourceProperty(this.srcId, SourceFloat.Gain) * 100f;
         }
         set
         {
@@ -131,7 +133,7 @@ public class Sound : ISound
             // This is the excepted range by OpenAL
             value /= 100f;
 
-            this.alInvoker.Source(this.srcId, ALSourcef.Gain, (float)Math.Round(value, 4));
+            this.alInvoker.SetSourceProperty(this.srcId, SourceFloat.Gain, (float)Math.Round(value, 4));
         }
     }
 
@@ -145,7 +147,7 @@ public class Sound : ISound
                 throw new InvalidOperationException(IsDisposedExceptionMessage);
             }
 
-            var seconds = this.ignoreOpenALCalls ? 0f : this.alInvoker.GetSource(this.srcId, ALSourcef.SecOffset);
+            var seconds = this.ignoreOpenALCalls ? 0f : this.alInvoker.GetSourceProperty(this.srcId, SourceFloat.SecOffset);
 
             return new SoundTime(seconds);
         }
@@ -164,7 +166,7 @@ public class Sound : ISound
                 throw new InvalidOperationException(IsDisposedExceptionMessage);
             }
 
-            return !this.ignoreOpenALCalls && this.alInvoker.GetSource(this.srcId, ALSourceb.Looping);
+            return !this.ignoreOpenALCalls && this.alInvoker.GetSourceProperty(this.srcId, SourceBoolean.Looping);
         }
         set
         {
@@ -178,7 +180,7 @@ public class Sound : ISound
                 return;
             }
 
-            this.alInvoker.Source(this.srcId, ALSourceb.Looping, value);
+            this.alInvoker.SetSourceProperty(this.srcId, SourceBoolean.Looping, value);
         }
     }
 
@@ -202,10 +204,10 @@ public class Sound : ISound
 
                 return currentState switch
                 {
-                    ALSourceState.Playing => SoundState.Playing,
-                    ALSourceState.Paused => SoundState.Paused,
-                    ALSourceState.Stopped => SoundState.Stopped,
-                    ALSourceState.Initial => SoundState.Stopped,
+                    SourceState.Playing => SoundState.Playing,
+                    SourceState.Paused => SoundState.Paused,
+                    SourceState.Stopped => SoundState.Stopped,
+                    SourceState.Initial => SoundState.Stopped,
                     _ => throw new AudioException($"The OpenAL sound state of '{nameof(ALSourceState)}: {(int)currentState}' is not valid."),
                 };
             }
@@ -224,7 +226,7 @@ public class Sound : ISound
 
             return this.ignoreOpenALCalls
                 ? 0f
-                : this.alInvoker.GetSource(this.srcId, ALSourcef.Pitch);
+                : this.alInvoker.GetSourceProperty(this.srcId, SourceFloat.Pitch);
         }
         set
         {
@@ -236,7 +238,7 @@ public class Sound : ISound
                 return;
             }
 
-            this.alInvoker.Source(this.srcId, ALSourcef.Pitch, value);
+            this.alInvoker.SetSourceProperty(this.srcId, SourceFloat.Pitch, value);
         }
     }
 
@@ -328,7 +330,7 @@ public class Sound : ISound
         // Prevent a value past the end of the sound
         seconds = seconds > this.totalSeconds ? this.totalSeconds : seconds;
 
-        this.alInvoker.Source(this.srcId, ALSourcef.SecOffset, seconds);
+        this.alInvoker.SetSourceProperty(this.srcId, SourceFloat.SecOffset, seconds);
     }
 
     /// <inheritdoc/>
@@ -414,14 +416,24 @@ public class Sound : ISound
     /// </summary>
     /// <param name="format">The format to convert.</param>
     /// <returns>The <see cref="ALFormat"/> result.</returns>
-    private static ALFormat MapFormat(AudioFormat format) => format switch
+    private static BufferFormat MapNonFloatFormats(AudioFormat format) => format switch
     {
-        AudioFormat.Mono8 => ALFormat.Mono8,
-        AudioFormat.Mono16 => ALFormat.Mono16,
-        AudioFormat.MonoFloat32 => ALFormat.MonoFloat32Ext,
-        AudioFormat.Stereo8 => ALFormat.Stereo8,
-        AudioFormat.Stereo16 => ALFormat.Stereo16,
-        AudioFormat.StereoFloat32 => ALFormat.StereoFloat32Ext,
+        AudioFormat.Mono8 => BufferFormat.Mono8,
+        AudioFormat.Mono16 => BufferFormat.Mono16,
+        AudioFormat.Stereo8 => BufferFormat.Stereo8,
+        AudioFormat.Stereo16 => BufferFormat.Stereo16,
+        _ => throw new AudioException("Invalid or unknown audio format."),
+    };
+
+    /// <summary>
+    /// Maps the given audio <paramref name="format"/> to the <see cref="ALFormat"/> type equivalent.
+    /// </summary>
+    /// <param name="format">The format to convert.</param>
+    /// <returns>The <see cref="ALFormat"/> result.</returns>
+    private static FloatBufferFormat MapFloatFormats(AudioFormat format) => format switch
+    {
+        AudioFormat.MonoFloat32 => FloatBufferFormat.Mono,
+        AudioFormat.StereoFloat32 => FloatBufferFormat.Stereo,
         _ => throw new AudioException("Invalid or unknown audio format."),
     };
 
@@ -466,10 +478,10 @@ public class Sound : ISound
                 throw new AudioException($"The file extension '{extension}' is not supported file type.");
         }
 
-        var sizeInBytes = this.alInvoker.GetBuffer(this.bufferId, ALGetBufferi.Size);
-        var totalChannels = this.alInvoker.GetBuffer(this.bufferId, ALGetBufferi.Channels);
-        var bitDepth = this.alInvoker.GetBuffer(this.bufferId, ALGetBufferi.Bits);
-        var frequency = this.alInvoker.GetBuffer(this.bufferId, ALGetBufferi.Frequency);
+        var sizeInBytes = this.alInvoker.GetBuffer(this.bufferId, GetBufferInteger.Size);
+        var totalChannels = this.alInvoker.GetBuffer(this.bufferId, GetBufferInteger.Channels);
+        var bitDepth = this.alInvoker.GetBuffer(this.bufferId, GetBufferInteger.Bits);
+        var frequency = this.alInvoker.GetBuffer(this.bufferId, GetBufferInteger.Frequency);
 
         var sampleLen = sizeInBytes * 8 / (totalChannels * bitDepth);
 
@@ -496,12 +508,12 @@ public class Sound : ISound
 
         this.alInvoker.BufferData(
             this.bufferId,
-            MapFormat(data.Format),
+            MapFloatFormats(data.Format),
             data.BufferData.ToArray(),
             data.SampleRate);
 
         // Bind the buffer to the source
-        this.alInvoker.Source(this.srcId, ALSourcei.Buffer, (int)this.bufferId);
+        this.alInvoker.SetSourceProperty(this.srcId, SourceInteger.Buffer, (int)this.bufferId);
     }
 
     /// <summary>
@@ -517,12 +529,12 @@ public class Sound : ISound
 
         this.alInvoker.BufferData(
             this.bufferId,
-            MapFormat(data.Format),
+            MapNonFloatFormats(data.Format),
             data.BufferData.ToArray(),
             data.SampleRate);
 
         // Bind the buffer to the source
-        this.alInvoker.Source(this.srcId, ALSourcei.Buffer, (int)this.bufferId);
+        this.alInvoker.SetSourceProperty(this.srcId, SourceInteger.Buffer, (int)this.bufferId);
     }
 
     /// <summary>

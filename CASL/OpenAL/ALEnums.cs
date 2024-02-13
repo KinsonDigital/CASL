@@ -13,48 +13,48 @@ namespace CASL.OpenAL;
 /// <summary>
 /// Returned by AL.GetError.
 /// </summary>
-internal enum ALError
-{
-    /// <summary>
-    /// No OpenAL Error.
-    /// </summary>
-    NoError = 0,
-
-    /// <summary>
-    /// Invalid Name parameter passed to OpenAL call.
-    /// </summary>
-    InvalidName = 0xA001,
-
-    /// <summary>
-    /// Invalid parameter passed to OpenAL call.
-    /// </summary>
-    IllegalEnum = 0xA002,
-
-    /// <summary>
-    /// Invalid parameter passed to OpenAL call.
-    /// </summary>
-    InvalidEnum = 0xA002,
-
-    /// <summary>
-    /// Invalid OpenAL enum parameter value.
-    /// </summary>
-    InvalidValue = 0xA003,
-
-    /// <summary>
-    /// Illegal OpenAL call.
-    /// </summary>
-    IllegalCommand = 0xA004,
-
-    /// <summary>
-    /// Illegal OpenAL call.
-    /// </summary>
-    InvalidOperation = 0xA004,
-
-    /// <summary>
-    /// No OpenAL memory left.
-    /// </summary>
-    OutOfMemory = 0xA005,
-}
+// internal enum ALError
+// {
+//     /// <summary>
+//     /// No OpenAL Error.
+//     /// </summary>
+//     NoError = 0,
+//
+//     /// <summary>
+//     /// Invalid Name parameter passed to OpenAL call.
+//     /// </summary>
+//     InvalidName = 0xA001,
+//
+//     /// <summary>
+//     /// Invalid parameter passed to OpenAL call.
+//     /// </summary>
+//     IllegalEnum = 0xA002,
+//
+//     /// <summary>
+//     /// Invalid parameter passed to OpenAL call.
+//     /// </summary>
+//     InvalidEnum = 0xA002,
+//
+//     /// <summary>
+//     /// Invalid OpenAL enum parameter value.
+//     /// </summary>
+//     InvalidValue = 0xA003,
+//
+//     /// <summary>
+//     /// Illegal OpenAL call.
+//     /// </summary>
+//     IllegalCommand = 0xA004,
+//
+//     /// <summary>
+//     /// Illegal OpenAL call.
+//     /// </summary>
+//     InvalidOperation = 0xA004,
+//
+//     /// <summary>
+//     /// No OpenAL memory left.
+//     /// </summary>
+//     OutOfMemory = 0xA005,
+// }
 
 // #pragma warning restore CA1069 // Enums values should not be duplicated
 
@@ -137,6 +137,7 @@ internal enum ALSourceb
     EfxAuxiliarySendFilterGainHighFrequencyAuto = 0x2000C,
 }
 
+// TODO: Delete me
 /// <summary>
 /// A list of valid 32-bit Float Source/GetSource parameters.
 /// </summary>
