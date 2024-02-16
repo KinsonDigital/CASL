@@ -5,7 +5,6 @@
 namespace CASL.Data;
 
 using System;
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using CASL.Exceptions;
 using MP3Sharp;
@@ -13,14 +12,18 @@ using MP3Sharp;
 /// <summary>
 /// Streams mp3 audio data from a mp3 file.
 /// </summary>
-[ExcludeFromCodeCoverage]
-[SuppressMessage("ReSharper", "ClassNeverInstantiated.Global", Justification = "Instantiated via reflection")]
 internal sealed class Mp3AudioDataStream : IAudioDataStream<byte>
 {
     // NOTE: the Mp3Sharp decoder library only deals with 16bit mp3 files.  Which is 99% of what is used now days anyways
     private MP3Stream? mp3Reader;
-    private string? fileName;
+    private string? filePath;
     private bool isDisposed;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="Mp3AudioDataStream"/> class.
+    /// </summary>
+    /// <param name="filePath">The fully qualified path to the ogg audio file.</param>
+    public Mp3AudioDataStream(string filePath) => this.filePath = filePath;
 
     /// <summary>
     /// Gets or sets the name of the file.
@@ -31,7 +34,7 @@ internal sealed class Mp3AudioDataStream : IAudioDataStream<byte>
     /// </remarks>
     public string Filename
     {
-        get => this.fileName ?? string.Empty;
+        get => this.filePath ?? string.Empty;
         set
         {
             if (string.IsNullOrEmpty(value))
@@ -50,26 +53,26 @@ internal sealed class Mp3AudioDataStream : IAudioDataStream<byte>
             }
             else
             {
-                if (value != this.fileName)
+                if (value != this.filePath)
                 {
                     this.mp3Reader.Dispose();
                     this.mp3Reader = new MP3Stream(value);
                 }
             }
 
-            this.fileName = value;
+            this.filePath = value;
         }
     }
 
     /// <inheritdoc/>
-    public int Channels => string.IsNullOrEmpty(this.fileName) ? 0 : this.mp3Reader?.ChannelCount ?? 0;
+    public int Channels => string.IsNullOrEmpty(this.filePath) ? 0 : this.mp3Reader?.ChannelCount ?? 0;
 
     /// <inheritdoc/>
     public AudioFormat Format
     {
         get
         {
-            if (string.IsNullOrEmpty(this.fileName) || this.mp3Reader is null)
+            if (string.IsNullOrEmpty(this.filePath) || this.mp3Reader is null)
             {
                 return default;
             }
@@ -81,7 +84,16 @@ internal sealed class Mp3AudioDataStream : IAudioDataStream<byte>
     }
 
     /// <inheritdoc/>
-    public int SampleRate => string.IsNullOrEmpty(this.fileName) ? 0 : this.mp3Reader?.Frequency ?? 0;
+    public int SampleRate => string.IsNullOrEmpty(this.filePath) ? 0 : this.mp3Reader?.Frequency ?? 0;
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    /// <exception cref="NotImplementedException">
+    /// Thrown because their is no way to get this value from the <see cref="MP3Stream"/>.
+    /// </exception>
+    public long TotalSamples =>
+        throw new NotImplementedException("No way to get the total samples from an mp3 file.  This is because mp3 files are compressed.");
 
     /// <inheritdoc/>
     public int ReadSamples(byte[] buffer, int offset, int count)
@@ -95,6 +107,20 @@ internal sealed class Mp3AudioDataStream : IAudioDataStream<byte>
     }
 
     /// <inheritdoc/>
+    public int ReadSamples(byte[] buffer) => ReadSamples(buffer.AsSpan());
+
+    /// <inheritdoc/>
+    public int ReadSamples(Span<byte> buffer)
+    {
+        if (string.IsNullOrEmpty(Filename))
+        {
+            throw new StringNullOrEmptyException();
+        }
+
+        return this.mp3Reader?.Read(buffer) ?? 0;
+    }
+
+    /// <inheritdoc/>
     public void Flush()
     {
         if (this.mp3Reader is not null)
@@ -102,7 +128,7 @@ internal sealed class Mp3AudioDataStream : IAudioDataStream<byte>
             this.mp3Reader.Dispose();
         }
 
-        this.mp3Reader = new MP3Stream(this.fileName);
+        this.mp3Reader = new MP3Stream(this.filePath);
     }
 
     /// <inheritdoc/>

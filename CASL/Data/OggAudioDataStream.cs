@@ -5,7 +5,6 @@
 namespace CASL.Data;
 
 using System;
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using CASL.Exceptions;
 using NVorbis;
@@ -13,13 +12,17 @@ using NVorbis;
 /// <summary>
 /// Streams ogg audio data from a ogg file.
 /// </summary>
-[ExcludeFromCodeCoverage]
-[SuppressMessage("ReSharper", "ClassNeverInstantiated.Global", Justification = "Instantiated via reflection")]
 internal sealed class OggAudioDataStream : IAudioDataStream<float>
 {
     private VorbisReader? vorbisReader;
-    private string? fileName;
+    private string? filePath;
     private bool isDisposed;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="OggAudioDataStream"/> class.
+    /// </summary>
+    /// <param name="filePath">The fully qualified path to the ogg audio file.</param>
+    public OggAudioDataStream(string filePath) => this.filePath = filePath;
 
     /// <summary>
     /// Gets or sets the name of the file.
@@ -30,7 +33,7 @@ internal sealed class OggAudioDataStream : IAudioDataStream<float>
     /// </remarks>
     public string Filename
     {
-        get => this.fileName ?? string.Empty;
+        get => this.filePath ?? string.Empty;
         set
         {
             if (string.IsNullOrEmpty(value))
@@ -43,9 +46,9 @@ internal sealed class OggAudioDataStream : IAudioDataStream<float>
                 throw new FileNotFoundException($"The file '{value}' was not found or does not exist", value);
             }
 
-            var valueChanged = this.fileName != value;
+            var valueChanged = this.filePath != value;
 
-            this.fileName = value;
+            this.filePath = value;
 
             if (valueChanged)
             {
@@ -59,7 +62,7 @@ internal sealed class OggAudioDataStream : IAudioDataStream<float>
     {
         get
         {
-            if (string.IsNullOrEmpty(this.fileName))
+            if (string.IsNullOrEmpty(this.filePath))
             {
                 return 0;
             }
@@ -78,7 +81,7 @@ internal sealed class OggAudioDataStream : IAudioDataStream<float>
     {
         get
         {
-            if (string.IsNullOrEmpty(this.fileName) || this.vorbisReader is null)
+            if (string.IsNullOrEmpty(this.filePath) || this.vorbisReader is null)
             {
                 return default;
             }
@@ -92,7 +95,7 @@ internal sealed class OggAudioDataStream : IAudioDataStream<float>
     {
         get
         {
-            if (string.IsNullOrEmpty(this.fileName))
+            if (string.IsNullOrEmpty(this.filePath))
             {
                 return 0;
             }
@@ -107,6 +110,9 @@ internal sealed class OggAudioDataStream : IAudioDataStream<float>
     }
 
     /// <inheritdoc/>
+    public long TotalSamples => this.vorbisReader?.TotalSamples ?? 0;
+
+    /// <inheritdoc/>
     public void Flush()
     {
         if (this.vorbisReader is not null)
@@ -114,7 +120,7 @@ internal sealed class OggAudioDataStream : IAudioDataStream<float>
             this.vorbisReader.Dispose();
         }
 
-        this.vorbisReader = new VorbisReader(this.fileName);
+        this.vorbisReader = new VorbisReader(this.filePath);
     }
 
     /// <inheritdoc/>
@@ -132,6 +138,20 @@ internal sealed class OggAudioDataStream : IAudioDataStream<float>
 
         return this.vorbisReader?.ReadSamples(buffer, offset, count) ?? 0;
     }
+
+    /// <inheritdoc/>
+    public int ReadSamples(Span<float> buffer)
+    {
+        if (string.IsNullOrEmpty(Filename))
+        {
+            throw new StringNullOrEmptyException();
+        }
+
+        return this.vorbisReader?.ReadSamples(buffer) ?? 0;
+    }
+
+    /// <inheritdoc/>
+    public int ReadSamples(float[] buffer) => ReadSamples(buffer.AsSpan());
 
     /// <inheritdoc/>
     public void Dispose() => Dispose(true);

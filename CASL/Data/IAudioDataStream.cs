@@ -15,7 +15,7 @@ internal interface IAudioDataStream<T> : IDisposable
     /// <summary>
     /// Gets or sets the name of the file.
     /// </summary>
-    string Filename { get; set; }
+    string Filename { get; set; } // TODO: Change the name of this to FilePath
 
     /// <summary>
     /// Gets the number of audio channels.
@@ -33,6 +33,20 @@ internal interface IAudioDataStream<T> : IDisposable
     int SampleRate { get; }
 
     /// <summary>
+    /// Gets the total number of samples in the audio stream.
+    /// </summary>
+    long TotalSamples { get; }
+
+    /// <summary>
+    /// Reads an amount of samples into the given <paramref name="buffer"/> with the same number of samples
+    /// as the length of the <paramref name="buffer"/>.
+    /// </summary>
+    /// <param name="buffer">The buffer to fill with data.</param>
+    /// <returns>The number of samples read.</returns>
+    /// <remarks>Invoking this simply fills the <paramref name="buffer"/> param with data.</remarks>
+    int ReadSamples(T[] buffer);
+
+    /// <summary>
     ///     Reads an amount of samples starting at the given <paramref name="offset"/>
     ///     and for a number of samples by the given <paramref name="count"/>.
     /// </summary>
@@ -42,6 +56,15 @@ internal interface IAudioDataStream<T> : IDisposable
     /// <returns>The number of samples read.</returns>
     /// <remarks>Invoking this simply fills the <paramref name="buffer"/> param with data.</remarks>
     int ReadSamples(T[] buffer, int offset, int count);
+
+    /// <summary>
+    /// Reads an amount of samples into the given <paramref name="buffer"/> with the same number of samples
+    /// as the length of the <paramref name="buffer"/>.
+    /// </summary>
+    /// <param name="buffer">The buffer to fill with data.</param>
+    /// <returns>The number of samples read.</returns>
+    /// <remarks>Invoking this simply fills the <paramref name="buffer"/> param with data.</remarks>
+    int ReadSamples(Span<T> buffer);
 
     /// <summary>
     /// Flushes the reader back to the beginning.
