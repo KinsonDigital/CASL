@@ -1,4 +1,4 @@
-// <copyright file="AudioDeviceManager.cs" company="KinsonDigital">
+﻿// <copyright file="AudioDeviceManager.cs" company="KinsonDigital">
 // Copyright (c) KinsonDigital. All rights reserved.
 // </copyright>
 
@@ -281,8 +281,11 @@ internal sealed class AudioDeviceManager : IAudioDeviceManager
             var sourceState = this.alInvoker.GetSourceState(soundSrc.SourceId);
 
             var notPlayingOrPaused = sourceState != ALSourceState.Playing && sourceState != ALSourceState.Paused;
+            var playSpeed = this.alInvoker.GetSource(soundSrc.SourceId, ALSourcef.Pitch);
+            var playSpeedIsDefault = Math.Abs(playSpeed - 1f) < 0.00001f;
 
-            if (notPlayingOrPaused)
+            // Should the sound be cached?
+            if (notPlayingOrPaused && playSpeedIsDefault)
             {
                 continue;
             }
@@ -292,7 +295,7 @@ internal sealed class AudioDeviceManager : IAudioDeviceManager
             soundStats.PlaybackState = default;
             soundStats.TimePosition = GetCurrentTimePosition(soundSrc.SourceId);
             soundStats.TotalSeconds = soundSrc.TotalSeconds;
-            soundStats.PlaySpeed = this.alInvoker.GetSource(soundSrc.SourceId, ALSourcef.Pitch);
+            soundStats.PlaySpeed = playSpeed;
 
             soundStats.PlaybackState = sourceState == ALSourceState.Playing ? SoundState.Playing : SoundState.Paused;
 
