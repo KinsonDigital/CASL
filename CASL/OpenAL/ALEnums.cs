@@ -416,7 +416,7 @@ internal enum ALSourcei
     /// <summary>
     /// The playback position, expressed in bytes.
     /// </summary>
-    ByteOffset = 0x1026,  // AL_EXT_OFFSET extension.
+    ByteOffset = 0x1026, // AL_EXT_OFFSET extension.
 
     /// <summary>
     /// The playback position, expressed in samples.

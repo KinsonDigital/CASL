@@ -32,5 +32,8 @@ internal struct SoundStats
     /// <summary>
     /// The speed that the sound is playing at.
     /// </summary>
+    /// <remarks>
+    ///     A value of 1.0 is normal speed.  A value of 2.0 is twice the normal speed.  A value of 0.5 is half the normal speed.
+    /// </remarks>
     public float PlaySpeed;
 }

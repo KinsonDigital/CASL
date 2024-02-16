@@ -5,7 +5,6 @@
 namespace CASLTests.Data;
 
 using System.Collections.ObjectModel;
-using System.Linq;
 using CASL;
 using CASL.Data;
 using Xunit;
@@ -28,7 +27,7 @@ public class SoundDataTests
             AudioFormat.Stereo16);
 
         // Assert
-        data.BufferData.ToArray().Should().BeEquivalentTo(new[] { 1f });
+        data.BufferData.Should().BeEquivalentTo(new[] { 1f });
         data.SampleRate.Should().Be(44100);
         data.Channels.Should().Be(2);
         data.Format.Should().Be(AudioFormat.Stereo16);
