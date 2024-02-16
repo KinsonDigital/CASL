@@ -141,7 +141,6 @@ internal sealed class AudioDeviceManager : IAudioDeviceManager
         this.DeviceChanging?.Invoke(this, EventArgs.Empty);
 
         CacheSoundSources();
-
         DestroyDevice();
         InitDevice(name);
 
@@ -149,25 +148,7 @@ internal sealed class AudioDeviceManager : IAudioDeviceManager
 
         this.DeviceChanged?.Invoke(this, EventArgs.Empty);
 
-        // Reset all of the states such as if playing or paused and the current time position
-        foreach (var cachedState in this.continuePlaybackCache)
-        {
-            // Set the current position of the sound
-            SetTimePosition(cachedState.SourceId, cachedState.TimePosition, cachedState.TotalSeconds);
-
-            // Set the play speed
-            this.alInvoker.Source(cachedState.SourceId, ALSourcef.Pitch, cachedState.PlaySpeed);
-
-            // Set the state of the sound
-            if (cachedState.PlaybackState == SoundState.Playing)
-            {
-                this.alInvoker.SourcePlay(cachedState.SourceId);
-            }
-            else if (cachedState.PlaybackState == SoundState.Paused)
-            {
-                this.alInvoker.SourceStop(cachedState.SourceId);
-            }
-        }
+        ResetsCachedSoundStates();
     }
 
     /// <inheritdoc/>
@@ -206,6 +187,32 @@ internal sealed class AudioDeviceManager : IAudioDeviceManager
 
     /// <inheritdoc/>
     public void Dispose() => Dispose(true);
+
+    /// <summary>
+    /// Resets the state of all the sound sources to the state they were in before changing the audio device.
+    /// </summary>
+    private void ResetsCachedSoundStates()
+    {
+        // Reset all of the states such as if playing or paused and the current time position
+        foreach (var cachedState in this.continuePlaybackCache)
+        {
+            // Set the current position of the sound
+            SetTimePosition(cachedState.SourceId, cachedState.TimePosition, cachedState.TotalSeconds);
+
+            // Set the play speed
+            this.alInvoker.Source(cachedState.SourceId, ALSourcef.Pitch, cachedState.PlaySpeed);
+
+            // Set the state of the sound
+            if (cachedState.PlaybackState == SoundState.Playing)
+            {
+                this.alInvoker.SourcePlay(cachedState.SourceId);
+            }
+            else if (cachedState.PlaybackState == SoundState.Paused)
+            {
+                this.alInvoker.SourcePause(cachedState.SourceId);
+            }
+        }
+    }
 
     /// <summary>
     /// Invoked when there is an OpenAL specific error.
