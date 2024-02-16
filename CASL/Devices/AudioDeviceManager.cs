@@ -1,4 +1,4 @@
-﻿// <copyright file="AudioDeviceManager.cs" company="KinsonDigital">
+// <copyright file="AudioDeviceManager.cs" company="KinsonDigital">
 // Copyright (c) KinsonDigital. All rights reserved.
 // </copyright>
 
@@ -273,7 +273,9 @@ internal sealed class AudioDeviceManager : IAudioDeviceManager
         {
             var sourceState = this.alInvoker.GetSourceState(soundSrc.SourceId);
 
-            if (sourceState != ALSourceState.Playing && sourceState != ALSourceState.Paused)
+            var notPlayingOrPaused = sourceState != ALSourceState.Playing && sourceState != ALSourceState.Paused;
+
+            if (notPlayingOrPaused)
             {
                 continue;
             }
