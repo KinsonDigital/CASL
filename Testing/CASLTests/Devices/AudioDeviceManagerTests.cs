@@ -9,6 +9,7 @@ namespace CASLTests.Devices;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics.CodeAnalysis;
 using System.IO.Abstractions;
 using System.Linq;
 using CASL;
@@ -52,6 +53,7 @@ public class AudioDeviceManagerTests
 
         this.mockALInvoker.Setup(m => m.GenSource()).Returns(this.srcId);
         this.mockALInvoker.Setup(m => m.GenBuffer()).Returns(this.bufferId);
+        this.mockALInvoker.Setup(m => m.GetDeviceList()).Returns(new[] { "Device-1", "Device-2" });
         this.mockALInvoker.Setup(m => m.OpenDevice(It.IsAny<string>())).Returns(device);
         this.mockALInvoker.Setup(m => m.CreateContext(device, It.IsAny<ALContextAttributes>()))
             .Returns(this.context);
@@ -97,8 +99,6 @@ public class AudioDeviceManagerTests
         var expected = new[] { "Device-1", "Device-2" };
         var manager = CreateManager();
         manager.InitDevice();
-        this.mockALInvoker.Setup(m => m.GetDeviceList())
-            .Returns(() => new[] { "Device-1", "Device-2" });
 
         // Act
         var actual = manager.GetDeviceNames().ToArray();
@@ -310,17 +310,14 @@ public class AudioDeviceManagerTests
     public void ChangeDevice_WhenUsingInvalidDeviceName_ThrowsException()
     {
         // Arrange
-        this.mockALInvoker.Setup(m => m.GetDeviceList())
-            .Returns(new[] { "test-device" });
-
         var manager = CreateManager();
         manager.InitDevice();
 
         // Act
-        var action = () => manager.ChangeDevice("test-device-1");
+        var action = () => manager.ChangeDevice("non-existing-device");
 
         // Assert
-        var expectedExceptionMessage = "Device Name: test-device-1\nThe audio device does not exist.";
+        var expectedExceptionMessage = "Device Name: non-existing-device\nThe audio device does not exist.";
         action.Should().Throw<AudioDeviceDoesNotExistException>().WithMessage(expectedExceptionMessage);
     }
 
@@ -334,39 +331,14 @@ public class AudioDeviceManagerTests
         // Arrange
         MockSoundLength(totalSeconds);
 
-        this.mockALInvoker.Setup(m => m.GetDeviceList())
-            .Returns(new[] { "test-device" });
         this.mockALInvoker.Setup(m => m.GetSourceState(this.srcId))
             .Returns(ALSourceState.Playing);
         this.mockALInvoker.Setup(m => m.GetSource(this.srcId, ALSourcef.SecOffset)).Returns(timePosition);
 
-        var mockOggDecoder = new Mock<ISoundDecoder<float>>();
-        mockOggDecoder.Setup(m => m.LoadData(It.IsAny<string>()))
-            .Returns(() =>
-            {
-                var oggData = new SoundData<float>
-                {
-                    BufferData = new ReadOnlyCollection<float>(new[] { 1f }),
-                    Format = AudioFormat.Stereo16,
-                    Channels = 2,
-                    SampleRate = 44100,
-                };
-
-                return oggData;
-            });
-
         var manager = CreateManager();
 
-        _ = new Sound(
-            this.oggFilePath,
-            this.mockALInvoker.Object,
-            manager,
-            mockOggDecoder.Object,
-            new Mock<ISoundDecoder<byte>>().Object,
-            this.mockPath.Object);
-
         // Act
-        manager.ChangeDevice("test-device");
+        manager.ChangeDevice("Device-1");
 
         // Assert
         this.mockALInvoker.Verify(m => m.GetSourceState(this.srcId), Times.Once());
@@ -391,41 +363,16 @@ public class AudioDeviceManagerTests
          * for each sound source that exists.
          */
         // Arrange
-        this.mockALInvoker.Setup(m => m.GetDeviceList())
-            .Returns(new[] { "test-device" });
         this.mockALInvoker.Setup(m => m.GetSourceState(this.srcId))
             .Returns((ALSourceState)srcState);
         this.mockALInvoker.Setup(m => m.GetSource(this.srcId, ALGetSourcei.SampleOffset))
             .Returns(sampleOffset); // End result will be calculated to the time position that the sound is currently at
 
-        var mockOggDecoder = new Mock<ISoundDecoder<float>>();
-        mockOggDecoder.Setup(m => m.LoadData(It.IsAny<string>()))
-            .Returns(() =>
-            {
-                var oggData = new SoundData<float>
-                {
-                    BufferData = new ReadOnlyCollection<float>(new[] { 1f }),
-                    Format = AudioFormat.Stereo16,
-                    Channels = 2,
-                    SampleRate = 44100,
-                };
-
-                return oggData;
-            });
-
         var manager = CreateManager();
         manager.InitDevice();
 
-        _ = new Sound(
-            this.oggFilePath,
-            this.mockALInvoker.Object,
-            manager,
-            mockOggDecoder.Object,
-            new Mock<ISoundDecoder<byte>>().Object,
-            this.mockPath.Object);
-
         // Act
-        manager.ChangeDevice("test-device");
+        manager.ChangeDevice("Device-1");
 
         // Assert
         this.mockALInvoker.Verify(m => m.GetSourceState(this.srcId), Times.Exactly(srcStateInvokeCount));
@@ -436,15 +383,13 @@ public class AudioDeviceManagerTests
     public void ChangeDevice_WhenInvokedWithEventSubscription_InvokesDeviceChangedEvent()
     {
         // Arrange
-        this.mockALInvoker.Setup(m => m.GetDeviceList())
-            .Returns(new[] { "test-device" });
         var manager = CreateManager();
         manager.InitDevice();
 
         // Act
         var eventRaised = false;
         manager.DeviceChanged += (sender, args) => eventRaised = true;
-        manager.ChangeDevice("test-device");
+        manager.ChangeDevice("Device-1");
 
         // Assert
         eventRaised.Should().BeTrue();
@@ -454,19 +399,18 @@ public class AudioDeviceManagerTests
     public void ChangeDevice_WithNoNoDeviceChangedEventSubscription_DoesNotThrowException()
     {
         // Arrange
-        this.mockALInvoker.Setup(m => m.GetDeviceList()).Returns(new[] { "test-device" });
-
         var manager = CreateManager();
         manager.InitDevice();
 
         // Act
-        var action = () => manager.ChangeDevice("test-device");
+        var action = () => manager.ChangeDevice("Device-1");
 
         // Assert
         action.Should().NotThrow<NullReferenceException>();
     }
 
     [Fact]
+    [SuppressMessage("csharpsquid", "S3966", Justification = "Need to execute dispose twice for testing.")]
     public void Dispose_WhenInvoked_DisposesOfManager()
     {
         // Arrange
