@@ -6,8 +6,8 @@ namespace CASL;
 
 using System.Diagnostics.CodeAnalysis;
 using System.IO.Abstractions;
-using Data;
 using Devices;
+using Factories;
 using NativeInterop;
 using NativeInterop.Factories;
 using OpenAL;
@@ -55,6 +55,7 @@ internal static class IoC
         IoCContainer.Register<IDependencyManager, OpenALDependencyManager>(Lifestyle.Singleton);
         IoCContainer.Register<ILibraryLoader, NativeLibraryLoader>(Lifestyle.Singleton);
         IoCContainer.Register<IFilePathResolver, NativeLibPathResolver>(Lifestyle.Singleton);
+        IoCContainer.Register<IAudioDataStreamFactory, AudioDataStreamFactory>(Lifestyle.Singleton);
 
         SetupAudio();
 
@@ -71,16 +72,5 @@ internal static class IoC
         IoCContainer.Register<IOpenALInvoker, OpenALInvoker>(Lifestyle.Singleton);
 
         IoCContainer.Register<IAudioDeviceManager, AudioDeviceManager>(Lifestyle.Singleton);
-
-        // Register the proper data stream to be the implementation if the consumer is a certain decoder
-        IoCContainer.RegisterConditional<IAudioDataStream<float>, OggAudioDataStream>(
-            context => !context.HasConsumer || context.Consumer.ImplementationType == typeof(OggSoundDecoder), true);
-
-        IoCContainer.Register<ISoundDecoder<float>, OggSoundDecoder>(true);
-
-        IoCContainer.RegisterConditional<IAudioDataStream<byte>, Mp3AudioDataStream>(
-            context => !context.HasConsumer || context.Consumer.ImplementationType == typeof(MP3SoundDecoder), true);
-
-        IoCContainer.Register<ISoundDecoder<byte>, MP3SoundDecoder>(true);
     }
 }
