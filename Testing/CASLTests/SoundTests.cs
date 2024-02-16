@@ -9,12 +9,14 @@ namespace CASLTests;
 using System;
 using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
+using System.IO;
 using System.IO.Abstractions;
+using System.Linq;
 using CASL;
 using CASL.Data;
-using CASL.Data.Exceptions;
 using CASL.Devices;
 using CASL.Exceptions;
+using CASL.Factories;
 using CASL.OpenAL;
 using FluentAssertions;
 using Moq;
@@ -31,13 +33,14 @@ public class SoundTests
     private const uint BufferId = 5678;
     private const string SoundFileNameWithoutExtension = "sound";
     private readonly Mock<IAudioDeviceManager> mockAudioManager;
-    private readonly Mock<ISoundDecoder<float>> mockOggDecoder;
-    private readonly Mock<ISoundDecoder<byte>> mockMp3Decoder;
     private readonly Mock<IOpenALInvoker> mockALInvoker;
+    private readonly Mock<IAudioDataStream<byte>> mockMp3DataStream;
+    private readonly Mock<IAudioDataStream<float>> mockOggDataStream;
+    private readonly Mock<IAudioDataStreamFactory> mockDataStreamFactory;
     private readonly Mock<IPath> mockPath;
+    private readonly Mock<IFile> mockFile;
     private readonly string oggContentFilePath;
     private readonly string mp3ContentFilePath;
-    private readonly float[] oggBufferData = { 11f, 22f, 33f, 44f };
 
     /// <summary>
     /// Initializes a new instance of the <see cref="SoundTests"/> class.
@@ -58,35 +61,177 @@ public class SoundTests
         this.mockAudioManager = new Mock<IAudioDeviceManager>();
         this.mockAudioManager.Setup(m => m.InitSound()).Returns((SrcId, BufferId));
 
-        this.mockOggDecoder = new Mock<ISoundDecoder<float>>();
-        this.mockOggDecoder.Setup(m => m.LoadData(this.oggContentFilePath)).Returns(() =>
-        {
-            var result = new SoundData<float>
-            {
-                BufferData = new ReadOnlyCollection<float>(this.oggBufferData),
-                Channels = 2,
-                Format = AudioFormat.Stereo16,
-                SampleRate = 44100,
-            };
+        this.mockMp3DataStream = new Mock<IAudioDataStream<byte>>();
+        this.mockOggDataStream = new Mock<IAudioDataStream<float>>();
+        this.mockOggDataStream.SetupGet(p => p.Channels).Returns(2);
+        this.mockOggDataStream.SetupGet(p => p.TotalSamples).Returns(2);
+        this.mockOggDataStream.SetupGet(p => p.Format).Returns(AudioFormat.StereoFloat32);
 
-            return result;
-        });
-
-        this.mockMp3Decoder = new Mock<ISoundDecoder<byte>>();
+        this.mockDataStreamFactory = new Mock<IAudioDataStreamFactory>();
+        this.mockDataStreamFactory.Setup(m => m.CreateMp3AudioStream(It.IsAny<string>()))
+            .Returns(this.mockMp3DataStream.Object);
+        this.mockDataStreamFactory.Setup(m => m.CreateOggAudioStream(It.IsAny<string>()))
+            .Returns(this.mockOggDataStream.Object);
 
         this.mockPath = new Mock<IPath>();
         this.mockPath.Setup(m => m.GetExtension(this.oggContentFilePath)).Returns(OggFileExtension);
         this.mockPath.Setup(m => m.GetExtension(this.mp3ContentFilePath)).Returns(MP3FileExtension);
         this.mockPath.Setup(m => m.GetFileNameWithoutExtension(It.IsAny<string?>()))
             .Returns(SoundFileNameWithoutExtension);
+
+        this.mockFile = new Mock<IFile>();
+        this.mockFile.Setup(m => m.Exists(It.IsAny<string>())).Returns(true);
     }
 
     #region Constructor Tests
+    [Theory]
+    [InlineData(null, "Value cannot be null. (Parameter 'filePath')")]
+    [InlineData("", "The value cannot be an empty string. (Parameter 'filePath')")]
+    public void Ctor_WithNullFilePathParam_ThrowsException(string? filePath, string expected)
+    {
+        // Arrange & Act
+        var act = () =>
+        {
+            _ = new Sound(
+                filePath,
+                this.mockALInvoker.Object,
+                this.mockAudioManager.Object,
+                this.mockDataStreamFactory.Object,
+                this.mockPath.Object,
+                this.mockFile.Object);
+        };
+
+        // Assert
+        act.Should()
+            .Throw<ArgumentException>()
+            .WithMessage(expected);
+    }
+
+    [Fact]
+    public void Ctor_WithNullALInvokerParam_ThrowsException()
+    {
+        // Arrange & Act
+        var act = () =>
+        {
+            _ = new Sound(
+                this.oggContentFilePath,
+                null,
+                this.mockAudioManager.Object,
+                this.mockDataStreamFactory.Object,
+                this.mockPath.Object,
+                this.mockFile.Object);
+        };
+
+        // Assert
+        act.Should()
+            .Throw<ArgumentNullException>()
+            .WithMessage("Value cannot be null. (Parameter 'alInvoker')");
+    }
+
+    [Fact]
+    public void Ctor_WithNullAudioManagerParam_ThrowsException()
+    {
+        // Arrange & Act
+        var act = () =>
+        {
+            _ = new Sound(
+                this.oggContentFilePath,
+                this.mockALInvoker.Object,
+                null,
+                this.mockDataStreamFactory.Object,
+                this.mockPath.Object,
+                this.mockFile.Object);
+        };
+
+        // Assert
+        act.Should()
+            .Throw<ArgumentNullException>()
+            .WithMessage("Value cannot be null. (Parameter 'audioManager')");
+    }
+
+    [Fact]
+    public void Ctor_WithNullDataStreamFactoryParam_ThrowsException()
+    {
+        // Arrange & Act
+        var act = () =>
+        {
+            _ = new Sound(
+                this.oggContentFilePath,
+                this.mockALInvoker.Object,
+                this.mockAudioManager.Object,
+                null,
+                this.mockPath.Object,
+                this.mockFile.Object);
+        };
+
+        // Assert
+        act.Should()
+            .Throw<ArgumentNullException>()
+            .WithMessage("Value cannot be null. (Parameter 'dataStreamFactory')");
+    }
+
+    [Fact]
+    public void Ctor_WithNullPathParam_ThrowsException()
+    {
+        // Arrange & Act
+        var act = () =>
+        {
+            _ = new Sound(
+                this.oggContentFilePath,
+                this.mockALInvoker.Object,
+                this.mockAudioManager.Object,
+                this.mockDataStreamFactory.Object,
+                null,
+                this.mockFile.Object);
+        };
+
+        // Assert
+        act.Should()
+            .Throw<ArgumentNullException>()
+            .WithMessage("Value cannot be null. (Parameter 'path')");
+    }
+
+    [Fact]
+    public void Ctor_WithNullFileParam_ThrowsException()
+    {
+        // Arrange & Act
+        var act = () =>
+        {
+            _ = new Sound(
+                this.oggContentFilePath,
+                this.mockALInvoker.Object,
+                this.mockAudioManager.Object,
+                this.mockDataStreamFactory.Object,
+                this.mockPath.Object,
+                null);
+        };
+
+        // Assert
+        act.Should()
+            .Throw<ArgumentNullException>()
+            .WithMessage("Value cannot be null. (Parameter 'file')");
+    }
+
+    [Fact]
+    public void Ctor_WhenFileDoesNotExist_ThrowsException()
+    {
+        // Arrange
+        this.mockFile.Setup(m => m.Exists(It.IsAny<string>())).Returns(false);
+
+        // Act
+        var act = () => _ = CreateSystemUnderTest("non-existing-file.data");
+
+        // Assert
+        act.Should().Throw<FileNotFoundException>()
+            .WithMessage("The sound file could not be found.")
+            .Subject.First().FileName.Should().Be("non-existing-file.data");
+    }
+
     [Fact]
     public void Ctor_WhenInvoking_SubscribesToDeviceChangedEvent()
     {
         // Act
-        _ = CreateSound(this.oggContentFilePath);
+        _ = CreateSystemUnderTest(this.oggContentFilePath);
 
         // Assert
         this.mockAudioManager.VerifyAdd(m => m.DeviceChanged += It.IsAny<EventHandler<EventArgs>>(),
@@ -94,126 +239,105 @@ public class SoundTests
             $"Subscription to the event '{nameof(IAudioDeviceManager.DeviceChanged)}' event did not occur.");
     }
 
-    [Fact]
-    public void Ctor_WithNoOggBufferData_ThrowsException()
-    {
-        // Act
-        this.mockOggDecoder.Setup(m => m.LoadData(this.oggContentFilePath))
-            .Returns(() =>
-            {
-                var result = default(SoundData<float>);
-                result.BufferData = new ReadOnlyCollection<float>(Array.Empty<float>());
-
-                return result;
-            });
-
-        // Act
-        var act = () => _ = CreateSound(this.oggContentFilePath);
-
-        // Assert
-        act.Should().Throw<SoundDataException>()
-            .WithMessage("No audio data exists.");
-    }
-
-    [Fact]
-    public void Ctor_WithNoMP3BufferData_ThrowsException()
-    {
-        // Act
-        this.mockMp3Decoder.Setup(m => m.LoadData(this.mp3ContentFilePath))
-            .Returns(() =>
-            {
-                var result = default(SoundData<byte>);
-                result.BufferData = new ReadOnlyCollection<byte>(Array.Empty<byte>());
-
-                return result;
-            });
-
-        // Act
-        var act = () => _ = CreateSound(this.mp3ContentFilePath);
-
-        // Assert
-        act.Should().Throw<SoundDataException>()
-            .WithMessage("No audio data exists.");
-    }
-
     [Theory]
-    [InlineData(AudioFormat.Mono8, (int)ALFormat.Mono8)]
-    [InlineData(AudioFormat.Mono16, (int)ALFormat.Mono16)]
     [InlineData(AudioFormat.MonoFloat32, (int)ALFormat.MonoFloat32Ext)]
-    [InlineData(AudioFormat.Stereo8, (int)ALFormat.Stereo8)]
-    [InlineData(AudioFormat.Stereo16, (int)ALFormat.Stereo16)]
     [InlineData(AudioFormat.StereoFloat32, (int)ALFormat.StereoFloat32Ext)]
-    public void Ctor_WhenUsingOggSound_UploadsBufferData(AudioFormat format, int expected)
+    public void Ctor_WhenUsingOggSound_UploadsBufferData(AudioFormat format, int expectedFormat)
     {
         // NOTE: The ALFormat enum values are casted to ints because
         // ALFormat is internal and cannot be used as a param of the unit test method
+        // without forcing the unit test method to be internal
 
         // Arrange
-        this.mockOggDecoder.Setup(m => m.LoadData(this.oggContentFilePath))
-            .Returns(() =>
-            {
-                var result = default(SoundData<float>);
-                result.Format = format;
-                result.Channels = 2;
-                result.SampleRate = 44100;
-                result.BufferData = new ReadOnlyCollection<float>(new[] { 1f, 2f });
+        const int channels = 2;
+        const int totalSamples = 2;
+        const int sampleRate = 44_000;
+        var expectedBufferData = Enumerable.Repeat(0f, totalSamples * channels).ToArray();
+        var result = default(SoundData<float>);
+        result.Format = format;
+        result.Channels = channels;
+        result.SampleRate = sampleRate;
+        result.BufferData = new ReadOnlyCollection<float>([1f, 2f]);
 
-                return result;
-            });
+        this.mockOggDataStream.Setup(p => p.Format).Returns(format);
+        this.mockOggDataStream.Setup(p => p.TotalSamples).Returns(totalSamples);
+        this.mockOggDataStream.Setup(p => p.Channels).Returns(channels);
+        this.mockOggDataStream.Setup(p => p.SampleRate).Returns(sampleRate);
+
+        float[]? actualBufferData = null;
+
+        this.mockOggDataStream.Setup(m => m.ReadSamples(It.IsAny<float[]>()))
+            .Callback<float[]>((buffer) => actualBufferData = buffer);
 
         // Act
-        _ = CreateSound(this.oggContentFilePath);
+        _ = CreateSystemUnderTest(this.oggContentFilePath);
 
         // Assert
-        this.mockOggDecoder.Verify(m => m.LoadData(this.oggContentFilePath), Times.Once());
-        this.mockALInvoker.Verify(m => m.BufferData(BufferId, (ALFormat)expected, new[] { 1f, 2f }, 44100), Times.Once());
+        actualBufferData.Should().NotBeNull();
+        actualBufferData.Should().BeEquivalentTo(expectedBufferData);
+        this.mockOggDataStream.Verify(m => m.ReadSamples(It.IsAny<float[]>()), Times.Once);
+        this.mockALInvoker.Verify(
+            m => m.BufferData(BufferId, (ALFormat)expectedFormat, new[] { 0f, 0f, 0f, 0f }, sampleRate),
+            Times.Once());
     }
 
     [Fact]
     public void Ctor_WhenUsingUnknownFormat_ThrowsException()
     {
         // Arrange
-        this.mockOggDecoder.Setup(m => m.LoadData(this.oggContentFilePath))
-            .Returns(() =>
-            {
-                var result = default(SoundData<float>);
-                result.Format = default;
-                result.Channels = 2;
-                result.SampleRate = 44100;
-                result.BufferData = new ReadOnlyCollection<float>(new[] { 1f, 2f });
-
-                return result;
-            });
+        this.mockOggDataStream.SetupGet(p => p.Format).Returns((AudioFormat)100);
+        this.mockOggDataStream.SetupGet(m => m.TotalSamples).Returns(2);
+        this.mockOggDataStream.SetupGet(m => m.Channels).Returns(2);
 
         // Act
-        var act = () => _ = CreateSound(this.oggContentFilePath);
+        var act = () => _ = CreateSystemUnderTest(this.oggContentFilePath);
 
-        act.Should().Throw<AudioException>()
-            .WithMessage("Invalid or unknown audio format.");
+        act.Should().Throw<AudioException>().WithMessage("Invalid or unknown audio format.");
     }
 
-    [Fact]
-    public void Ctor_WhenUsingMp3Sound_UploadsBufferData()
+    [Theory]
+    [InlineData(AudioFormat.MonoFloat32, (int)ALFormat.MonoFloat32Ext)]
+    [InlineData(AudioFormat.StereoFloat32, (int)ALFormat.StereoFloat32Ext)]
+    public void Ctor_WhenUsingMp3Sound_UploadsBufferData(AudioFormat format, int expectedFormat)
     {
         // Arrange
-        this.mockMp3Decoder.Setup(m => m.LoadData(this.mp3ContentFilePath))
+        const int channels = 2;
+        const int totalSamples = 2;
+        const int sampleRate = 44_000;
+        var expectedBufferData = new byte[32_768];
+        Array.Fill(expectedBufferData, (byte)0);
+        var result = default(SoundData<float>);
+        result.Format = format;
+        result.Channels = channels;
+        result.SampleRate = sampleRate;
+        result.BufferData = new ReadOnlyCollection<float>([1f, 2f]);
+
+        this.mockMp3DataStream.Setup(p => p.Format).Returns(format);
+        this.mockMp3DataStream.Setup(p => p.TotalSamples).Returns(totalSamples);
+        this.mockMp3DataStream.Setup(p => p.Channels).Returns(channels);
+        this.mockMp3DataStream.Setup(p => p.SampleRate).Returns(sampleRate);
+
+        byte[]? actualBufferData = null;
+        var totalReads = 0;
+
+        this.mockMp3DataStream.Setup(m => m.ReadSamples(It.IsAny<byte[]>()))
             .Returns(() =>
             {
-                var result = default(SoundData<byte>);
-                result.BufferData = new ReadOnlyCollection<byte>(new byte[] { 1, 2 });
-                result.Format = AudioFormat.Stereo16;
-                result.Channels = 2;
-                result.SampleRate = 44100;
-
-                return result;
-            });
+                totalReads += 1;
+                return totalReads == 1 ? 1 : 0;
+            })
+            .Callback<byte[]>((buffer) => actualBufferData = buffer);
 
         // Act
-        _ = CreateSound(this.mp3ContentFilePath);
+        _ = CreateSystemUnderTest(this.mp3ContentFilePath);
 
         // Assert
-        this.mockMp3Decoder.Verify(m => m.LoadData(this.mp3ContentFilePath), Times.Once());
-        this.mockALInvoker.Verify(m => m.BufferData(BufferId, ALFormat.Stereo16, new byte[] { 1, 2 }, 44100), Times.Once());
+        actualBufferData.Should().NotBeNull();
+        actualBufferData.Should().BeEquivalentTo(expectedBufferData);
+        this.mockMp3DataStream.Verify(m => m.ReadSamples(It.IsAny<byte[]>()), Times.Exactly(2));
+        this.mockALInvoker.Verify(
+            m => m.BufferData(BufferId, (ALFormat)expectedFormat, expectedBufferData, sampleRate),
+            Times.Once());
     }
 
     [Fact]
@@ -227,9 +351,9 @@ public class SoundTests
                 @"C:\temp\Content\Sounds\sound.wav",
                 this.mockALInvoker.Object,
                 this.mockAudioManager.Object,
-                this.mockOggDecoder.Object,
-                this.mockMp3Decoder.Object,
-                this.mockPath.Object);
+                this.mockDataStreamFactory.Object,
+                this.mockPath.Object,
+                this.mockFile.Object);
 
         // Assert
         act.Should().Throw<AudioException>()
@@ -242,7 +366,7 @@ public class SoundTests
     public void Name_WhenGettingValue_ReturnsCorrectResult()
     {
         // Act
-        var sut = CreateSound(this.oggContentFilePath);
+        var sut = CreateSystemUnderTest(this.oggContentFilePath);
 
         // Assert
         sut.Name.Should().Be("sound");
@@ -252,7 +376,7 @@ public class SoundTests
     public void IsLooping_WhenGettingValueWhileDisposed_ThrowsException()
     {
         // Arrange
-        var sut = CreateSound(this.oggContentFilePath);
+        var sut = CreateSystemUnderTest(this.oggContentFilePath);
         sut.Dispose();
 
         // Act
@@ -267,7 +391,7 @@ public class SoundTests
     public void IsLooping_WhenGettingValue_GetsSoundLoopingValue()
     {
         // Arrange
-        var sut = CreateSound(this.oggContentFilePath);
+        var sut = CreateSystemUnderTest(this.oggContentFilePath);
 
         // Act
         _ = sut.IsLooping;
@@ -280,7 +404,7 @@ public class SoundTests
     public void IsLooping_WhenSettingValueWhileSIgnoringOpenALCalls_ReturnsFalse()
     {
         // Arrange
-        var sut = CreateSound(this.oggContentFilePath);
+        var sut = CreateSystemUnderTest(this.oggContentFilePath);
         this.mockAudioManager.Raise(manager => manager.DeviceChanging += null, EventArgs.Empty);
 
         // Act
@@ -295,7 +419,7 @@ public class SoundTests
     public void IsLooping_WhenSettingValueWhileDisposed_ThrowsException()
     {
         // Arrange
-        var sut = CreateSound(this.oggContentFilePath);
+        var sut = CreateSystemUnderTest(this.oggContentFilePath);
         sut.Dispose();
 
         // Act
@@ -310,7 +434,7 @@ public class SoundTests
     public void IsLooping_WhenSettingValue_SetsSoundLoopingSetting()
     {
         // Arrange
-        var sut = CreateSound(this.oggContentFilePath);
+        var sut = CreateSystemUnderTest(this.oggContentFilePath);
 
         // Act
         sut.IsLooping = true;
@@ -323,7 +447,7 @@ public class SoundTests
     public void IsLooping_WhenSettingValueWhileIgnoringOpenALCalls_DoesNotAttemptToLoopSound()
     {
         // Arrange
-        var sut = CreateSound(this.oggContentFilePath);
+        var sut = CreateSystemUnderTest(this.oggContentFilePath);
         this.mockAudioManager.Raise(manager => manager.DeviceChanging += null, EventArgs.Empty);
 
         // Act
@@ -337,7 +461,7 @@ public class SoundTests
     public void Volume_WhenGettingValueWhileDisposed_ThrowsException()
     {
         // Arrange
-        var sut  = CreateSound(this.oggContentFilePath);
+        var sut = CreateSystemUnderTest(this.oggContentFilePath);
         sut.Dispose();
 
         // Act
@@ -352,7 +476,7 @@ public class SoundTests
     public void Volume_WhenGettingValue_GetsSoundVolume()
     {
         // Arrange
-        var sut = CreateSound(this.oggContentFilePath);
+        var sut = CreateSystemUnderTest(this.oggContentFilePath);
 
         // Act
         _ = sut.Volume;
@@ -365,7 +489,7 @@ public class SoundTests
     public void Volume_WhenSettingValueWhileDisposed_ThrowsException()
     {
         // Arrange
-        var sut = CreateSound(this.oggContentFilePath);
+        var sut = CreateSystemUnderTest(this.oggContentFilePath);
         sut.Dispose();
 
         // Act
@@ -384,7 +508,7 @@ public class SoundTests
     public void Volume_WhenSettingValue_SetsSoundVolume(float volume, float expected)
     {
         // Arrange
-        var sut = CreateSound(this.oggContentFilePath);
+        var sut = CreateSystemUnderTest(this.oggContentFilePath);
 
         // Act
         sut.Volume = volume;
@@ -397,7 +521,7 @@ public class SoundTests
     public void Volume_WhenGettingValueWhileIgnoringOpenALCalls_ReturnsZero()
     {
         // Arrange
-        var sut = CreateSound(this.oggContentFilePath);
+        var sut = CreateSystemUnderTest(this.oggContentFilePath);
         this.mockAudioManager.Raise(manager => manager.DeviceChanging += null, EventArgs.Empty);
 
         // Act
@@ -411,7 +535,7 @@ public class SoundTests
     public void Volume_WhenSettingValueWhileIgnoringOpenALCalls_DoesNotAttemptToSetSoundVolume()
     {
         // Arrange
-        var sut = CreateSound(this.oggContentFilePath);
+        var sut = CreateSystemUnderTest(this.oggContentFilePath);
         this.mockAudioManager.Raise(manager => manager.DeviceChanging += null, EventArgs.Empty);
 
         // Act
@@ -427,7 +551,7 @@ public class SoundTests
         // Arrange
         var expected = new SoundTime(90);
         this.mockALInvoker.Setup(m => m.GetSource(SrcId, ALSourcef.SecOffset)).Returns(90f);
-        var sut = CreateSound(this.oggContentFilePath);
+        var sut = CreateSystemUnderTest(this.oggContentFilePath);
 
         // Act
         var actual = sut.Position;
@@ -441,7 +565,7 @@ public class SoundTests
     public void Position_WhenGettingValueWhileUnloaded_ThrowsException()
     {
         // Arrange
-        var sut = CreateSound(this.oggContentFilePath);
+        var sut = CreateSystemUnderTest(this.oggContentFilePath);
         sut.Dispose();
 
         // Act
@@ -456,7 +580,7 @@ public class SoundTests
     public void Position_WhenGettingValueWhileIgnoringOpenALCalls_ReturnsZero()
     {
         // Arrange
-        var sut = CreateSound(this.oggContentFilePath);
+        var sut = CreateSystemUnderTest(this.oggContentFilePath);
         this.mockAudioManager.Raise(manager => manager.DeviceChanging += null, EventArgs.Empty);
         var expected = new SoundTime(0);
 
@@ -471,7 +595,7 @@ public class SoundTests
     public void Length_WhenGettingValue_ReturnsCorrectResult()
     {
         // Arrange
-        var sut = CreateSound(this.oggContentFilePath);
+        var sut = CreateSystemUnderTest(this.oggContentFilePath);
         var expected = new SoundTime(266.00076f);
 
         // Act
@@ -485,7 +609,7 @@ public class SoundTests
     public void State_WhenGettingValueWhileUnloaded_ThrowsException()
     {
         // Arrange
-        var sut = CreateSound(this.oggContentFilePath);
+        var sut = CreateSystemUnderTest(this.oggContentFilePath);
         sut.Dispose();
 
         // Act
@@ -500,7 +624,7 @@ public class SoundTests
     public void State_WhenGettingValueWhileIgnoringOpenALCalls_ReturnsAsStopped()
     {
         // Arrange
-        var sut = CreateSound(this.oggContentFilePath);
+        var sut = CreateSystemUnderTest(this.oggContentFilePath);
         this.mockAudioManager.Raise(manager => manager.DeviceChanging += null, EventArgs.Empty);
 
         // Act
@@ -526,7 +650,7 @@ public class SoundTests
 
         // Arrange
         this.mockALInvoker.Setup(m => m.GetSourceState(SrcId)).Returns((ALSourceState)openALState);
-        var sut = CreateSound(this.oggContentFilePath);
+        var sut = CreateSystemUnderTest(this.oggContentFilePath);
 
         // Act
         var actual = sut.State;
@@ -539,7 +663,7 @@ public class SoundTests
     public void State_WithInvalidOpenALSourceState_ThrowsException()
     {
         // Arrange
-        var sut = CreateSound(this.oggContentFilePath);
+        var sut = CreateSystemUnderTest(this.oggContentFilePath);
         this.mockALInvoker.Setup(m => m.GetSourceState(SrcId)).Returns(0f);
 
         // Act
@@ -554,7 +678,7 @@ public class SoundTests
     public void PlaySpeed_WhenGettingValueWhileUnloaded_ThrowsException()
     {
         // Arrange
-        var sut = CreateSound(this.oggContentFilePath);
+        var sut = CreateSystemUnderTest(this.oggContentFilePath);
         sut.Dispose();
 
         // Act
@@ -569,7 +693,7 @@ public class SoundTests
     public void PlaySpeed_WhenIgnoringOpenALCalls_ReturnsZero()
     {
         // Arrange
-        var sut = CreateSound(this.oggContentFilePath);
+        var sut = CreateSystemUnderTest(this.oggContentFilePath);
         this.mockAudioManager.Raise(manager => manager.DeviceChanging += null, EventArgs.Empty);
 
         // Act
@@ -586,7 +710,7 @@ public class SoundTests
     public void PlaySpeed_WhenSettingValue_ReturnsCorrectResult(float speedValue, float expectedResult)
     {
         // Arrange
-        var sut = CreateSound(this.oggContentFilePath);
+        var sut = CreateSystemUnderTest(this.oggContentFilePath);
 
         // Act
         sut.PlaySpeed = speedValue;
@@ -601,7 +725,7 @@ public class SoundTests
     public void PlaySpeed_WhenIgnoringOpenALCalls_DoesNotMakeOpenALCalls()
     {
         // Arrange
-        var sut = CreateSound(this.oggContentFilePath);
+        var sut = CreateSystemUnderTest(this.oggContentFilePath);
         this.mockAudioManager.Raise(manager => manager.DeviceChanging += null, EventArgs.Empty);
 
         // Act
@@ -617,7 +741,7 @@ public class SoundTests
     public void Play_WhenDisposed_ThrowsException()
     {
         // Arrange
-        var sut = CreateSound(this.oggContentFilePath);
+        var sut = CreateSystemUnderTest(this.oggContentFilePath);
         sut.Dispose();
 
         // Act
@@ -633,7 +757,7 @@ public class SoundTests
     {
         // Arrange
         this.mockALInvoker.Setup(m => m.GetSourceState(SrcId)).Returns(ALSourceState.Stopped);
-        var sut = CreateSound(this.oggContentFilePath);
+        var sut = CreateSystemUnderTest(this.oggContentFilePath);
 
         // Act
         sut.Play();
@@ -647,7 +771,7 @@ public class SoundTests
     {
         // Arrange
         this.mockALInvoker.Setup(m => m.GetSourceState(SrcId)).Returns(ALSourceState.Playing);
-        var sut = CreateSound(this.oggContentFilePath);
+        var sut = CreateSystemUnderTest(this.oggContentFilePath);
 
         // Act
         sut.Play();
@@ -660,7 +784,7 @@ public class SoundTests
     public void Play_WhenIgnoringOpenALCalls_DoesNotAttemptToPlaySound()
     {
         // Arrange
-        var sut = CreateSound(this.oggContentFilePath);
+        var sut = CreateSystemUnderTest(this.oggContentFilePath);
 
         this.mockALInvoker.Setup(m => m.GetSourceState(SrcId)).Returns(ALSourceState.Playing);
         this.mockAudioManager.Raise(manager => manager.DeviceChanging += null, EventArgs.Empty);
@@ -676,7 +800,7 @@ public class SoundTests
     public void Pause_WhenDisposed_ThrowsException()
     {
         // Arrange
-        var sut = CreateSound(this.oggContentFilePath);
+        var sut = CreateSystemUnderTest(this.oggContentFilePath);
         sut.Dispose();
 
         // Act
@@ -691,7 +815,7 @@ public class SoundTests
     public void Pause_WhenInvoked_PausesSound()
     {
         // Arrange
-        var sut = CreateSound(this.oggContentFilePath);
+        var sut = CreateSystemUnderTest(this.oggContentFilePath);
 
         // Act
         sut.Pause();
@@ -704,7 +828,7 @@ public class SoundTests
     public void Pause_WhenIgnoringOpenALCalls_DoesNotAttemptToPauseSound()
     {
         // Arrange
-        var sut = CreateSound(this.oggContentFilePath);
+        var sut = CreateSystemUnderTest(this.oggContentFilePath);
         this.mockAudioManager.Raise(manager => manager.DeviceChanging += null, EventArgs.Empty);
 
         // Act
@@ -718,7 +842,7 @@ public class SoundTests
     public void Stop_WhenDisposed_ThrowsException()
     {
         // Arrange
-        var sut = CreateSound(this.oggContentFilePath);
+        var sut = CreateSystemUnderTest(this.oggContentFilePath);
         sut.Dispose();
 
         // Act
@@ -733,7 +857,7 @@ public class SoundTests
     public void Stop_WhenInvoked_StopsSound()
     {
         // Arrange
-        var sut = CreateSound(this.oggContentFilePath);
+        var sut = CreateSystemUnderTest(this.oggContentFilePath);
 
         // Act
         sut.Stop();
@@ -746,7 +870,7 @@ public class SoundTests
     public void Stop_WhenIgnoringOpenALCalls_DoesNotAttemptToStopSound()
     {
         // Arrange
-        var sut = CreateSound(this.oggContentFilePath);
+        var sut = CreateSystemUnderTest(this.oggContentFilePath);
         this.mockAudioManager.Raise(manager => manager.DeviceChanging += null, EventArgs.Empty);
 
         // Act
@@ -760,7 +884,7 @@ public class SoundTests
     public void Reset_WhenDisposed_ThrowsException()
     {
         // Arrange
-        var sut = CreateSound(this.oggContentFilePath);
+        var sut = CreateSystemUnderTest(this.oggContentFilePath);
         sut.Dispose();
 
         // Act
@@ -775,7 +899,7 @@ public class SoundTests
     public void Reset_WhenInvoked_ResetsSound()
     {
         // Arrange
-        var sut = CreateSound(this.oggContentFilePath);
+        var sut = CreateSystemUnderTest(this.oggContentFilePath);
 
         // Act
         sut.Reset();
@@ -788,7 +912,7 @@ public class SoundTests
     public void Reset_WhenIgnoringOpenALCalls_DoesNotAttemptToResetSound()
     {
         // Arrange
-        var sut = CreateSound(this.oggContentFilePath);
+        var sut = CreateSystemUnderTest(this.oggContentFilePath);
         this.mockAudioManager.Raise(manager => manager.DeviceChanging += null, EventArgs.Empty);
 
         // Act
@@ -802,7 +926,7 @@ public class SoundTests
     public void SetTimePosition_WhenDisposed_ThrowsException()
     {
         // Arrange
-        var sut = CreateSound(this.oggContentFilePath);
+        var sut = CreateSystemUnderTest(this.oggContentFilePath);
         sut.Dispose();
 
         // Act
@@ -821,18 +945,11 @@ public class SoundTests
     {
         // Arrange
         MockSoundLength(50);
-        this.mockOggDecoder.Setup(m => m.LoadData(this.oggContentFilePath))
-            .Returns(() =>
-            {
-                var result = default(SoundData<float>);
-                result.Format = AudioFormat.Stereo16;
-                result.Channels = 2;
-                result.SampleRate = 441000;
-                result.BufferData = new ReadOnlyCollection<float>(new[] { 1f, 2f });
+        this.mockOggDataStream.Setup(p => p.Format).Returns(AudioFormat.StereoFloat32);
+        this.mockOggDataStream.Setup(p => p.TotalSamples).Returns(2);
+        this.mockOggDataStream.Setup(p => p.Channels).Returns(2);
 
-                return result;
-            });
-        var sut = CreateSound(this.oggContentFilePath);
+        var sut = CreateSystemUnderTest(this.oggContentFilePath);
 
         // Act
         sut.SetTimePosition(seconds);
@@ -845,7 +962,7 @@ public class SoundTests
     public void SetTimePosition_WithIgnoringOpenALCalls_DoesNotAttemptToSetTimePosition()
     {
         // Arrange
-        var sut = CreateSound(this.oggContentFilePath);
+        var sut = CreateSystemUnderTest(this.oggContentFilePath);
         this.mockAudioManager.Raise(manager => manager.DeviceChanging += null, EventArgs.Empty);
 
         // Act
@@ -859,7 +976,7 @@ public class SoundTests
     public void Rewind_WhenTimeIsPastBeginningOfSound_ResetsAndPlaysSound()
     {
         // Arrange
-        var sut = CreateSound(this.oggContentFilePath);
+        var sut = CreateSystemUnderTest(this.oggContentFilePath);
         this.mockALInvoker.Setup(m => m.GetSourceState(SrcId)).Returns(ALSourceState.Stopped);
         this.mockALInvoker.Setup(m => m.GetSource(SrcId, ALSourcef.SecOffset)).Returns(10f);
 
@@ -879,7 +996,7 @@ public class SoundTests
         MockSoundLength(25);
         this.mockALInvoker.Setup(m => m.GetSource(SrcId, ALSourcef.SecOffset))
             .Returns(15f);
-        var sut = CreateSound(this.oggContentFilePath);
+        var sut = CreateSystemUnderTest(this.oggContentFilePath);
 
         // Act
         sut.Rewind(10f);
@@ -892,7 +1009,7 @@ public class SoundTests
     public void Rewind_WhenIgnoringOpenALCalls_DoesNotAttemptToRewindSound()
     {
         // Arrange
-        var sut = CreateSound(this.oggContentFilePath);
+        var sut = CreateSystemUnderTest(this.oggContentFilePath);
         this.mockAudioManager.Raise(manager => manager.DeviceChanging += null, EventArgs.Empty);
 
         // Act
@@ -909,7 +1026,7 @@ public class SoundTests
         MockSoundLength(10);
         this.mockALInvoker.Setup(m => m.GetSource(SrcId, ALSourcef.SecOffset)).Returns(10f);
 
-        var sut = CreateSound(this.oggContentFilePath);
+        var sut = CreateSystemUnderTest(this.oggContentFilePath);
 
         // Act
         sut.FastForward(20f);
@@ -923,7 +1040,7 @@ public class SoundTests
     public void FastForward_WhenIgnoringOpenALCalls_DoesNotAttemptToResetSound()
     {
         // Arrange
-        var sut = CreateSound(this.oggContentFilePath);
+        var sut = CreateSystemUnderTest(this.oggContentFilePath);
         this.mockAudioManager.Raise(manager => manager.DeviceChanging += null, EventArgs.Empty);
 
         // Act
@@ -939,21 +1056,12 @@ public class SoundTests
     {
         // Arrange
         MockSoundLength(60);
-        this.mockOggDecoder.Setup(m => m.LoadData(this.oggContentFilePath)).Returns(() =>
-        {
-            var result = new SoundData<float>
-            {
-                BufferData = new ReadOnlyCollection<float>(this.oggBufferData),
-                Channels = 2,
-                Format = AudioFormat.Stereo16,
-                SampleRate = 44100,
-            };
-
-            return result;
-        });
+        this.mockOggDataStream.SetupGet(p => p.Channels).Returns(2);
+        this.mockOggDataStream.SetupGet(p => p.TotalSamples).Returns(2);
+        this.mockOggDataStream.SetupGet(p => p.Format).Returns(AudioFormat.Stereo16);
 
         this.mockALInvoker.Setup(m => m.GetSource(SrcId, ALSourcef.SecOffset)).Returns(30f);
-        var sut = CreateSound(this.oggContentFilePath);
+        var sut = CreateSystemUnderTest(this.oggContentFilePath);
 
         // Act
         sut.FastForward(10f);
@@ -967,51 +1075,56 @@ public class SoundTests
     {
         // Arrange
         // Simulate an audio device change so the event is invoked inside of the sound class
+        this.mockOggDataStream.SetupGet(p => p.Channels).Returns(2);
+        this.mockOggDataStream.SetupGet(p => p.TotalSamples).Returns(2);
+        this.mockOggDataStream.SetupGet(p => p.SampleRate).Returns(44_100);
+        this.mockOggDataStream.SetupGet(p => p.Format).Returns(AudioFormat.Stereo16);
         this.mockAudioManager.Setup(m => m.ChangeDevice(It.IsAny<string>()))
             .Callback<string>(_ =>
             {
                 this.mockAudioManager.Raise(manager => manager.DeviceChanged += (_, _) => { }, EventArgs.Empty);
             });
 
-        this.mockOggDecoder.Setup(m => m.LoadData(this.oggContentFilePath))
-            .Returns(() =>
-            {
-                var result = default(SoundData<float>);
-                result.Format = AudioFormat.Stereo16;
-                result.Channels = 2;
-                result.SampleRate = 44100;
-                result.BufferData = new ReadOnlyCollection<float>(new[] { 1f, 2f });
-
-                return result;
-            });
-        _ = CreateSound(this.oggContentFilePath);
+        _ = CreateSystemUnderTest(this.oggContentFilePath);
 
         // Act
         this.mockAudioManager.Object.ChangeDevice(It.IsAny<string>());
 
         // Assert
         // NOTE: The first invoke is during Sound construction, the second is when changing audio devices
-        this.mockOggDecoder.Verify(m => m.LoadData(this.oggContentFilePath), Times.Exactly(2));
-        this.mockALInvoker.Verify(m => m.BufferData(BufferId, ALFormat.Stereo16, new[] { 1f, 2f }, 44100), Times.Exactly(2));
+        this.mockALInvoker
+            .Verify(m => m.BufferData(
+                    It.IsAny<uint>(),
+                    It.IsAny<ALFormat>(),
+                    It.IsAny<float[]>(),
+                    It.IsAny<int>()),
+                Times.Exactly(2));
+        this.mockALInvoker.Verify(
+            m => m.BufferData(BufferId, ALFormat.Stereo16, new[] { 0f, 0f, 0f, 0f }, 44_100),
+            Times.Exactly(2));
     }
 
-    [Fact]
+    [Theory]
+    [InlineData(true)]
     [SuppressMessage("csharpsquid", "S3966", Justification = "Need to execute dispose twice for testing.")]
-    public void Dispose_WhenInvoked_DisposesOfSound()
+    public void Dispose_WhenInvoked_DisposesOfSound(bool isOggFileType)
     {
         // Arrange
-        var sut = CreateSound(this.oggContentFilePath);
+        var sut = CreateSystemUnderTest(isOggFileType ? this.oggContentFilePath : this.mp3ContentFilePath);
 
         // Act
         sut.Dispose();
         sut.Dispose();
 
         // Assert
-        this.mockOggDecoder.Verify(m => m.Dispose(), Times.Once());
-        this.mockMp3Decoder.Verify(m => m.Dispose(), Times.Once());
+        this.mockOggDataStream.Verify(m => m.Dispose(), isOggFileType ? Times.Once : Times.Never);
+        this.mockMp3DataStream.Verify(m => m.Dispose(), isOggFileType ? Times.Never : Times.Once);
         this.mockAudioManager.VerifyRemove(m => m.DeviceChanged -= It.IsAny<EventHandler<EventArgs>>(),
             Times.Once(),
             $"Un-subscription to the event '{nameof(IAudioDeviceManager.DeviceChanged)}' event did not occur.");
+        this.mockAudioManager.VerifyRemove(m => m.DeviceChanging -= It.IsAny<EventHandler<EventArgs>>(),
+            Times.Once(),
+            $"Un-subscription to the event '{nameof(IAudioDeviceManager.DeviceChanging)}' event did not occur.");
         this.mockALInvoker.VerifyRemove(m => m.ErrorCallback -= It.IsAny<Action<string>>(),
             Times.Once(),
             $"Un-subscription to the event '{nameof(IOpenALInvoker.ErrorCallback)}' event did not occur.");
@@ -1021,7 +1134,7 @@ public class SoundTests
     public void Dispose_WhenIgnoringOpenALCalls_DoesNotAttemptToUnloadData()
     {
         // Arrange
-        var sut = CreateSound(this.oggContentFilePath);
+        var sut = CreateSystemUnderTest(this.oggContentFilePath);
         this.mockAudioManager.Raise(manager => manager.DeviceChanging += null, EventArgs.Empty);
 
         // Act
@@ -1039,7 +1152,7 @@ public class SoundTests
     {
         // Arrange
         this.mockAudioManager.Setup(m => m.InitSound()).Returns((0u, BufferId));
-        var sut = CreateSound(this.oggContentFilePath);
+        var sut = CreateSystemUnderTest(this.oggContentFilePath);
 
         // Act
         sut.Dispose();
@@ -1055,13 +1168,13 @@ public class SoundTests
     /// </summary>
     /// <param name="filePath">The path to the sound file.</param>
     /// <returns>The instance for testing.</returns>
-    private Sound CreateSound(string filePath)
+    private Sound CreateSystemUnderTest(string filePath)
         => new (filePath,
             this.mockALInvoker.Object,
             this.mockAudioManager.Object,
-            this.mockOggDecoder.Object,
-            this.mockMp3Decoder.Object,
-            this.mockPath.Object);
+            this.mockDataStreamFactory.Object,
+            this.mockPath.Object,
+            this.mockFile.Object);
 
     /// <summary>
     /// Mocks the buffer data stats to influence the total seconds that the sound has.

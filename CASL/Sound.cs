@@ -5,7 +5,10 @@
 namespace CASL;
 
 using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
+using System.IO;
 using System.IO.Abstractions;
 using System.Linq;
 using Data;
@@ -13,18 +16,20 @@ using CASL.Data.Exceptions;
 using Devices;
 using Devices.Factories;
 using Exceptions;
+using Factories;
 using OpenAL;
 
 /// <summary>
 /// A single sound that can be played, paused etc.
 /// </summary>
+[SuppressMessage("ReSharper", "ClassWithVirtualMembersNeverInherited.Global", Justification = "Users need to inherit.")]
 public class Sound : ISound
 {
     private const char CrossPlatDirSeparatorChar = '/';
     private const string IsDisposedExceptionMessage = "The sound is disposed.  You must create another sound instance.";
     private readonly IAudioDeviceManager audioManager;
-    private readonly ISoundDecoder<float> oggDecoder;
-    private readonly ISoundDecoder<byte> mp3Decoder;
+    private readonly IAudioDataStream<float>? oggDataStream;
+    private readonly IAudioDataStream<byte>? mp3DataStream;
     private readonly IOpenALInvoker alInvoker;
     private readonly IPath path;
     private uint srcId;
@@ -45,13 +50,23 @@ public class Sound : ISound
         this.alInvoker = IoC.Container.GetInstance<IOpenALInvoker>();
         this.alInvoker.ErrorCallback += ErrorCallback;
 
-        this.oggDecoder = IoC.Container.GetInstance<ISoundDecoder<float>>();
-
-        this.mp3Decoder = IoC.Container.GetInstance<ISoundDecoder<byte>>();
         this.audioManager = AudioDeviceManagerFactory.CreateDeviceManager();
         this.audioManager.DeviceChanging += AudioManager_DeviceChanging;
         this.audioManager.DeviceChanged += AudioManager_DeviceChanged;
         this.path = IoC.Container.GetInstance<IPath>();
+
+        var extension = this.path.GetExtension(FilePath).ToLower();
+        var dataStreamFactory = IoC.Container.GetInstance<IAudioDataStreamFactory>();
+
+        switch (extension)
+        {
+            case ".ogg":
+                this.oggDataStream = dataStreamFactory.CreateOggAudioStream(FilePath);
+                break;
+            case ".mp3":
+                this.mp3DataStream = dataStreamFactory.CreateMp3AudioStream(FilePath);
+                break;
+        }
 
         Init();
     }
@@ -62,25 +77,46 @@ public class Sound : ISound
     /// <param name="filePath">The path to the sound file.</param>
     /// <param name="alInvoker">Provides access to OpenAL.</param>
     /// <param name="audioManager">Manages audio related operations.</param>
-    /// <param name="oggDecoder">Decodes OGG audio files.</param>
-    /// <param name="mp3Decoder">Decodes MP3 audio files.</param>
+    /// <param name="dataStreamFactory">Creates audio data streams.</param>
     /// <param name="path">Manages file paths.</param>
+    /// <param name="file">Performs operations with files.</param>
     internal Sound(
         string filePath,
         IOpenALInvoker alInvoker,
         IAudioDeviceManager audioManager,
-        ISoundDecoder<float> oggDecoder,
-        ISoundDecoder<byte> mp3Decoder,
-        IPath path)
+        IAudioDataStreamFactory dataStreamFactory,
+        IPath path,
+        IFile file)
     {
+        ArgumentException.ThrowIfNullOrEmpty(filePath);
+        ArgumentNullException.ThrowIfNull(alInvoker);
+        ArgumentNullException.ThrowIfNull(audioManager);
+        ArgumentNullException.ThrowIfNull(dataStreamFactory);
+        ArgumentNullException.ThrowIfNull(path);
+        ArgumentNullException.ThrowIfNull(file);
+
+        if (!file.Exists(filePath))
+        {
+            throw new FileNotFoundException($"The sound file could not be found.", filePath);
+        }
+
         FilePath = filePath.ToCrossPlatPath().TrimAllFromEnd(CrossPlatDirSeparatorChar);
 
         this.alInvoker = alInvoker;
         this.alInvoker.ErrorCallback += ErrorCallback;
 
-        this.oggDecoder = oggDecoder;
+        var extension = path.GetExtension(FilePath).ToLower();
 
-        this.mp3Decoder = mp3Decoder;
+        switch (extension)
+        {
+            case ".ogg":
+                this.oggDataStream = dataStreamFactory.CreateOggAudioStream(FilePath);
+                break;
+            case ".mp3":
+                this.mp3DataStream = dataStreamFactory.CreateMp3AudioStream(FilePath);
+                break;
+        }
+
         this.audioManager = audioManager;
         this.path = path;
 
@@ -394,8 +430,8 @@ public class Sound : ISound
 
         if (disposing)
         {
-            this.oggDecoder.Dispose();
-            this.mp3Decoder.Dispose();
+            this.oggDataStream?.Dispose();
+            this.mp3DataStream?.Dispose();
             this.audioManager.DeviceChanging -= AudioManager_DeviceChanging;
             this.audioManager.DeviceChanged -= AudioManager_DeviceChanged;
         }
@@ -451,13 +487,48 @@ public class Sound : ISound
         switch (extension)
         {
             case ".ogg":
-                var oggData = this.oggDecoder.LoadData(FilePath);
+                ArgumentNullException.ThrowIfNull(this.oggDataStream);
+
+                this.oggDataStream.Flush();
+
+                var oggData = default(SoundData<float>);
+                oggData.SampleRate = this.oggDataStream.SampleRate;
+                oggData.Channels = this.oggDataStream.Channels;
+                oggData.Format = this.oggDataStream.Format;
+
+                var oggDataResult = new List<float>();
+                var oggBuffer = new float[this.oggDataStream.TotalSamples * this.oggDataStream.Channels];
+
+                this.oggDataStream.ReadSamples(oggBuffer);
+                oggDataResult.AddRange(oggBuffer);
+
+                oggData.BufferData = new ReadOnlyCollection<float>(oggDataResult);
 
                 UploadOggData(oggData);
 
                 break;
             case ".mp3":
-                var mp3Data = this.mp3Decoder.LoadData(FilePath);
+                ArgumentNullException.ThrowIfNull(this.mp3DataStream);
+
+                var mp3Data = default(SoundData<byte>);
+
+                this.mp3DataStream.Flush();
+
+                mp3Data.SampleRate = this.mp3DataStream.SampleRate;
+                mp3Data.Channels = this.mp3DataStream.Channels;
+                mp3Data.Format = this.mp3DataStream.Format;
+
+                var mp3DataResult = new List<byte>();
+
+                const int bytesPerChunk = 32_768;
+
+                var mp3Buffer = new byte[bytesPerChunk];
+                while (this.mp3DataStream.ReadSamples(mp3Buffer) > 0)
+                {
+                    mp3DataResult.AddRange(mp3Buffer);
+                }
+
+                mp3Data.BufferData = new ReadOnlyCollection<byte>(mp3DataResult);
 
                 UploadMp3Data(mp3Data);
 
