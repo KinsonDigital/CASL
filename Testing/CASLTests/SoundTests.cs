@@ -90,16 +90,13 @@ public class SoundTests
     public void Ctor_WithNullFilePathParam_ThrowsException(string? filePath, string expected)
     {
         // Arrange & Act
-        var act = () =>
-        {
-            _ = new Sound(
+        var act = () => _ = new Sound(
                 filePath,
                 this.mockALInvoker.Object,
                 this.mockAudioManager.Object,
                 this.mockDataStreamFactory.Object,
                 this.mockPath.Object,
                 this.mockFile.Object);
-        };
 
         // Assert
         act.Should()
@@ -111,16 +108,13 @@ public class SoundTests
     public void Ctor_WithNullALInvokerParam_ThrowsException()
     {
         // Arrange & Act
-        var act = () =>
-        {
-            _ = new Sound(
-                this.oggContentFilePath,
-                null,
-                this.mockAudioManager.Object,
-                this.mockDataStreamFactory.Object,
-                this.mockPath.Object,
-                this.mockFile.Object);
-        };
+        var act = void () => _ = new Sound(
+            this.oggContentFilePath,
+            null,
+            this.mockAudioManager.Object,
+            this.mockDataStreamFactory.Object,
+            this.mockPath.Object,
+            this.mockFile.Object);
 
         // Assert
         act.Should()
@@ -132,16 +126,13 @@ public class SoundTests
     public void Ctor_WithNullAudioManagerParam_ThrowsException()
     {
         // Arrange & Act
-        var act = () =>
-        {
-            _ = new Sound(
+        var act = () => _ = new Sound(
                 this.oggContentFilePath,
                 this.mockALInvoker.Object,
                 null,
                 this.mockDataStreamFactory.Object,
                 this.mockPath.Object,
                 this.mockFile.Object);
-        };
 
         // Assert
         act.Should()
@@ -153,16 +144,13 @@ public class SoundTests
     public void Ctor_WithNullDataStreamFactoryParam_ThrowsException()
     {
         // Arrange & Act
-        var act = () =>
-        {
-            _ = new Sound(
+        var act = () => _ = new Sound(
                 this.oggContentFilePath,
                 this.mockALInvoker.Object,
                 this.mockAudioManager.Object,
                 null,
                 this.mockPath.Object,
                 this.mockFile.Object);
-        };
 
         // Assert
         act.Should()
@@ -174,16 +162,13 @@ public class SoundTests
     public void Ctor_WithNullPathParam_ThrowsException()
     {
         // Arrange & Act
-        var act = () =>
-        {
-            _ = new Sound(
+        var act = () => _ = new Sound(
                 this.oggContentFilePath,
                 this.mockALInvoker.Object,
                 this.mockAudioManager.Object,
                 this.mockDataStreamFactory.Object,
                 null,
                 this.mockFile.Object);
-        };
 
         // Assert
         act.Should()
@@ -195,16 +180,13 @@ public class SoundTests
     public void Ctor_WithNullFileParam_ThrowsException()
     {
         // Arrange & Act
-        var act = () =>
-        {
-            _ = new Sound(
+        var act = () => _ = new Sound(
                 this.oggContentFilePath,
                 this.mockALInvoker.Object,
                 this.mockAudioManager.Object,
                 this.mockDataStreamFactory.Object,
                 this.mockPath.Object,
                 null);
-        };
 
         // Assert
         act.Should()
@@ -1080,10 +1062,7 @@ public class SoundTests
         this.mockOggDataStream.SetupGet(p => p.SampleRate).Returns(44_100);
         this.mockOggDataStream.SetupGet(p => p.Format).Returns(AudioFormat.Stereo16);
         this.mockAudioManager.Setup(m => m.ChangeDevice(It.IsAny<string>()))
-            .Callback<string>(_ =>
-            {
-                this.mockAudioManager.Raise(manager => manager.DeviceChanged += (_, _) => { }, EventArgs.Empty);
-            });
+            .Callback<string>(_ => this.mockAudioManager.Raise(manager => manager.DeviceChanged += (_, _) => { }, EventArgs.Empty));
 
         _ = CreateSystemUnderTest(this.oggContentFilePath);
 

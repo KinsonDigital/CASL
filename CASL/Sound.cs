@@ -622,7 +622,7 @@ public class Sound : ISound
     }
 
     /// <summary>
-    /// Puts the sound into an ignore mode to prevent OpenAL calls from occuring
+    /// Puts the sound into an ignore mode to prevent OpenAL calls from occurring
     /// during an audio device change.
     /// </summary>
     private void AudioManager_DeviceChanging(object? sender, EventArgs e)
