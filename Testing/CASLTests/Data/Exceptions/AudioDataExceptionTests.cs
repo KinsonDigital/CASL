@@ -1,4 +1,4 @@
-﻿// <copyright file="SoundDataExceptionTests.cs" company="KinsonDigital">
+﻿// <copyright file="AudioDataExceptionTests.cs" company="KinsonDigital">
 // Copyright (c) KinsonDigital. All rights reserved.
 // </copyright>
 
@@ -9,16 +9,16 @@ using CASL.Data.Exceptions;
 using Xunit;
 
 /// <summary>
-/// Tests the <see cref="SoundDataException"/> class.
+/// Tests the <see cref="AudioDataException"/> class.
 /// </summary>
-public class SoundDataExceptionTests
+public class AudioDataExceptionTests
 {
     #region Constructor Tests
     [Fact]
     public void Ctor_WhenInvokedWithNoParam_CorrectlySetsMessage()
     {
         // Act
-        var exception = new SoundDataException();
+        var exception = new AudioDataException();
 
         // Assert
         Assert.Equal("There was an issue with the processing the audio data.", exception.Message);
@@ -28,7 +28,7 @@ public class SoundDataExceptionTests
     public void Ctor_WhenInvokedWithSingleMessageParam_CorrectlySetsMessage()
     {
         // Act
-        var exception = new SoundDataException("test-message");
+        var exception = new AudioDataException("test-message");
 
         // Assert
         Assert.Equal("test-message", exception.Message);
@@ -41,7 +41,7 @@ public class SoundDataExceptionTests
         var innerException = new Exception("inner-exception");
 
         // Act
-        var deviceException = new SoundDataException("test-exception", innerException);
+        var deviceException = new AudioDataException("test-exception", innerException);
 
         // Assert
         Assert.Equal("inner-exception", deviceException.InnerException.Message);

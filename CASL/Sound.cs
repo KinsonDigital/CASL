@@ -565,7 +565,7 @@ public class Sound : ISound
     {
         if (data.BufferData.Count <= 0)
         {
-            throw new SoundDataException("No audio data exists.");
+            throw new AudioDataException("No audio data exists.");
         }
 
         this.alInvoker.BufferData(
@@ -586,7 +586,7 @@ public class Sound : ISound
     {
         if (data.BufferData.Count <= 0)
         {
-            throw new SoundDataException("No audio data exists.");
+            throw new AudioDataException("No audio data exists.");
         }
 
         this.alInvoker.BufferData(

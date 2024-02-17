@@ -156,7 +156,7 @@ internal sealed class AudioDeviceManager : IAudioDeviceManager
     ///     Occurs if this method is executed without initializing the <see cref="InitDevice"/>() method.
     ///     This can be done by invoking the <see cref="InitDevice(string?)"/>.
     /// </exception>
-    /// <exception cref="SoundDataException">
+    /// <exception cref="AudioDataException">
     ///     Occurs if the <see cref="SoundSource.SourceId"/> of the given param <paramref name="soundSrc"/> does not exist.
     /// </exception>
     public void UpdateSoundSource(SoundSource soundSrc)
@@ -168,7 +168,7 @@ internal sealed class AudioDeviceManager : IAudioDeviceManager
 
         if (!this.soundSources.Keys.Contains(soundSrc.SourceId))
         {
-            throw new SoundDataException($"The sound source with the source id '{soundSrc.SourceId}' does not exist.");
+            throw new AudioDataException($"The sound source with the source id '{soundSrc.SourceId}' does not exist.");
         }
 
         this.soundSources[soundSrc.SourceId] = soundSrc;

@@ -223,7 +223,7 @@ public class AudioDeviceManagerTests
 
         // Assert
         var expectedExceptionMessage = $"The sound source with the source id '1234' does not exist.";
-        action.Should().Throw<SoundDataException>().WithMessage(expectedExceptionMessage);
+        action.Should().Throw<AudioDataException>().WithMessage(expectedExceptionMessage);
     }
 
     [Fact]
