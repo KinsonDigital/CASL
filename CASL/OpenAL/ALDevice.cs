@@ -1,4 +1,4 @@
-﻿// <copyright file="ALDevice.cs" company="KinsonDigital">
+// <copyright file="ALDevice.cs" company="KinsonDigital">
 // Copyright (c) KinsonDigital. All rights reserved.
 // </copyright>
 
@@ -11,6 +11,7 @@ using System.Diagnostics.CodeAnalysis;
 /// Opaque handle to an OpenAL device.
 /// </summary>
 public struct ALDevice : IEquatable<ALDevice>
+internal struct ALDevice : IEquatable<ALDevice>
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="ALDevice"/> struct.
