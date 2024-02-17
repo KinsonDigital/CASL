@@ -1,4 +1,4 @@
-﻿// <copyright file="SoundDataTests.cs" company="KinsonDigital">
+﻿// <copyright file="AudioDataTests.cs" company="KinsonDigital">
 // Copyright (c) KinsonDigital. All rights reserved.
 // </copyright>
 
@@ -10,16 +10,16 @@ using Xunit;
 using FluentAssertions;
 
 /// <summary>
-/// Tests the <see cref="SoundData{T}"/> struct.
+/// Tests the <see cref="AudioData{T}"/> struct.
 /// </summary>
-public class SoundDataTests
+public class AudioDataTests
 {
     #region Constructor Tests
     [Fact]
     public void Ctor_WhenInvoked_SetsPropertiesToCorrectValues()
     {
         // Act
-        var data = new SoundData<float>(
+        var data = new AudioData<float>(
             new[] { 1f },
             44100,
             2,

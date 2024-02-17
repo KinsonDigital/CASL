@@ -19,7 +19,7 @@ public sealed class SoundDataException : Exception
     /// Initializes a new instance of the <see cref="SoundDataException"/> class.
     /// </summary>
     public SoundDataException()
-        : base("There was an issue with the processing the sound data.")
+        : base("There was an issue with the processing the audio data.")
     {
     }
 

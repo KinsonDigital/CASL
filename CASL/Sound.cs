@@ -491,7 +491,7 @@ public class Sound : ISound
 
                 this.oggDataStream.Flush();
 
-                var oggData = new SoundData<float>
+                var oggData = new AudioData<float>
                 {
                     Format = this.oggDataStream.Format,
                     Channels = this.oggDataStream.Channels,
@@ -514,7 +514,7 @@ public class Sound : ISound
 
                 this.mp3DataStream.Flush();
 
-                var mp3Data = new SoundData<byte>
+                var mp3Data = new AudioData<byte>
                 {
                     SampleRate = this.mp3DataStream.SampleRate,
                     Channels = this.mp3DataStream.Channels,
@@ -560,8 +560,8 @@ public class Sound : ISound
     /// <summary>
     /// Uploads Ogg audio data to the sound card.
     /// </summary>
-    /// <param name="data">The ogg related sound data to upload.</param>
-    private void UploadOggData(SoundData<float> data)
+    /// <param name="data">The ogg related audio data to upload.</param>
+    private void UploadOggData(AudioData<float> data)
     {
         if (data.BufferData.Count <= 0)
         {
@@ -581,8 +581,8 @@ public class Sound : ISound
     /// <summary>
     /// Uploads MP3 audio data to the sound card.
     /// </summary>
-    /// <param name="data">The mp3 related sound data to upload.</param>
-    private void UploadMp3Data(SoundData<byte> data)
+    /// <param name="data">The mp3 related audio data to upload.</param>
+    private void UploadMp3Data(AudioData<byte> data)
     {
         if (data.BufferData.Count <= 0)
         {
@@ -600,7 +600,7 @@ public class Sound : ISound
     }
 
     /// <summary>
-    /// Unloads the sound data from the card.
+    /// Unloads the audio data from the card.
     /// </summary>
     private void UnloadSoundData()
     {

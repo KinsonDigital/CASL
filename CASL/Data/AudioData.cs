@@ -1,25 +1,30 @@
-﻿// <copyright file="SoundData.cs" company="KinsonDigital">
+﻿// <copyright file="AudioData.cs" company="KinsonDigital">
 // Copyright (c) KinsonDigital. All rights reserved.
 // </copyright>
 
 namespace CASL.Data;
 
 using System.Collections.ObjectModel;
+using System.Diagnostics.CodeAnalysis;
 
 /// <summary>
 /// Holds data related to a single sound.
 /// </summary>
 /// <typeparam name="T">The type of buffer data of the sound.</typeparam>
-internal readonly record struct SoundData<T>
+internal readonly record struct AudioData<T>
 {
     /// <summary>
-    /// Initializes a new instance of the <see cref="SoundData{T}"/> class.
+    /// Initializes a new instance of the <see cref="AudioData{T}"/> struct.
     /// </summary>
     /// <param name="bufferData">The buffer data.</param>
     /// <param name="sampleRate">The sample rate.</param>
     /// <param name="channels">The total number of channels.</param>
     /// <param name="format">The audio format.</param>
-    public SoundData(T[] bufferData, int sampleRate, int channels, AudioFormat format)
+    [SuppressMessage(
+        "StyleCop.CSharp.DocumentationRules",
+        "SA1642:Constructor summary documentation should begin with standard text",
+        Justification = "Incorrectly flagging this as a violation")]
+    public AudioData(T[] bufferData, int sampleRate, int channels, AudioFormat format)
         : this()
     {
         BufferData = new ReadOnlyCollection<T>(bufferData);

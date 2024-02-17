@@ -21,7 +21,7 @@ public class SoundDataExceptionTests
         var exception = new SoundDataException();
 
         // Assert
-        Assert.Equal("There was an issue with the processing the sound data.", exception.Message);
+        Assert.Equal("There was an issue with the processing the audio data.", exception.Message);
     }
 
     [Fact]
