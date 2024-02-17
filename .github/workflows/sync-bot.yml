@@ -13,8 +13,7 @@ on:
 
 jobs:
   sync_bot:
-    name: Sync Bot Status Check
-    if: ${{ !github.event.issue.pull_request }}
+    name: Sync Bot
     runs-on: ubuntu-latest
     steps:
       - name: Set Up Deno
