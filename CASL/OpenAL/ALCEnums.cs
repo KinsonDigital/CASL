@@ -8,7 +8,7 @@ namespace CASL.OpenAL;
 /// <summary>
 /// Defines available context attributes.
 /// </summary>
-public enum AlcContextAttributes
+internal enum AlcContextAttributes
 {
     /// <summary>
     /// Followed by System.Int32 Hz
@@ -47,7 +47,7 @@ public enum AlcContextAttributes
 /// <summary>
 /// Defines available parameters for <see cref="ALC.GetString(ALDevice, AlcGetString)"/>.
 /// </summary>
-public enum AlcGetString
+internal enum AlcGetString
 {
     /// <summary>The specifier string for the default device.
     /// </summary>
@@ -91,7 +91,7 @@ public enum AlcGetString
 /// <summary>
 /// Defines available parameters for <see cref="ALC.GetString(ALDevice, AlcGetString)"/>.
 /// </summary>
-public enum AlcGetStringList
+internal enum AlcGetStringList
 {
     /// <summary>
     /// The name of the specified capture device, or a list of all available capture devices if no capture device is specified.
@@ -115,7 +115,7 @@ public enum AlcGetStringList
 /// <summary>
 /// A list of valid string AL.Get() parameters.
 /// </summary>
-public enum ALGetString
+internal enum ALGetString
 {
     /// <summary>
     /// Gets the Vendor name.
@@ -141,7 +141,7 @@ public enum ALGetString
 /// <summary>
 /// Defines OpenAL context errors.
 /// </summary>
-public enum AlcError
+internal enum AlcError
 {
     /// <summary>
     /// There is no current error.
