@@ -7,7 +7,6 @@
 namespace CASLTests;
 
 using System;
-using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.IO.Abstractions;
@@ -235,11 +234,6 @@ public class SoundTests
         const int totalSamples = 2;
         const int sampleRate = 44_000;
         var expectedBufferData = Enumerable.Repeat(0f, totalSamples * channels).ToArray();
-        var result = default(SoundData<float>);
-        result.Format = format;
-        result.Channels = channels;
-        result.SampleRate = sampleRate;
-        result.BufferData = new ReadOnlyCollection<float>([1f, 2f]);
 
         this.mockOggDataStream.Setup(p => p.Format).Returns(format);
         this.mockOggDataStream.Setup(p => p.TotalSamples).Returns(totalSamples);
@@ -288,11 +282,6 @@ public class SoundTests
         const int sampleRate = 44_000;
         var expectedBufferData = new byte[32_768];
         Array.Fill(expectedBufferData, (byte)0);
-        var result = default(SoundData<float>);
-        result.Format = format;
-        result.Channels = channels;
-        result.SampleRate = sampleRate;
-        result.BufferData = new ReadOnlyCollection<float>([1f, 2f]);
 
         this.mockMp3DataStream.Setup(p => p.Format).Returns(format);
         this.mockMp3DataStream.Setup(p => p.TotalSamples).Returns(totalSamples);

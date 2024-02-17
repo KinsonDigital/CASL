@@ -491,10 +491,12 @@ public class Sound : ISound
 
                 this.oggDataStream.Flush();
 
-                var oggData = default(SoundData<float>);
-                oggData.SampleRate = this.oggDataStream.SampleRate;
-                oggData.Channels = this.oggDataStream.Channels;
-                oggData.Format = this.oggDataStream.Format;
+                var oggData = new SoundData<float>
+                {
+                    Format = this.oggDataStream.Format,
+                    Channels = this.oggDataStream.Channels,
+                    SampleRate = this.oggDataStream.SampleRate,
+                };
 
                 var oggDataResult = new List<float>();
                 var oggBuffer = new float[this.oggDataStream.TotalSamples * this.oggDataStream.Channels];
@@ -502,7 +504,7 @@ public class Sound : ISound
                 this.oggDataStream.ReadSamples(oggBuffer);
                 oggDataResult.AddRange(oggBuffer);
 
-                oggData.BufferData = new ReadOnlyCollection<float>(oggDataResult);
+                oggData = oggData with { BufferData = new ReadOnlyCollection<float>(oggDataResult) };
 
                 UploadOggData(oggData);
 
@@ -510,13 +512,14 @@ public class Sound : ISound
             case ".mp3":
                 ArgumentNullException.ThrowIfNull(this.mp3DataStream);
 
-                var mp3Data = default(SoundData<byte>);
-
                 this.mp3DataStream.Flush();
 
-                mp3Data.SampleRate = this.mp3DataStream.SampleRate;
-                mp3Data.Channels = this.mp3DataStream.Channels;
-                mp3Data.Format = this.mp3DataStream.Format;
+                var mp3Data = new SoundData<byte>
+                {
+                    SampleRate = this.mp3DataStream.SampleRate,
+                    Channels = this.mp3DataStream.Channels,
+                    Format = this.mp3DataStream.Format,
+                };
 
                 var mp3DataResult = new List<byte>();
 
@@ -528,7 +531,7 @@ public class Sound : ISound
                     mp3DataResult.AddRange(mp3Buffer);
                 }
 
-                mp3Data.BufferData = new ReadOnlyCollection<byte>(mp3DataResult);
+                mp3Data = mp3Data with { BufferData = new ReadOnlyCollection<byte>(mp3DataResult) };
 
                 UploadMp3Data(mp3Data);
 
