@@ -1,4 +1,4 @@
-﻿// <copyright file="Sound.cs" company="KinsonDigital">
+// <copyright file="Sound.cs" company="KinsonDigital">
 // Copyright (c) KinsonDigital. All rights reserved.
 // </copyright>
 
@@ -436,7 +436,7 @@ public class Sound : ISound
             this.audioManager.DeviceChanged -= AudioManager_DeviceChanged;
         }
 
-        UnloadSoundData();
+        UnloadSound();
 
         // ReSharper disable HeapView.DelegateAllocation
         this.alInvoker.ErrorCallback -= ErrorCallback;
@@ -602,7 +602,7 @@ public class Sound : ISound
     /// <summary>
     /// Unloads the audio data from the card.
     /// </summary>
-    private void UnloadSoundData()
+    private void UnloadSound()
     {
         if (this.srcId <= 0)
         {
