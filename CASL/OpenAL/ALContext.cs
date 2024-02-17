@@ -1,4 +1,4 @@
-﻿// <copyright file="ALContext.cs" company="KinsonDigital">
+// <copyright file="ALContext.cs" company="KinsonDigital">
 // Copyright (c) KinsonDigital. All rights reserved.
 // </copyright>
 
@@ -11,6 +11,7 @@ using System.Diagnostics.CodeAnalysis;
 /// Encapsulates the state of a given instance of the state machine.
 /// </summary>
 public struct ALContext : IEquatable<ALContext>
+internal struct ALContext : IEquatable<ALContext>
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="ALContext"/> struct.
