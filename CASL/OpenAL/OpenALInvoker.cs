@@ -128,30 +128,30 @@ internal class OpenALInvoker : IOpenALInvoker
     }
 
     /// <inheritdoc/>
-    public int GetSource(uint sid, ALGetSourcei param)
+    public int GetSource(uint source, ALGetSourcei param)
     {
         ClearAlError();
-        this.al.GetSource(sid, param, out var result);
+        this.al.GetSource(source, param, out var result);
         ProcessAlError();
 
         return result;
     }
 
     /// <inheritdoc/>
-    public bool GetSource(uint sid, ALSourceb param)
+    public bool GetSource(uint source, ALSourceb param)
     {
         ClearAlError();
-        this.al.GetSource(sid, (ALGetSourcei)param, out var result);
+        this.al.GetSource(source, (ALGetSourcei)param, out var result);
         ProcessAlError();
 
         return result != 0;
     }
 
     /// <inheritdoc/>
-    public float GetSource(uint sid, ALSourcef param)
+    public float GetSource(uint source, ALSourcef param)
     {
         ClearAlError();
-        this.al.GetSource(sid, param, out var value);
+        this.al.GetSource(source, param, out var value);
         ProcessAlError();
 
         return value;
@@ -168,10 +168,10 @@ internal class OpenALInvoker : IOpenALInvoker
     }
 
     /// <inheritdoc/>
-    public ALSourceState GetSourceState(uint sid)
+    public ALSourceState GetSourceState(uint source)
     {
         ClearAlError();
-        this.al.GetSource(sid, ALGetSourcei.SourceState, out var result);
+        this.al.GetSource(source, ALGetSourcei.SourceState, out var result);
         ProcessAlError();
 
         return (ALSourceState)result;
@@ -242,57 +242,59 @@ internal class OpenALInvoker : IOpenALInvoker
 
     /// <inheritdoc/>
     public void Source(uint sid, ALSourcei param, int value)
+    /// <inheritdoc/>
+    public void Source(uint source, ALSourcei param, int value)
     {
         ClearAlError();
-        this.al.Source(sid, param, value);
+        this.al.Source(source, param, value);
         ProcessAlError();
     }
 
     /// <inheritdoc/>
-    public void Source(uint sid, ALSourceb param, bool value)
+    public void Source(uint source, ALSourceb param, bool value)
     {
         ClearAlError();
-        this.al.Source(sid, param, value);
+        this.al.Source(source, param, value);
         ProcessAlError();
     }
 
     /// <inheritdoc/>
-    public void Source(uint sid, ALSourcef param, float value)
+    public void Source(uint source, ALSourcef param, float value)
     {
         ClearAlError();
-        this.al.Source(sid, param, value);
+        this.al.Source(source, param, value);
         ProcessAlError();
     }
 
     /// <inheritdoc/>
-    public void SourcePlay(uint sid)
+    public void SourcePlay(uint source)
     {
         ClearAlError();
-        this.al.SourcePlay(sid);
+        this.al.SourcePlay(source);
         ProcessAlError();
     }
 
     /// <inheritdoc/>
-    public void SourcePause(uint sid)
+    public void SourcePause(uint source)
     {
         ClearAlError();
-        this.al.SourcePause(sid);
+        this.al.SourcePause(source);
         ProcessAlError();
     }
 
     /// <inheritdoc/>
-    public void SourceStop(uint sid)
+    public void SourceStop(uint source)
     {
         ClearAlError();
-        this.al.SourceStop(sid);
+        this.al.SourceStop(source);
         ProcessAlError();
     }
 
     /// <inheritdoc/>
-    public void SourceRewind(uint sid)
+    public void SourceRewind(uint source)
     {
         ClearAlError();
-        this.al.SourceRewind(sid);
+        this.al.SourceRewind(source);
         ProcessAlError();
     }
 

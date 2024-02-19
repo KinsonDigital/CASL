@@ -99,33 +99,33 @@ internal interface IOpenALInvoker
     /// <summary>
     /// This function retrieves an integer property of a source.
     /// </summary>
-    /// <param name="sid">Source name whose attribute is being retrieved.</param>
+    /// <param name="source">Source name whose attribute is being retrieved.</param>
     /// <param name="param">
     ///     The name of the attribute to retrieve: ALSourcei.SourceRelative,
     ///     Buffer, SourceState, BuffersQueued, BuffersProcessed.
     /// </param>
     /// <returns>A pointer to the integer value being retrieved.</returns>
-    int GetSource(uint sid, ALGetSourcei param);
+    int GetSource(uint source, ALGetSourcei param);
 
     /// <summary>
     /// This function retrieves a bool property of a source.
     /// </summary>
-    /// <param name="sid">Source name whose attribute is being retrieved.</param>
+    /// <param name="source">Source name whose attribute is being retrieved.</param>
     /// <param name="param">The name of the attribute to get: ALSourceb.SourceRelative, Looping.</param>
     /// <returns>A pointer to the bool value being retrieved.</returns>
-    bool GetSource(uint sid, ALSourceb param);
+    bool GetSource(uint source, ALSourceb param);
 
     /// <summary>
     /// This function retrieves a floating-point property of a source.
     /// </summary>
-    /// <param name="sid">Source name whose attribute is being retrieved.</param>
+    /// <param name="source">Source name whose attribute is being retrieved.</param>
     /// <param name="param">
     ///     The name of the attribute to set: ALSourcef.Pitch, Gain, MinGain, MaxGain, MaxDistance,
     ///     RolloffFactor, ConeOuterGain, ConeInnerAngle, ConeOuterAngle, SecOffset, ReferenceDistance,
     ///     EfxAirAbsorptionFactor, EfxRoomRolloffFactor, EfxConeOuterGainHighFrequency.
     /// </param>
     /// <returns>A pointer to the floating-point value being retrieved.</returns>
-    float GetSource(uint sid, ALSourcef param);
+    float GetSource(uint source, ALSourcef param);
 
     /// <summary>
     /// <inheritdoc cref="AL.GetBuffer"/>
@@ -138,9 +138,9 @@ internal interface IOpenALInvoker
     /// <summary>
     /// This function retrieves an integer property of a source.
     /// </summary>
-    /// <param name="sid">Source name whose attribute is being retrieved.</param>
+    /// <param name="source">Source name whose attribute is being retrieved.</param>
     /// <returns>The source state.</returns>
-    ALSourceState GetSourceState(uint sid);
+    ALSourceState GetSourceState(uint source);
 
     /// <summary>
     /// This function retrieves a context's device pointer.
@@ -222,33 +222,33 @@ internal interface IOpenALInvoker
     /// <summary>
     /// This function sets an integer property of a source.
     /// </summary>
-    /// <param name="sid">Source name whose attribute is being set.</param>
+    /// <param name="source">Source name whose attribute is being set.</param>
     /// <param name="param">
     ///     The name of the attribute to set: ALSourcei.SourceRelative, ConeInnerAngle, ConeOuterAngle,
     ///     Looping, Buffer, SourceState.
     /// </param>
     /// <param name="value">The value to set the attribute to.</param>
-    void Source(uint sid, ALSourcei param, int value);
+    void Source(uint source, ALSourcei param, int value);
 
     /// <summary>
     /// This function sets an bool property of a source.
     /// </summary>
-    /// <param name="sid">Source name whose attribute is being set.</param>
+    /// <param name="source">Source name whose attribute is being set.</param>
     /// <param name="param">The name of the attribute to set: ALSourceb.SourceRelative, Looping.</param>
     /// <param name="value">The value to set the attribute to.</param>
-    void Source(uint sid, ALSourceb param, bool value);
+    void Source(uint source, ALSourceb param, bool value);
 
     /// <summary>
     /// This function sets a floating-point property of a source.
     /// </summary>
-    /// <param name="sid">Source name whose attribute is being set.</param>
+    /// <param name="source">Source name whose attribute is being set.</param>
     /// <param name="param">
     ///     The name of the attribute to set: ALSourcef.Pitch, Gain, MinGain, MaxGain, MaxDistance,
     ///     RolloffFactor, ConeOuterGain, ConeInnerAngle, ConeOuterAngle, SecOffset, ReferenceDistance,
     ///     EfxAirAbsorptionFactor, EfxRoomRolloffFactor, EfxConeOuterGainHighFrequency.
     /// </param>
     /// <param name="value">The value to set the attribute to.</param>
-    void Source(uint sid, ALSourcef param, float value);
+    void Source(uint source, ALSourcef param, float value);
 
     /// <summary>
     ///     This function plays, replays or resumes a source. The playing source will have
@@ -257,28 +257,28 @@ internal interface IOpenALInvoker
     ///     buffer(s) are done playing, the source will progress to the ALSourceState.Stopped
     ///     state.
     /// </summary>
-    /// <param name="sid">The name of the source to be played.</param>
-    void SourcePlay(uint sid);
+    /// <param name="source">The name of the source to be played.</param>
+    void SourcePlay(uint source);
 
     /// <summary>
     ///     This function pauses a source. The paused source will have its state changed
     ///     to ALSourceState.Paused.
     /// </summary>
-    /// <param name="sid">The name of the source to be paused.</param>
-    void SourcePause(uint sid);
+    /// <param name="source">The name of the source to be paused.</param>
+    void SourcePause(uint source);
 
     /// <summary>
     ///     This function stops a source. The stopped source will have it's state changed
     ///     to ALSourceState.Stopped.
     /// </summary>
-    /// <param name="sid">The name of the source to be stopped.</param>
-    void SourceStop(uint sid);
+    /// <param name="source">The name of the source to be stopped.</param>
+    void SourceStop(uint source);
 
     /// <summary>
     ///     This function stops the source and sets its state to ALSourceState.Initial.
     /// </summary>
-    /// <param name="sid">The name of the source to be rewound.</param>
-    void SourceRewind(uint sid);
+    /// <param name="source">The name of the source to be rewound.</param>
+    void SourceRewind(uint source);
 
     /// <summary>
     /// This function closes a device by name.
