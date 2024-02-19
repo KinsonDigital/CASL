@@ -1,4 +1,4 @@
-﻿// <copyright file="AL.cs" company="KinsonDigital">
+// <copyright file="AL.cs" company="KinsonDigital">
 // Copyright (c) KinsonDigital. All rights reserved.
 // </copyright>
 
@@ -86,37 +86,37 @@ internal class AL
     private delegate string ALGet(ALGetString param);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    private delegate void ALGetSourceInt(uint sid, ALGetSourcei param, [Out] out int value);
+    private delegate void ALGetSourceInt(uint source, ALGetSourcei param, [Out] out int value);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    private delegate void ALGetSourceFloat(uint sid, ALSourcef param, out float value);
+    private delegate void ALGetSourceFloat(uint source, ALSourcef param, out float value);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    private delegate void ALGetBufferInt(uint bid, ALGetBufferi param, [Out] out int value);
+    private delegate void ALGetBufferInt(uint buffer, ALGetBufferi param, [Out] out int value);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    private unsafe delegate void ALBufferData(uint bid, ALFormat format, void* buffer, int size, int freq);
+    private unsafe delegate void ALBufferData(uint buffer, ALFormat format, void* data, int size, int freq);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    private delegate void ALSourceInt(uint sid, ALSourcei param, int value);
+    private delegate void ALSourceInt(uint source, ALSourcei param, int value);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    private delegate void ALSourceBool(uint sid, ALSourceb param, bool value);
+    private delegate void ALSourceBool(uint source, ALSourceb param, bool value);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    private delegate void ALSourceFloat(uint sid, ALSourcef param, float value);
+    private delegate void ALSourceFloat(uint source, ALSourcef param, float value);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    private delegate void ALSourcePlay(uint sid);
+    private delegate void ALSourcePlay(uint source);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    private delegate void ALSourcePause(uint sid);
+    private delegate void ALSourcePause(uint source);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    private delegate void ALSourceStop(uint sid);
+    private delegate void ALSourceStop(uint source);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    private delegate void ALSourceRewind(uint sid);
+    private delegate void ALSourceRewind(uint source);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     private delegate void ALDeleteBuffers(int n, [In] ref uint buffers);
@@ -169,84 +169,84 @@ internal class AL
     /// <summary>
     /// This function retrieves an integer property of a source.
     /// </summary>
-    /// <param name="sid">Source name whose attribute is being retrieved.</param>
+    /// <param name="source">Source name whose attribute is being retrieved.</param>
     /// <param name="param">The name of the attribute to retrieve: ALSourcei.SourceRelative, Buffer, SourceState, BuffersQueued, BuffersProcessed.</param>
     /// <param name="value">A pointer to the integer value being retrieved.</param>
-    public void GetSource(uint sid, ALGetSourcei param, [Out] out int value) => this.alGetSourceInt(sid, param, out value);
+    public void GetSource(uint source, ALGetSourcei param, [Out] out int value) => this.alGetSourceInt(source, param, out value);
 
     /// <summary>
     /// This function retrieves a floating-point property of a source.
     /// </summary>
-    /// <param name="sid">Source name whose attribute is being retrieved.</param>
+    /// <param name="source">Source name whose attribute is being retrieved.</param>
     /// <param name="param">The name of the attribute to set: ALSourcef.Pitch, Gain, MinGain, MaxGain, MaxDistance, RolloffFactor, ConeOuterGain, ConeInnerAngle, ConeOuterAngle, SecOffset, ReferenceDistance, EfxAirAbsorptionFactor, EfxRoomRolloffFactor, EfxConeOuterGainHighFrequency.</param>
     /// <param name="value">A pointer to the floating-point value being retrieved.</param>
-    public void GetSource(uint sid, ALSourcef param, out float value) => this.alGetSourceFloat(sid, param, out value);
+    public void GetSource(uint source, ALSourcef param, out float value) => this.alGetSourceFloat(source, param, out value);
 
     /// <summary>
     /// This function retrieves an integer property of a buffer.
     /// </summary>
-    /// <param name="bid">Buffer name whose attribute is being retrieved.</param>
+    /// <param name="buffer">Buffer name whose attribute is being retrieved.</param>
     /// <param name="param">The name of the attribute to be retrieved: ALGetBufferi.Frequency, Bits, Channels, Size, and the currently hidden AL_DATA (dangerous).</param>
     /// <param name="value">A pointer to an int to hold the retrieved buffer.</param>
-    public void GetBuffer(uint bid, ALGetBufferi param, [Out] out int value) => this.alGetBufferInt(bid, param, out value);
+    public void GetBuffer(uint buffer, ALGetBufferi param, [Out] out int value) => this.alGetBufferInt(buffer, param, out value);
 
     /// <summary>
     /// This function fills a buffer with audio buffer. All the pre-defined formats are PCM buffer, but this function may be used by extensions to load other buffer types as well.
     /// </summary>
-    /// <param name="bid">buffer Handle/Name to be filled with buffer.</param>
+    /// <param name="buffer">buffer Handle/Name to be filled with buffer.</param>
     /// <param name="format">Format type from among the following: ALFormat.Mono8, ALFormat.Mono16, ALFormat.Stereo8, ALFormat.Stereo16.</param>
-    /// <param name="buffer">Pointer to a pinned audio buffer.</param>
+    /// <param name="data">Pointer to a pinned audio buffer.</param>
     /// <param name="size">The size of the audio buffer in bytes.</param>
     /// <param name="freq">The frequency of the audio buffer.</param>
-    public unsafe void BufferData(uint bid, ALFormat format, void* buffer, int size, int freq) => this.alBufferData(bid, format, buffer, size, freq);
+    public unsafe void BufferData(uint buffer, ALFormat format, void* data, int size, int freq) => this.alBufferData(buffer, format, data, size, freq);
 
     /// <summary>
     /// This function sets an integer property of a source.
     /// </summary>
-    /// <param name="sid">Source name whose attribute is being set.</param>
+    /// <param name="source">Source name whose attribute is being set.</param>
     /// <param name="param">The name of the attribute to set: ALSourcei.SourceRelative, ConeInnerAngle, ConeOuterAngle, Looping, Buffer, SourceState.</param>
     /// <param name="value">The value to set the attribute to.</param>
-    public void Source(uint sid, ALSourcei param, int value) => this.alSourceInt(sid, param, value);
+    public void Source(uint source, ALSourcei param, int value) => this.alSourceInt(source, param, value);
 
     /// <summary>
     /// This function sets an bool property of a source.
     /// </summary>
-    /// <param name="sid">Source name whose attribute is being set.</param>
+    /// <param name="source">Source name whose attribute is being set.</param>
     /// <param name="param">The name of the attribute to set: ALSourceb.SourceRelative, Looping.</param>
     /// <param name="value">The value to set the attribute to.</param>
-    public void Source(uint sid, ALSourceb param, bool value) => this.alSourceBool(sid, param, value);
+    public void Source(uint source, ALSourceb param, bool value) => this.alSourceBool(source, param, value);
 
     /// <summary>
     /// This function sets a floating-point property of a source.
     /// </summary>
-    /// <param name="sid">Source name whose attribute is being set.</param>
+    /// <param name="source">Source name whose attribute is being set.</param>
     /// <param name="param">The name of the attribute to set: ALSourcef.Pitch, Gain, MinGain, MaxGain, MaxDistance, RolloffFactor, ConeOuterGain, ConeInnerAngle, ConeOuterAngle, SecOffset, ReferenceDistance, EfxAirAbsorptionFactor, EfxRoomRolloffFactor, EfxConeOuterGainHighFrequency.</param>
     /// <param name="value">The value to set the attribute to.</param>
-    public void Source(uint sid, ALSourcef param, float value) => this.alSourceFloat(sid, param, value);
+    public void Source(uint source, ALSourcef param, float value) => this.alSourceFloat(source, param, value);
 
     /// <summary>
     /// This function plays, replays or resumes a source. The playing source will have it's state changed to ALSourceState.Playing. When called on a source which is already playing, the source will restart at the beginning. When the attached buffer(s) are done playing, the source will progress to the ALSourceState.Stopped state.
     /// </summary>
-    /// <param name="sid">The name of the source to be played.</param>
-    public void SourcePlay(uint sid) => this.alSourcePlay(sid);
+    /// <param name="source">The name of the source to be played.</param>
+    public void SourcePlay(uint source) => this.alSourcePlay(source);
 
     /// <summary>
     /// This function pauses a source. The paused source will have its state changed to ALSourceState.Paused.
     /// </summary>
-    /// <param name="sid">The name of the source to be paused.</param>
-    public void SourcePause(uint sid) => this.alSourcePause(sid);
+    /// <param name="source">The name of the source to be paused.</param>
+    public void SourcePause(uint source) => this.alSourcePause(source);
 
     /// <summary>
     /// This function stops a source. The stopped source will have it's state changed to ALSourceState.Stopped.
     /// </summary>
-    /// <param name="sid">The name of the source to be stopped.</param>
-    public void SourceStop(uint sid) => this.alSourceStop(sid);
+    /// <param name="source">The name of the source to be stopped.</param>
+    public void SourceStop(uint source) => this.alSourceStop(source);
 
     /// <summary>
     /// This function stops the source and sets its state to ALSourceState.Initial.
     /// </summary>
-    /// <param name="sid">The name of the source to be rewound.</param>
-    public void SourceRewind(uint sid) => this.alSourceRewind(sid);
+    /// <param name="source">The name of the source to be rewound.</param>
+    public void SourceRewind(uint source) => this.alSourceRewind(source);
 
     /// <summary>
     /// This function deletes one or more buffers, freeing the resources used by the buffer. Buffers which are attached to a source can not be deleted. See AL.Source (ALSourcei) and AL.SourceUnqueueBuffers for information on how to detach a buffer from a source.
