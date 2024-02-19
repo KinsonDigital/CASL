@@ -1,4 +1,4 @@
-// <copyright file="AL.cs" company="KinsonDigital">
+﻿// <copyright file="AL.cs" company="KinsonDigital">
 // Copyright (c) KinsonDigital. All rights reserved.
 // </copyright>
 
@@ -32,6 +32,8 @@ internal class AL
     private readonly ALSourceInt alSourceInt;
     private readonly ALSourceBool alSourceBool;
     private readonly ALSourceFloat alSourceFloat;
+    private readonly ALSourceQueueBuffers alSourceQueueBuffers;
+    private readonly ALSourceUnqueueBuffers alSourceUnqueueBuffers;
     private readonly ALSourcePlay alSourcePlay;
     private readonly ALSourcePause alSourcePause;
     private readonly ALSourceStop alSourceStop;
@@ -63,6 +65,8 @@ internal class AL
         this.alBufferData = delegateFactory.CreateDelegate<ALBufferData>(libraryPointer, nameof(this.alBufferData));
         this.alSourceInt = delegateFactory.CreateDelegate<ALSourceInt>(libraryPointer, "alSourcei");
         this.alSourceBool = delegateFactory.CreateDelegate<ALSourceBool>(libraryPointer, "alSourcei");
+        this.alSourceQueueBuffers = delegateFactory.CreateDelegate<ALSourceQueueBuffers>(libraryPointer, nameof(this.alSourceQueueBuffers));
+        this.alSourceUnqueueBuffers = delegateFactory.CreateDelegate<ALSourceUnqueueBuffers>(libraryPointer, nameof(this.alSourceUnqueueBuffers));
         this.alSourceFloat = delegateFactory.CreateDelegate<ALSourceFloat>(libraryPointer, "alSourcef");
         this.alSourcePlay = delegateFactory.CreateDelegate<ALSourcePlay>(libraryPointer, nameof(this.alSourcePlay));
         this.alSourcePause = delegateFactory.CreateDelegate<ALSourcePause>(libraryPointer, nameof(this.alSourcePause));
@@ -105,6 +109,12 @@ internal class AL
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     private delegate void ALSourceFloat(uint source, ALSourcef param, float value);
+
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    private delegate void ALSourceQueueBuffers(uint source, uint n, ref uint buffers);
+
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    private delegate void ALSourceUnqueueBuffers(uint source, uint n, ref uint buffers);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     private delegate void ALSourcePlay(uint source);
@@ -181,6 +191,26 @@ internal class AL
     /// <param name="param">The name of the attribute to set: ALSourcef.Pitch, Gain, MinGain, MaxGain, MaxDistance, RolloffFactor, ConeOuterGain, ConeInnerAngle, ConeOuterAngle, SecOffset, ReferenceDistance, EfxAirAbsorptionFactor, EfxRoomRolloffFactor, EfxConeOuterGainHighFrequency.</param>
     /// <param name="value">A pointer to the floating-point value being retrieved.</param>
     public void GetSource(uint source, ALSourcef param, out float value) => this.alGetSourceFloat(source, param, out value);
+
+    /// <summary>
+    /// This function queues a set of buffers on a source. All buffers attached to a source will be
+    /// played in sequence, and the number of processed buffers can be detected using an
+    /// <see cref="GetSource(uint,CASL.OpenAL.ALGetSourcei,out int)"/> call to retrieve <see cref="ALGetSourcei.BuffersProcessed"/>.
+    /// </summary>
+    /// <param name="source">The name of the source to queue buffers onto.</param>
+    /// <param name="n">The number of buffers to be queued.</param>
+    /// <param name="buffers">The array of buffer names to be queued.</param>
+    public void SourceQueueBuffers(uint source, int n, ref uint buffers) => this.alSourceQueueBuffers(source, (uint)n, ref buffers);
+
+    /// <summary>
+    /// This function unqueues a set of buffers on a source. All buffers attached to a source will be
+    /// played in sequence, and the number of processed buffers can be detected using an
+    /// <see cref="GetSource(uint,CASL.OpenAL.ALGetSourcei, out int)"/> call to retrieve <see cref="ALGetSourcei.BuffersProcessed"/>.
+    /// </summary>
+    /// <param name="source">The name of the source to unqueue buffers from.</param>
+    /// <param name="n">The number of buffers to be unqueued.</param>
+    /// <param name="buffers">The array of buffer names to were removed.</param>
+    public void SourceUnqueueBuffers(uint source, int n, ref uint buffers) => this.alSourceUnqueueBuffers(source, (uint)n, ref buffers);
 
     /// <summary>
     /// This function retrieves an integer property of a buffer.
