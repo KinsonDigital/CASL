@@ -241,7 +241,19 @@ internal class OpenALInvoker : IOpenALInvoker
     }
 
     /// <inheritdoc/>
-    public void Source(uint sid, ALSourcei param, int value)
+    public void SourceQueueBuffers(int source, int count, ref uint[] buffers)
+    {
+        ClearAlError();
+        ProcessAlError();
+    }
+
+    /// <inheritdoc/>
+    public void SourceUnqueueBuffers(int source, int count, ref uint[] buffers)
+    {
+        ClearAlError();
+        ProcessAlError();
+    }
+
     /// <inheritdoc/>
     public void Source(uint source, ALSourcei param, int value)
     {
