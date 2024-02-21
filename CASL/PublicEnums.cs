@@ -43,6 +43,7 @@ public enum AudioFormat
 /// <summary>
 /// The state of a sound.
 /// </summary>
+// TODO: Rename to AudioState
 public enum SoundState
 {
     /// <summary>
@@ -59,4 +60,36 @@ public enum SoundState
     /// The state of the sound when it is stopped.
     /// </summary>
     Stopped = 3,
+}
+
+/// <summary>
+/// The type of audio to use for audio playback.
+/// </summary>
+public enum BufferType
+{
+    /// <summary>
+    /// Loads the entire buffer for playback.
+    /// </summary>
+    Full = 1,
+
+    /// <summary>
+    /// Streams the buffer for playback.
+    /// </summary>
+    Stream = 2,
+}
+
+/// <summary>
+/// The type of audio format.
+/// </summary>
+public enum AudioFormatType
+{
+    /// <summary>
+    /// Represents the MP3 audio format.
+    /// </summary>
+    Mp3 = 1,
+
+    /// <summary>
+    /// Represents the Ogg audio format.
+    /// </summary>
+    Ogg = 2,
 }
