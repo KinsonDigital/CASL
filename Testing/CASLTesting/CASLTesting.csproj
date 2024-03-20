@@ -38,6 +38,9 @@
     <None Update="AudioFiles\pathetic.mp3">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="AudioFiles\pathetic.ogg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
   <!--COPY 64 BIT WINDOWS VERSION OF OPENAL TO PUBLISH DIRECTORY-->
