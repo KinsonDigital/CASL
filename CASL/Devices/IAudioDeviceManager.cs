@@ -55,6 +55,7 @@ internal interface IAudioDeviceManager : IDisposable
     /// <summary>
     /// Initializes a sound and returns a relative sound source and buffer id.
     /// </summary>
+    /// <param name="totalBuffers">The total number of buffers to create.</param>
     /// <returns>
     ///     srcId: The OpenAL source id.
     ///     bufferId: The OpenAL id of the sound buffer.
@@ -63,7 +64,7 @@ internal interface IAudioDeviceManager : IDisposable
     ///     Occurs if this method is executed without initializing the <see cref="InitDevice"/>() method.
     ///     This can be done by invoking the <see cref="InitDevice(string?)"/>.
     /// </exception>
-    (uint srcId, uint bufferId) InitSound();
+    (uint srcId, uint[] bufferIds) InitSound(int totalBuffers);
 
     /// <summary>
     /// Changes the audio device that matches the given <paramref name="name"/>.
