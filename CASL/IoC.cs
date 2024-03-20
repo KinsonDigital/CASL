@@ -53,6 +53,7 @@ internal static class IoC
         IoCContainer.Register(() => FileSystem.Path, Lifestyle.Singleton);
 
         IoCContainer.Register<ITaskService, TaskService>(true);
+        IoCContainer.Register<IThreadService, ThreadService>(Lifestyle.Singleton);
         IoCContainer.Register<IApplication, Application>(Lifestyle.Singleton);
         IoCContainer.Register<IPlatform, Platform>(Lifestyle.Singleton);
         IoCContainer.Register<ILibrary, OpenALLibrary>(Lifestyle.Singleton);
