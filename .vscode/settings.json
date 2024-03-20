@@ -17,6 +17,8 @@
 		"nupkg",
 		"ound",
 		"pwsh",
+		"Reactable",
+		"reactables",
 		"runsettings",
 		"softprops",
 		"Sourceb",
@@ -24,6 +26,8 @@
 		"Sourcei",
 		"stylecop",
 		"udio",
+		"Unqueue",
+		"Unsubscriber",
 		"Vorbis",
 		"xunit"
 	],
