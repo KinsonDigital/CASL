@@ -1,4 +1,4 @@
-// <copyright file="AudioDeviceManager.cs" company="KinsonDigital">
+﻿// <copyright file="AudioDeviceManager.cs" company="KinsonDigital">
 // Copyright (c) KinsonDigital. All rights reserved.
 // </copyright>
 
@@ -35,9 +35,17 @@ internal sealed class AudioDeviceManager : IAudioDeviceManager
     /// <param name="alInvoker">Provides access to OpenAL.</param>
     public AudioDeviceManager(IOpenALInvoker alInvoker)
     {
+        ArgumentNullException.ThrowIfNull(alInvoker);
+
         this.alInvoker = alInvoker;
         this.alInvoker.ErrorCallback += ErrorCallback;
     }
+
+    /// <summary>
+    /// Finalizes an instance of the <see cref="AudioDeviceManager"/> class.
+    /// </summary>
+    [ExcludeFromCodeCoverage(Justification = "Finalizers cannot be tested")]
+    ~AudioDeviceManager() => Dispose(false);
 
     /// <inheritdoc/>
     public event EventHandler<EventArgs>? DeviceChanging;
@@ -83,10 +91,7 @@ internal sealed class AudioDeviceManager : IAudioDeviceManager
             this.device = this.alInvoker.OpenDevice(nameResult);
         }
 
-        if (this.attributes is null)
-        {
-            this.attributes = new ALContextAttributes();
-        }
+        this.attributes ??= new ALContextAttributes();
 
         if (this.context.Handle == 0)
         {
@@ -183,10 +188,22 @@ internal sealed class AudioDeviceManager : IAudioDeviceManager
         }
 
         this.soundSources.Remove(sourceId);
+        this.alInvoker.DeleteSource(sourceId);
     }
 
     /// <inheritdoc/>
-    public void Dispose() => Dispose(true);
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
+    /// <summary>
+    /// Invoked when there is an OpenAL specific error.
+    /// </summary>
+    /// <param name="errorMsg">The error message from OpenAL.</param>
+    [ExcludeFromCodeCoverage]
+    private static void ErrorCallback(string errorMsg) => throw new AudioException(errorMsg);
 
     /// <summary>
     /// Resets the state of all the sound sources to the state they were in before changing the audio device.
@@ -214,13 +231,6 @@ internal sealed class AudioDeviceManager : IAudioDeviceManager
         }
     }
 
-    /// <summary>
-    /// Invoked when there is an OpenAL specific error.
-    /// </summary>
-    /// <param name="errorMsg">The error message from OpenAL.</param>
-    [ExcludeFromCodeCoverage]
-    private static void ErrorCallback(string errorMsg) => throw new AudioException(errorMsg);
-
     /// <inheritdoc cref="IDisposable.Dispose"/>
     /// <param name="disposing"><see langword="true"/> to dispose of managed resources.</param>
     private void Dispose(bool disposing)
@@ -234,6 +244,8 @@ internal sealed class AudioDeviceManager : IAudioDeviceManager
 
         if (disposing)
         {
+            this.DeviceChanging = null;
+            this.DeviceChanged = null;
             this.alInvoker.ErrorCallback -= ErrorCallback;
             this.soundSources.Clear();
             this.continuePlaybackCache.Clear();

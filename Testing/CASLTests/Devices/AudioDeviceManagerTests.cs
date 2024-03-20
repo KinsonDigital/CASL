@@ -56,8 +56,32 @@ public class AudioDeviceManagerTests
         this.mockALInvoker.Setup(m => m.MakeContextCurrent(this.context)).Returns(true);
     }
 
-    #region Prop Tests
+    #region Constructor Tests
+    [Fact]
+    public void Ctor_WithNullALInvokerParam_ThrowsException()
+    {
+        // Arrange & Act
+        var act = () =>
+        {
+            _ = new AudioDeviceManager(null);
+        };
 
+        // Assert
+        act.Should().ThrowArgNullException().WithNullParamMsg("alInvoker");
+    }
+
+    [Fact]
+    public void Ctor_WhenInvoked_SubscribesToErrorCallback()
+    {
+        // Arrange & Act
+        _ = CreateSystemUnderTest();
+
+        // Assert
+        this.mockALInvoker.VerifyAdd(e => e.ErrorCallback += It.IsAny<Action<string>>(), Times.Once());
+    }
+    #endregion
+
+    #region Prop Tests
     [Fact]
     public void IsInitialized_WhenGettingValueAfterInitialization_ReturnsTrue()
     {
@@ -128,11 +152,9 @@ public class AudioDeviceManagerTests
         // Assert
         actual.Should().NotBeNull().And.HaveCount(2).And.ContainInOrder(111, 222);
     }
-
     #endregion
 
     #region Method Tests
-
     [Fact]
     public void InitDevice_WhenInvoked_InitializesDevice()
     {
@@ -173,10 +195,10 @@ public class AudioDeviceManagerTests
         sut.Dispose();
 
         // Act
-        var action = sut.InitSound;
+        var act = () => sut.InitSound(1);
 
         // Assert
-        action.Should().Throw<AudioDeviceManagerNotInitializedException>().WithMessage(IsDisposedExceptionMessage);
+        act.Should().Throw<AudioDeviceManagerNotInitializedException>().WithMessage(IsDisposedExceptionMessage);
     }
 
     [Fact]
@@ -284,6 +306,7 @@ public class AudioDeviceManagerTests
 
         // Assert
         sut.GetSoundSources().Select(s => s.SourceId).Should().ContainSingle().Which.Should().Be(1122u);
+        this.mockALInvoker.Verify(m => m.DeleteSource(3344u), Times.Once);
     }
 
     [Fact]
@@ -478,7 +501,21 @@ public class AudioDeviceManagerTests
         // Assert
         this.mockALInvoker.Verify(m => m.MakeContextCurrent(ALContext.Null()), Times.Once());
     }
+    #endregion
 
+    #region Indirect Tests
+    [Fact]
+    public void ALInvoker_WhenOpenALErrorOccurs_ThrowsException()
+    {
+        // Arrange
+        _ = CreateSystemUnderTest();
+
+        // Act
+        var act = () => this.mockALInvoker.Raise(x => x.ErrorCallback += null, "test-error");
+
+        // Assert
+        act.Should().Throw<AudioException>().WithMessage("test-error");
+    }
     #endregion
 
     /// <summary>
