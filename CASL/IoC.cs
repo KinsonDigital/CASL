@@ -62,6 +62,7 @@ internal static class IoC
         IoCContainer.Register<ILibraryLoader, NativeLibraryLoader>(Lifestyle.Singleton);
         IoCContainer.Register<IFilePathResolver, NativeLibPathResolver>(Lifestyle.Singleton);
         IoCContainer.Register<IAudioDecoderFactory, AudioDecoderFactory>(Lifestyle.Singleton);
+        IoCContainer.Register<IAudioBufferFactory, AudioBufferFactory>(Lifestyle.Singleton);
 
         SetupAudio();
         SetupReactables();
