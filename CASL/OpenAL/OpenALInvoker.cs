@@ -241,16 +241,51 @@ internal class OpenALInvoker : IOpenALInvoker
     }
 
     /// <inheritdoc/>
-    public void SourceQueueBuffers(int source, int count, ref uint[] buffers)
+    public void SourceQueueBuffer(uint source, ref uint bufferId)
     {
         ClearAlError();
+
+        this.al.SourceQueueBuffers(source, 1, ref bufferId);
+
         ProcessAlError();
     }
 
     /// <inheritdoc/>
-    public void SourceUnqueueBuffers(int source, int count, ref uint[] buffers)
+    public void SourceQueueBuffers(uint source, int count, ref uint[] buffers)
     {
         ClearAlError();
+
+        if (buffers.Length <= 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(buffers), "The buffers array must contain at least one buffer.");
+        }
+
+        this.al.SourceQueueBuffers(source, count, ref buffers[0]);
+
+        ProcessAlError();
+    }
+
+    public void SourceUnqueueBuffer(uint source, ref uint buffer)
+    {
+        ClearAlError();
+
+        this.al.SourceUnqueueBuffers(source, 1, ref buffer);
+
+        ProcessAlError();
+    }
+
+    /// <inheritdoc/>
+    public void SourceUnqueueBuffers(uint source, int count, ref uint[] buffers)
+    {
+        ClearAlError();
+
+        if (buffers.Length <= 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(buffers), "The buffers array must contain at least one buffer.");
+        }
+
+        this.al.SourceUnqueueBuffers(source, count, ref buffers[0]);
+
         ProcessAlError();
     }
 
@@ -323,6 +358,11 @@ internal class OpenALInvoker : IOpenALInvoker
     /// <inheritdoc/>
     public void DeleteBuffer(uint buffer)
     {
+        if (buffer == 0)
+        {
+            return;
+        }
+
         ClearAlError();
         this.al.DeleteBuffers(1, ref buffer);
         ProcessAlError();

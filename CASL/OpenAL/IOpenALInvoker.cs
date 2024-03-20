@@ -220,6 +220,15 @@ internal interface IOpenALInvoker
     void BindBufferToSource(uint source, int buffer);
 
     /// <summary>
+    /// This function queues the given <paramref name="bufferId"/> on a source. All buffers attached to a source will be
+    /// played in sequence, and the number of processed buffers can be detected using an
+    /// <see cref="GetSource(uint,CASL.OpenAL.ALGetSourcei)"/> call to retrieve <see cref="ALGetSourcei.BuffersProcessed"/>.
+    /// </summary>
+    /// <param name="source">The name of the source to queue the buffer onto.</param>
+    /// <param name="bufferId">The buffer to be queued.</param>
+    void SourceQueueBuffer(uint source, ref uint bufferId);
+
+    /// <summary>
     /// This function queues a set of buffers on a source. All buffers attached to a source will be
     /// played in sequence, and the number of processed buffers can be detected using an
     /// <see cref="GetSource(uint,CASL.OpenAL.ALGetSourcei)"/> call to retrieve <see cref="ALGetSourcei.BuffersProcessed"/>.
@@ -227,17 +236,26 @@ internal interface IOpenALInvoker
     /// <param name="source">The name of the source to queue buffers onto.</param>
     /// <param name="count">The number of buffers to be queued.</param>
     /// <param name="buffers">The array of buffer names to be queued.</param>
-    void SourceQueueBuffers(int source, int count, ref uint[] buffers);
+    void SourceQueueBuffers(uint source, int count, ref uint[] buffers);
+
+    /// <summary>
+    /// This function unqueues a single buffer on a source. All buffers attached to a source will be
+    /// played in sequence, and the number of processed buffers can be detected using an
+    /// <see cref="GetSource(uint,CASL.OpenAL.ALGetSourcei)"/> call to retrieve <see cref="ALGetSourcei.BuffersProcessed"/>.
+    /// </summary>
+    /// <param name="source">The name of the source that contains the buffer to unqueue.</param>
+    /// <param name="buffer">The buffer name to be unqueued.</param>
+    void SourceUnqueueBuffer(uint source, ref uint buffer);
 
     /// <summary>
     /// This function unqueues a set of buffers on a source. All buffers attached to a source will be
     /// played in sequence, and the number of processed buffers can be detected using an
     /// <see cref="GetSource(uint,CASL.OpenAL.ALGetSourcei)"/> call to retrieve <see cref="ALGetSourcei.BuffersProcessed"/>.
     /// </summary>
-    /// <param name="source">The name of the source to queue buffers onto.</param>
-    /// <param name="count">The number of buffers to be queued.</param>
-    /// <param name="buffers">The array of buffer names to be queued.</param>
-    void SourceUnqueueBuffers(int source, int count, ref uint[] buffers);
+    /// <param name="source">The name of the source that contains the buffers to unqueue.</param>
+    /// <param name="count">The number of buffers to be unqueued.</param>
+    /// <param name="buffers">The array of buffer names to be unqueued.</param>
+    void SourceUnqueueBuffers(uint source, int count, ref uint[] buffers);
 
     /// <summary>
     /// This function sets an integer property of a source.
