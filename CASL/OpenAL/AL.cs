@@ -1,4 +1,4 @@
-﻿// <copyright file="AL.cs" company="KinsonDigital">
+// <copyright file="AL.cs" company="KinsonDigital">
 // Copyright (c) KinsonDigital. All rights reserved.
 // </copyright>
 
@@ -93,7 +93,7 @@ internal class AL
     private delegate void ALGetSourceInt(uint source, ALGetSourcei param, [Out] out int value);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    private delegate void ALGetSourceFloat(uint source, ALSourcef param, out float value);
+    private delegate void ALGetSourceFloat(uint source, ALSourcef param, [Out] out float value);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     private delegate void ALGetBufferInt(uint buffer, ALGetBufferi param, [Out] out int value);
@@ -190,7 +190,7 @@ internal class AL
     /// <param name="source">Source name whose attribute is being retrieved.</param>
     /// <param name="param">The name of the attribute to set: ALSourcef.Pitch, Gain, MinGain, MaxGain, MaxDistance, RolloffFactor, ConeOuterGain, ConeInnerAngle, ConeOuterAngle, SecOffset, ReferenceDistance, EfxAirAbsorptionFactor, EfxRoomRolloffFactor, EfxConeOuterGainHighFrequency.</param>
     /// <param name="value">A pointer to the floating-point value being retrieved.</param>
-    public void GetSource(uint source, ALSourcef param, out float value) => this.alGetSourceFloat(source, param, out value);
+    public void GetSource(uint source, ALSourcef param, [Out] out float value) => this.alGetSourceFloat(source, param, out value);
 
     /// <summary>
     /// This function queues a set of buffers on a source. All buffers attached to a source will be
