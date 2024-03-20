@@ -1,4 +1,4 @@
-﻿// <copyright file="AudioDeviceManager.cs" company="KinsonDigital">
+// <copyright file="AudioDeviceManager.cs" company="KinsonDigital">
 // Copyright (c) KinsonDigital. All rights reserved.
 // </copyright>
 
@@ -104,7 +104,7 @@ internal sealed class AudioDeviceManager : IAudioDeviceManager
     }
 
     /// <inheritdoc/>
-    public (uint srcId, uint bufferId) InitSound()
+    public (uint srcId, uint[] bufferIds) InitSound(int totalBuffers)
     {
         if (!IsInitialized)
         {
@@ -116,11 +116,11 @@ internal sealed class AudioDeviceManager : IAudioDeviceManager
         soundSrc.SourceId = 0;
 
         soundSrc.SourceId = this.alInvoker.GenSource();
-        var bufferId = this.alInvoker.GenBuffer();
+        var bufferIds = this.alInvoker.GenBuffers(totalBuffers);
 
         this.soundSources.Add(soundSrc.SourceId, soundSrc);
 
-        return (soundSrc.SourceId, bufferId);
+        return (soundSrc.SourceId, bufferIds);
     }
 
     /// <inheritdoc/>

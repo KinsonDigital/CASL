@@ -1,4 +1,4 @@
-﻿// <copyright file="IOpenALInvoker.cs" company="KinsonDigital">
+// <copyright file="IOpenALInvoker.cs" company="KinsonDigital">
 // Copyright (c) KinsonDigital. All rights reserved.
 // </copyright>
 
@@ -72,6 +72,16 @@ internal interface IOpenALInvoker
     /// </summary>
     /// <returns>Pointer to an uint value which will store the name of the new buffer.</returns>
     uint GenBuffer();
+
+    /// <summary>
+    ///     This function generates one or more buffers, which contain audio data (see
+    ///     <see cref="BufferData{TBuffer}"/>). References to buffers are uint values, which are used wherever a
+    ///     buffer reference is needed (in calls such as alDeleteBuffers, alSourcei,
+    ///     alSourceQueueBuffers, and <see cref="SourceUnqueueBuffers"/>).
+    /// </summary>
+    /// <param name="count">The number of buffers to generate.</param>
+    /// <returns>The array of buffer ids.</returns>
+    uint[] GenBuffers(int count);
 
     /// <summary>
     /// This function generates one source only.

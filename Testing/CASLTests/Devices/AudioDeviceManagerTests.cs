@@ -14,10 +14,12 @@ using CASL;
 using CASL.Data.Exceptions;
 using CASL.Devices;
 using CASL.Devices.Exceptions;
+using CASL.Exceptions;
 using CASL.OpenAL;
 using Moq;
 using Xunit;
 using FluentAssertions;
+using Helpers;
 
 #pragma warning restore IDE0001 // Name can be simplified
 
@@ -181,17 +183,19 @@ public class AudioDeviceManagerTests
     public void InitSound_WhenInvoked_SetsUpSoundAndReturnsCorrectResult()
     {
         // Arrange
+        this.mockALInvoker.Setup(m => m.GenBuffers(It.IsAny<int>())).Returns(new[] { BufferId });
+
         var sut = CreateSystemUnderTest();
         sut.InitDevice();
 
         // Act
-        var (actualSourceId, actualBufferId) = sut.InitSound();
+        var (actualSourceId, actualBufferIds) = sut.InitSound(1);
 
         // Assert
         actualSourceId.Should().Be(SrcId);
-        actualBufferId.Should().Be(BufferId);
+        actualBufferIds.Should().BeEquivalentTo(new[] { BufferId });
         this.mockALInvoker.Verify(m => m.GenSource(), Times.Once());
-        this.mockALInvoker.Verify(m => m.GenBuffer(), Times.Once());
+        this.mockALInvoker.Verify(m => m.GenBuffers(1), Times.Once());
     }
 
     [Fact]
@@ -232,7 +236,7 @@ public class AudioDeviceManagerTests
         // Arrange
         var sut = CreateSystemUnderTest();
         sut.InitDevice();
-        sut.InitSound();
+        sut.InitSound(1);
 
         // Act
         var action = () =>
@@ -272,8 +276,8 @@ public class AudioDeviceManagerTests
         this.mockALInvoker.Setup(m => m.GenSource()).Returns(() => myItems.Dequeue());
 
         sut.InitDevice();
-        sut.InitSound();
-        sut.InitSound();
+        sut.InitSound(1);
+        sut.InitSound(1);
 
         // Act
         sut.RemoveSoundSource(3344u);
@@ -369,7 +373,7 @@ public class AudioDeviceManagerTests
         sut.DeviceChanging += (_, _) => deviceChangingEventRaised = true;
         sut.DeviceChanged += (_, _) => deviceChangedEventRaised = true;
         sut.InitDevice("Device-1");
-        sut.InitSound();
+        sut.InitSound(1);
 
         // Act
         sut.ChangeDevice("Device-2");
@@ -430,7 +434,7 @@ public class AudioDeviceManagerTests
 
         var sut = CreateSystemUnderTest();
         sut.InitDevice("Device-1");
-        sut.InitSound();
+        sut.InitSound(1);
 
         // Act
         sut.ChangeDevice("Device-2");

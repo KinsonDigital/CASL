@@ -95,6 +95,18 @@ internal class OpenALInvoker : IOpenALInvoker
     }
 
     /// <inheritdoc/>
+    public uint[] GenBuffers(int count)
+    {
+        var buffers = new uint[count];
+
+        ClearAlError();
+        this.al.GenBuffers(count, ref buffers[0]);
+        ProcessAlError();
+
+        return buffers;
+    }
+
+    /// <inheritdoc/>
     public uint GenSource()
     {
         ClearAlError();
