@@ -6,11 +6,14 @@ namespace CASL;
 
 using System.Diagnostics.CodeAnalysis;
 using System.IO.Abstractions;
+using Carbonate.OneWay;
+using Data;
 using Devices;
 using Factories;
 using NativeInterop;
 using NativeInterop.Factories;
 using OpenAL;
+using ReactableData;
 using SimpleInjector;
 
 /// <summary>
@@ -58,6 +61,7 @@ internal static class IoC
         IoCContainer.Register<IAudioDecoderFactory, AudioDecoderFactory>(Lifestyle.Singleton);
 
         SetupAudio();
+        SetupReactables();
 
         isInitialized = true;
     }
@@ -70,7 +74,18 @@ internal static class IoC
         IoCContainer.Register<ALC>(Lifestyle.Singleton);
         IoCContainer.Register<AL>(Lifestyle.Singleton);
         IoCContainer.Register<IOpenALInvoker, OpenALInvoker>(Lifestyle.Singleton);
-
         IoCContainer.Register<IAudioDeviceManager, AudioDeviceManager>(Lifestyle.Singleton);
+        IoCContainer.Register<IStreamBufferManager, StreamBufferManager>(Lifestyle.Singleton);
+    }
+
+    /// <summary>
+    /// Setup container registration related to reactables.
+    /// </summary>
+    private static void SetupReactables()
+    {
+        IoCContainer.Register<IReactableFactory, ReactableFactory>(Lifestyle.Singleton);
+        IoCContainer.Register<IPushReactable<AudioCommandData>, PushReactable<AudioCommandData>>(Lifestyle.Singleton);
+        IoCContainer.Register<IPushReactable<PosCommandData>, PushReactable<PosCommandData>>(Lifestyle.Singleton);
+        IoCContainer.Register<IPullReactable<bool>, PullReactable<bool>>(Lifestyle.Singleton);
     }
 }
