@@ -7,7 +7,6 @@ namespace CASL.Devices;
 using System;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
-using Factories;
 
 /// <summary>
 /// Manages the audio devices in the system.
@@ -15,7 +14,7 @@ using Factories;
 [ExcludeFromCodeCoverage]
 public static class AudioDevice
 {
-    private static readonly IAudioDeviceManager AudioManager = AudioDeviceManagerFactory.CreateDeviceManager();
+    private static readonly IAudioDeviceManager AudioManager = IoC.Container.GetInstance<IAudioDeviceManager>();
 
     /// <summary>
     /// Gets the name of the current audio device in use.
