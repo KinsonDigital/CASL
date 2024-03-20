@@ -1,4 +1,4 @@
-﻿// <copyright file="IoC.cs" company="KinsonDigital">
+// <copyright file="IoC.cs" company="KinsonDigital">
 // Copyright (c) KinsonDigital. All rights reserved.
 // </copyright>
 
@@ -9,6 +9,7 @@ using System.IO.Abstractions;
 using Carbonate.OneWay;
 using Data;
 using Devices;
+using DotnetWrappers;
 using Factories;
 using NativeInterop;
 using NativeInterop.Factories;
@@ -51,6 +52,7 @@ internal static class IoC
         IoCContainer.Register(() => FileSystem.Directory, Lifestyle.Singleton);
         IoCContainer.Register(() => FileSystem.Path, Lifestyle.Singleton);
 
+        IoCContainer.Register<ITaskService, TaskService>(true);
         IoCContainer.Register<IApplication, Application>(Lifestyle.Singleton);
         IoCContainer.Register<IPlatform, Platform>(Lifestyle.Singleton);
         IoCContainer.Register<ILibrary, OpenALLibrary>(Lifestyle.Singleton);
