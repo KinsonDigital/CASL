@@ -165,11 +165,6 @@ internal sealed class FullBuffer : IAudioBuffer
     {
         ArgumentException.ThrowIfNullOrEmpty(filePath);
 
-        if (this.isInitialized)
-        {
-            return this.srcId;
-        }
-
         if (!this.file.Exists(filePath))
         {
             throw new FileNotFoundException("The sound file could not be found.", filePath);
@@ -189,14 +184,8 @@ internal sealed class FullBuffer : IAudioBuffer
             this.audioDeviceManager.InitDevice();
         }
 
-        (this.srcId, var bufferIds) = this.audioDeviceManager.InitSound(1);
-        this.bufferId = bufferIds[0];
-
-        SoundSource soundSrc;
-        soundSrc.SourceId = this.srcId;
-        soundSrc.TotalSeconds = TotalSeconds;
-
-        this.audioDeviceManager.UpdateSoundSource(soundSrc);
+        this.srcId = this.alInvoker.GenSource();
+        this.bufferId = this.alInvoker.GenBuffer();
 
         this.isInitialized = true;
 
@@ -246,6 +235,13 @@ internal sealed class FullBuffer : IAudioBuffer
     }
 
     /// <inheritdoc/>
+    public void RemoveBuffer()
+    {
+        this.alInvoker.Source(this.srcId, ALSourcei.Buffer, 0);
+        this.alInvoker.DeleteBuffer(this.bufferId);
+    }
+
+    /// <inheritdoc/>
     public void Dispose()
     {
         Dispose(true);
@@ -270,12 +266,7 @@ internal sealed class FullBuffer : IAudioBuffer
             this.audioDecoder.Dispose();
         }
 
-        this.alInvoker.SourceStop(this.srcId);
-        this.alInvoker.Source(this.srcId, ALSourcei.Buffer, 0);
-
-        this.alInvoker.DeleteBuffer(this.bufferId);
-
-        this.audioDeviceManager.RemoveSoundSource(this.srcId);
+        RemoveBuffer();
 
         this.isDisposed = true;
     }

@@ -40,9 +40,6 @@ public class StreamBufferTests
     private readonly IFile mockFile;
     private readonly IPath mockPath;
     private readonly IReactableFactory mockReactableFactory;
-    private readonly IPushReactable<AudioCommandData> mockAudioCmdReactable;
-    private readonly IPushReactable<PosCommandData> mockPosCmdReactable;
-    private readonly IPullReactable<bool> mockLoopingReactable;
     private readonly IDisposable mockAudioCmdUnsubscriber;
     private readonly IDisposable mockPosCmdUnsubscriber;
     private readonly IDisposable mockLoopingUnsubscriber;
@@ -64,38 +61,39 @@ public class StreamBufferTests
     public StreamBufferTests()
     {
         this.mockAlInvoker = Substitute.For<IOpenALInvoker>();
+        this.mockAlInvoker.GenSource().Returns(SourceId);
+        this.mockAlInvoker.GenBuffers(Arg.Any<int>()).Returns(this.bufferIds);
 
         this.mockDeviceManager = Substitute.For<IAudioDeviceManager>();
-        this.mockDeviceManager.InitSound(Arg.Any<int>()).Returns((SourceId, this.bufferIds));
 
         this.mockAudioDecoder = Substitute.For<IAudioDecoder>();
         this.mockStreamBufferManager = Substitute.For<IStreamBufferManager>();
 
         this.audioCmdSubscription = Substitute.For<IReceiveSubscription<AudioCommandData>>();
         this.mockAudioCmdUnsubscriber = Substitute.For<IDisposable>();
-        this.mockAudioCmdReactable = Substitute.For<IPushReactable<AudioCommandData>>();
-        this.mockAudioCmdReactable.Subscribe(Arg.Any<IReceiveSubscription<AudioCommandData>>())
+        var mockAudioCmdReactable = Substitute.For<IPushReactable<AudioCommandData>>();
+        mockAudioCmdReactable.Subscribe(Arg.Any<IReceiveSubscription<AudioCommandData>>())
             .Returns(this.mockAudioCmdUnsubscriber)
             .AndDoes(callInfo => this.audioCmdSubscription = callInfo.Arg<IReceiveSubscription<AudioCommandData>>());
 
         this.posCmdSubscription = Substitute.For<IReceiveSubscription<PosCommandData>>();
         this.mockPosCmdUnsubscriber = Substitute.For<IDisposable>();
-        this.mockPosCmdReactable = Substitute.For<IPushReactable<PosCommandData>>();
-        this.mockPosCmdReactable.Subscribe(Arg.Any<IReceiveSubscription<PosCommandData>>())
+        var mockPosCmdReactable = Substitute.For<IPushReactable<PosCommandData>>();
+        mockPosCmdReactable.Subscribe(Arg.Any<IReceiveSubscription<PosCommandData>>())
             .Returns(this.mockPosCmdUnsubscriber)
             .AndDoes(callInfo => this.posCmdSubscription = callInfo.Arg<IReceiveSubscription<PosCommandData>>());
 
         this.loopSubscription = Substitute.For<IRespondSubscription<bool>>();
         this.mockLoopingUnsubscriber = Substitute.For<IDisposable>();
-        this.mockLoopingReactable = Substitute.For<IPullReactable<bool>>();
-        this.mockLoopingReactable.Subscribe(Arg.Any<IRespondSubscription<bool>>())
+        var mockLoopingReactable = Substitute.For<IPullReactable<bool>>();
+        mockLoopingReactable.Subscribe(Arg.Any<IRespondSubscription<bool>>())
             .Returns(this.mockLoopingUnsubscriber)
             .AndDoes(callInfo => this.loopSubscription = callInfo.Arg<IRespondSubscription<bool>>());
 
         this.mockReactableFactory = Substitute.For<IReactableFactory>();
-        this.mockReactableFactory.CreateAudioCmndReactable().Returns(this.mockAudioCmdReactable);
-        this.mockReactableFactory.CreatePositionCmndReactable().Returns(this.mockPosCmdReactable);
-        this.mockReactableFactory.CreateIsLoopingReactable().Returns(this.mockLoopingReactable);
+        this.mockReactableFactory.CreateAudioCmndReactable().Returns(mockAudioCmdReactable);
+        this.mockReactableFactory.CreatePositionCmndReactable().Returns(mockPosCmdReactable);
+        this.mockReactableFactory.CreateIsLoopingReactable().Returns(mockLoopingReactable);
 
         this.mockTaskService = Substitute.For<ITaskService>();
         this.mockTaskService.SetAction(Arg.Any<Action>());
@@ -245,28 +243,18 @@ public class StreamBufferTests
     {
         // Arrange
         var fileName = $"test-file{extension}";
-        var expectedSoundSrc = new SoundSource
-        {
-            SourceId = SourceId,
-            TotalSeconds = 298,
-        };
 
         this.mockPath.GetExtension(Arg.Any<string>()).Returns(extension);
         this.mockAudioDecoder.TotalSeconds.Returns(298);
-        this.mockDeviceManager.InitSound(Arg.Any<int>()).Returns((SourceId, [0u]));
 
         var sut = CreateSystemUnderTest();
 
         // Act
-        var actualFirstInvoke = sut.Init(fileName);
-        var actualSecondInvoke = sut.Init(fileName);
+        var actualSrcId = sut.Init(fileName);
 
         // Assert
-        actualFirstInvoke.Should().Be(SourceId);
-        actualSecondInvoke.Should().Be(SourceId);
-        this.mockDeviceManager.Received(1).InitDevice();
+        actualSrcId.Should().Be(SourceId);
         this.mockPath.Received(1).GetExtension(fileName);
-        this.mockDeviceManager.UpdateSoundSource(expectedSoundSrc);
     }
 
     [Fact]
@@ -318,7 +306,7 @@ public class StreamBufferTests
     }
 
     [Fact]
-    public void Upload_WhenUploadingMp3Data_StartsStreamingOggData()
+    public void Upload_WhenUploadingMp3Data_StartsStreamingMp3Data()
     {
         // Arrange
         var expectedBufferStats = new BufferStats
@@ -368,7 +356,7 @@ public class StreamBufferTests
 
         this.mockTaskService.When(x => x.SetAction(Arg.Any<Action>()))
             .Do(cb => this.streamDataDelegate = cb.Arg<Action>());
-        this.mockTaskService.When(x => x.Start()).Do(cb => this.streamDataDelegate?.Invoke());
+        this.mockTaskService.When(x => x.Start()).Do(_ => this.streamDataDelegate?.Invoke());
         this.mockTaskService.IsCancellationRequested.Returns(_ => isCancelRequested);
 
         // Prevent an infinite loop from occurring
@@ -406,6 +394,7 @@ public class StreamBufferTests
     {
         // Arrange
         var isCancelRequested = false;
+        var taskServiceIsRunning = false;
 
         this.mockPath.GetExtension(Arg.Any<string>()).Returns(".ogg");
 
@@ -413,12 +402,19 @@ public class StreamBufferTests
         this.mockStreamBufferManager.ToPositionSeconds(Arg.Any<long>(), Arg.Any<float>()).Returns(100f);
         this.mockAudioDecoder.TotalSeconds.Returns(50f);
 
+        this.mockAlInvoker.GetSource(Arg.Any<uint>(), ALSourcef.Pitch).Returns(1f);
         this.mockAlInvoker.GetSourceState(Arg.Any<uint>()).Returns(ALSourceState.Playing);
 
         this.mockTaskService.When(x => x.SetAction(Arg.Any<Action>()))
             .Do(cb => this.streamDataDelegate = cb.Arg<Action>());
-        this.mockTaskService.When(x => x.Start()).Do(cb => this.streamDataDelegate?.Invoke());
+        this.mockTaskService.When(x => x.Start()).Do(cb =>
+        {
+            cb.Should().NotBeNull("it is required for mocking the task service.");
+            this.streamDataDelegate?.Invoke();
+            taskServiceIsRunning = true;
+        });
         this.mockTaskService.IsCancellationRequested.Returns(_ => isCancelRequested);
+        this.mockTaskService.IsRunning.Returns((_) => taskServiceIsRunning);
 
         // Execute the internal read sample data delegate
         this.mockStreamBufferManager.ManageBuffers(
@@ -437,6 +433,7 @@ public class StreamBufferTests
         this.audioCmdSubscription.OnReceive(new AudioCommandData { Command = AudioCommands.EnableLooping, SourceId = SourceId });
 
         // Act
+        sut.Upload();
         sut.Upload();
 
         // Assert
@@ -459,6 +456,9 @@ public class StreamBufferTests
         this.mockAlInvoker.Received(1).SourcePlay(SourceId);
 
         this.mockThreadService.Received(1).Sleep(100);
+
+        this.mockTaskService.Received(1).SetAction(Arg.Any<Action>());
+        this.mockTaskService.Received(1).Start();
     }
 
     [Fact]
@@ -473,11 +473,12 @@ public class StreamBufferTests
         this.mockStreamBufferManager.ToPositionSeconds(Arg.Any<long>(), Arg.Any<float>()).Returns(100f);
         this.mockAudioDecoder.TotalSeconds.Returns(50f);
 
+        this.mockAlInvoker.GetSource(Arg.Any<uint>(), ALSourcef.Pitch).Returns(1f);
         this.mockAlInvoker.GetSourceState(Arg.Any<uint>()).Returns(ALSourceState.Playing);
 
         this.mockTaskService.When(x => x.SetAction(Arg.Any<Action>()))
             .Do(cb => this.streamDataDelegate = cb.Arg<Action>());
-        this.mockTaskService.When(x => x.Start()).Do(cb => this.streamDataDelegate?.Invoke());
+        this.mockTaskService.When(x => x.Start()).Do(_ => this.streamDataDelegate?.Invoke());
         this.mockTaskService.IsCancellationRequested.Returns(_ => isCancelRequested);
 
         // Execute the internal read sample data delegate
@@ -528,14 +529,27 @@ public class StreamBufferTests
         // Arrange
         // This prevents an infinite loop from occurring
         this.mockTaskService.IsCompletedSuccessfully.Returns(true);
+
         var sut = CreateSystemUnderTest();
         sut.Init("test-file.ogg");
 
         // Act
         sut.Dispose();
         sut.Dispose();
+        this.mockDeviceManager.DeviceChanging += Raise.EventWith(sut, EventArgs.Empty);
+        var changingInvoked = sut.GetBoolFieldValue("audioDeviceChanging");
+
+        // Set the private value to true to verify if the changed event has been invoked
+        sut.SetBoolField("audioDeviceChanging", true);
+
+        this.mockDeviceManager.DeviceChanged += Raise.EventWith(sut, EventArgs.Empty);
+
+        var changedInvoked = sut.GetBoolFieldValue("audioDeviceChanging");
 
         // Assert
+        changingInvoked.Should().BeFalse("the device changing event should not have been invoked.");
+        changedInvoked.Should().BeTrue("the device changed event should not have been invoked.");
+
         this.mockTaskService.Received(1).Cancel();
         this.mockTaskService.Received(1).Dispose();
         this.mockAudioCmdUnsubscriber.Received(1).Dispose();
@@ -543,12 +557,11 @@ public class StreamBufferTests
         this.mockLoopingUnsubscriber.Received(1).Dispose();
         this.mockAudioDecoder.Received(1).Dispose();
         this.mockAlInvoker.Received(1).SourceStop(SourceId);
-        this.mockAlInvoker.Received(4).Source(SourceId, ALSourcei.Buffer, 0);
+        this.mockAlInvoker.Received(1).Source(SourceId, ALSourcei.Buffer, 0);
         this.mockAlInvoker.Received(1).DeleteBuffer(this.bufferIds[0]);
         this.mockAlInvoker.Received(1).DeleteBuffer(this.bufferIds[1]);
         this.mockAlInvoker.Received(1).DeleteBuffer(this.bufferIds[2]);
         this.mockAlInvoker.Received(1).DeleteBuffer(this.bufferIds[3]);
-        this.mockDeviceManager.Received(1).RemoveSoundSource(SourceId);
     }
     #endregion
 
@@ -599,7 +612,9 @@ public class StreamBufferTests
         };
 
         this.mockPath.GetExtension(Arg.Any<string>()).Returns(".mp3");
-        this.mockDeviceManager.InitSound(Arg.Any<int>()).Returns((SourceId, this.bufferIds));
+
+        // this.mockDeviceManager.InitSound(Arg.Any<int>()).Returns((SourceId, this.bufferIds));
+
         this.mockAudioDecoder.Format.Returns(ALFormat.StereoFloat32Ext);
         this.mockAudioDecoder.SampleRate.Returns(41_000);
         this.mockAudioDecoder.TotalChannels.Returns(2);
@@ -636,7 +651,9 @@ public class StreamBufferTests
         };
 
         this.mockPath.GetExtension(Arg.Any<string>()).Returns(".ogg");
-        this.mockDeviceManager.InitSound(Arg.Any<int>()).Returns((SourceId, this.bufferIds));
+
+        // this.mockDeviceManager.InitSound(Arg.Any<int>()).Returns((SourceId, this.bufferIds));
+
         this.mockAudioDecoder.Format.Returns(ALFormat.StereoFloat32Ext);
         this.mockAudioDecoder.SampleRate.Returns(41_000);
         this.mockAudioDecoder.TotalChannels.Returns(2);
@@ -726,7 +743,7 @@ public class StreamBufferTests
         this.mockAudioDecoder.TotalSamples.Returns(100);
         this.mockAudioDecoder.TotalChannels.Returns(2);
 
-        var sut = CreateSystemUnderTest();
+        _ = CreateSystemUnderTest();
 
         // Act
         this.posCmdSubscription.OnReceive(new PosCommandData { SourceId = 710u, PositionSeconds = 379f });

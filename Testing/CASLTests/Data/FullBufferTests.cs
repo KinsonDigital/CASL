@@ -41,10 +41,7 @@ public class FullBufferTests
     private readonly IDisposable mockAudioCmdUnsubscriber;
     private readonly IDisposable mockPosCmdUnsubscriber;
     private readonly IDisposable mockLoopingUnsubscriber;
-    private readonly uint[] buffers =
-    [
-        100u
-    ];
+    private readonly uint bufferId = 100u;
     private IReceiveSubscription<AudioCommandData> audioCmdSubscription;
     private IReceiveSubscription<PosCommandData> posCmdSubscription;
     private IRespondSubscription<bool> loopSubscription;
@@ -55,9 +52,10 @@ public class FullBufferTests
     public FullBufferTests()
     {
         this.mockAlInvoker = Substitute.For<IOpenALInvoker>();
+        this.mockAlInvoker.GenSource().Returns(SourceId);
+        this.mockAlInvoker.GenBuffer().Returns(this.bufferId);
 
         this.mockDeviceManager = Substitute.For<IAudioDeviceManager>();
-        this.mockDeviceManager.InitSound(Arg.Any<int>()).Returns((SourceId, this.buffers));
 
         this.mockAudioDecoder = Substitute.For<IAudioDecoder>();
 
@@ -350,16 +348,12 @@ public class FullBufferTests
         var sut = CreateSystemUnderTest();
 
         // Act
-        var actualFirstInvoke = sut.Init(filePath);
-        var actualSecondInvoke = sut.Init(filePath);
+        var actualSrcId = sut.Init(filePath);
 
         // Assert
-        actualFirstInvoke.Should().Be(SourceId);
-        actualSecondInvoke.Should().Be(SourceId);
+        actualSrcId.Should().Be(SourceId);
         this.mockPath.Received(1).GetExtension(filePath);
         this.mockDeviceManager.Received(isInitialized ? 0 : 1).InitDevice();
-        this.mockDeviceManager.Received(1).InitSound(1);
-        this.mockDeviceManager.Received(1).UpdateSoundSource(expectedSoundSrc);
     }
 
     [Fact]
@@ -401,7 +395,6 @@ public class FullBufferTests
         var bufferData = new[] { 10f, 20f, 30f };
 
         this.mockPath.GetExtension(Arg.Any<string>()).Returns(".ogg");
-        this.mockDeviceManager.InitSound(Arg.Any<int>()).Returns((SourceId, this.buffers));
         this.mockAudioDecoder.GetSampleData<float>().Returns(bufferData);
         this.mockAudioDecoder.SampleRate.Returns(41000);
         this.mockAudioDecoder.Format.Returns(ALFormat.StereoFloat32Ext);
@@ -416,8 +409,8 @@ public class FullBufferTests
         this.mockAudioDecoder.Received(1).ReadAllSamples();
         this.mockAudioDecoder.Received(1).GetSampleData<float>();
         this.mockAudioDecoder.DidNotReceive().GetSampleData<byte>();
-        this.mockAlInvoker.Received(1).BufferData(this.buffers[0], ALFormat.StereoFloat32Ext, bufferData, 41000);
-        this.mockAlInvoker.Received(1).Source(SourceId, ALSourcei.Buffer, (int)this.buffers[0]);
+        this.mockAlInvoker.Received(1).BufferData(this.bufferId, ALFormat.StereoFloat32Ext, bufferData, 41000);
+        this.mockAlInvoker.Received(1).Source(SourceId, ALSourcei.Buffer, (int)this.bufferId);
     }
 
     [Fact]
@@ -430,7 +423,6 @@ public class FullBufferTests
         ];
 
         this.mockPath.GetExtension(Arg.Any<string>()).Returns(".mp3");
-        this.mockDeviceManager.InitSound(Arg.Any<int>()).Returns((SourceId, this.buffers));
         this.mockAudioDecoder.GetSampleData<byte>().Returns(bufferData);
         this.mockAudioDecoder.SampleRate.Returns(25000);
         this.mockAudioDecoder.Format.Returns(ALFormat.Stereo16);
@@ -445,8 +437,8 @@ public class FullBufferTests
         this.mockAudioDecoder.Received(1).ReadAllSamples();
         this.mockAudioDecoder.Received(1).GetSampleData<byte>();
         this.mockAudioDecoder.DidNotReceive().GetSampleData<float>();
-        this.mockAlInvoker.Received(1).BufferData(this.buffers[0], ALFormat.Stereo16, bufferData, 25000);
-        this.mockAlInvoker.Received(1).Source(SourceId, ALSourcei.Buffer, (int)this.buffers[0]);
+        this.mockAlInvoker.Received(1).BufferData(this.bufferId, ALFormat.Stereo16, bufferData, 25000);
+        this.mockAlInvoker.Received(1).Source(SourceId, ALSourcei.Buffer, (int)this.bufferId);
     }
 
     [Fact]
@@ -466,10 +458,8 @@ public class FullBufferTests
         this.mockPosCmdUnsubscriber.Received(1).Dispose();
         this.mockLoopingUnsubscriber.Received(1).Dispose();
         this.mockAudioDecoder.Received(1).Dispose();
-        this.mockAlInvoker.Received(1).SourceStop(SourceId);
         this.mockAlInvoker.Received(1).Source(SourceId, ALSourcei.Buffer, 0);
-        this.mockAlInvoker.Received(1).DeleteBuffer(this.buffers[0]);
-        this.mockDeviceManager.Received(1).RemoveSoundSource(SourceId);
+        this.mockAlInvoker.Received(1).DeleteBuffer(this.bufferId);
     }
     #endregion
 

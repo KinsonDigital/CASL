@@ -37,4 +37,9 @@ internal interface IAudioBuffer : IDisposable
     /// Uploads the audio data to the audio hardware.
     /// </summary>
     void Upload();
+
+    /// <summary>
+    /// Removes the buffer from the audio hardware.
+    /// </summary>
+    void RemoveBuffer();
 }

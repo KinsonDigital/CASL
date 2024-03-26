@@ -38,7 +38,6 @@ internal sealed class StreamBuffer : IAudioBuffer
     private bool isInitialized;
     private bool isDisposed;
     private bool audioDeviceChanging;
-    private string filePath;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="StreamBuffer"/> class.
@@ -77,25 +76,6 @@ internal sealed class StreamBuffer : IAudioBuffer
         IPath path,
         IFile file)
     {
-        /*
-         * Device change issues:
-         *
-         * There is an issue with changing the audio device with stream buffers.  When change devices,
-         * the old source id's and cache in the AudioDeviceManager are cleared. This means that the source ids
-         * need to be recreated but are not.  Also the source id is not being updated in the StreamBuffer.
-         *
-         * One problem is that the Sound class is attempting to perform openal calls on the old source id
-         * which is causing the failures.  We need to figure out a way to handle this.
-         *
-         * One problem is there can be any amount of Sound instances with each have its own buffer instance.
-         * This means there is a lot of updates to perform.  One idea is to refactor the Init() methods
-         * in both the Full and Stream buffers to easily handle the regeneration of the source ids.
-         *
-         * These Init() methods already do all of the id requests to the device manager for this.  We just need
-         * to 'reinitialize' but buffers from scratch like normal but the current implementations might not
-         * be set up for reuse.  They are currently set up to only be invoked once and never again.
-         */
-
         ArgumentNullException.ThrowIfNull(alInvoker);
         ArgumentNullException.ThrowIfNull(audioDeviceManager);
         ArgumentNullException.ThrowIfNull(audioDecoder);
@@ -141,18 +121,6 @@ internal sealed class StreamBuffer : IAudioBuffer
         this.audioDeviceManager.DeviceChanged += DeviceChanged;
     }
 
-    private void DeviceChanging(object? sender, EventArgs e)
-    {
-        this.audioDeviceChanging = true;
-    }
-
-    private void DeviceChanged(object? sender, EventArgs e)
-    {
-        this.audioDeviceChanging = false;
-
-        var newSrcId = Init(this.filePath);
-    }
-
     /// <summary>
     /// Finalizes an instance of the <see cref="StreamBuffer"/> class.
     /// </summary>
@@ -191,13 +159,6 @@ internal sealed class StreamBuffer : IAudioBuffer
     {
         ArgumentException.ThrowIfNullOrEmpty(filePath);
 
-        this.filePath = filePath;
-
-        if (this.isInitialized)
-        {
-            return this.srcId;
-        }
-
         if (!this.file.Exists(filePath))
         {
             throw new FileNotFoundException($"The audio file could not be found.", filePath);
@@ -220,18 +181,13 @@ internal sealed class StreamBuffer : IAudioBuffer
             _ => throw new ArgumentException(exMsg, nameof(filePath)),
         };
 
-        (this.srcId, var bufferedIds) = this.audioDeviceManager.InitSound(TotalDataBuffers);
+        this.srcId = this.alInvoker.GenSource();
+        var newBufferIds = this.alInvoker.GenBuffers(TotalDataBuffers);
 
-        for (var i = 0; i < bufferedIds.Length; i++)
+        for (var i = 0; i < newBufferIds.Length; i++)
         {
-            this.bufferIds[i] = bufferedIds[i];
+            this.bufferIds[i] = newBufferIds[i];
         }
-
-        SoundSource soundSrc;
-        soundSrc.SourceId = this.srcId;
-        soundSrc.TotalSeconds = TotalSeconds;
-
-        this.audioDeviceManager.UpdateSoundSource(soundSrc);
 
         this.isInitialized = true;
 
@@ -252,8 +208,24 @@ internal sealed class StreamBuffer : IAudioBuffer
 
         FillBuffersFromStart();
 
+        if (this.taskService.IsRunning)
+        {
+            return;
+        }
+
         this.taskService.SetAction(StreamData);
         this.taskService.Start();
+    }
+
+    /// <inheritdoc/>
+    public void RemoveBuffer()
+    {
+        this.alInvoker.Source(this.srcId, ALSourcei.Buffer, 0);
+
+        foreach (var bufferId in this.bufferIds)
+        {
+            this.alInvoker.DeleteBuffer(bufferId);
+        }
     }
 
     /// <inheritdoc/>
@@ -274,6 +246,9 @@ internal sealed class StreamBuffer : IAudioBuffer
 
         if (disposing)
         {
+            this.audioDeviceManager.DeviceChanging -= DeviceChanging;
+            this.audioDeviceManager.DeviceChanged -= DeviceChanged;
+
             this.taskService.Cancel();
 
             while (true)
@@ -293,16 +268,20 @@ internal sealed class StreamBuffer : IAudioBuffer
         }
 
         this.alInvoker.SourceStop(this.srcId);
-        foreach (var bufferId in this.bufferIds)
-        {
-            this.alInvoker.Source(this.srcId, ALSourcei.Buffer, 0);
-            this.alInvoker.DeleteBuffer(bufferId);
-        }
-
-        this.audioDeviceManager.RemoveSoundSource(this.srcId);
+        RemoveBuffer();
 
         this.isDisposed = true;
     }
+
+    /// <summary>
+    /// Puts the buffer into a state of changing audio devices.
+    /// </summary>
+    private void DeviceChanging(object? sender, EventArgs e) => this.audioDeviceChanging = true;
+
+    /// <summary>
+    /// Puts the buffer into a state of not changing audio devices.
+    /// </summary>
+    private void DeviceChanged(object? sender, EventArgs e) => this.audioDeviceChanging = false;
 
     /// <summary>
     /// Processes audio commands.
@@ -449,10 +428,17 @@ internal sealed class StreamBuffer : IAudioBuffer
                     break;
             }
 
+            var playSpeed = this.alInvoker.GetSource(this.srcId, ALSourcef.Pitch);
+
+            // Adjust the time to sleep based on the play speed.
+            // The faster the play speed, the more often buffer attempts need to be made,
+            // which means we need to sleep less to make sure we keep up.
+            var sleepTime = playSpeed.MapValue(1f, 2f, 100, 0);
+
             // Sleep for a bit to avoid unnecessary CPU usage
             // NOTE: This made a difference of 0.3% to over 25% CPU when using
             // Thread.Sleep() vs Task.Delay().  Task.Delay() is not efficient for this use case.
-            this.threadService.Sleep(100);
+            this.threadService.Sleep(sleepTime);
         }
     }
 
