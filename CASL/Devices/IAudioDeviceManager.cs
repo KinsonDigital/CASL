@@ -34,12 +34,6 @@ internal interface IAudioDeviceManager : IDisposable
     string DeviceInUse { get; }
 
     /// <summary>
-    /// Gets a list of the current sound sources.
-    /// </summary>
-    /// <returns>The list of sound sources.</returns>
-    ImmutableArray<SoundSource> GetSoundSources();
-
-    /// <summary>
     /// Gets the list of audio devices in the system.
     /// </summary>
     /// <returns>The list of devices.</returns>
@@ -53,20 +47,6 @@ internal interface IAudioDeviceManager : IDisposable
     void InitDevice(string? name = null);
 
     /// <summary>
-    /// Initializes a sound and returns a relative sound source and buffer id.
-    /// </summary>
-    /// <param name="totalBuffers">The total number of buffers to create.</param>
-    /// <returns>
-    ///     srcId: The OpenAL source id.
-    ///     bufferId: The OpenAL id of the sound buffer.
-    /// </returns>
-    /// <exception cref="AudioDeviceManagerNotInitializedException">
-    ///     Occurs if this method is executed without initializing the <see cref="InitDevice"/>() method.
-    ///     This can be done by invoking the <see cref="InitDevice(string?)"/>.
-    /// </exception>
-    (uint srcId, uint[] bufferIds) InitSound(int totalBuffers);
-
-    /// <summary>
     /// Changes the audio device that matches the given <paramref name="name"/>.
     /// </summary>
     /// <param name="name">The name of the audio device to change to.</param>
@@ -78,19 +58,4 @@ internal interface IAudioDeviceManager : IDisposable
     ///     Occurs if attempting to change to a device that does not exist on the system.
     /// </exception>
     void ChangeDevice(string name);
-
-    /// <summary>
-    /// Updates the sound source using the given <paramref name="soundSrc"/>.
-    /// </summary>
-    /// <param name="soundSrc">The OpenAL source id.</param>
-    /// <remarks>
-    ///     The sound source is found using the given params <see cref="SoundSource.SourceId"/> value.
-    /// </remarks>
-    void UpdateSoundSource(SoundSource soundSrc);
-
-    /// <summary>
-    /// Removes a sound source with the given source ID.
-    /// </summary>
-    /// <param name="sourceId">The ID of the source to delete.</param>
-    void RemoveSoundSource(uint sourceId);
 }
