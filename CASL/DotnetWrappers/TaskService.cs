@@ -30,6 +30,9 @@ internal sealed class TaskService : ITaskService
     public bool IsCancellationRequested => this.tokenSrc.IsCancellationRequested;
 
     /// <inheritdoc/>
+    public bool IsRunning => this.internalTask?.Status == TaskStatus.Running;
+
+    /// <inheritdoc/>
     public void SetAction(Action action) => this.internalTask = new Task(action, this.tokenSrc.Token);
 
     /// <inheritdoc/>

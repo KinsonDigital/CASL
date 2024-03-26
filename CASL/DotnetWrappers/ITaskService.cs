@@ -35,6 +35,11 @@ internal interface ITaskService : IDisposable
     bool IsCancellationRequested { get; }
 
     /// <summary>
+    /// Gets a value indicating whether if the task is currently running.
+    /// </summary>
+    bool IsRunning { get; }
+
+    /// <summary>
     /// Sets the delegate of type <see cref="Action"/> to be executed on another thread
     /// once the <see cref="Start"/>() method has been invoked.
     /// </summary>
