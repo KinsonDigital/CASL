@@ -73,7 +73,7 @@ public class ExtensionMethodTests
     }
 
     [Fact]
-    public void MapValue_WhenMappingFloatValue_ReturnsCorrectResult()
+    public void MapValue_WhenMappingFloatValueToLongValue_ReturnsCorrectResult()
     {
         // Arrange
         const float value = 123f;
@@ -86,7 +86,20 @@ public class ExtensionMethodTests
     }
 
     [Fact]
-    public void MapValue_WhenMappingLongValue_ReturnsCorrectResult()
+    public void MapValue_WhenMappingFloatValueToIntValue_ReturnsCorrectResult()
+    {
+        // Arrange
+        const float value = 123f;
+
+        // Act
+        var actual = value.MapValue(0f, 200f, 0, 1000);
+
+        // Assert
+        actual.Should().Be(615);
+    }
+
+    [Fact]
+    public void MapValue_WhenMappingLongValueToFloatValue_ReturnsCorrectResult()
     {
         // Arrange
         const long value = 123L;

@@ -173,6 +173,18 @@ internal static class ExtensionMethods
     /// <param name="toStart">The to starting range value.</param>
     /// <param name="toStop">The to ending range value.</param>
     /// <returns>A value that has been mapped to a range between <paramref name="toStart"/> and <paramref name="toStop"/>.</returns>
+    public static int MapValue(this float value, float fromStart, float fromStop, int toStart, int toStop)
+        => (int)(toStart + ((toStop - toStart) * ((value - fromStart) / (fromStop - fromStart))));
+
+    /// <summary>
+    /// Maps the given <paramref name="value"/> from one range to another.
+    /// </summary>
+    /// <param name="value">The value to map.</param>
+    /// <param name="fromStart">The from starting range value.</param>
+    /// <param name="fromStop">The from ending range value.</param>
+    /// <param name="toStart">The to starting range value.</param>
+    /// <param name="toStop">The to ending range value.</param>
+    /// <returns>A value that has been mapped to a range between <paramref name="toStart"/> and <paramref name="toStop"/>.</returns>
     public static long MapValue(this float value, float fromStart, float fromStop, long toStart, long toStop)
         => (long)(toStart + ((toStop - toStart) * ((value - fromStart) / (fromStop - fromStart))));
 
