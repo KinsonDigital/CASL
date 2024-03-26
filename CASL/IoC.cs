@@ -4,6 +4,7 @@
 
 namespace CASL;
 
+using System;
 using System.Diagnostics.CodeAnalysis;
 using System.IO.Abstractions;
 using Carbonate.OneWay;
@@ -26,6 +27,8 @@ internal static class IoC
     private static readonly FileSystem FileSystem = new ();
     private static readonly Container IoCContainer = new ();
     private static bool isInitialized;
+    private static bool unloadSetup;
+    private static IAssembly? assembly;
 
     /// <summary>
     /// Gets the inversion of control container used to get instances of objects.
@@ -37,6 +40,13 @@ internal static class IoC
             if (!isInitialized)
             {
                 SetupContainer();
+            }
+
+            if (!unloadSetup)
+            {
+                unloadSetup = true;
+                assembly = IoCContainer.GetInstance<IAssembly>();
+                assembly.Unloading += AssemblyOnUnloading;
             }
 
             return IoCContainer;
@@ -52,6 +62,7 @@ internal static class IoC
         IoCContainer.Register(() => FileSystem.Directory, Lifestyle.Singleton);
         IoCContainer.Register(() => FileSystem.Path, Lifestyle.Singleton);
 
+        IoCContainer.Register<IAssembly, Assembly>(Lifestyle.Singleton);
         IoCContainer.Register<ITaskService, TaskService>(true);
         IoCContainer.Register<IThreadService, ThreadService>(Lifestyle.Singleton);
         IoCContainer.Register<IApplication, Application>(Lifestyle.Singleton);
@@ -91,5 +102,19 @@ internal static class IoC
         IoCContainer.Register<IPushReactable<AudioCommandData>, PushReactable<AudioCommandData>>(Lifestyle.Singleton);
         IoCContainer.Register<IPushReactable<PosCommandData>, PushReactable<PosCommandData>>(Lifestyle.Singleton);
         IoCContainer.Register<IPullReactable<bool>, PullReactable<bool>>(Lifestyle.Singleton);
+    }
+
+    /// <summary>
+    /// Invoked during the unloading process of the assembly.
+    /// </summary>
+    private static void AssemblyOnUnloading()
+    {
+        ArgumentNullException.ThrowIfNull(assembly);
+
+        assembly.Unloading -= AssemblyOnUnloading;
+
+        // Clean up by using OpenAL operations to destroy the device context and device
+        var audioDeviceManager = IoCContainer.GetInstance<IAudioDeviceManager>();
+        audioDeviceManager.Dispose();
     }
 }
