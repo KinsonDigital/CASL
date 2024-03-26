@@ -6,6 +6,7 @@ namespace CASL.OpenAL;
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 
 /// <summary>
@@ -415,7 +416,12 @@ internal class OpenALInvoker : IOpenALInvoker
 
         if (error != AlcError.NoError)
         {
-            this.ErrorCallback?.Invoke(string.IsNullOrEmpty(errorMessage) ? "OpenAL" : errorMessage);
+            var stackTrace = new StackTrace(true).ToString();
+
+            var completeErrorMsg = string.IsNullOrEmpty(errorMessage) ? "OpenAL" : errorMessage;
+            completeErrorMsg += $"\n{stackTrace}";
+
+            this.ErrorCallback?.Invoke(completeErrorMsg);
         }
 #endif
     }
