@@ -30,7 +30,6 @@ internal class AL
     private readonly ALGetBufferInt alGetBufferInt;
     private readonly ALBufferData alBufferData;
     private readonly ALSourceInt alSourceInt;
-    private readonly ALSourceBool alSourceBool;
     private readonly ALSourceFloat alSourceFloat;
     private readonly ALSourceQueueBuffers alSourceQueueBuffers;
     private readonly ALSourceUnqueueBuffers alSourceUnqueueBuffers;
@@ -64,7 +63,6 @@ internal class AL
         this.alGetBufferInt = delegateFactory.CreateDelegate<ALGetBufferInt>(libraryPointer, "alGetBufferi");
         this.alBufferData = delegateFactory.CreateDelegate<ALBufferData>(libraryPointer, nameof(this.alBufferData));
         this.alSourceInt = delegateFactory.CreateDelegate<ALSourceInt>(libraryPointer, "alSourcei");
-        this.alSourceBool = delegateFactory.CreateDelegate<ALSourceBool>(libraryPointer, "alSourcei");
         this.alSourceQueueBuffers = delegateFactory.CreateDelegate<ALSourceQueueBuffers>(libraryPointer, nameof(this.alSourceQueueBuffers));
         this.alSourceUnqueueBuffers = delegateFactory.CreateDelegate<ALSourceUnqueueBuffers>(libraryPointer, nameof(this.alSourceUnqueueBuffers));
         this.alSourceFloat = delegateFactory.CreateDelegate<ALSourceFloat>(libraryPointer, "alSourcef");
@@ -104,9 +102,24 @@ internal class AL
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     private delegate void ALSourceInt(uint source, ALSourcei param, int value);
 
-    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    private delegate void ALSourceBool(uint source, ALSourceb param, bool value);
-
+    /// <summary>
+    /// Sets an floating point property of a source.
+    /// </summary>
+    /// <param name="source">Source name whose attribute is being set.</param>
+    /// <param name="param">The name of the attribute to set.</param>
+    /// <param name="value">The value to set the attribute to.</param>
+    /// <remarks>
+    /// Requires OpenAL 1.0 or higher.
+    /// <br/>
+    /// Possible Errors:
+    ///     <list type="bullet">
+    ///         <item><see cref="ALError.InvalidValue"/></item>
+    ///         <item><see cref="ALError.InvalidEnum"/></item>
+    ///         <item><see cref="ALError.InvalidName"/></item>
+    ///         <item><see cref="ALError.InvalidOperation"/></item>
+    ///     </list>
+    /// </remarks>
+    /// <seealso cref="ALGetSourceFloat"/>
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     private delegate void ALSourceFloat(uint source, ALSourcef param, float value);
 
@@ -244,7 +257,7 @@ internal class AL
     /// <param name="source">Source name whose attribute is being set.</param>
     /// <param name="param">The name of the attribute to set: ALSourceb.SourceRelative, Looping.</param>
     /// <param name="value">The value to set the attribute to.</param>
-    public void Source(uint source, ALSourceb param, bool value) => this.alSourceBool(source, param, value);
+    public void Source(uint source, ALSourceb param, bool value) => this.alSourceInt(source, (ALSourcei)param, value ? 1 : 0);
 
     /// <summary>
     /// This function sets a floating-point property of a source.
