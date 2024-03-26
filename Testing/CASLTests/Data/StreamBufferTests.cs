@@ -613,8 +613,6 @@ public class StreamBufferTests
 
         this.mockPath.GetExtension(Arg.Any<string>()).Returns(".mp3");
 
-        // this.mockDeviceManager.InitSound(Arg.Any<int>()).Returns((SourceId, this.bufferIds));
-
         this.mockAudioDecoder.Format.Returns(ALFormat.StereoFloat32Ext);
         this.mockAudioDecoder.SampleRate.Returns(41_000);
         this.mockAudioDecoder.TotalChannels.Returns(2);
@@ -651,8 +649,6 @@ public class StreamBufferTests
         };
 
         this.mockPath.GetExtension(Arg.Any<string>()).Returns(".ogg");
-
-        // this.mockDeviceManager.InitSound(Arg.Any<int>()).Returns((SourceId, this.bufferIds));
 
         this.mockAudioDecoder.Format.Returns(ALFormat.StereoFloat32Ext);
         this.mockAudioDecoder.SampleRate.Returns(41_000);

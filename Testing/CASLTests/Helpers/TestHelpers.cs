@@ -9,7 +9,6 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using FluentAssertions;
-using FluentAssertions.Primitives;
 using FluentAssertions.Specialized;
 
 /// <summary>

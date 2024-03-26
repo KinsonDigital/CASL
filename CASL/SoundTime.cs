@@ -4,18 +4,24 @@
 
 namespace CASL;
 
+using System.Diagnostics.CodeAnalysis;
+
 /// <summary>
 /// Represents a time value of a sound.
 /// </summary>
 /// <remarks>
 ///     This could represent the current position or the length of a sound.
 /// </remarks>
-public struct SoundTime
+public readonly record struct SoundTime
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="SoundTime"/> struct.
     /// </summary>
     /// <param name="totalSeconds">The total number of seconds of the time.</param>
+    [SuppressMessage(
+        "StyleCop.CSharp.DocumentationRules",
+        "SA1642:Constructor summary documentation should begin with standard text",
+        Justification = "The standard text is a struct, not a class.")]
     public SoundTime(float totalSeconds)
     {
         Milliseconds = totalSeconds * 1000f;
