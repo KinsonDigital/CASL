@@ -51,6 +51,11 @@ public interface ISound : IDisposable
     SoundState State { get; }
 
     /// <summary>
+    /// Gets the type of buffer.
+    /// </summary>
+    BufferType BufferType { get; }
+
+    /// <summary>
     /// Gets or sets the play speed to the given value.
     /// </summary>
     /// <param name="value">The speed that the sound should play at.</param>
@@ -72,13 +77,7 @@ public interface ISound : IDisposable
     void Pause();
 
     /// <summary>
-    /// Stops the sound.
-    /// </summary>
-    /// <remarks>This will set the time position back to the beginning.</remarks>
-    void Stop();
-
-    /// <summary>
-    /// Resets the sound.
+    /// Stops the audio playback and resets back to the beginning.
     /// </summary>
     /// <remarks>
     ///     This will stop the sound and set the time position back to the beginning.

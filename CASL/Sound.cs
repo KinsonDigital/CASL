@@ -1,99 +1,66 @@
-// <copyright file="Sound.cs" company="KinsonDigital">
+﻿// <copyright file="Sound.cs" company="KinsonDigital">
 // Copyright (c) KinsonDigital. All rights reserved.
 // </copyright>
 
 namespace CASL;
 
 using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.IO.Abstractions;
-using System.Linq;
+using Carbonate.OneWay;
 using Data;
-using CASL.Data.Exceptions;
 using Devices;
-using Devices.Factories;
 using Exceptions;
 using Factories;
 using OpenAL;
+using ReactableData;
 
 /// <summary>
 /// A single sound that can be played, paused etc.
 /// </summary>
 [SuppressMessage("ReSharper", "ClassWithVirtualMembersNeverInherited.Global", Justification = "Users need to inherit.")]
+// TODO: Rename this to Audio
 public class Sound : ISound
 {
     private const char CrossPlatDirSeparatorChar = '/';
     private const string IsDisposedExceptionMessage = "The sound is disposed.  You must create another sound instance.";
     private readonly IAudioDeviceManager audioManager;
-    private readonly IAudioDataStream<float>? oggDataStream;
-    private readonly IAudioDataStream<byte>? mp3DataStream;
+    private readonly IPushReactable<AudioCommandData> audioCommandReactable;
+    private readonly IPushReactable<PosCommandData> posCommandReactable;
+    private readonly IPullReactable<bool> loopingReactable;
     private readonly IOpenALInvoker alInvoker;
+    private readonly IAudioBuffer audioBuffer;
     private readonly IPath path;
     private uint srcId;
-    private uint bufferId;
-    private bool ignoreOpenALCalls;
     private bool isDisposed;
-    private float totalSeconds;
+    private bool audioDeviceChanging;
+    private SoundTime posBeforeDeviceChange;
+    private ALSourceState stateBeforeDeviceChange;
+    private float volumeBeforeDeviceChange = -1;
+    private float playSpeedBeforeDeviceChange;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="Sound"/> class.
     /// </summary>
     /// <param name="filePath">The path to the sound file.</param>
-    [ExcludeFromCodeCoverage]
-    public Sound(string filePath)
+    /// <param name="bufferType">The type of audio buffer used.</param>
+    /// <remarks>
+    ///     Using <see cref="CASL.BufferType"/>.<see cref="CASL.BufferType.Full"/> means all of the audio data will be loaded into memory.
+    ///     This is fine for small audio files like sound effects.  Large audio files will consume more memory and take longer to load.
+    ///     <para/>
+    ///     Using <see cref="CASL.BufferType"/>.<see cref="CASL.BufferType.Stream"/> means all of the audio data will be loaded/streamed into
+    ///     This is better for larger audio files like music. It will consume less memory and much better for performances from a loading perspective.
+    ///     in chunks as needed memory.
+    /// </remarks>
+    /// <exception cref="ArgumentException">Thrown if the <paramref name="filePath"/> is null or empty.</exception>
+    /// <exception cref="InvalidEnumArgumentException">Thrown if the <paramref name="bufferType"/> is invalid.</exception>
+    ///
+    [ExcludeFromCodeCoverage(Justification = "Directly interacts with the IoC container.")]
+    public Sound(string filePath, BufferType bufferType)
     {
-        FilePath = filePath.ToCrossPlatPath().TrimAllFromEnd(CrossPlatDirSeparatorChar);
-
-        this.alInvoker = IoC.Container.GetInstance<IOpenALInvoker>();
-        this.alInvoker.ErrorCallback += ErrorCallback;
-
-        this.audioManager = AudioDeviceManagerFactory.CreateDeviceManager();
-        this.audioManager.DeviceChanging += AudioManager_DeviceChanging;
-        this.audioManager.DeviceChanged += AudioManager_DeviceChanged;
-        this.path = IoC.Container.GetInstance<IPath>();
-
-        var extension = this.path.GetExtension(FilePath).ToLower();
-        var dataStreamFactory = IoC.Container.GetInstance<IAudioDataStreamFactory>();
-
-        switch (extension)
-        {
-            case ".ogg":
-                this.oggDataStream = dataStreamFactory.CreateOggAudioStream(FilePath);
-                break;
-            case ".mp3":
-                this.mp3DataStream = dataStreamFactory.CreateMp3AudioStream(FilePath);
-                break;
-        }
-
-        Init();
-    }
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="Sound"/> class.
-    /// </summary>
-    /// <param name="filePath">The path to the sound file.</param>
-    /// <param name="alInvoker">Provides access to OpenAL.</param>
-    /// <param name="audioManager">Manages audio related operations.</param>
-    /// <param name="dataStreamFactory">Creates audio data streams.</param>
-    /// <param name="path">Manages file paths.</param>
-    /// <param name="file">Performs operations with files.</param>
-    internal Sound(
-        string filePath,
-        IOpenALInvoker alInvoker,
-        IAudioDeviceManager audioManager,
-        IAudioDataStreamFactory dataStreamFactory,
-        IPath path,
-        IFile file)
-    {
-        ArgumentException.ThrowIfNullOrEmpty(filePath);
-        ArgumentNullException.ThrowIfNull(alInvoker);
-        ArgumentNullException.ThrowIfNull(audioManager);
-        ArgumentNullException.ThrowIfNull(dataStreamFactory);
-        ArgumentNullException.ThrowIfNull(path);
-        ArgumentNullException.ThrowIfNull(file);
+        var file = IoC.Container.GetInstance<IFile>();
 
         if (!file.Exists(filePath))
         {
@@ -102,20 +69,104 @@ public class Sound : ISound
 
         FilePath = filePath.ToCrossPlatPath().TrimAllFromEnd(CrossPlatDirSeparatorChar);
 
+        this.alInvoker = IoC.Container.GetInstance<IOpenALInvoker>();
+        this.alInvoker.ErrorCallback += ErrorCallback;
+
+        this.audioManager = IoC.Container.GetInstance<IAudioDeviceManager>();
+        this.audioManager.DeviceChanging += AudioManager_DeviceChanging;
+        this.audioManager.DeviceChanged += AudioManager_DeviceChanged;
+        this.path = IoC.Container.GetInstance<IPath>();
+
+        var reactableFactory = IoC.Container.GetInstance<IReactableFactory>();
+        this.audioCommandReactable = reactableFactory.CreateAudioCmndReactable();
+        this.posCommandReactable = reactableFactory.CreatePositionCmndReactable();
+        this.loopingReactable = reactableFactory.CreateIsLoopingReactable();
+
+        var bufferFactory = IoC.Container.GetInstance<IAudioBufferFactory>();
+
+        this.audioBuffer = bufferType switch
+        {
+            BufferType.Full => bufferFactory.CreateFullBuffer(filePath),
+            BufferType.Stream => bufferFactory.CreateStreamBuffer(filePath),
+            _ => throw new InvalidEnumArgumentException(nameof(bufferType), (int)bufferType, typeof(BufferType))
+        };
+
+        Init();
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="Sound"/> class.
+    /// </summary>
+    /// <param name="filePath">The path to the sound file.</param>
+    /// <param name="bufferType">The type of audio buffer used.</param>
+    /// <param name="alInvoker">Provides access to OpenAL.</param>
+    /// <param name="audioManager">Manages audio device related operations.</param>
+    /// <param name="reactableFactory">Creates reactables.</param>
+    /// <param name="path">Manages file paths.</param>
+    /// <param name="file">Performs operations with files.</param>
+    /// <param name="bufferFactory">Creates audio buffers.</param>
+    /// <exception cref="ArgumentException">Thrown if the <paramref name="filePath"/> is null or empty.</exception>
+    /// <exception cref="ArgumentNullException">
+    /// Thrown if the following parameters are null:
+    /// <list type="bullet">
+    ///     <item><paramref name="alInvoker"/></item>
+    ///     <item><paramref name="audioManager"/></item>
+    ///     <item><paramref name="bufferFactory"/></item>
+    ///     <item><paramref name="reactableFactory"/></item>
+    ///     <item><paramref name="path"/></item>
+    ///     <item><paramref name="file"/></item>
+    /// </list>
+    /// </exception>
+    [SuppressMessage("csharpsquid", "S107", Justification = "Not part of the public API.")]
+    internal Sound(
+        string filePath,
+        BufferType bufferType,
+        IOpenALInvoker alInvoker,
+        IAudioDeviceManager audioManager,
+        IAudioBufferFactory bufferFactory,
+        IReactableFactory reactableFactory,
+        IPath path,
+        IFile file)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(filePath);
+        ArgumentNullException.ThrowIfNull(alInvoker);
+        ArgumentNullException.ThrowIfNull(audioManager);
+        ArgumentNullException.ThrowIfNull(bufferFactory);
+        ArgumentNullException.ThrowIfNull(reactableFactory);
+        ArgumentNullException.ThrowIfNull(path);
+        ArgumentNullException.ThrowIfNull(file);
+
+        if (!file.Exists(filePath))
+        {
+            throw new FileNotFoundException($"The sound file could not be found.", filePath);
+        }
+
+        var extension = path.GetExtension(filePath).ToLower();
+
+        var exMsg = $"The file extension '{extension}' is not supported.";
+        exMsg += " Supported extensions are '.ogg' and '.mp3'.";
+
+        if (extension != ".ogg" && extension != ".mp3")
+        {
+            throw new AudioException(exMsg);
+        }
+
+        FilePath = filePath.ToCrossPlatPath().TrimAllFromEnd(CrossPlatDirSeparatorChar);
+        BufferType = bufferType;
+
         this.alInvoker = alInvoker;
         this.alInvoker.ErrorCallback += ErrorCallback;
 
-        var extension = path.GetExtension(FilePath).ToLower();
-
-        switch (extension)
+        this.audioBuffer = bufferType switch
         {
-            case ".ogg":
-                this.oggDataStream = dataStreamFactory.CreateOggAudioStream(FilePath);
-                break;
-            case ".mp3":
-                this.mp3DataStream = dataStreamFactory.CreateMp3AudioStream(FilePath);
-                break;
-        }
+            BufferType.Full => bufferFactory.CreateFullBuffer(filePath),
+            BufferType.Stream => bufferFactory.CreateStreamBuffer(filePath),
+            _ => throw new InvalidEnumArgumentException(nameof(bufferType), (int)bufferType, typeof(BufferType))
+        };
+
+        this.audioCommandReactable = reactableFactory.CreateAudioCmndReactable();
+        this.posCommandReactable = reactableFactory.CreatePositionCmndReactable();
+        this.loopingReactable = reactableFactory.CreateIsLoopingReactable();
 
         this.audioManager = audioManager;
         this.path = path;
@@ -126,6 +177,12 @@ public class Sound : ISound
         Init();
     }
 
+    /// <summary>
+    /// Finalizes an instance of the <see cref="Sound"/> class.
+    /// </summary>
+    [ExcludeFromCodeCoverage(Justification = "Finalizers cannot be tested")]
+    ~Sound() => Dispose(false);
+
     /// <inheritdoc/>
     public string Name => this.path.GetFileNameWithoutExtension(FilePath);
 
@@ -133,19 +190,22 @@ public class Sound : ISound
     public string FilePath { get; }
 
     /// <inheritdoc/>
+    /// <exception cref="InvalidOperationException">Thrown if the <see cref="Sound"/> has been disposed.</exception>
     public float Volume
     {
         get
         {
             if (this.isDisposed)
             {
-                throw new InvalidOperationException(IsDisposedExceptionMessage);
+                return 0;
             }
 
-            // Get the current volume between 0.0 and 1.0
-            return this.ignoreOpenALCalls
-                ? 0
-                : this.alInvoker.GetSource(this.srcId, ALSourcef.Gain) * 100f;
+            if (this.audioDeviceChanging)
+            {
+                return this.volumeBeforeDeviceChange;
+            }
+
+            return this.alInvoker.GetSource(this.srcId, ALSourcef.Gain) * 100f;
         }
         set
         {
@@ -154,7 +214,7 @@ public class Sound : ISound
                 throw new InvalidOperationException(IsDisposedExceptionMessage);
             }
 
-            if (this.ignoreOpenALCalls)
+            if (this.audioDeviceChanging)
             {
                 return;
             }
@@ -178,30 +238,34 @@ public class Sound : ISound
         {
             if (this.isDisposed)
             {
-                throw new InvalidOperationException(IsDisposedExceptionMessage);
+                return default;
             }
 
-            var seconds = this.ignoreOpenALCalls ? 0f : this.alInvoker.GetSource(this.srcId, ALSourcef.SecOffset);
-
-            return new SoundTime(seconds);
+            return this.audioDeviceChanging ? this.posBeforeDeviceChange : this.audioBuffer.Position;
         }
     }
 
     /// <inheritdoc/>
-    public SoundTime Length => new (this.totalSeconds);
-
-    /// <inheritdoc/>
-    public bool IsLooping
+    public SoundTime Length
     {
         get
         {
             if (this.isDisposed)
             {
-                throw new InvalidOperationException(IsDisposedExceptionMessage);
+                return default;
             }
 
-            return !this.ignoreOpenALCalls && this.alInvoker.GetSource(this.srcId, ALSourceb.Looping);
+            var length = this.audioDeviceChanging ? 0f : this.audioBuffer.TotalSeconds;
+
+            return new SoundTime(length);
         }
+    }
+
+    /// <inheritdoc/>
+    /// <exception cref="InvalidOperationException">Thrown if the <see cref="Sound"/> has been disposed.</exception>
+    public bool IsLooping
+    {
+        get => !this.audioDeviceChanging && !this.isDisposed && this.loopingReactable.Pull(PullNotifications.GetLoopState);
         set
         {
             if (this.isDisposed)
@@ -209,12 +273,17 @@ public class Sound : ISound
                 throw new InvalidOperationException(IsDisposedExceptionMessage);
             }
 
-            if (this.ignoreOpenALCalls)
+            if (this.audioDeviceChanging)
             {
                 return;
             }
 
-            this.alInvoker.Source(this.srcId, ALSourceb.Looping, value);
+            var state = new AudioCommandData
+            {
+                SourceId = this.srcId,
+                Command = value ? AudioCommands.EnableLooping : AudioCommands.DisableLooping,
+            };
+            this.audioCommandReactable.Push(PushNotifications.SendAudioCmd, state);
         }
     }
 
@@ -223,51 +292,40 @@ public class Sound : ISound
     {
         get
         {
-            if (this.isDisposed)
-            {
-                throw new InvalidOperationException(IsDisposedExceptionMessage);
-            }
-
-            if (this.ignoreOpenALCalls)
+            if (this.audioDeviceChanging || this.isDisposed)
             {
                 return SoundState.Stopped;
             }
-            else
-            {
-                var currentState = this.alInvoker.GetSourceState(this.srcId);
 
-                return currentState switch
-                {
-                    ALSourceState.Playing => SoundState.Playing,
-                    ALSourceState.Paused => SoundState.Paused,
-                    ALSourceState.Stopped => SoundState.Stopped,
-                    ALSourceState.Initial => SoundState.Stopped,
-                    _ => throw new AudioException($"The OpenAL sound state of '{nameof(ALSourceState)}: {(int)currentState}' is not valid."),
-                };
-            }
+            var currentState = this.alInvoker.GetSourceState(this.srcId);
+
+#pragma warning disable CS8524 // The switch expression does not handle some values of its input type (it is not exhaustive) involving an unnamed enum value.
+            return currentState switch
+#pragma warning restore CS8524 // The switch expression does not handle some values of its input type (it is not exhaustive) involving an unnamed enum value.
+            {
+                ALSourceState.Playing => SoundState.Playing,
+                ALSourceState.Paused => SoundState.Paused,
+                ALSourceState.Stopped => SoundState.Stopped,
+                ALSourceState.Initial => SoundState.Stopped,
+            };
         }
     }
 
     /// <inheritdoc/>
+    public BufferType BufferType { get; }
+
+    /// <inheritdoc/>
     public float PlaySpeed
     {
-        get
-        {
-            if (this.isDisposed)
-            {
-                throw new InvalidOperationException(IsDisposedExceptionMessage);
-            }
-
-            return this.ignoreOpenALCalls
+        get => this.audioDeviceChanging || this.isDisposed
                 ? 0f
                 : this.alInvoker.GetSource(this.srcId, ALSourcef.Pitch);
-        }
         set
         {
             value = value < 0f ? 0.25f : value;
             value = value > 2.0f ? 2.0f : value;
 
-            if (this.ignoreOpenALCalls)
+            if (this.audioDeviceChanging)
             {
                 return;
             }
@@ -277,6 +335,7 @@ public class Sound : ISound
     }
 
     /// <inheritdoc/>
+    /// <exception cref="InvalidOperationException">Thrown if the <see cref="Sound"/> has been disposed.</exception>
     public void Play()
     {
         if (this.isDisposed)
@@ -284,20 +343,21 @@ public class Sound : ISound
             throw new InvalidOperationException(IsDisposedExceptionMessage);
         }
 
-        if (State == SoundState.Playing)
+        if (this.audioDeviceChanging)
         {
             return;
         }
 
-        if (this.ignoreOpenALCalls)
+        var cmd = new AudioCommandData
         {
-            return;
-        }
-
-        this.alInvoker.SourcePlay(this.srcId);
+            SourceId = this.srcId,
+            Command = AudioCommands.Play,
+        };
+        this.audioCommandReactable.Push(PushNotifications.SendAudioCmd, cmd);
     }
 
     /// <inheritdoc/>
+    /// <exception cref="InvalidOperationException">Thrown if the <see cref="Sound"/> has been disposed.</exception>
     public void Pause()
     {
         if (this.isDisposed)
@@ -305,31 +365,21 @@ public class Sound : ISound
             throw new InvalidOperationException(IsDisposedExceptionMessage);
         }
 
-        if (this.ignoreOpenALCalls)
+        if (this.audioDeviceChanging)
         {
             return;
         }
 
-        this.alInvoker.SourcePause(this.srcId);
+        var cmd = new AudioCommandData
+        {
+            SourceId = this.srcId,
+            Command = AudioCommands.Pause,
+        };
+        this.audioCommandReactable.Push(PushNotifications.SendAudioCmd, cmd);
     }
 
     /// <inheritdoc/>
-    public void Stop()
-    {
-        if (this.isDisposed)
-        {
-            throw new InvalidOperationException(IsDisposedExceptionMessage);
-        }
-
-        if (this.ignoreOpenALCalls)
-        {
-            return;
-        }
-
-        this.alInvoker.SourceStop(this.srcId);
-    }
-
-    /// <inheritdoc/>
+    /// <exception cref="InvalidOperationException">Thrown if the <see cref="Sound"/> has been disposed.</exception>
     public void Reset()
     {
         if (this.isDisposed)
@@ -337,15 +387,21 @@ public class Sound : ISound
             throw new InvalidOperationException(IsDisposedExceptionMessage);
         }
 
-        if (this.ignoreOpenALCalls)
+        if (this.audioDeviceChanging)
         {
             return;
         }
 
-        this.alInvoker.SourceRewind(this.srcId);
+        var cmd = new AudioCommandData
+        {
+            SourceId = this.srcId,
+            Command = AudioCommands.Reset,
+        };
+        this.audioCommandReactable.Push(PushNotifications.SendAudioCmd, cmd);
     }
 
     /// <inheritdoc/>
+    /// <exception cref="InvalidOperationException">Thrown if the <see cref="Sound"/> has been disposed.</exception>
     public void SetTimePosition(float seconds)
     {
         if (this.isDisposed)
@@ -353,7 +409,7 @@ public class Sound : ISound
             throw new InvalidOperationException(IsDisposedExceptionMessage);
         }
 
-        if (this.ignoreOpenALCalls)
+        if (this.audioDeviceChanging)
         {
             return;
         }
@@ -361,54 +417,22 @@ public class Sound : ISound
         // Prevent negative numbers
         seconds = seconds < 0f ? 0.0f : seconds;
 
+        var isPastEnd = seconds > this.audioBuffer.TotalSeconds;
+
         // Prevent a value past the end of the sound
-        seconds = seconds > this.totalSeconds ? this.totalSeconds : seconds;
+        seconds = isPastEnd ? (float)Math.Floor(this.audioBuffer.TotalSeconds) : seconds;
 
-        this.alInvoker.Source(this.srcId, ALSourcef.SecOffset, seconds);
+        var cmd = new PosCommandData { SourceId = this.srcId, PositionSeconds = seconds };
+        this.posCommandReactable.Push(PushNotifications.UpdateSoundPos, cmd);
     }
 
     /// <inheritdoc/>
-    public void Rewind(float seconds)
-    {
-        if (this.ignoreOpenALCalls)
-        {
-            return;
-        }
-
-        var intendedSeconds = Position.TotalSeconds - seconds;
-
-        // If the request to move backwards will result in
-        // a value less then 0, just set to 0
-        if (intendedSeconds < 0)
-        {
-            Reset();
-            Play();
-            return;
-        }
-
-        SetTimePosition(intendedSeconds);
-    }
+    /// <exception cref="InvalidOperationException">Thrown if the <see cref="Sound"/> has been disposed.</exception>
+    public void Rewind(float seconds) => SetTimePosition(Position.TotalSeconds - seconds);
 
     /// <inheritdoc/>
-    public void FastForward(float seconds)
-    {
-        if (this.ignoreOpenALCalls)
-        {
-            return;
-        }
-
-        var intendedSeconds = Position.TotalSeconds + seconds;
-
-        // If the request to move forward will result in
-        // a value past the end of the sound, just set to the end.
-        if (intendedSeconds > this.totalSeconds)
-        {
-            Reset();
-            return;
-        }
-
-        SetTimePosition(intendedSeconds);
-    }
+    /// <exception cref="InvalidOperationException">Thrown if the <see cref="Sound"/> has been disposed.</exception>
+    public void FastForward(float seconds) => SetTimePosition(Position.TotalSeconds + seconds);
 
     /// <inheritdoc/>
     public void Dispose()
@@ -428,38 +452,24 @@ public class Sound : ISound
             return;
         }
 
+        if (State == SoundState.Playing)
+        {
+            this.alInvoker.SourceStop(this.srcId);
+        }
+
         if (disposing)
         {
-            this.oggDataStream?.Dispose();
-            this.mp3DataStream?.Dispose();
+            this.audioBuffer.Dispose();
+
             this.audioManager.DeviceChanging -= AudioManager_DeviceChanging;
             this.audioManager.DeviceChanged -= AudioManager_DeviceChanged;
         }
 
-        UnloadSound();
-
-        // ReSharper disable HeapView.DelegateAllocation
+        this.alInvoker.DeleteSource(this.srcId);
         this.alInvoker.ErrorCallback -= ErrorCallback;
 
-        // ReSharper restore HeapView.DelegateAllocation
         this.isDisposed = true;
     }
-
-    /// <summary>
-    /// Maps the given audio <paramref name="format"/> to the <see cref="ALFormat"/> type equivalent.
-    /// </summary>
-    /// <param name="format">The format to convert.</param>
-    /// <returns>The <see cref="ALFormat"/> result.</returns>
-    private static ALFormat MapFormat(AudioFormat format) => format switch
-    {
-        AudioFormat.Mono8 => ALFormat.Mono8,
-        AudioFormat.Mono16 => ALFormat.Mono16,
-        AudioFormat.MonoFloat32 => ALFormat.MonoFloat32Ext,
-        AudioFormat.Stereo8 => ALFormat.Stereo8,
-        AudioFormat.Stereo16 => ALFormat.Stereo16,
-        AudioFormat.StereoFloat32 => ALFormat.StereoFloat32Ext,
-        _ => throw new AudioException("Invalid or unknown audio format."),
-    };
 
     /// <summary>
     /// The callback invoked when an OpenAL error occurs.
@@ -473,168 +483,63 @@ public class Sound : ISound
     /// </summary>
     private void Init()
     {
-        if (!this.audioManager.IsInitialized)
-        {
-            this.audioManager.InitDevice();
-        }
-
-        (this.srcId, this.bufferId) = this.audioManager.InitSound();
-
-        var extension = this.path.GetExtension(FilePath);
-
-        SoundSource soundSrc;
-
-        switch (extension)
-        {
-            case ".ogg":
-                ArgumentNullException.ThrowIfNull(this.oggDataStream);
-
-                this.oggDataStream.Flush();
-
-                var oggData = new AudioData<float>
-                {
-                    Format = this.oggDataStream.Format,
-                    Channels = this.oggDataStream.Channels,
-                    SampleRate = this.oggDataStream.SampleRate,
-                };
-
-                var oggDataResult = new List<float>();
-                var oggBuffer = new float[this.oggDataStream.TotalSamples * this.oggDataStream.Channels];
-
-                this.oggDataStream.ReadSamples(oggBuffer);
-                oggDataResult.AddRange(oggBuffer);
-
-                oggData = oggData with { BufferData = new ReadOnlyCollection<float>(oggDataResult) };
-
-                UploadOggData(oggData);
-
-                break;
-            case ".mp3":
-                ArgumentNullException.ThrowIfNull(this.mp3DataStream);
-
-                this.mp3DataStream.Flush();
-
-                var mp3Data = new AudioData<byte>
-                {
-                    SampleRate = this.mp3DataStream.SampleRate,
-                    Channels = this.mp3DataStream.Channels,
-                    Format = this.mp3DataStream.Format,
-                };
-
-                var mp3DataResult = new List<byte>();
-
-                const int bytesPerChunk = 32_768;
-
-                var mp3Buffer = new byte[bytesPerChunk];
-                while (this.mp3DataStream.ReadSamples(mp3Buffer) > 0)
-                {
-                    mp3DataResult.AddRange(mp3Buffer);
-                }
-
-                mp3Data = mp3Data with { BufferData = new ReadOnlyCollection<byte>(mp3DataResult) };
-
-                UploadMp3Data(mp3Data);
-
-                break;
-            default:
-                throw new AudioException($"The file extension '{extension}' is not supported file type.");
-        }
-
-        var sizeInBytes = this.alInvoker.GetBuffer(this.bufferId, ALGetBufferi.Size);
-        var totalChannels = this.alInvoker.GetBuffer(this.bufferId, ALGetBufferi.Channels);
-        var bitDepth = this.alInvoker.GetBuffer(this.bufferId, ALGetBufferi.Bits);
-        var frequency = this.alInvoker.GetBuffer(this.bufferId, ALGetBufferi.Frequency);
-
-        var sampleLen = sizeInBytes * 8 / (totalChannels * bitDepth);
-
-        this.totalSeconds = (float)sampleLen / frequency;
-
-        soundSrc.SourceId = this.srcId;
-        soundSrc.TotalSeconds = this.totalSeconds;
-
-        this.audioManager.UpdateSoundSource(soundSrc);
-
-        this.ignoreOpenALCalls = false;
+        this.srcId = this.audioBuffer.Init(FilePath);
+        this.audioBuffer.Upload();
     }
 
     /// <summary>
-    /// Uploads Ogg audio data to the sound card.
-    /// </summary>
-    /// <param name="data">The ogg related audio data to upload.</param>
-    private void UploadOggData(AudioData<float> data)
-    {
-        if (data.BufferData.Count <= 0)
-        {
-            throw new AudioDataException("No audio data exists.");
-        }
-
-        this.alInvoker.BufferData(
-            this.bufferId,
-            MapFormat(data.Format),
-            data.BufferData.ToArray(),
-            data.SampleRate);
-
-        // Bind the buffer to the source
-        this.alInvoker.Source(this.srcId, ALSourcei.Buffer, (int)this.bufferId);
-    }
-
-    /// <summary>
-    /// Uploads MP3 audio data to the sound card.
-    /// </summary>
-    /// <param name="data">The mp3 related audio data to upload.</param>
-    private void UploadMp3Data(AudioData<byte> data)
-    {
-        if (data.BufferData.Count <= 0)
-        {
-            throw new AudioDataException("No audio data exists.");
-        }
-
-        this.alInvoker.BufferData(
-            this.bufferId,
-            MapFormat(data.Format),
-            data.BufferData.ToArray(),
-            data.SampleRate);
-
-        // Bind the buffer to the source
-        this.alInvoker.Source(this.srcId, ALSourcei.Buffer, (int)this.bufferId);
-    }
-
-    /// <summary>
-    /// Unloads the audio data from the card.
-    /// </summary>
-    private void UnloadSound()
-    {
-        if (this.srcId <= 0)
-        {
-            return;
-        }
-
-        if (this.ignoreOpenALCalls)
-        {
-            return;
-        }
-
-        this.alInvoker.DeleteSource(this.srcId);
-
-        if (this.bufferId != 0)
-        {
-            this.alInvoker.DeleteBuffer(this.bufferId);
-        }
-
-        this.audioManager.RemoveSoundSource(this.srcId);
-    }
-
-    /// <summary>
-    /// Puts the sound into an ignore mode to prevent OpenAL calls from occurring
-    /// during an audio device change.
+    /// Saves various states of the sound to be reapplied after the device has
+    /// been changed.
     /// </summary>
     private void AudioManager_DeviceChanging(object? sender, EventArgs e)
-        => this.ignoreOpenALCalls = true;
+    {
+        this.stateBeforeDeviceChange = this.alInvoker.GetSourceState(this.srcId);
+        this.volumeBeforeDeviceChange = Volume;
+        this.posBeforeDeviceChange = Position;
+        this.playSpeedBeforeDeviceChange = PlaySpeed;
+
+        this.audioDeviceChanging = true;
+
+        if (this.stateBeforeDeviceChange != ALSourceState.Stopped)
+        {
+            this.alInvoker.SourceStop(this.srcId);
+        }
+
+        this.audioBuffer.RemoveBuffer();
+        this.alInvoker.DeleteSource(this.srcId);
+        this.srcId = 0;
+    }
 
     /// <summary>
-    /// Invoked when the audio device has been changed.
+    /// Reapplies the state of the sound after the audio device has been changed.
     /// </summary>
-    /// <param name="sender">The source of the event.</param>
-    /// <param name="e">Contains various event related information.</param>
-    private void AudioManager_DeviceChanged(object? sender, EventArgs e) => Init();
+    private void AudioManager_DeviceChanged(object? sender, EventArgs e)
+    {
+        Init();
+
+        this.audioDeviceChanging = false;
+
+        if (this.volumeBeforeDeviceChange >= 0)
+        {
+            Volume = this.volumeBeforeDeviceChange;
+            this.volumeBeforeDeviceChange = -1;
+        }
+
+        if (this.posBeforeDeviceChange != default)
+        {
+            SetTimePosition(this.posBeforeDeviceChange.TotalSeconds);
+            this.posBeforeDeviceChange = default;
+        }
+
+        if (this.playSpeedBeforeDeviceChange >= 0)
+        {
+            PlaySpeed = this.playSpeedBeforeDeviceChange;
+            this.playSpeedBeforeDeviceChange = -1;
+        }
+
+        if (this.stateBeforeDeviceChange == ALSourceState.Playing)
+        {
+            Play();
+        }
+    }
 }
