@@ -41,22 +41,22 @@ public enum AudioFormat
 }
 
 /// <summary>
-/// The state of a sound.
+/// The state of a audio.
 /// </summary>
 public enum AudioState
 {
     /// <summary>
-    /// The state of a sound when it is playing.
+    /// The state of a audio when it is playing.
     /// </summary>
     Playing = 1,
 
     /// <summary>
-    /// The state of the sound when it is paused.
+    /// The state of the audio when it is paused.
     /// </summary>
     Paused = 2,
 
     /// <summary>
-    /// The state of the sound when it is stopped.
+    /// The state of the audio when it is stopped.
     /// </summary>
     Stopped = 3,
 }

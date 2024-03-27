@@ -1,4 +1,4 @@
-// <copyright file="AudioTests.cs" company="KinsonDigital">
+﻿// <copyright file="AudioTests.cs" company="KinsonDigital">
 // Copyright (c) KinsonDigital. All rights reserved.
 // </copyright>
 
@@ -34,10 +34,10 @@ public class AudioTests
     private const string MP3FileExtension = ".mp3";
     private const uint SrcId = 1234;
     private const uint BufferId = 5678;
-    private const string SoundFileNameWithoutExtension = "sound";
-    private const string BaseDirPath = "C:/temp/Content/Sounds";
-    private const string Mp3ContentFilePath = $"{BaseDirPath}/{SoundFileNameWithoutExtension}{MP3FileExtension}";
-    private const string OggContentFilePath = $"{BaseDirPath}/{SoundFileNameWithoutExtension}{OggFileExtension}";
+    private const string AudioFileNameWithoutExtension = "audio";
+    private const string BaseDirPath = "C:/temp/Content/Audio";
+    private const string Mp3ContentFilePath = $"{BaseDirPath}/{AudioFileNameWithoutExtension}{MP3FileExtension}";
+    private const string OggContentFilePath = $"{BaseDirPath}/{AudioFileNameWithoutExtension}{OggFileExtension}";
     private readonly IAudioDeviceManager mockAudioManager;
     private readonly IOpenALInvoker mockALInvoker;
     private readonly IAudioBufferFactory mockAudioBufferFactory;
@@ -81,7 +81,7 @@ public class AudioTests
         this.mockPath = Substitute.For<IPath>();
         this.mockPath.GetExtension(OggContentFilePath).Returns(OggFileExtension);
         this.mockPath.GetExtension(Mp3ContentFilePath).Returns(MP3FileExtension);
-        this.mockPath.GetFileNameWithoutExtension(Arg.Any<string?>()).Returns(SoundFileNameWithoutExtension);
+        this.mockPath.GetFileNameWithoutExtension(Arg.Any<string?>()).Returns(AudioFileNameWithoutExtension);
 
         this.mockFile = Substitute.For<IFile>();
         this.mockFile.Exists(Arg.Any<string>()).Returns(true);
@@ -241,7 +241,7 @@ public class AudioTests
 
         // Assert
         act.Should().Throw<FileNotFoundException>()
-            .WithMessage("The sound file could not be found.")
+            .WithMessage("The audio file could not be found.")
             .Subject.First().FileName.Should().Be("non-existing-file.data");
     }
 
@@ -276,7 +276,7 @@ public class AudioTests
     [Theory]
     [InlineData(BufferType.Full)]
     [InlineData(BufferType.Stream)]
-    public void Ctor_WhenInvoked_InitializesSound(BufferType bufferType)
+    public void Ctor_WhenInvoked_InitializesAudio(BufferType bufferType)
     {
         // Arrange & Act
         var sut = CreateSystemUnderTest(OggContentFilePath, bufferType);
@@ -296,7 +296,7 @@ public class AudioTests
 
         // Act
         var act = () => _ = new Audio(
-            @"C:\temp\Content\Sounds\sound.wav",
+            @"C:\temp\Content\Audio\audio.wav",
             BufferType.Full,
             this.mockALInvoker,
             this.mockAudioManager,
@@ -319,7 +319,7 @@ public class AudioTests
         var sut = CreateSystemUnderTest(OggContentFilePath);
 
         // Assert
-        sut.Name.Should().Be("sound");
+        sut.Name.Should().Be("audio");
     }
 
     [Fact]
@@ -353,7 +353,7 @@ public class AudioTests
     }
 
     [Fact]
-    public void IsLooping_WhenGettingValueWhileNotDisposed_GetsSoundLoopState()
+    public void IsLooping_WhenGettingValueWhileNotDisposed_GetsAudioLoopState()
     {
         // Arrange
         var sut = CreateSystemUnderTest(OggContentFilePath);
@@ -377,7 +377,7 @@ public class AudioTests
 
         // Assert
         act.Should().Throw<InvalidOperationException>()
-            .WithMessage("The sound is disposed.  You must create another sound instance.");
+            .WithMessage("The audio is disposed.  You must create another audio instance.");
     }
 
     [Fact]
@@ -397,7 +397,7 @@ public class AudioTests
     [Theory]
     [InlineData(true, AudioCommands.EnableLooping)]
     [InlineData(false, AudioCommands.DisableLooping)]
-    internal void IsLooping_WhenSettingValue_SetsSoundLoopingSetting(bool value, AudioCommands cmd)
+    internal void IsLooping_WhenSettingValue_SetsAudioLoopingSetting(bool value, AudioCommands cmd)
     {
         // Arrange
         var expectedCmd = new AudioCommandData { SourceId = SrcId, Command = cmd, };
@@ -441,7 +441,7 @@ public class AudioTests
     }
 
     [Fact]
-    public void Volume_WhenGettingValue_GetsSoundVolume()
+    public void Volume_WhenGettingValue_GetsAudioVolume()
     {
         // Arrange
         this.mockALInvoker.GetSource(Arg.Any<uint>(), ALSourcef.Gain).Returns(0.123f);
@@ -467,7 +467,7 @@ public class AudioTests
 
         // Assert
         act.Should().Throw<InvalidOperationException>()
-            .WithMessage("The sound is disposed.  You must create another sound instance.");
+            .WithMessage("The audio is disposed.  You must create another audio instance.");
     }
 
     [Theory]
@@ -475,7 +475,7 @@ public class AudioTests
     [InlineData(50f, 0.5f)]
     [InlineData(-5f, 0f)]
     [InlineData(142f, 1f)]
-    public void Volume_WhenSettingValue_SetsSoundVolume(float volume, float expected)
+    public void Volume_WhenSettingValue_SetsAudioVolume(float volume, float expected)
     {
         // Arrange
         var sut = CreateSystemUnderTest(OggContentFilePath);
@@ -734,11 +734,11 @@ public class AudioTests
 
         // Assert
         act.Should().Throw<InvalidOperationException>()
-            .WithMessage("The sound is disposed.  You must create another sound instance.");
+            .WithMessage("The audio is disposed.  You must create another audio instance.");
     }
 
     [Fact]
-    public void Play_WhenInvoked_PlaysSound()
+    public void Play_WhenInvoked_PlaysAudio()
     {
         // Arrange
         var expectedCmd = new AudioCommandData { SourceId = SrcId, Command = AudioCommands.Play, };
@@ -754,7 +754,7 @@ public class AudioTests
     }
 
     [Fact]
-    public void Play_WhileChangingDevices_DoesNotAttemptToPlaySound()
+    public void Play_WhileChangingDevices_DoesNotAttemptToPlayAudio()
     {
         // Arrange
         var sut = CreateSystemUnderTest(OggContentFilePath);
@@ -781,11 +781,11 @@ public class AudioTests
 
         // Assert
         act.Should().Throw<InvalidOperationException>()
-            .WithMessage("The sound is disposed.  You must create another sound instance.");
+            .WithMessage("The audio is disposed.  You must create another audio instance.");
     }
 
     [Fact]
-    public void Pause_WhileChangingDevices_DoesNotAttemptToPauseSound()
+    public void Pause_WhileChangingDevices_DoesNotAttemptToPauseAudio()
     {
         // Arrange
         var sut = CreateSystemUnderTest(OggContentFilePath);
@@ -799,7 +799,7 @@ public class AudioTests
     }
 
     [Fact]
-    public void Pause_WhenInvoked_PausesSound()
+    public void Pause_WhenInvoked_PausesAudio()
     {
         // Arrange
         var expectedCmd = new AudioCommandData { SourceId = SrcId, Command = AudioCommands.Pause, };
@@ -824,11 +824,11 @@ public class AudioTests
 
         // Assert
         act.Should().Throw<InvalidOperationException>()
-            .WithMessage("The sound is disposed.  You must create another sound instance.");
+            .WithMessage("The audio is disposed.  You must create another audio instance.");
     }
 
     [Fact]
-    public void Reset_WhenInvoked_ResetsSound()
+    public void Reset_WhenInvoked_ResetsAudio()
     {
         // Arrange
         var expectedCmd = new AudioCommandData { SourceId = SrcId, Command = AudioCommands.Reset, };
@@ -842,7 +842,7 @@ public class AudioTests
     }
 
     [Fact]
-    public void Reset_WhileChangingDevices_DoesNotAttemptToResetSound()
+    public void Reset_WhileChangingDevices_DoesNotAttemptToResetAudio()
     {
         // Arrange
         var sut = CreateSystemUnderTest(OggContentFilePath);
@@ -867,7 +867,7 @@ public class AudioTests
 
         // Assert
         act.Should().Throw<InvalidOperationException>()
-            .WithMessage("The sound is disposed.  You must create another sound instance.");
+            .WithMessage("The audio is disposed.  You must create another audio instance.");
     }
 
     [Theory]
@@ -891,7 +891,7 @@ public class AudioTests
         sut.SetTimePosition(requestedPos);
 
         // Assert
-        this.mockPosCmnReactable.Received(1).Push(PushNotifications.UpdateSoundPos, expectedPosCmd);
+        this.mockPosCmnReactable.Received(1).Push(PushNotifications.UpdateAudioPos, expectedPosCmd);
     }
 
     [Fact]
@@ -911,7 +911,7 @@ public class AudioTests
     }
 
     [Fact]
-    public void Rewind_WhenTimeIsPastBeginningOfSound_ResetsAndPlaysSound()
+    public void Rewind_WhenTimeIsPastBeginningOfAudio_ResetsAndPlaysAudio()
     {
         // Arrange
         var expectedCmd = new PosCommandData
@@ -928,7 +928,7 @@ public class AudioTests
         sut.Rewind(20f);
 
         // Assert
-        this.mockPosCmnReactable.Received(1).Push(PushNotifications.UpdateSoundPos, expectedCmd);
+        this.mockPosCmnReactable.Received(1).Push(PushNotifications.UpdateAudioPos, expectedCmd);
     }
 
     [Fact]
@@ -945,11 +945,11 @@ public class AudioTests
         sut.Rewind(10f);
 
         // Assert
-        this.mockPosCmnReactable.Received(1).Push(PushNotifications.UpdateSoundPos, expected);
+        this.mockPosCmnReactable.Received(1).Push(PushNotifications.UpdateAudioPos, expected);
     }
 
     [Fact]
-    public void Rewind_WhileChangingDevices_DoesNotAttemptToRewindSound()
+    public void Rewind_WhileChangingDevices_DoesNotAttemptToRewindAudio()
     {
         // Arrange
         var sut = CreateSystemUnderTest(OggContentFilePath);
@@ -979,11 +979,11 @@ public class AudioTests
         sut.FastForward(seconds);
 
         // Assert
-        this.mockPosCmnReactable.Received(1).Push(PushNotifications.UpdateSoundPos, expected);
+        this.mockPosCmnReactable.Received(1).Push(PushNotifications.UpdateAudioPos, expected);
     }
 
     [Fact]
-    public void FastForward_WhileChangingDevices_DoesNotAttemptToResetSound()
+    public void FastForward_WhileChangingDevices_DoesNotAttemptToResetAudio()
     {
         // Arrange
         var sut = CreateSystemUnderTest(OggContentFilePath);
@@ -998,10 +998,10 @@ public class AudioTests
     }
 
     [Fact]
-    public void Sound_WhenChangingAudioDevice_ReinitializeSound()
+    public void Audio_WhenChangingAudioDevice_ReinitializeAudio()
     {
         // Arrange
-        // Simulate an audio device change so the event is invoked inside of the sound class
+        // Simulate an audio device change so the event is invoked inside of the  audio class
         var sut = CreateSystemUnderTest(OggContentFilePath);
 
         this.mockAudioManager.DeviceChanged += Raise.EventWith(sut, EventArgs.Empty);
@@ -1022,7 +1022,7 @@ public class AudioTests
     [InlineData(ALSourceState.Paused)]
     [InlineData(ALSourceState.Initial)]
     [SuppressMessage("csharpsquid", "S3966", Justification = "Need to execute dispose twice for testing.")]
-    internal void Dispose_WhenInvoked_DisposesOfSound(ALSourceState sourceState)
+    internal void Dispose_WhenInvoked_DisposesOfAudio(ALSourceState sourceState)
     {
         // Arrange
         this.mockALInvoker.GetSourceState(Arg.Any<uint>()).Returns(sourceState);
@@ -1067,7 +1067,7 @@ public class AudioTests
     [InlineData(ALSourceState.Paused)]
     [InlineData(ALSourceState.Stopped)]
     [InlineData(ALSourceState.Initial)]
-    internal void DeviceChangingProcess_WhenChangingDevices_CorrectlyRestoresSound(
+    internal void DeviceChangingProcess_WhenChangingDevices_CorrectlyRestoresAudio(
         ALSourceState stateBeforeChange)
     {
         // Arrange
@@ -1108,7 +1108,7 @@ public class AudioTests
         this.mockAudioBuffer.Received(2).Init(OggContentFilePath);
         this.mockAudioBuffer.Received(2).Upload();
         this.mockALInvoker.Received(1).Source(SrcId, ALSourcef.Gain, 0.5f);
-        this.mockPosCmnReactable.Received(1).Push(PushNotifications.UpdateSoundPos, expectedTimePos);
+        this.mockPosCmnReactable.Received(1).Push(PushNotifications.UpdateAudioPos, expectedTimePos);
         this.mockALInvoker.Received(1).Source(SrcId, ALSourcef.Pitch, 1.2f);
         this.mockAudioCmdReactable.Received(stateBeforeChange == ALSourceState.Playing ? 1 : 0).Push(PushNotifications.SendAudioCmd, expectedAudioCmd);
     }
@@ -1117,7 +1117,7 @@ public class AudioTests
     /// <summary>
     /// Creates an instance of <see cref="Audio"/> for testing.
     /// </summary>
-    /// <param name="filePath">The path to the sound file.</param>
+    /// <param name="filePath">The path to the  audio file.</param>
     /// <param name="bufferType">The type of buffer.</param>
     /// <returns>The instance for testing.</returns>
     private Audio CreateSystemUnderTest(string filePath, BufferType bufferType = BufferType.Full)

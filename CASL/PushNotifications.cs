@@ -14,12 +14,12 @@ using System.Diagnostics.CodeAnalysis;
 internal static class PushNotifications
 {
     /// <summary>
-    /// Gets an ID that represents a push notification to send an audio command to update the sound state.
+    /// Gets an ID that represents a push notification to send an audio command to update the audio state.
     /// </summary>
     public static Guid SendAudioCmd => new ("3ad715a2-5436-4a15-8838-210d25fdfaa7");
 
     /// <summary>
-    /// Gets an ID that represents a push notification to update the sound position.
+    /// Gets an ID that represents a push notification to update the audio position.
     /// </summary>
-    public static Guid UpdateSoundPos => new ("077d224e-46c1-4c34-bc9b-e71e2e4fdd42");
+    public static Guid UpdateAudioPos => new ("077d224e-46c1-4c34-bc9b-e71e2e4fdd42");
 }

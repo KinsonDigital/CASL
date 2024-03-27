@@ -27,7 +27,7 @@ public static class AudioDevice
     public static ImmutableArray<string> AudioDevices => AudioManager.GetDeviceNames();
 
     /// <summary>
-    /// Changes the audio device for the sound to the given name.
+    /// Changes the audio device for the audio to the given name.
     /// </summary>
     /// <param name="name">The name of the device.</param>
     public static void SetAudioDevice(string name)

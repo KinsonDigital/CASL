@@ -106,7 +106,7 @@ internal sealed class StreamBuffer : IAudioBuffer
             () => this.audioCmdUnsubscriber?.Dispose());
 
         this.posCmdUnsubscriber = posCmdReactable.CreateOneWayReceive(
-            PushNotifications.UpdateSoundPos,
+            PushNotifications.UpdateAudioPos,
             name: nameof(StreamBuffer),
             ProcessPosCmd,
             () => this.posCmdUnsubscriber?.Dispose());

@@ -7,22 +7,22 @@ namespace CASL;
 using System;
 
 /// <summary>
-/// A single sound that can be played, paused etc.
+/// A single audio that can be played, paused etc.
 /// </summary>
 public interface IAudio : IDisposable
 {
     /// <summary>
-    /// Gets the name of the sound.
+    /// Gets the name of the audio.
     /// </summary>
     string Name { get; }
 
     /// <summary>
-    /// Gets the fully qualified path to the sound file.
+    /// Gets the fully qualified path to the audio file.
     /// </summary>
     string FilePath { get; }
 
     /// <summary>
-    /// Gets or sets the volume of the sound.
+    /// Gets or sets the volume of the audio.
     /// </summary>
     /// <remarks>
     ///     The only valid value accepted is 0-100. If a value outside of
@@ -31,7 +31,7 @@ public interface IAudio : IDisposable
     float Volume { get; set; }
 
     /// <summary>
-    /// Gets the current time position of the sound.
+    /// Gets the current time position of the audio.
     /// </summary>
     AudioTime Position { get; }
 
@@ -41,12 +41,12 @@ public interface IAudio : IDisposable
     AudioTime Length { get; }
 
     /// <summary>
-    /// Gets or sets a value indicating whether the sound loops back to the beginning once the end has been reached.
+    /// Gets or sets a value indicating whether the audio loops back to the beginning once the end has been reached.
     /// </summary>
     bool IsLooping { get; set; }
 
     /// <summary>
-    /// Gets the state of the sound.
+    /// Gets the state of the audio.
     /// </summary>
     AudioState State { get; }
 
@@ -58,7 +58,7 @@ public interface IAudio : IDisposable
     /// <summary>
     /// Gets or sets the play speed to the given value.
     /// </summary>
-    /// <param name="value">The speed that the sound should play at.</param>
+    /// <param name="value">The speed that the audio should play at.</param>
     /// <remarks>
     ///     The valid range of <paramref name="value"/> is between 0.25 and 2.0
     ///     with a <paramref name="value"/> less then 0.25 defaulting to 0.25 and
@@ -67,12 +67,12 @@ public interface IAudio : IDisposable
     float PlaySpeed { get; set; }
 
     /// <summary>
-    /// Plays the sound.
+    /// Plays the audio.
     /// </summary>
     void Play();
 
     /// <summary>
-    /// Pauses the sound.
+    /// Pauses the audio.
     /// </summary>
     void Pause();
 
@@ -80,24 +80,24 @@ public interface IAudio : IDisposable
     /// Stops the audio playback and resets back to the beginning.
     /// </summary>
     /// <remarks>
-    ///     This will stop the sound and set the time position back to the beginning.
+    ///     This will stop the audio and set the time position back to the beginning.
     /// </remarks>
     void Reset();
 
     /// <summary>
-    /// Sets the time position of the sound to the given value.
+    /// Sets the time position of the audio to the given value.
     /// </summary>
-    /// <param name="seconds">The time position in seconds of where to set the sound.</param>
+    /// <param name="seconds">The time position in seconds of where to set the audio.</param>
     void SetTimePosition(float seconds);
 
     /// <summary>
-    /// Rewinds the sound by the given amount of <paramref name="seconds"/>.
+    /// Rewinds the audio by the given amount of <paramref name="seconds"/>.
     /// </summary>
     /// <param name="seconds">The amount of seconds to rewind the song.</param>
     void Rewind(float seconds);
 
     /// <summary>
-    /// Fast forwards the sound by the given amount of <paramref name="seconds"/>.
+    /// Fast forwards the audio by the given amount of <paramref name="seconds"/>.
     /// </summary>
     /// <param name="seconds">The amount of seconds to fast forward the song.</param>
     void FastForward(float seconds);

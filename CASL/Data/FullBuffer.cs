@@ -110,7 +110,7 @@ internal sealed class FullBuffer : IAudioBuffer
             () => this.audioCmdUnsubscriber?.Dispose());
 
         this.posCmdUnsubscriber = posCmdReactable.CreateOneWayReceive(
-            PushNotifications.UpdateSoundPos,
+            PushNotifications.UpdateAudioPos,
             name: nameof(FullBuffer),
             (data) =>
             {
@@ -167,7 +167,7 @@ internal sealed class FullBuffer : IAudioBuffer
 
         if (!this.file.Exists(filePath))
         {
-            throw new FileNotFoundException("The sound file could not be found.", filePath);
+            throw new FileNotFoundException("The audio file could not be found.", filePath);
         }
 
         var extension = this.path.GetExtension(filePath).ToLower();
@@ -257,7 +257,7 @@ internal sealed class FullBuffer : IAudioBuffer
             return;
         }
 
-        // NOTE: Do not dispose of the device manager.  This needs to stay alive for other sounds that could be loaded in the future.
+        // NOTE: Do not dispose of the device manager.  This needs to stay alive for other audio that could be loaded in the future.
         if (disposing)
         {
             this.audioCmdUnsubscriber.Dispose();

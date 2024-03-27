@@ -65,7 +65,7 @@ internal interface IStreamBufferManager
     /// <summary>
     /// Unqueues all processed buffers from the audio source.
     /// </summary>
-    /// <param name="srcId">The sound source id.</param>
+    /// <param name="srcId">The audio source id.</param>
     void UnqueueProcessedBuffers(uint srcId);
 
     /// <summary>

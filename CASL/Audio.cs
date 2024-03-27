@@ -18,13 +18,13 @@ using OpenAL;
 using ReactableData;
 
 /// <summary>
-/// A single sound that can be played, paused etc.
+/// A single audio that can be played, paused etc.
 /// </summary>
 [SuppressMessage("ReSharper", "ClassWithVirtualMembersNeverInherited.Global", Justification = "Users need to inherit.")]
 public class Audio : IAudio
 {
     private const char CrossPlatDirSeparatorChar = '/';
-    private const string IsDisposedExceptionMessage = "The sound is disposed.  You must create another sound instance.";
+    private const string IsDisposedExceptionMessage = "The audio is disposed.  You must create another audio instance.";
     private readonly IAudioDeviceManager audioManager;
     private readonly IPushReactable<AudioCommandData> audioCommandReactable;
     private readonly IPushReactable<PosCommandData> posCommandReactable;
@@ -43,11 +43,11 @@ public class Audio : IAudio
     /// <summary>
     /// Initializes a new instance of the <see cref="Audio"/> class.
     /// </summary>
-    /// <param name="filePath">The path to the sound file.</param>
+    /// <param name="filePath">The path to the audio file.</param>
     /// <param name="bufferType">The type of audio buffer used.</param>
     /// <remarks>
     ///     Using <see cref="CASL.BufferType"/>.<see cref="CASL.BufferType.Full"/> means all of the audio data will be loaded into memory.
-    ///     This is fine for small audio files like sound effects.  Large audio files will consume more memory and take longer to load.
+    ///     This is fine for small audio files like audio effects.  Large audio files will consume more memory and take longer to load.
     ///     <para/>
     ///     Using <see cref="CASL.BufferType"/>.<see cref="CASL.BufferType.Stream"/> means all of the audio data will be loaded/streamed into
     ///     This is better for larger audio files like music. It will consume less memory and much better for performances from a loading perspective.
@@ -63,7 +63,7 @@ public class Audio : IAudio
 
         if (!file.Exists(filePath))
         {
-            throw new FileNotFoundException($"The sound file could not be found.", filePath);
+            throw new FileNotFoundException($"The audio file could not be found.", filePath);
         }
 
         FilePath = filePath.ToCrossPlatPath().TrimAllFromEnd(CrossPlatDirSeparatorChar);
@@ -96,7 +96,7 @@ public class Audio : IAudio
     /// <summary>
     /// Initializes a new instance of the <see cref="Audio"/> class.
     /// </summary>
-    /// <param name="filePath">The path to the sound file.</param>
+    /// <param name="filePath">The path to the audio file.</param>
     /// <param name="bufferType">The type of audio buffer used.</param>
     /// <param name="alInvoker">Provides access to OpenAL.</param>
     /// <param name="audioManager">Manages audio device related operations.</param>
@@ -137,7 +137,7 @@ public class Audio : IAudio
 
         if (!file.Exists(filePath))
         {
-            throw new FileNotFoundException($"The sound file could not be found.", filePath);
+            throw new FileNotFoundException($"The audio file could not be found.", filePath);
         }
 
         var extension = path.GetExtension(filePath).ToLower();
@@ -418,11 +418,11 @@ public class Audio : IAudio
 
         var isPastEnd = seconds > this.audioBuffer.TotalSeconds;
 
-        // Prevent a value past the end of the sound
+        // Prevent a value past the end of the audio
         seconds = isPastEnd ? (float)Math.Floor(this.audioBuffer.TotalSeconds) : seconds;
 
         var cmd = new PosCommandData { SourceId = this.srcId, PositionSeconds = seconds };
-        this.posCommandReactable.Push(PushNotifications.UpdateSoundPos, cmd);
+        this.posCommandReactable.Push(PushNotifications.UpdateAudioPos, cmd);
     }
 
     /// <inheritdoc/>
@@ -478,7 +478,7 @@ public class Audio : IAudio
     private static void ErrorCallback(string errorMsg) => throw new AudioException(errorMsg);
 
     /// <summary>
-    /// Initializes the sound.
+    /// Initializes the audio.
     /// </summary>
     private void Init()
     {
@@ -487,7 +487,7 @@ public class Audio : IAudio
     }
 
     /// <summary>
-    /// Saves various states of the sound to be reapplied after the device has
+    /// Saves various states of the audio to be reapplied after the device has
     /// been changed.
     /// </summary>
     private void AudioManager_DeviceChanging(object? sender, EventArgs e)
@@ -510,7 +510,7 @@ public class Audio : IAudio
     }
 
     /// <summary>
-    /// Reapplies the state of the sound after the audio device has been changed.
+    /// Reapplies the state of the audio after the audio device has been changed.
     /// </summary>
     private void AudioManager_DeviceChanged(object? sender, EventArgs e)
     {

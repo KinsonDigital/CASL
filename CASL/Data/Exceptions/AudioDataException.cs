@@ -10,7 +10,7 @@ using System.Runtime.Serialization;
 using System.Security;
 
 /// <summary>
-/// Occurs when an OpenAL sound sources does not exist.
+/// Occurs when an OpenAL audio sources does not exist.
 /// </summary>
 [Serializable]
 public sealed class AudioDataException : Exception

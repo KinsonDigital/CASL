@@ -19,7 +19,7 @@
     <Configurations>Debug;Release</Configurations>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <Authors>Kinson Digital Team</Authors>
-    <Description>CASL is a simplistic cross-platform, .NET library for playing and managing sounds powered by OpenAL 1.1 using software rendering.</Description>
+    <Description>CASL is a simplistic cross-platform, .NET library for playing and managing audio powered by OpenAL 1.1 using software rendering.</Description>
     <Copyright>2021</Copyright>
     <PackageLicenseFile>LICENSE.md</PackageLicenseFile>
     <PackageProjectUrl>https://github.com/KinsonDigital/CASL</PackageProjectUrl>

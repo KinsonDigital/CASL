@@ -254,7 +254,7 @@ public class FullBufferTests
     }
 
     [Fact]
-    public void Position_WhenGettingValueBeforeInitialization_ReturnsEmptySoundTime()
+    public void Position_WhenGettingValueBeforeInitialization_ReturnsEmptyAudioTime()
     {
         // Arrange
         var expected = default(AudioTime);
@@ -326,7 +326,7 @@ public class FullBufferTests
 
         // Assert
         act.Should().Throw<FileNotFoundException>()
-            .WithMessage("The sound file could not be found.")
+            .WithMessage("The audio file could not be found.")
             .And.FileName.Should().Be("non-existing-file.ogg");
     }
 

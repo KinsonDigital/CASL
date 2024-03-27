@@ -7,10 +7,10 @@ namespace CASL;
 using System.Diagnostics.CodeAnalysis;
 
 /// <summary>
-/// Represents a time value of a sound.
+/// Represents a time value of a audio.
 /// </summary>
 /// <remarks>
-///     This could represent the current position or the length of a sound.
+///     This could represent the current position or the length of a audio.
 /// </remarks>
 public readonly record struct AudioTime
 {
@@ -30,22 +30,22 @@ public readonly record struct AudioTime
     }
 
     /// <summary>
-    /// Gets the milliseconds of the sound.
+    /// Gets the milliseconds of the audio.
     /// </summary>
     public float Milliseconds { get; }
 
     /// <summary>
-    /// Gets the seconds of the sound.
+    /// Gets the seconds of the audio.
     /// </summary>
     public float Seconds { get; }
 
     /// <summary>
-    /// Gets the minutes of the sound.
+    /// Gets the minutes of the audio.
     /// </summary>
     public float Minutes { get; }
 
     /// <summary>
-    /// Gets the total number of seconds of the sound.
+    /// Gets the total number of seconds of the audio.
     /// </summary>
     public float TotalSeconds => Minutes * 60f;
 }

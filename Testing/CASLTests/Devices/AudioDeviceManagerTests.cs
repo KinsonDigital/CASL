@@ -38,7 +38,7 @@ public class AudioDeviceManagerTests
 
         this.mockALInvoker = new Mock<IOpenALInvoker>();
 
-        MockSoundLength(60);
+        MockAudioLength(60);
 
         this.mockALInvoker.Setup(m => m.GenSource()).Returns(SrcId);
         this.mockALInvoker.Setup(m => m.GenBuffer()).Returns(BufferId);
@@ -261,7 +261,7 @@ public class AudioDeviceManagerTests
     public void ChangeDevice_WithCacheable_RunsChangeDevicesProcess(int playState)
     {
         // Arrange
-        MockSoundLength(5);
+        MockAudioLength(5);
 
         this.mockALInvoker.Setup(m => m.GetSourceState(SrcId))
             .Returns((ALSourceState)playState);
@@ -346,10 +346,10 @@ public class AudioDeviceManagerTests
     private AudioDeviceManager CreateSystemUnderTest() => new (this.mockALInvoker.Object);
 
     /// <summary>
-    /// Mocks the buffer data stats to influence the total seconds that the sound has.
+    /// Mocks the buffer data stats to influence the total seconds that the  audio has.
     /// </summary>
     /// <param name="totalSeconds">The total number of seconds to simulate.</param>
-    private void MockSoundLength(float totalSeconds)
+    private void MockAudioLength(float totalSeconds)
     {
         /* This is the total seconds for every byte of data
          * based on 2 Channels, 32 bit depth and a frequency of 44100.
