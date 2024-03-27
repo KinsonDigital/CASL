@@ -33,12 +33,12 @@ public interface ISound : IDisposable
     /// <summary>
     /// Gets the current time position of the sound.
     /// </summary>
-    SoundTime Position { get; }
+    AudioTime Position { get; }
 
     /// <summary>
     /// Gets the length of the song.
     /// </summary>
-    SoundTime Length { get; }
+    AudioTime Length { get; }
 
     /// <summary>
     /// Gets or sets a value indicating whether the sound loops back to the beginning once the end has been reached.

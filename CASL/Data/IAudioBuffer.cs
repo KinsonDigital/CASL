@@ -19,7 +19,7 @@ internal interface IAudioBuffer : IDisposable
     /// <summary>
     /// Gets the current time position of the audio.
     /// </summary>
-    SoundTime Position { get; }
+    AudioTime Position { get; }
 
     /// <summary>
     /// Gets a value indicating whether the audio is currently set to loop.

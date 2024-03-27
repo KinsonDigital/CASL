@@ -131,7 +131,7 @@ internal sealed class StreamBuffer : IAudioBuffer
     public float TotalSeconds => this.audioDecoder.TotalSeconds;
 
     /// <inheritdoc/>
-    public SoundTime Position
+    public AudioTime Position
     {
         get
         {

@@ -36,7 +36,7 @@ public class Sound : ISound
     private uint srcId;
     private bool isDisposed;
     private bool audioDeviceChanging;
-    private SoundTime posBeforeDeviceChange;
+    private AudioTime posBeforeDeviceChange;
     private ALSourceState stateBeforeDeviceChange;
     private float volumeBeforeDeviceChange = -1;
     private float playSpeedBeforeDeviceChange;
@@ -232,7 +232,7 @@ public class Sound : ISound
     }
 
     /// <inheritdoc/>
-    public SoundTime Position
+    public AudioTime Position
     {
         get
         {
@@ -246,7 +246,7 @@ public class Sound : ISound
     }
 
     /// <inheritdoc/>
-    public SoundTime Length
+    public AudioTime Length
     {
         get
         {
@@ -257,7 +257,7 @@ public class Sound : ISound
 
             var length = this.audioDeviceChanging ? 0f : this.audioBuffer.TotalSeconds;
 
-            return new SoundTime(length);
+            return new AudioTime(length);
         }
     }
 

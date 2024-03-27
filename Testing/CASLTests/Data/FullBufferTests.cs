@@ -257,7 +257,7 @@ public class FullBufferTests
     public void Position_WhenGettingValueBeforeInitialization_ReturnsEmptySoundTime()
     {
         // Arrange
-        var expected = default(SoundTime);
+        var expected = default(AudioTime);
         var sut = CreateSystemUnderTest();
 
         // Act
@@ -271,7 +271,7 @@ public class FullBufferTests
     public void Position_WhenGettingValue_ReturnsCorrectResult()
     {
         // Arrange
-        var expected = new SoundTime(123);
+        var expected = new AudioTime(123);
 
         this.mockAlInvoker.GetSource(Arg.Any<uint>(), ALSourcef.SecOffset).Returns(123);
 

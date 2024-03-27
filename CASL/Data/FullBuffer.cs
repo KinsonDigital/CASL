@@ -140,7 +140,7 @@ internal sealed class FullBuffer : IAudioBuffer
     public float TotalSeconds => this.audioDecoder.TotalSeconds;
 
     /// <inheritdoc/>
-    public SoundTime Position
+    public AudioTime Position
     {
         get
         {
@@ -151,7 +151,7 @@ internal sealed class FullBuffer : IAudioBuffer
 
             var seconds = this.alInvoker.GetSource(this.srcId, ALSourcef.SecOffset);
 
-            return new SoundTime(seconds);
+            return new AudioTime(seconds);
         }
     }
 

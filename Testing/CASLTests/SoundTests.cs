@@ -513,7 +513,7 @@ public class SoundTests
     public void Position_WhenGettingValue_ReturnsCorrectResult()
     {
         // Arrange
-        var expected = new SoundTime(90);
+        var expected = new AudioTime(90);
         this.mockAudioBuffer.Position.Returns(expected);
         var sut = CreateSystemUnderTest(OggContentFilePath);
 
@@ -528,7 +528,7 @@ public class SoundTests
     public void Position_WhenGettingValueWhileDisposed_ReturnsCorrectResult()
     {
         // Arrange
-        var expected = default(SoundTime);
+        var expected = default(AudioTime);
         this.mockAudioBuffer.Position.Returns(expected);
         var sut = CreateSystemUnderTest(OggContentFilePath);
         sut.Dispose();
@@ -544,10 +544,10 @@ public class SoundTests
     public void Position_WhenGettingValueWhileChangingDevices_ReturnsPositionBeforeStartOfDeviceChangeProcess()
     {
         // Arrange
-        this.mockAudioBuffer.Position.Returns(new SoundTime(123));
+        this.mockAudioBuffer.Position.Returns(new AudioTime(123));
         var sut = CreateSystemUnderTest(OggContentFilePath);
         this.mockAudioManager.DeviceChanging += Raise.EventWith(sut, EventArgs.Empty);
-        var expected = new SoundTime(123);
+        var expected = new AudioTime(123);
 
         // Act
         var actual = sut.Position;
@@ -560,7 +560,7 @@ public class SoundTests
     public void Length_WhileDisposed_ReturnsZero()
     {
         // Arrange
-        var expected = new SoundTime(0f);
+        var expected = new AudioTime(0f);
 
         this.mockAudioBuffer.TotalSeconds.Returns(123f);
 
@@ -578,7 +578,7 @@ public class SoundTests
     public void Length_WhenGettingValue_ReturnsCorrectResult()
     {
         // Arrange
-        var expected = new SoundTime(266.00076f);
+        var expected = new AudioTime(266.00076f);
 
         this.mockAudioBuffer.TotalSeconds.Returns(266.00076f);
 
@@ -595,7 +595,7 @@ public class SoundTests
     public void Length_WhenGettingValueWhileChangingDevices_ReturnsZero()
     {
         // Arrange
-        var expected = new SoundTime(0f);
+        var expected = new AudioTime(0f);
         this.mockAudioBuffer.TotalSeconds.Returns(123);
         var sut = CreateSystemUnderTest(OggContentFilePath);
 
@@ -922,7 +922,7 @@ public class SoundTests
         };
 
         var sut = CreateSystemUnderTest(OggContentFilePath);
-        this.mockAudioBuffer.Position.Returns(new SoundTime(10f));
+        this.mockAudioBuffer.Position.Returns(new AudioTime(10f));
         this.mockAudioBuffer.TotalSeconds.Returns(300f);
 
         // Act
@@ -939,7 +939,7 @@ public class SoundTests
         var expected = new PosCommandData { SourceId = SrcId, PositionSeconds = 90f, };
 
         this.mockAudioBuffer.TotalSeconds.Returns(123.456f);
-        this.mockAudioBuffer.Position.Returns(new SoundTime(100f));
+        this.mockAudioBuffer.Position.Returns(new AudioTime(100f));
         var sut = CreateSystemUnderTest(OggContentFilePath);
 
         // Act
@@ -1088,7 +1088,7 @@ public class SoundTests
         this.mockALInvoker.GetSourceState(Arg.Any<uint>()).Returns(stateBeforeChange);
         this.mockALInvoker.GetSource(Arg.Any<uint>(), ALSourcef.Gain).Returns(0.5f);
         this.mockALInvoker.GetSource(Arg.Any<uint>(), ALSourcef.Pitch).Returns(1.2f);
-        this.mockAudioBuffer.Position.Returns(new SoundTime(50f));
+        this.mockAudioBuffer.Position.Returns(new AudioTime(50f));
 
         var sut = CreateSystemUnderTest(OggContentFilePath);
 

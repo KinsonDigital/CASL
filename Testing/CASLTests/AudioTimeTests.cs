@@ -1,4 +1,4 @@
-﻿// <copyright file="SoundTimeTests.cs" company="KinsonDigital">
+﻿// <copyright file="AudioTimeTests.cs" company="KinsonDigital">
 // Copyright (c) KinsonDigital. All rights reserved.
 // </copyright>
 
@@ -9,9 +9,9 @@ using FluentAssertions;
 using Xunit;
 
 /// <summary>
-/// Tests the <see cref="SoundTime"/> struct.
+/// Tests the <see cref="AudioTime"/> struct.
 /// </summary>
-public class SoundTimeTests
+public class AudioTimeTests
 {
     #region Ctor Tests
     [Fact]
@@ -24,7 +24,7 @@ public class SoundTimeTests
         const int expectedTotalSeconds = 90;
 
         // Act
-        var time = new SoundTime(90);
+        var time = new AudioTime(90);
 
         // Assert
         time.Milliseconds.Should().Be(expectedMilliseconds);
