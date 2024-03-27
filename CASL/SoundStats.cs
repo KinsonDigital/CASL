@@ -27,7 +27,7 @@ internal struct SoundStats
     /// <summary>
     /// The current playback state of the sound.
     /// </summary>
-    public SoundState PlaybackState;
+    public AudioState PlaybackState;
 
     /// <summary>
     /// The speed that the sound is playing at.

@@ -1,4 +1,4 @@
-﻿// <copyright file="AudioTests.cs" company="KinsonDigital">
+// <copyright file="AudioTests.cs" company="KinsonDigital">
 // Copyright (c) KinsonDigital. All rights reserved.
 // </copyright>
 
@@ -618,7 +618,7 @@ public class AudioTests
         var actual = sut.State;
 
         // Assert
-        actual.Should().Be(SoundState.Stopped);
+        actual.Should().Be(AudioState.Stopped);
     }
 
     [Fact]
@@ -632,15 +632,15 @@ public class AudioTests
         var actual = sut.State;
 
         // Assert
-        actual.Should().Be(SoundState.Stopped);
+        actual.Should().Be(AudioState.Stopped);
     }
 
     [Theory]
-    [InlineData(0x1011, SoundState.Stopped)]
-    [InlineData(0x1012, SoundState.Playing)]
-    [InlineData(0x1013, SoundState.Paused)]
-    [InlineData(0x1014, SoundState.Stopped)]
-    public void State_WhenGettingValue_ReturnsCorrectResult(int openALState, SoundState expected)
+    [InlineData(0x1011, AudioState.Stopped)]
+    [InlineData(0x1012, AudioState.Playing)]
+    [InlineData(0x1013, AudioState.Paused)]
+    [InlineData(0x1014, AudioState.Stopped)]
+    public void State_WhenGettingValue_ReturnsCorrectResult(int openALState, AudioState expected)
     {
         /*NOTE:
          * The first InlineData value must be a raw integer value of the ALSourceState enum.

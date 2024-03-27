@@ -287,13 +287,13 @@ public class Audio : IAudio
     }
 
     /// <inheritdoc/>
-    public SoundState State
+    public AudioState State
     {
         get
         {
             if (this.audioDeviceChanging || this.isDisposed)
             {
-                return SoundState.Stopped;
+                return AudioState.Stopped;
             }
 
             var currentState = this.alInvoker.GetSourceState(this.srcId);
@@ -302,10 +302,10 @@ public class Audio : IAudio
             return currentState switch
 #pragma warning restore CS8524 // The switch expression does not handle some values of its input type (it is not exhaustive) involving an unnamed enum value.
             {
-                ALSourceState.Playing => SoundState.Playing,
-                ALSourceState.Paused => SoundState.Paused,
-                ALSourceState.Stopped => SoundState.Stopped,
-                ALSourceState.Initial => SoundState.Stopped,
+                ALSourceState.Playing => AudioState.Playing,
+                ALSourceState.Paused => AudioState.Paused,
+                ALSourceState.Stopped => AudioState.Stopped,
+                ALSourceState.Initial => AudioState.Stopped,
             };
         }
     }
@@ -451,7 +451,7 @@ public class Audio : IAudio
             return;
         }
 
-        if (State == SoundState.Playing)
+        if (State == AudioState.Playing)
         {
             this.alInvoker.SourceStop(this.srcId);
         }

@@ -43,8 +43,7 @@ public enum AudioFormat
 /// <summary>
 /// The state of a sound.
 /// </summary>
-// TODO: Rename to AudioState
-public enum SoundState
+public enum AudioState
 {
     /// <summary>
     /// The state of a sound when it is playing.

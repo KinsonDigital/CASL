@@ -48,7 +48,7 @@ public interface IAudio : IDisposable
     /// <summary>
     /// Gets the state of the sound.
     /// </summary>
-    SoundState State { get; }
+    AudioState State { get; }
 
     /// <summary>
     /// Gets the type of buffer.
