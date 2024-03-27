@@ -52,10 +52,7 @@ public static class Program
             return validFiles.Length > 0;
         }
 
-        void SetMusicLibDirPath(string path)
-        {
-            soundLibDirPath = path.EndsWith(@"\") ? path : $@"{path}\";
-        }
+        void SetMusicLibDirPath(string path) => soundLibDirPath = path.EndsWith(@"\") ? path : $@"{path}\";
 
         void SetDefaultSoundFile()
         {

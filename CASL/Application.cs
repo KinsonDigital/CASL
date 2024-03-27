@@ -10,7 +10,7 @@ using System.Reflection;
 /// <summary>
 /// Provides information about the running application.
 /// </summary>
-[ExcludeFromCodeCoverage]
+[ExcludeFromCodeCoverage(Justification = "Directly interacts with dotnet.")]
 public class Application : IApplication
 {
     /// <inheritdoc/>

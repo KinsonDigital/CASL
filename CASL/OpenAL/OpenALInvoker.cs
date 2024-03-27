@@ -1,4 +1,4 @@
-﻿// <copyright file="OpenALInvoker.cs" company="KinsonDigital">
+// <copyright file="OpenALInvoker.cs" company="KinsonDigital">
 // Copyright (c) KinsonDigital. All rights reserved.
 // </copyright>
 
@@ -6,6 +6,7 @@ namespace CASL.OpenAL;
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 
 /// <summary>
@@ -35,12 +36,9 @@ internal class OpenALInvoker : IOpenALInvoker
     /// <inheritdoc/>
     public ALContext CreateContext(ALDevice device, ALContextAttributes attributes)
     {
+        ClearAlcError(device);
         var contextResult = this.alc.CreateContext(device, attributes.CreateAttributeArray());
-        var error = this.alc.GetError(device);
-
-        var errorMessage = Enum.GetName(typeof(AlcError), error);
-
-        InvokeErrorIfTrue(error != AlcError.NoError, errorMessage);
+        ProcessAlcError(device);
 
         return contextResult;
     }
@@ -48,14 +46,11 @@ internal class OpenALInvoker : IOpenALInvoker
     /// <inheritdoc/>
     public ALDevice OpenDevice(string? deviceName)
     {
-        var deviceResult = this.alc.OpenDevice(deviceName);
-        var error = this.alc.GetError(deviceResult);
+        ClearAlcError(ALDevice.Null());
+        var device = this.alc.OpenDevice(deviceName);
+        ProcessAlcError(device);
 
-        var errorMessage = Enum.GetName(typeof(AlcError), error);
-
-        InvokeErrorIfTrue(error != AlcError.NoError, errorMessage);
-
-        return deviceResult;
+        return device;
     }
 
     /// <inheritdoc/>
@@ -70,26 +65,19 @@ internal class OpenALInvoker : IOpenALInvoker
 
             if (!result)
             {
-                InvokeErrorIfTrue(true, "Issue destroying the context.");
+                this.ErrorCallback?.Invoke("Issue destroying the context.");
             }
         }
         else
         {
+            ClearAlcError(ALDevice.Null());
             result = this.alc.MakeContextCurrent(context);
+            ProcessAlcError(ALDevice.Null());
 
-            var device = GetContextsDevice(context);
-
-            var error = this.alc.GetError(device);
-
-            if (result)
-            {
-                var errorMessage = Enum.GetName(typeof(AlcError), error);
-                InvokeErrorIfTrue(error != AlcError.NoError, errorMessage);
-            }
-            else
+            if (!result)
             {
                 // Throw an error that the context could not be made current
-                InvokeErrorIfTrue(true, $"Context with handle '{context.Handle}' could not be made current.");
+                this.ErrorCallback?.Invoke($"Context with handle '{context.Handle}' could not be made current.");
             }
         }
 
@@ -99,70 +87,73 @@ internal class OpenALInvoker : IOpenALInvoker
     /// <inheritdoc/>
     public uint GenBuffer()
     {
+        ClearAlError();
         var buffer = 0u;
         this.al.GenBuffers(1, ref buffer);
-
-        var error = GetError();
-
-        var errorMessage = Enum.GetName(typeof(ALError), error);
-
-        InvokeErrorIfTrue(error != ALError.NoError, errorMessage);
+        ProcessAlError();
 
         return buffer;
     }
 
     /// <inheritdoc/>
+    public uint[] GenBuffers(int count)
+    {
+        var buffers = new uint[count];
+
+        ClearAlError();
+        this.al.GenBuffers(count, ref buffers[0]);
+        ProcessAlError();
+
+        return buffers;
+    }
+
+    /// <inheritdoc/>
     public uint GenSource()
     {
+        ClearAlError();
         var source = 0u;
         this.al.GenSources(1, ref source);
-
-        var error = GetError();
-        var errorMessage = Enum.GetName(typeof(ALError), error);
-
-        InvokeErrorIfTrue(error != ALError.NoError, errorMessage);
+        ProcessAlError();
 
         return source;
     }
 
     /// <inheritdoc/>
-    public string GetErrorString(ALError param) => this.al.Get((ALGetString)param);
-
-    /// <inheritdoc/>
-    public int GetSource(uint sid, ALGetSourcei param)
+    public string GetErrorString(ALError param)
     {
-        this.al.GetSource(sid, param, out var result);
-
-        var error = GetError();
-        var errorMessage = Enum.GetName(typeof(ALError), error);
-
-        InvokeErrorIfTrue(error != ALError.NoError, errorMessage);
+        ClearAlError();
+        var result = this.al.Get((ALGetString)param);
+        ProcessAlError();
 
         return result;
     }
 
     /// <inheritdoc/>
-    public bool GetSource(uint sid, ALSourceb param)
+    public int GetSource(uint source, ALGetSourcei param)
     {
-        this.al.GetSource(sid, (ALGetSourcei)param, out var result);
+        ClearAlError();
+        this.al.GetSource(source, param, out var result);
+        ProcessAlError();
 
-        var error = GetError();
-        var errorMessage = Enum.GetName(typeof(ALError), error);
+        return result;
+    }
 
-        InvokeErrorIfTrue(error != ALError.NoError, errorMessage);
+    /// <inheritdoc/>
+    public bool GetSource(uint source, ALSourceb param)
+    {
+        ClearAlError();
+        this.al.GetSource(source, (ALGetSourcei)param, out var result);
+        ProcessAlError();
 
         return result != 0;
     }
 
     /// <inheritdoc/>
-    public float GetSource(uint sid, ALSourcef param)
+    public float GetSource(uint source, ALSourcef param)
     {
-        this.al.GetSource(sid, param, out var value);
-
-        var error = GetError();
-        var errorMessage = Enum.GetName(typeof(ALError), error);
-
-        InvokeErrorIfTrue(error != ALError.NoError, errorMessage);
+        ClearAlError();
+        this.al.GetSource(source, param, out var value);
+        ProcessAlError();
 
         return value;
     }
@@ -170,20 +161,19 @@ internal class OpenALInvoker : IOpenALInvoker
     /// <inheritdoc/>
     public int GetBuffer(uint bid, ALGetBufferi param)
     {
+        ClearAlError();
         this.al.GetBuffer(bid, param, out var value);
-
-        var error = GetError();
-        var errorMessage = Enum.GetName(typeof(ALError), error);
-
-        InvokeErrorIfTrue(error != ALError.NoError, errorMessage);
+        ProcessAlError();
 
         return value;
     }
 
     /// <inheritdoc/>
-    public ALSourceState GetSourceState(uint sid)
+    public ALSourceState GetSourceState(uint source)
     {
-        this.al.GetSource(sid, ALGetSourcei.SourceState, out var result);
+        ClearAlError();
+        this.al.GetSource(source, ALGetSourcei.SourceState, out var result);
+        ProcessAlError();
 
         return (ALSourceState)result;
     }
@@ -191,25 +181,19 @@ internal class OpenALInvoker : IOpenALInvoker
     /// <inheritdoc/>
     public ALDevice GetContextsDevice(ALContext context)
     {
-        var deviceResult = this.alc.GetContextsDevice(context);
+        ClearAlcError(ALDevice.Null());
+        var device = this.alc.GetContextsDevice(context);
+        ProcessAlcError(device);
 
-        var error = this.alc.GetError(deviceResult);
-        var errorMessage = Enum.GetName(typeof(AlcError), error);
-
-        InvokeErrorIfTrue(error != AlcError.NoError, errorMessage);
-
-        return deviceResult;
+        return device;
     }
 
     /// <inheritdoc/>
     public string GetString(ALDevice device, AlcGetString param)
     {
+        ClearAlcError(device);
         var result = this.alc.GetString(device, param);
-        var error = this.alc.GetError(device);
-
-        var errorMessage = Enum.GetName(typeof(AlcError), error);
-
-        InvokeErrorIfTrue(error != AlcError.NoError, errorMessage);
+        ProcessAlcError(device);
 
         return result;
     }
@@ -220,12 +204,10 @@ internal class OpenALInvoker : IOpenALInvoker
         unsafe
         {
             var nullDevice = new ALDevice(0);
+            ClearAlcError(nullDevice);
 
             var stringsStart = this.alc.GetStringPtr(nullDevice, (AlcGetString)AlcGetStringList.AllDevicesSpecifier);
-            var error = this.alc.GetError(nullDevice);
-            var errorMessage = Enum.GetName(typeof(AlcError), error);
-
-            InvokeErrorIfTrue(error != AlcError.NoError, errorMessage);
+            ProcessAlcError(nullDevice);
 
             return ((nint)stringsStart).ToStrings();
         }
@@ -240,114 +222,137 @@ internal class OpenALInvoker : IOpenALInvoker
     {
         unsafe
         {
+            ClearAlError();
+
             fixed (TBuffer* b = buffer)
             {
                 this.al.BufferData(bid, format, b, buffer.Length * sizeof(TBuffer), freq);
             }
+
+            ProcessAlError();
         }
-
-        var error = GetError();
-        var errorMessage = Enum.GetName(typeof(ALError), error);
-
-        InvokeErrorIfTrue(error != ALError.NoError, errorMessage);
     }
 
     /// <inheritdoc/>
     public void BindBufferToSource(uint source, int buffer)
     {
+        ClearAlError();
         this.al.Source(source, ALSourcei.Buffer, buffer);
-
-        var error = GetError();
-        var errorMessage = Enum.GetName(typeof(ALError), error);
-
-        InvokeErrorIfTrue(error != ALError.NoError, errorMessage);
+        ProcessAlError();
     }
 
     /// <inheritdoc/>
-    public void Source(uint sid, ALSourcei param, int value)
+    public void SourceQueueBuffer(uint source, ref uint bufferId)
     {
-        this.al.Source(sid, param, value);
+        ClearAlError();
 
-        var error = GetError();
-        var errorMessage = Enum.GetName(typeof(ALError), error);
+        this.al.SourceQueueBuffers(source, 1, ref bufferId);
 
-        InvokeErrorIfTrue(error != ALError.NoError, errorMessage);
+        ProcessAlError();
     }
 
     /// <inheritdoc/>
-    public void Source(uint sid, ALSourceb param, bool value)
+    public void SourceQueueBuffers(uint source, int count, ref uint[] buffers)
     {
-        this.al.Source(sid, param, value);
+        ClearAlError();
 
-        var error = GetError();
-        var errorMessage = Enum.GetName(typeof(ALError), error);
+        if (buffers.Length <= 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(buffers), "The buffers array must contain at least one buffer.");
+        }
 
-        InvokeErrorIfTrue(error != ALError.NoError, errorMessage);
+        this.al.SourceQueueBuffers(source, count, ref buffers[0]);
+
+        ProcessAlError();
     }
 
     /// <inheritdoc/>
-    public void Source(uint sid, ALSourcef param, float value)
+    public void SourceUnqueueBuffer(uint source, ref uint buffer)
     {
-        this.al.Source(sid, param, value);
+        ClearAlError();
 
-        var error = GetError();
-        var errorMessage = Enum.GetName(typeof(ALError), error);
+        this.al.SourceUnqueueBuffers(source, 1, ref buffer);
 
-        InvokeErrorIfTrue(error != ALError.NoError, errorMessage);
+        ProcessAlError();
     }
 
     /// <inheritdoc/>
-    public void SourcePlay(uint sid)
+    public void SourceUnqueueBuffers(uint source, int count, ref uint[] buffers)
     {
-        this.al.SourcePlay(sid);
+        ClearAlError();
 
-        var error = GetError();
-        var errorMessage = Enum.GetName(typeof(ALError), error);
+        if (buffers.Length <= 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(buffers), "The buffers array must contain at least one buffer.");
+        }
 
-        InvokeErrorIfTrue(error != ALError.NoError, errorMessage);
+        this.al.SourceUnqueueBuffers(source, count, ref buffers[0]);
+
+        ProcessAlError();
     }
 
     /// <inheritdoc/>
-    public void SourcePause(uint sid)
+    public void Source(uint source, ALSourcei param, int value)
     {
-        this.al.SourcePause(sid);
-
-        var error = GetError();
-        var errorMessage = Enum.GetName(typeof(ALError), error);
-
-        InvokeErrorIfTrue(error != ALError.NoError, errorMessage);
+        ClearAlError();
+        this.al.Source(source, param, value);
+        ProcessAlError();
     }
 
     /// <inheritdoc/>
-    public void SourceStop(uint sid)
+    public void Source(uint source, ALSourceb param, bool value)
     {
-        this.al.SourceStop(sid);
-
-        var error = GetError();
-        var errorMessage = Enum.GetName(typeof(ALError), error);
-
-        InvokeErrorIfTrue(error != ALError.NoError, errorMessage);
+        ClearAlError();
+        this.al.Source(source, param, value);
+        ProcessAlError();
     }
 
     /// <inheritdoc/>
-    public void SourceRewind(uint sid)
+    public void Source(uint source, ALSourcef param, float value)
     {
-        this.al.SourceRewind(sid);
+        ClearAlError();
+        this.al.Source(source, param, value);
+        ProcessAlError();
+    }
 
-        var error = GetError();
-        var errorMessage = Enum.GetName(typeof(ALError), error);
+    /// <inheritdoc/>
+    public void SourcePlay(uint source)
+    {
+        ClearAlError();
+        this.al.SourcePlay(source);
+        ProcessAlError();
+    }
 
-        InvokeErrorIfTrue(error != ALError.NoError, errorMessage);
+    /// <inheritdoc/>
+    public void SourcePause(uint source)
+    {
+        ClearAlError();
+        this.al.SourcePause(source);
+        ProcessAlError();
+    }
+
+    /// <inheritdoc/>
+    public void SourceStop(uint source)
+    {
+        ClearAlError();
+        this.al.SourceStop(source);
+        ProcessAlError();
+    }
+
+    /// <inheritdoc/>
+    public void SourceRewind(uint source)
+    {
+        ClearAlError();
+        this.al.SourceRewind(source);
+        ProcessAlError();
     }
 
     /// <inheritdoc/>
     public bool CloseDevice(ALDevice device)
     {
+        ClearAlcError(device);
         var closeResult = this.alc.CloseDevice(device);
-        var error = this.alc.GetError(device);
-        var errorMessage = Enum.GetName(typeof(AlcError), error);
-
-        InvokeErrorIfTrue(error != AlcError.NoError, errorMessage);
+        ProcessAlcError(device);
 
         return closeResult;
     }
@@ -355,47 +360,91 @@ internal class OpenALInvoker : IOpenALInvoker
     /// <inheritdoc/>
     public void DeleteBuffer(uint buffer)
     {
+        if (buffer == 0)
+        {
+            return;
+        }
+
+        ClearAlError();
         this.al.DeleteBuffers(1, ref buffer);
-
-        var error = GetError();
-        var errorMessage = Enum.GetName(typeof(ALError), error);
-
-        InvokeErrorIfTrue(error != ALError.NoError, errorMessage);
+        ProcessAlError();
     }
 
     /// <inheritdoc/>
     public void DeleteSource(uint source)
     {
+        ClearAlError();
         this.al.DeleteSources(1, ref source);
-
-        var error = GetError();
-        var errorMessage = Enum.GetName(typeof(ALError), error);
-
-        InvokeErrorIfTrue(error != ALError.NoError, errorMessage);
+        ProcessAlError();
     }
 
     /// <inheritdoc/>
     public void DestroyContext(ALContext context)
     {
         var device = GetContextsDevice(context);
-
+        ClearAlcError(device);
         this.alc.DestroyContext(context);
-        var error = this.alc.GetError(device);
-        var errorMessage = Enum.GetName(typeof(AlcError), error);
-
-        InvokeErrorIfTrue(error != AlcError.NoError, errorMessage);
+        ProcessAlcError(device);
     }
 
     /// <summary>
-    /// Invokes the error callback if the <paramref name="shouldInvoke"/> is true.
+    /// Processes any possible OpenAL errors.
     /// </summary>
-    /// <param name="shouldInvoke">If true, invokes the error callback.</param>
-    /// <param name="errorMessage">The error message.</param>
-    private void InvokeErrorIfTrue(bool shouldInvoke, string? errorMessage)
+    private void ProcessAlError()
     {
-        if (shouldInvoke)
+#if DEBUG
+        var error = this.al.GetError();
+
+        var errorMessage = Enum.GetName(typeof(ALError), error);
+
+        if (error != ALError.NoError)
         {
             this.ErrorCallback?.Invoke(string.IsNullOrEmpty(errorMessage) ? "OpenAL" : errorMessage);
         }
+#endif
+    }
+
+    /// <summary>
+    /// Processes any possible OpenAL context errors.
+    /// </summary>
+    /// <param name="device">The device related to the error.</param>
+    private void ProcessAlcError(ALDevice device)
+    {
+#if DEBUG
+        var error = this.alc.GetError(device);
+
+        var errorMessage = Enum.GetName(typeof(AlcError), error);
+
+        if (error != AlcError.NoError)
+        {
+            var stackTrace = new StackTrace(true).ToString();
+
+            var completeErrorMsg = string.IsNullOrEmpty(errorMessage) ? "OpenAL" : errorMessage;
+            completeErrorMsg += $"\n{stackTrace}";
+
+            this.ErrorCallback?.Invoke(completeErrorMsg);
+        }
+#endif
+    }
+
+    /// <summary>
+    /// Clears the OpenAL error.
+    /// </summary>
+    private void ClearAlError()
+    {
+#if DEBUG
+        this.al.GetError();
+#endif
+    }
+
+    /// <summary>
+    /// Clears the OpenAL context error for the given <paramref name="device"/>.
+    /// </summary>
+    /// <param name="device">The device related to the error.</param>
+    private void ClearAlcError(ALDevice device)
+    {
+#if DEBUG
+        this.alc.GetError(device);
+#endif
     }
 }

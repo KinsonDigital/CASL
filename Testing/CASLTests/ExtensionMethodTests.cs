@@ -7,6 +7,7 @@ namespace CASLTests;
 using System;
 using System.Runtime.InteropServices;
 using CASL;
+using FluentAssertions;
 using Xunit;
 
 /// <summary>
@@ -62,12 +63,51 @@ public class ExtensionMethodTests
     [InlineData("", "")]
     [InlineData("/", "")]
     [InlineData("///", "")]
-    public void TrimAllFromEnd_WhenInvoked_ReturnsCorrectResult(string value, string expected)
+    public void TrimAllFromEnd_WhenInvoked_ReturnsCorrectResult(string? value, string expected)
     {
         // Arrange & Act
         var actual = value.TrimAllFromEnd('/');
 
         // Assert
         Assert.Equal(expected, actual);
+    }
+
+    [Fact]
+    public void MapValue_WhenMappingFloatValueToLongValue_ReturnsCorrectResult()
+    {
+        // Arrange
+        const float value = 123f;
+
+        // Act
+        var actual = value.MapValue(0f, 200f, 0L, 1000L);
+
+        // Assert
+        actual.Should().Be(615);
+    }
+
+    [Fact]
+    public void MapValue_WhenMappingFloatValueToIntValue_ReturnsCorrectResult()
+    {
+        // Arrange
+        const float value = 123f;
+
+        // Act
+        var actual = value.MapValue(0f, 200f, 0, 1000);
+
+        // Assert
+        actual.Should().Be(615);
+    }
+
+    [Fact]
+    public void MapValue_WhenMappingLongValueToFloatValue_ReturnsCorrectResult()
+    {
+        // Arrange
+        const long value = 123L;
+
+        // Act
+        var actual = value.MapValue(0L, 200L, 0f, 1000f);
+
+        // Assert
+        actual.Should().Be(615);
     }
 }

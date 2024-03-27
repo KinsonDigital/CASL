@@ -5,19 +5,19 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": ".NET Core Launch (console)",
+            "name": "Run CASL Testing",
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "BuildSolution",
             "args": [],
             "stopAtEntry": false,
             "windows": {
-                "program": "${workspaceFolder}/Testing/CASLTesting/bin/Debug-WIN/net5.0/CASLTesting.dll",
-                "console": "integratedTerminal"
+                "program": "${workspaceFolder}/Testing/CASLTesting/bin/Debug/net8.0/CASLTesting.dll",
+                "console": "externalTerminal"
             },
             "linux": {
-                "program": "${workspaceFolder}/Testing/CASLTesting/bin/Debug-LINUX/net5.0/CASLTesting.dll",
-                "console": "integratedTerminal"
+                "program": "${workspaceFolder}/Testing/CASLTesting/bin/Debug/net8.0/CASLTesting.dll",
+                "console": "externalTerminal"
             }
         },
         {

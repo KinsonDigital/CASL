@@ -32,7 +32,7 @@ public class AudioDeviceDoesNotExistExceptionTests
     public void Ctor_WhenInvokedWithSingleMessageParam_CorrectlySetsMessage()
     {
         // Arrange
-        var expected  = "test-message";
+        var expected = "test-message";
 
         // Act
         var exception = new AudioDeviceDoesNotExistException(expected);
@@ -54,14 +54,13 @@ public class AudioDeviceDoesNotExistExceptionTests
 
         // Assert
         exception.Message.Should().Be(expectedExceptionMessage);
-
     }
 
     [Fact]
     public void Ctor_WhenInvokedWithMessageAndInnerException_ThrowsException()
     {
         // Arrange
-        var expectedMessage =  "test-exception";
+        var expectedMessage = "test-exception";
         var expectedInnerMessage = "inner-exception";
         var innerException = new Exception(expectedInnerMessage);
 

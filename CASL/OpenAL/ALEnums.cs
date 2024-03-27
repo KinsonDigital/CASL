@@ -74,7 +74,7 @@ internal enum ALGetSourcei
     SampleOffset = 0x1025,
 
     /// <summary>
-    /// Indicate the Buffer to provide sound samples. Type: uint Range: any valid Buffer Handle.
+    /// Indicate the Buffer to provide audio samples. Type: uint Range: any valid Buffer Handle.
     /// </summary>
     Buffer = 0x1009,
 
@@ -113,28 +113,6 @@ internal enum ALSourceb
     /// Indicate whether the Source is looping. Type: bool Range: [True, False] Default: False.
     /// </summary>
     Looping = 0x1007,
-
-    /// <summary>
-    /// (EFX Extension) If this Source property is set to True, this Source’s direct-path is automatically filtered according to the
-    /// orientation of the source relative to the listener and the setting of the Source property Sourcef.ConeOuterGainHF.
-    /// Type: bool Range [False, True] Default: True
-    /// </summary>
-    EfxDirectFilterGainHighFrequencyAuto = 0x2000A,
-
-    /// <summary>
-    /// (EFX Extension) If this Source property is set to True, the intensity of this Source’s reflected sound is automatically attenuated
-    /// according to source-listener distance and source directivity (as determined by the cone parameters). If it is False, the reflected
-    /// sound is not attenuated according to distance and directivity. Type: bool Range [False, True] Default: True
-    /// </summary>
-    EfxAuxiliarySendFilterGainAuto = 0x2000B,
-
-    /// <summary>
-    /// (EFX Extension) If this Source property is AL_TRUE (its default value), the intensity of this Source’s reflected sound at high
-    /// frequencies will be automatically attenuated according to the high-frequency source directivity as set by the Sourcef.ConeOuterGainHF
-    /// property. If this property is AL_FALSE, the Source’s reflected sound is not filtered at all according to the Source’s directivity.
-    /// Type: bool Range [False, True] Default: True
-    /// </summary>
-    EfxAuxiliarySendFilterGainHighFrequencyAuto = 0x2000C,
 }
 
 /// <summary>
@@ -209,13 +187,13 @@ internal enum ALSourcef
 
     /// <summary>
     /// (EFX Extension) This property is defined the same way as the Reverb Room Roll off property: it is one of two methods available in the
-    /// Effect Extension to attenuate the reflected sound (early reflections and reverberation) according to source-listener distance.
+    /// Effect Extension to attenuate the reflected audio (early reflections and reverberation) according to source-listener distance.
     /// ange [0.0f .. 10.0f] Default: 0.0f
     /// </summary>
     EfxRoomRolloffFactor = 0x20008,
 
     /// <summary>
-    /// (EFX Extension) A directed Source points in a specified direction. The Source sounds at full volume when the listener is directly in
+    /// (EFX Extension) A directed Source points in a specified direction. The Source audio at full volume when the listener is directly in
     /// front of the source; it is attenuated as the listener circles the Source away from the front. Range [0.0f .. 1.0f] Default: 1.0f
     /// </summary>
     EfxConeOuterGainHighFrequency = 0x20009,
@@ -248,7 +226,7 @@ internal enum ALSourceState
 }
 
 /// <summary>
-/// Sound samples: Format specifier.
+/// Audio samples: Format specifier.
 /// </summary>
 internal enum ALFormat
 {
@@ -416,7 +394,7 @@ internal enum ALSourcei
     /// <summary>
     /// The playback position, expressed in bytes.
     /// </summary>
-    ByteOffset = 0x1026,  // AL_EXT_OFFSET extension.
+    ByteOffset = 0x1026, // AL_EXT_OFFSET extension.
 
     /// <summary>
     /// The playback position, expressed in samples.
@@ -424,7 +402,7 @@ internal enum ALSourcei
     SampleOffset = 0x1025, // AL_EXT_OFFSET extension.
 
     /// <summary>
-    /// Indicate the Buffer to provide sound samples. Type: uint Range: any valid Buffer Handle.
+    /// Indicate the Buffer to provide audio samples. Type: uint Range: any valid Buffer Handle.
     /// </summary>
     Buffer = 0x1009,
 
@@ -445,7 +423,7 @@ internal enum ALSourcei
 internal enum ALGetBufferi
 {
     /// <summary>
-    /// Sound sample's frequency, in units of hertz [Hz]. This is the number of samples per second. Half of the sample frequency marks
+    /// Audio sample's frequency, in units of hertz [Hz]. This is the number of samples per second. Half of the sample frequency marks
     /// the maximum significant frequency component.
     /// </summary>
     Frequency = 0x2001,
