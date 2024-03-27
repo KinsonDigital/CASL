@@ -122,13 +122,13 @@ internal class StreamBufferManager : IStreamBufferManager
     /// <exception cref="InvalidEnumArgumentException">
     ///     Thrown if the <see cref="AudioFormat"/> is not a valid enum value.
     /// </exception>
-    public void FillBuffersFromStart<T>(BufferStats bufferStats, IEnumerable<uint> bufferIds, Action flushData, Func<T[]> readSamples)
+    public void FillBuffersFromStart<T>(BufferStats bufferStats, IEnumerable<uint> bufferIds, Action flushDecoderData, Func<T[]> readSamples)
         where T : unmanaged
     {
         this.alInvoker.SourceStop(bufferStats.SourceId);
         UnqueueProcessedBuffers(bufferStats.SourceId);
 
-        flushData();
+        flushDecoderData();
 
         foreach (var id in bufferIds)
         {

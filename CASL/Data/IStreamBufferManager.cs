@@ -71,10 +71,11 @@ internal interface IStreamBufferManager
     /// <summary>
     /// Fills the buffers from the beginning of the audio data.
     /// </summary>
-    /// <param name="bufferStats"></param>
-    /// <param name="bufferIds"></param>
-    /// <param name="flushData"></param>
-    /// <param name="readSamples"></param>
-    void FillBuffersFromStart<T>(BufferStats bufferStats, IEnumerable<uint> bufferIds, Action flushData, Func<T[]> readSamples)
+    /// <param name="bufferStats">Information about the buffer.</param>
+    /// <param name="bufferIds">The list of buffer ids.</param>
+    /// <param name="flushDecoderData">The <see cref="Action"/> delegate used to flush the decoder data.</param>
+    /// <param name="readSamples">The <see cref="Func{TResult}"/> delegate used to read the decoded samples. </param>
+    /// <typeparam name="T">The type of audio data.</typeparam>
+    void FillBuffersFromStart<T>(BufferStats bufferStats, IEnumerable<uint> bufferIds, Action flushDecoderData, Func<T[]> readSamples)
         where T : unmanaged;
 }

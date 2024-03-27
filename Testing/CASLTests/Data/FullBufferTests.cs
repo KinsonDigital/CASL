@@ -336,8 +336,6 @@ public class FullBufferTests
     public void Init_WhenBufferIsNotInitialized_InitializesBuffer(string extension, bool isInitialized)
     {
         // Arrange
-        var expectedSoundSrc = new SoundSource { SourceId = SourceId, TotalSeconds = 123 };
-
         var fileName = $"test-AUDIO.{extension}";
         var filePath = $"C:/dir-A/{fileName}";
 

@@ -22,7 +22,7 @@ internal interface IAudioBuffer : IDisposable
     SoundTime Position { get; }
 
     /// <summary>
-    /// Returns a value indicating whether the audio is currently set to loop.
+    /// Gets a value indicating whether the audio is currently set to loop.
     /// </summary>
     bool IsLooping { get; }
 
