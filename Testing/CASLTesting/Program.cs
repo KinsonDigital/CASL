@@ -9,6 +9,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using CASL;
@@ -20,153 +22,302 @@ using CASL.Devices;
 public static class Program
 {
     private const string AudioDirName = "AudioFiles";
-    private static readonly string AudioFilePath = $@"{Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}{Path.DirectorySeparatorChar}{AudioDirName}{Path.DirectorySeparatorChar}";
+    private static readonly string DefaultAudioLibDirPath = $@"{Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}{Path.DirectorySeparatorChar}{AudioDirName}{Path.DirectorySeparatorChar}";
     private static readonly char[] Numbers = new[]
     {
         '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
     };
 
+    private static Task audioPosTask;
+    private static CancellationTokenSource audioPosTokenSrc;
+    private static Audio? audio;
+    private static StringBuilder helpText = new StringBuilder();
+
     public static void Main()
     {
-        var paused = false;
-        var cancelTokenSrc = new CancellationTokenSource();
-        var soundLibDirPath = AudioFilePath;
+        SetDefaultSoundFile();
 
-        Sound? sound;
+        var fastForwardRegex = new Regex("(-f|--fast-forward)=[0-9]+");
+        AddToHelp("Fast forwards the audio by a given value in seconds.", fastForwardRegex);
 
-        string[] GetValidFiles(string path)
-        {
-            var oggFiles = Directory.GetFiles(path, "*.ogg");
-            var mp3Files = Directory.GetFiles(path, "*.mp3");
+        var rewindRegex = new Regex("(-r|--rewind)=[0-9]+");
+        AddToHelp("Rewinds the audio by a given value in seconds.", rewindRegex);
 
-            var validFiles = new List<string>(oggFiles);
-            validFiles.AddRange(mp3Files);
+        var playRegex = new Regex("--play");
+        AddToHelp("Plays the audio.", playRegex);
 
-            return validFiles.ToArray();
-        }
+        var pauseRegex = new Regex("--pause");
+        AddToHelp("Pauses the audio.", pauseRegex);
 
-        bool ValidMusicLibrary(string path)
-        {
-            var validFiles = GetValidFiles(path);
+        var resetRegex = new Regex("--reset");
+        AddToHelp("Stops the audio and resets the position back to the begining.", resetRegex);
 
-            return validFiles.Length > 0;
-        }
+        var setPosRegex = new Regex("--set-pos=(-|)[0-9]+");
+        AddToHelp("Sets the position in the audio by a given value in seconds.", setPosRegex);
 
-        void SetMusicLibDirPath(string path) => soundLibDirPath = path.EndsWith(@"\") ? path : $@"{path}\";
+        var getPosRegex = new Regex("--get-pos");
+        AddToHelp("Gets the current position in the audio.", getPosRegex);
 
-        void SetDefaultSoundFile()
-        {
-            var soundFileName = Path.GetFileName(GetValidFiles(soundLibDirPath)[0]);
-            var soundLibPath = $"{soundLibDirPath}{soundFileName}";
-            sound = new Sound(soundLibPath);
+        var listDevicesRegex = new Regex("--list-devices");
+        AddToHelp("Lists the available audio devices.", listDevicesRegex);
 
-            WriteLine($"Music Library set to '{soundLibDirPath}'.");
-            WriteLine($"Default sound file set to '{soundFileName}'", enterBlankAfter: true);
-        }
+        var changeDeviceRegex = new Regex("--change-device");
+        AddToHelp("Starts the change audio device process.", changeDeviceRegex);
 
-        void LoadSound(string soundFile)
-        {
-            paused = true;
-            if (sound is not null)
-            {
-                sound.Stop();
-                sound.Dispose();
-            }
+        var getVolumeRegex = new Regex("(-v|--get-volume)");
+        AddToHelp("Gets the current volume setting of the audio.", getVolumeRegex);
 
-            sound = new Sound(soundFile);
-            WriteLine($"Loaded sound '{Path.GetFileName(soundFile)}'.");
+        var setVolumeRegex = new Regex("(-v|--set-volume)=[0-9]+");
+        AddToHelp("Sets the audio to a given value.", setVolumeRegex);
 
-            paused = false;
-        }
+        var setPlaySpeedRegex = new Regex("--set-speed=[0-9]+");
+        AddToHelp("Sets the playback speed of the audio.", setPlaySpeedRegex);
+
+        var getPlaySpeed = new Regex("--get-speed");
+        AddToHelp("Gets the current playback speed of the audio.", getPlaySpeed);
+
+        var toggleLoopPosRegex = new Regex("--toggle-loop");
+        AddToHelp("Toggles the audio looping setting.", toggleLoopPosRegex);
+
+        var loadSoundRegex = new Regex("--load-sound");
+        AddToHelp("Starts the load audio process.", loadSoundRegex);
+
+        var unloadSoundRegex = new Regex("--unload");
+        AddToHelp("Unloads the currently loaded audio.", unloadSoundRegex);
+
+        var setLibPathRegex = new Regex("--set-lib-path=.+");
+        AddToHelp("Sets the audio library directory path.", setLibPathRegex);
+
+        var clearScreenRegex = new Regex("(-c|--clear)");
+        AddToHelp("Clears the screen.", clearScreenRegex);
+
+        var showHelpRegex = new Regex("(-h|--help)");
+        AddToHelp("Shows help.", showHelpRegex);
+
+        var quitRegex = new Regex("(-q|--quit)");
+        AddToHelp("Quits the application.", quitRegex);
+
+        audio = new Audio(filePath, BufferType.Stream);
+
+        var soundLibDirPath = DefaultAudioLibDirPath;
 
         WriteLine("Type the command '-h | -help' for a list of commands.", enterBlankAfter: true);
 
-        if (ValidMusicLibrary(soundLibDirPath))
-        {
-            SetDefaultSoundFile();
-        }
-        else
-        {
-            WriteLine($"No valid sound files exist at the music library path '{soundLibDirPath}'.", enterBlankAfter: true);
-            WriteLine("Set a new music library path or type '-q' to exit.");
+        StartPosUpdater();
 
-            while (true)
+        while (true)
+        {
+            var input = Console.ReadLine().ToLower();
+
+            if (quitRegex.IsMatch(input))
             {
-                var libPathCommand = Console.ReadLine();
-
-                if (string.IsNullOrEmpty(libPathCommand))
-                {
-                    WriteLine("Invalid command.  Type a path or '-q' to quit.");
-                }
-                else if (libPathCommand == "-q")
-                {
-                    return;
-                }
-                else
-                {
-                    if (Directory.Exists(libPathCommand))
-                    {
-                        if (ValidMusicLibrary(libPathCommand))
-                        {
-                            SetMusicLibDirPath(libPathCommand);
-                            SetDefaultSoundFile();
-                            break;
-                        }
-                        else
-                        {
-                            WriteLine("Not a valid music library path.  Must contain '.ogg' or '.mp3' files.");
-                        }
-                    }
-                    else
-                    {
-                        WriteLine($"The path '{libPathCommand}' does not exist.\nPlease type a valid directory path.");
-                    }
-                }
+                break;
             }
-        }
 
-        var getTimeTask = new Task(
-            () =>
-            {
-                while (cancelTokenSrc.IsCancellationRequested is false)
-                {
-                    cancelTokenSrc.Token.WaitHandle.WaitOne(500);
-
-                    if (paused)
-                    {
-                        continue;
-                    }
-
-                    var seconds = (int)sound.Position.Seconds;
-
-                    var currentTimePos = $"{(int)sound.Position.Minutes}:{(seconds < 10 ? $"0{seconds}" : seconds)}";
-                    var timeLen = $"{(int)sound.Length.Minutes}:{(int)sound.Length.Seconds}";
-
-                    Console.Title = $"{currentTimePos} - {timeLen}";
-                }
-            }, cancelTokenSrc.Token);
-
-        ShowHelp();
-
-        getTimeTask.Start();
-
-        var command = Console.ReadLine()?.ToLower().Trim() ?? string.Empty;
-
-        sound.IsLooping = true;
-
-        while (command != "-q" && command != "--quit")
-        {
-            if (command == "-h" || command == "--help")
+            if (showHelpRegex.IsMatch(input))
             {
                 ShowHelp();
             }
-            else if (command == "-c" || command == "--clear")
+            else if (clearScreenRegex.IsMatch(input))
             {
                 Console.Clear();
             }
-            else if (command.StartsWith("--set-lib"))
+            else if (playRegex.IsMatch(input))
             {
-                var sections = command.Split("=");
+                audio.Play();
+            }
+            else if (pauseRegex.IsMatch(input))
+            {
+                audio.Pause();
+            }
+            else if (fastForwardRegex.IsMatch(input))
+            {
+                if (int.TryParse(input.Split('=')[1], out var seconds))
+                {
+                    audio.FastForward(seconds);
+                }
+            }
+            else if (rewindRegex.IsMatch(input))
+            {
+                if (int.TryParse(input.Split('=')[1], out var seconds))
+                {
+                    audio.Rewind(seconds);
+                }
+            }
+            else if (resetRegex.IsMatch(input))
+            {
+                audio.Reset();
+            }
+            else if (setPosRegex.IsMatch(input))
+            {
+                if (int.TryParse(input.Split('=')[1], out var seconds))
+                {
+                    audio.SetTimePosition(seconds);
+                }
+            }
+            else if (getPosRegex.IsMatch(input))
+            {
+                var position = audio.Position;
+                var minutes = Math.Floor(position.Minutes);
+                var seconds = Math.Round(position.Seconds, 0);
+                var totalSeconds = Math.Round(position.TotalSeconds, 0);
+
+                Console.WriteLine($"Position: {minutes}:{seconds} | Total Seconds: {totalSeconds}");
+            }
+            else if (listDevicesRegex.IsMatch(input))
+            {
+                var deviceNames = AudioDevice.AudioDevices;
+
+                WriteBlank();
+
+                for (var i = 0; i < deviceNames.Length; i++)
+                {
+                    WriteLine($"{i}: {deviceNames[i]}");
+                }
+            }
+            else if (changeDeviceRegex.IsMatch(input))
+            {
+                var deviceNames = AudioDevice.AudioDevices;
+
+                WriteLine("Enter a number to choose from the list of devices.");
+                WriteLine("Enter 'q' to stop the choose device process.", enterBlankBefore: true);
+
+                for (var i = 0; i < deviceNames.Length; i++)
+                {
+                    TabbedWriteLine($"{i}: {deviceNames[i]}");
+                }
+
+                Console.WriteLine(string.Join("\n", deviceNames));
+
+                Write("Enter a device item number: ", enterBlankBefore: true);
+
+                var isNumber = false;
+
+                do
+                {
+                    var numberInput = Console.ReadLine();
+
+                    if (numberInput == "q")
+                    {
+                        break;
+                    }
+
+                    if (string.IsNullOrEmpty(numberInput) || numberInput.Length > 1)
+                    {
+                        WriteLine("Invalid device number.  Please use a number from the device list.");
+                        continue;
+                    }
+
+                    var deviceNumber = numberInput[0];
+
+                    isNumber = Numbers.Contains(numberInput[0]);
+
+                    if (isNumber)
+                    {
+                        int.TryParse(deviceNumber.ToString(), out var chosenNumber);
+
+                        var chosenDevice = deviceNames[chosenNumber];
+
+                        AudioDevice.SetAudioDevice(chosenDevice);
+                        WriteLine($"The audio device set to '{chosenDevice}'.", enterBlankBefore: true, enterBlankAfter: true);
+                    }
+                }
+                while (!isNumber);
+            }
+            else if (getVolumeRegex.IsMatch(input))
+            {
+                Console.WriteLine($"Volume: {audio.Volume}");
+            }
+            else if (setVolumeRegex.IsMatch(input))
+            {
+                if (float.TryParse(input.Split('=')[1], out var volume))
+                {
+                    audio.Volume = volume;
+                }
+            }
+            else if (setVolumeRegex.IsMatch(input))
+            {
+                if (int.TryParse(input.Split('=')[1], out var volumeChange))
+                {
+                    audio.Volume += volumeChange;
+                }
+            }
+            else if (setPlaySpeedRegex.IsMatch(input))
+            {
+                if (float.TryParse(input.Split('=')[1], out var speed))
+                {
+                    audio.PlaySpeed = speed;
+                }
+            }
+            else if (getPlaySpeed.IsMatch(input))
+            {
+                Console.WriteLine($"Play Speed: {audio.PlaySpeed}");
+            }
+            else if (toggleLoopPosRegex.IsMatch(input))
+            {
+                audio.IsLooping = !audio.IsLooping;
+
+                if (audio.IsLooping)
+                {
+                    Console.WriteLine("Looping enabled");
+                }
+                else
+                {
+                    Console.WriteLine("Looping disabled");
+                }
+            }
+            else if (loadSoundRegex.IsMatch(input))
+            {
+                var soundList = GetValidFiles(soundLibDirPath);
+
+                WriteLine("Enter a number to choose from the list of sounds.", enterBlankBefore: true);
+                WriteLine("Enter 'q' to stop the load sound process.", enterBlankBefore: true);
+
+                for (var i = 0; i < soundList.Length; i++)
+                {
+                    TabbedWriteLine($"{i}: {Path.GetFileName(soundList[i])}");
+                }
+
+                Write("Enter a sound item number: ", enterBlankBefore: true);
+
+                var isNumber = false;
+
+                do
+                {
+                    var numberInput = Console.ReadLine();
+
+                    if (numberInput == "q")
+                    {
+                        break;
+                    }
+
+                    if (string.IsNullOrEmpty(numberInput) || numberInput.Length > 1)
+                    {
+                        WriteLine("Invalid sound number.  Please use a number from the sound list.");
+                        continue;
+                    }
+
+                    var soundNumber = numberInput[0];
+
+                    isNumber = Numbers.Contains(numberInput[0]);
+
+                    if (isNumber)
+                    {
+                        int.TryParse(soundNumber.ToString(), out var chosenNumber);
+
+                        var chosenSound = soundList[chosenNumber];
+                        LoadSound(chosenSound, BufferType.Full);
+                    }
+                }
+                while (!isNumber);
+            }
+            else if (unloadSoundRegex.IsMatch(input))
+            {
+                audio.Dispose();
+            }
+            else if (setLibPathRegex.IsMatch(input))
+            {
+                var sections = input.Split("=");
 
                 if (sections.Length < 2)
                 {
@@ -193,324 +344,106 @@ public static class Program
                     }
                 }
             }
-            else if (command.StartsWith("--load-sound"))
-            {
-                var soundList = GetValidFiles(soundLibDirPath);
-
-                WriteLine("Enter a number to choose from the list of sounds.", enterBlankBefore: true);
-                WriteLine("Enter 'q' to stop the load sound process.", enterBlankBefore: true);
-
-                for (var i = 0; i < soundList.Length; i++)
-                {
-                    TabbedWriteLine($"{i}: {Path.GetFileName(soundList[i])}");
-                }
-
-                Write("Enter a sound item number: ", enterBlankBefore: true);
-
-                var isNumber = false;
-                var chosenSound = string.Empty;
-
-                do
-                {
-                    var numberInput = Console.ReadLine();
-
-                    if (numberInput == "q")
-                    {
-                        break;
-                    }
-
-                    if (string.IsNullOrEmpty(numberInput) || numberInput.Length > 1)
-                    {
-                        WriteLine("Invalid sound number.  Please use a number from the sound list.");
-                        continue;
-                    }
-
-                    var soundNumber = numberInput[0];
-
-                    isNumber = Numbers.Contains(numberInput[0]);
-
-                    if (isNumber)
-                    {
-                        int.TryParse(soundNumber.ToString(), out var chosenNumber);
-
-                        chosenSound = soundList[chosenNumber];
-
-                        LoadSound(chosenSound);
-                    }
-                }
-                while (isNumber is false);
-
-                WriteLine($"The audio device set to '{chosenSound}'.", enterBlankBefore: true, enterBlankAfter: true);
-            }
-            else if (command == "--play")
-            {
-                sound.Play();
-            }
-            else if (command == "--pause")
-            {
-                sound.Pause();
-            }
-            else if (command == "-s" || command == "--stop")
-            {
-                sound.Stop();
-            }
-            else if (command.StartsWith("-f=") || command.StartsWith("--forward="))
-            {
-                var sections = command.Split('=', StringSplitOptions.RemoveEmptyEntries);
-
-                if (sections.Length < 2)
-                {
-                    WriteLine("The fast forward command contains no value.", enterBlankAfter: true);
-                }
-                else
-                {
-                    float.TryParse(sections[1], out var seconds);
-
-                    sound.FastForward(seconds);
-                }
-            }
-            else if (command.StartsWith("-r=") || command.StartsWith("--rewind="))
-            {
-                var sections = command.Split('=', StringSplitOptions.RemoveEmptyEntries);
-
-                if (sections.Length < 2)
-                {
-                    WriteLine("The rewind command contains no value.", enterBlankAfter: true);
-                }
-                else
-                {
-                    float.TryParse(sections[1], out var seconds);
-
-                    sound.Rewind(seconds);
-                }
-            }
-            else if (command.StartsWith("-v+") || command.StartsWith("--volume+") ||
-                     command.StartsWith("-v-") || command.StartsWith("--volume-") ||
-                     command.StartsWith("-v=") || command.StartsWith("--volume="))
-            {
-                var sections = Array.Empty<string>();
-                var volumeIncrease = false;
-                var volumeDecrease = false;
-                var volumeSet = false;
-
-                if (command.StartsWith("-v+"))
-                {
-                    sections = command.Split("v+");
-                    volumeIncrease = true;
-                }
-                else if (command.StartsWith("--volume+"))
-                {
-                    sections = command.Split("volume+");
-                    volumeIncrease = true;
-                }
-                else if (command.StartsWith("-v-"))
-                {
-                    sections = command.Split("v-");
-                    volumeDecrease = true;
-                }
-                else if (command.StartsWith("--volume-"))
-                {
-                    sections = command.Split("volume-");
-                    volumeDecrease = true;
-                }
-                else if (command.StartsWith("-v="))
-                {
-                    sections = command.Split("v=");
-                    volumeSet = true;
-                }
-                else if (command.StartsWith("--volume="))
-                {
-                    sections = command.Split("volume=");
-                    volumeSet = true;
-                }
-
-                if (sections.Length < 2)
-                {
-                    WriteLine("The volume command contains no value.", enterBlankAfter: true);
-                }
-                else
-                {
-                    float.TryParse(sections[1], out var volume);
-
-                    if (volumeIncrease)
-                    {
-                        sound.Volume += volume;
-                    }
-                    else if (volumeDecrease)
-                    {
-                        sound.Volume -= volume;
-                    }
-                    else if (volumeSet)
-                    {
-                        sound.Volume = volume;
-                    }
-                }
-            }
-            else if (command.StartsWith("--looping"))
-            {
-                var sections = command.Split("=");
-
-                if (sections.Length == 1)
-                {
-                    WriteLine($"Sound looping turned {(sound.IsLooping ? "on" : "off")}.");
-                }
-                else
-                {
-                    var parseSuccess = bool.TryParse(sections[1].ToLower(), out var shouldLoop);
-
-                    if (parseSuccess)
-                    {
-                        sound.IsLooping = shouldLoop;
-
-                        WriteLine($"Looping has been turned {(shouldLoop ? "on" : "off")}.");
-                    }
-                    else
-                    {
-                        WriteLine("The '--looping' command must have a 'true' or 'false' value.");
-                    }
-                }
-            }
-            else if (command.StartsWith("--play-speed"))
-            {
-                var sections = command.Split("=");
-
-                if (sections.Length == 1)
-                {
-                    WriteLine($"Play speed set to {sound.PlaySpeed}.");
-                }
-                else
-                {
-                    var parseSuccess = float.TryParse(sections[1].ToLower(), out var playSpeed);
-
-                    if (parseSuccess)
-                    {
-                        sound.PlaySpeed = playSpeed;
-
-                        WriteLine($"Play speed has been set to {playSpeed}.");
-                    }
-                    else
-                    {
-                        WriteLine("The '--play-speed' command must have a floating point value.");
-                    }
-                }
-            }
-            else if (command.StartsWith("--set-pos"))
-            {
-                var sections = command.Split("=");
-
-                if (sections.Length >= 2)
-                {
-                    var timePos = sections[1];
-
-                    var timePosSections = timePos.Split(":");
-
-                    if (timePosSections.Length >= 2)
-                    {
-                        var minuteParseSuccess = int.TryParse(timePosSections[0], out var minute);
-                        var secondParseSuccess = int.TryParse(timePosSections[1], out var second);
-
-                        if (minuteParseSuccess is false || secondParseSuccess is false)
-                        {
-                            WriteLine("The minute and second value must be an integer value.", enterBlankAfter: true);
-                        }
-                        else
-                        {
-                            sound.SetTimePosition((minute * 60) + second);
-                        }
-                    }
-                    else
-                    {
-                        WriteLine("The value for the set position command must be in the minute and second format of 'mm:ss'.", enterBlankAfter: true);
-                    }
-                }
-                else
-                {
-                    WriteLine("The set position command contains no value.", enterBlankAfter: true);
-                }
-            }
-            else if (command == "-l" || command == "--list")
-            {
-                var deviceList = AudioDevice.AudioDevices;
-
-                WriteLine("System Audio Devices:", enterBlankBefore: true);
-
-                foreach (var device in deviceList)
-                {
-                    TabbedWriteLine(device);
-                }
-
-                WriteBlank();
-            }
-            else if (command == "--choose-device")
-            {
-                var deviceList = AudioDevice.AudioDevices;
-
-                WriteLine("Enter a number to choose from the list of devices.");
-                WriteLine("Enter 'q' to stop the choose device process.", enterBlankBefore: true);
-
-                for (var i = 0; i < deviceList.Length; i++)
-                {
-                    TabbedWriteLine($"{i}: {deviceList[i]}");
-                }
-
-                Write("Enter a device item number: ", enterBlankBefore: true);
-
-                var isNumber = false;
-                var chosenDevice = string.Empty;
-
-                do
-                {
-                    var numberInput = Console.ReadLine();
-
-                    if (numberInput == "q")
-                    {
-                        break;
-                    }
-
-                    if (string.IsNullOrEmpty(numberInput) || numberInput.Length > 1)
-                    {
-                        WriteLine("Invalid device number.  Please use a number from the device list.");
-                        continue;
-                    }
-
-                    var deviceNumber = numberInput[0];
-
-                    isNumber = Numbers.Contains(numberInput[0]);
-
-                    if (isNumber)
-                    {
-                        int.TryParse(deviceNumber.ToString(), out var chosenNumber);
-
-                        chosenDevice = deviceList[chosenNumber];
-
-                        AudioDevice.SetAudioDevice(chosenDevice);
-                    }
-                }
-                while (isNumber is false);
-
-                WriteLine($"The audio device set to '{chosenDevice}'.", enterBlankBefore: true, enterBlankAfter: true);
-            }
             else
             {
-                WriteLine($"The command '{command}' is invalid.", enterBlankBefore: true, enterBlankAfter: true);
+                Console.WriteLine($"The command '{input}' is invalid.");
             }
-
-            command = Console.ReadLine()?.ToLower().Trim() ?? string.Empty;
         }
 
-        cancelTokenSrc.Cancel();
-        getTimeTask.Wait();
-        getTimeTask.Dispose();
+        audioPosTokenSrc.Cancel();
+        audio.Dispose();
 
-        WriteLine("Disposing of audio service. . .", true);
+        string[] GetValidFiles(string path)
+        {
+            var oggFiles = Directory.GetFiles(path, "*.ogg");
+            var mp3Files = Directory.GetFiles(path, "*.mp3");
 
-        sound.Dispose();
+            var validFiles = new List<string>(oggFiles);
+            validFiles.AddRange(mp3Files);
 
-        WriteLine("Audio services disposed.", true);
+            return validFiles.ToArray();
+        }
+
+        bool ValidMusicLibrary(string path)
+        {
+            var validFiles = GetValidFiles(path);
+
+            return validFiles.Length > 0;
+        }
+
+        void SetMusicLibDirPath(string path) => soundLibDirPath = path.EndsWith(@"\") ? path : $@"{path}\";
+
+        void SetDefaultSoundFile()
+        {
+            var soundFileName = Path.GetFileName(GetValidFiles(soundLibDirPath)[0]);
+            var soundLibPath = $"{soundLibDirPath}{soundFileName}";
+            audio = new Audio(soundLibPath, BufferType.Stream);
+
+            WriteLine($"Music Library set to '{soundLibDirPath}'.");
+            WriteLine($"Default sound file set to '{soundFileName}'", enterBlankAfter: true);
+        }
+
+        void LoadSound(string soundFile, BufferType bufferType)
+        {
+
+        }
+    }
+
+    public static void AddToHelp(string description, Regex regex)
+    {
+        helpText.AppendLine();
+        var regexStr = regex.ToString();
+        var requiresValue = regexStr.Contains('=') && (regexStr.Contains("[0-9]+") || regexStr.Contains(".+"));
+        var hasMultipleVersions = regexStr.Contains('(') && regexStr.Contains('|') && regexStr.Contains(')');
+
+        regexStr = regexStr.Replace("(-|)", string.Empty);
+        regexStr = regexStr.Replace("[0-9]+", string.Empty);
+        regexStr = regexStr.Replace("(", string.Empty);
+        regexStr = regexStr.Replace(")", string.Empty);
+        regexStr = regexStr.Replace("=", string.Empty);
+        regexStr = regexStr.Replace(".+", string.Empty);
+
+        if (hasMultipleVersions)
+        {
+            var sections = regexStr.Split('|');
+
+            var joinStr = requiresValue ? "=<value>, " : ", ";
+            regexStr = string.Join(joinStr, sections);
+        }
+
+        regexStr += requiresValue ? "=<value>" : string.Empty;
+
+        helpText.AppendLine(regexStr);
+        helpText.AppendLine($"  {description}");
+    }
+
+    private static void StartPosUpdater()
+    {
+        audioPosTokenSrc = new CancellationTokenSource();
+
+        audioPosTask = new Task(
+            () =>
+            {
+                while (!audioPosTokenSrc.IsCancellationRequested)
+                {
+                    audioPosTokenSrc.Token.WaitHandle.WaitOne(250);
+
+                    var minutes = (int)Math.Floor(audio.Position.Minutes);
+                    var seconds = (int)Math.Round(audio.Position.Seconds, 0);
+                    var minSec = $"{minutes}:{seconds}";
+                    var totalSeconds = (int)Math.Round(audio.Position.TotalSeconds, 0);
+
+                    Console.Title = $"{minSec} |  Total Secs: {totalSeconds}";
+                }
+            }, audioPosTokenSrc.Token);
+
+        audioPosTask.Start();
     }
 
     private static void ShowHelp()
     {
+        Console.WriteLine(helpText.ToString());
+        return;
         WriteBlank();
 
         WriteLine("Commands:");
