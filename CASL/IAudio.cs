@@ -1,4 +1,4 @@
-﻿// <copyright file="ISound.cs" company="KinsonDigital">
+﻿// <copyright file="IAudio.cs" company="KinsonDigital">
 // Copyright (c) KinsonDigital. All rights reserved.
 // </copyright>
 
@@ -9,7 +9,7 @@ using System;
 /// <summary>
 /// A single sound that can be played, paused etc.
 /// </summary>
-public interface ISound : IDisposable
+public interface IAudio : IDisposable
 {
     /// <summary>
     /// Gets the name of the sound.

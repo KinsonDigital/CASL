@@ -1,8 +1,7 @@
-﻿// <copyright file="SoundTests.cs" company="KinsonDigital">
+﻿// <copyright file="AudioTests.cs" company="KinsonDigital">
 // Copyright (c) KinsonDigital. All rights reserved.
 // </copyright>
 
-#pragma warning disable IDE0002 // Name can be simplified
 #pragma warning disable SA1202
 
 namespace CASLTests;
@@ -27,9 +26,9 @@ using NSubstitute;
 using Xunit;
 
 /// <summary>
-/// Tests the <see cref="Sound"/> class.
+/// Tests the <see cref="Audio"/> class.
 /// </summary>
-public class SoundTests
+public class AudioTests
 {
     private const string OggFileExtension = ".ogg";
     private const string MP3FileExtension = ".mp3";
@@ -51,10 +50,10 @@ public class SoundTests
     private readonly IFile mockFile;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="SoundTests"/> class.
+    /// Initializes a new instance of the <see cref="AudioTests"/> class.
     /// </summary>
     [SuppressMessage("csharpsquid", "S1075", Justification = "Only used for testing")]
-    public SoundTests()
+    public AudioTests()
     {
         this.mockALInvoker = Substitute.For<IOpenALInvoker>();
         this.mockALInvoker.GenSource().Returns(SrcId);
@@ -95,7 +94,7 @@ public class SoundTests
     public void Ctor_WithNullFilePathParam_ThrowsException(string? filePath, string expected)
     {
         // Arrange & Act
-        var act = () => _ = new Sound(
+        var act = () => _ = new Audio(
             filePath,
             BufferType.Full,
             this.mockALInvoker,
@@ -115,7 +114,7 @@ public class SoundTests
     public void Ctor_WithNullALInvokerParam_ThrowsException()
     {
         // Arrange & Act
-        var act = void () => _ = new Sound(
+        var act = void () => _ = new Audio(
             OggContentFilePath,
             BufferType.Full,
             null,
@@ -135,7 +134,7 @@ public class SoundTests
     public void Ctor_WithNullAudioManagerParam_ThrowsException()
     {
         // Arrange & Act
-        var act = () => _ = new Sound(
+        var act = () => _ = new Audio(
             OggContentFilePath,
             BufferType.Full,
             this.mockALInvoker,
@@ -155,7 +154,7 @@ public class SoundTests
     public void Ctor_WithNullBufferFactoryParam_ThrowsException()
     {
         // Arrange & Act
-        var act = () => _ = new Sound(
+        var act = () => _ = new Audio(
             OggContentFilePath,
             BufferType.Full,
             this.mockALInvoker,
@@ -175,7 +174,7 @@ public class SoundTests
     public void Ctor_WithNullReactableFactoryParam_ThrowsException()
     {
         // Arrange & Act
-        var act = () => _ = new Sound(
+        var act = () => _ = new Audio(
             OggContentFilePath,
             BufferType.Full,
             this.mockALInvoker,
@@ -195,7 +194,7 @@ public class SoundTests
     public void Ctor_WithNullPathParam_ThrowsException()
     {
         // Arrange & Act
-        var act = () => _ = new Sound(
+        var act = () => _ = new Audio(
             OggContentFilePath,
             BufferType.Full,
             this.mockALInvoker,
@@ -215,7 +214,7 @@ public class SoundTests
     public void Ctor_WithNullFileParam_ThrowsException()
     {
         // Arrange & Act
-        var act = () => _ = new Sound(
+        var act = () => _ = new Audio(
             OggContentFilePath,
             BufferType.Full,
             this.mockALInvoker,
@@ -296,7 +295,7 @@ public class SoundTests
         this.mockPath.GetExtension(Arg.Any<string?>()).Returns(".wav");
 
         // Act
-        var act = () => _ = new Sound(
+        var act = () => _ = new Audio(
             @"C:\temp\Content\Sounds\sound.wav",
             BufferType.Full,
             this.mockALInvoker,
@@ -1116,12 +1115,12 @@ public class SoundTests
     #endregion
 
     /// <summary>
-    /// Creates an instance of <see cref="Sound"/> for testing.
+    /// Creates an instance of <see cref="Audio"/> for testing.
     /// </summary>
     /// <param name="filePath">The path to the sound file.</param>
     /// <param name="bufferType">The type of buffer.</param>
     /// <returns>The instance for testing.</returns>
-    private Sound CreateSystemUnderTest(string filePath, BufferType bufferType = BufferType.Full)
+    private Audio CreateSystemUnderTest(string filePath, BufferType bufferType = BufferType.Full)
         => new (filePath,
             bufferType,
             this.mockALInvoker,

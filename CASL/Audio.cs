@@ -1,4 +1,4 @@
-﻿// <copyright file="Sound.cs" company="KinsonDigital">
+﻿// <copyright file="Audio.cs" company="KinsonDigital">
 // Copyright (c) KinsonDigital. All rights reserved.
 // </copyright>
 
@@ -21,8 +21,7 @@ using ReactableData;
 /// A single sound that can be played, paused etc.
 /// </summary>
 [SuppressMessage("ReSharper", "ClassWithVirtualMembersNeverInherited.Global", Justification = "Users need to inherit.")]
-// TODO: Rename this to Audio
-public class Sound : ISound
+public class Audio : IAudio
 {
     private const char CrossPlatDirSeparatorChar = '/';
     private const string IsDisposedExceptionMessage = "The sound is disposed.  You must create another sound instance.";
@@ -42,7 +41,7 @@ public class Sound : ISound
     private float playSpeedBeforeDeviceChange;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="Sound"/> class.
+    /// Initializes a new instance of the <see cref="Audio"/> class.
     /// </summary>
     /// <param name="filePath">The path to the sound file.</param>
     /// <param name="bufferType">The type of audio buffer used.</param>
@@ -58,7 +57,7 @@ public class Sound : ISound
     /// <exception cref="InvalidEnumArgumentException">Thrown if the <paramref name="bufferType"/> is invalid.</exception>
     ///
     [ExcludeFromCodeCoverage(Justification = "Directly interacts with the IoC container.")]
-    public Sound(string filePath, BufferType bufferType)
+    public Audio(string filePath, BufferType bufferType)
     {
         var file = IoC.Container.GetInstance<IFile>();
 
@@ -95,7 +94,7 @@ public class Sound : ISound
     }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="Sound"/> class.
+    /// Initializes a new instance of the <see cref="Audio"/> class.
     /// </summary>
     /// <param name="filePath">The path to the sound file.</param>
     /// <param name="bufferType">The type of audio buffer used.</param>
@@ -118,7 +117,7 @@ public class Sound : ISound
     /// </list>
     /// </exception>
     [SuppressMessage("csharpsquid", "S107", Justification = "Not part of the public API.")]
-    internal Sound(
+    internal Audio(
         string filePath,
         BufferType bufferType,
         IOpenALInvoker alInvoker,
@@ -178,10 +177,10 @@ public class Sound : ISound
     }
 
     /// <summary>
-    /// Finalizes an instance of the <see cref="Sound"/> class.
+    /// Finalizes an instance of the <see cref="Audio"/> class.
     /// </summary>
     [ExcludeFromCodeCoverage(Justification = "Finalizers cannot be tested")]
-    ~Sound() => Dispose(false);
+    ~Audio() => Dispose(false);
 
     /// <inheritdoc/>
     public string Name => this.path.GetFileNameWithoutExtension(FilePath);
@@ -190,7 +189,7 @@ public class Sound : ISound
     public string FilePath { get; }
 
     /// <inheritdoc/>
-    /// <exception cref="InvalidOperationException">Thrown if the <see cref="Sound"/> has been disposed.</exception>
+    /// <exception cref="InvalidOperationException">Thrown if the <see cref="Audio"/> has been disposed.</exception>
     public float Volume
     {
         get
@@ -262,7 +261,7 @@ public class Sound : ISound
     }
 
     /// <inheritdoc/>
-    /// <exception cref="InvalidOperationException">Thrown if the <see cref="Sound"/> has been disposed.</exception>
+    /// <exception cref="InvalidOperationException">Thrown if the <see cref="Audio"/> has been disposed.</exception>
     public bool IsLooping
     {
         get => !this.audioDeviceChanging && !this.isDisposed && this.loopingReactable.Pull(PullNotifications.GetLoopState);
@@ -335,7 +334,7 @@ public class Sound : ISound
     }
 
     /// <inheritdoc/>
-    /// <exception cref="InvalidOperationException">Thrown if the <see cref="Sound"/> has been disposed.</exception>
+    /// <exception cref="InvalidOperationException">Thrown if the <see cref="Audio"/> has been disposed.</exception>
     public void Play()
     {
         if (this.isDisposed)
@@ -357,7 +356,7 @@ public class Sound : ISound
     }
 
     /// <inheritdoc/>
-    /// <exception cref="InvalidOperationException">Thrown if the <see cref="Sound"/> has been disposed.</exception>
+    /// <exception cref="InvalidOperationException">Thrown if the <see cref="Audio"/> has been disposed.</exception>
     public void Pause()
     {
         if (this.isDisposed)
@@ -379,7 +378,7 @@ public class Sound : ISound
     }
 
     /// <inheritdoc/>
-    /// <exception cref="InvalidOperationException">Thrown if the <see cref="Sound"/> has been disposed.</exception>
+    /// <exception cref="InvalidOperationException">Thrown if the <see cref="Audio"/> has been disposed.</exception>
     public void Reset()
     {
         if (this.isDisposed)
@@ -401,7 +400,7 @@ public class Sound : ISound
     }
 
     /// <inheritdoc/>
-    /// <exception cref="InvalidOperationException">Thrown if the <see cref="Sound"/> has been disposed.</exception>
+    /// <exception cref="InvalidOperationException">Thrown if the <see cref="Audio"/> has been disposed.</exception>
     public void SetTimePosition(float seconds)
     {
         if (this.isDisposed)
@@ -427,11 +426,11 @@ public class Sound : ISound
     }
 
     /// <inheritdoc/>
-    /// <exception cref="InvalidOperationException">Thrown if the <see cref="Sound"/> has been disposed.</exception>
+    /// <exception cref="InvalidOperationException">Thrown if the <see cref="Audio"/> has been disposed.</exception>
     public void Rewind(float seconds) => SetTimePosition(Position.TotalSeconds - seconds);
 
     /// <inheritdoc/>
-    /// <exception cref="InvalidOperationException">Thrown if the <see cref="Sound"/> has been disposed.</exception>
+    /// <exception cref="InvalidOperationException">Thrown if the <see cref="Audio"/> has been disposed.</exception>
     public void FastForward(float seconds) => SetTimePosition(Position.TotalSeconds + seconds);
 
     /// <inheritdoc/>
