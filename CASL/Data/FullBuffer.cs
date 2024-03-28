@@ -139,7 +139,7 @@ internal sealed class FullBuffer : IAudioBuffer
     /// <inheritdoc/>
     public float TotalSeconds => this.audioDecoder.TotalSeconds;
 
-    /// <inheritdoc/>
+    /// <inheritdoc cref="IAudioBuffer"/>
     public AudioTime Position
     {
         get
