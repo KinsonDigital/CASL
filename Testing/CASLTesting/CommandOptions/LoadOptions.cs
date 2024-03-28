@@ -10,6 +10,25 @@ using CommandLine;
 [Verb("load")]
 public class LoadOptions
 {
-    [Option('t', "type", Required = false, Default = BufferType.Stream)]
+    private string dirPath = string.Empty;
+
+    [Option('p', "path", Required = false, Default = null)]
+    public string? Path
+    {
+        get => this.dirPath;
+        set
+        {
+            this.dirPath = value.Trim(' ', '"');
+            this.dirPath = this.dirPath.Replace('\\', '/');
+            this.dirPath = this.dirPath.EndsWith('/') ? this.dirPath[..^1] : this.dirPath;
+        }
+    }
+
+    [Option(
+        't',
+        "type",
+        Required = false,
+        Default = BufferType.Stream,
+        MetaValue = "[Stream|Full]")]
     public BufferType Type { get; set; }
 }

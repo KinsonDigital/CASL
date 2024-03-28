@@ -28,6 +28,7 @@ public static class Program
 
         if (isInteractive)
         {
+            Console.WriteLine("Type 'help' to see a list of commands.\n");
             var processor = new OptionsProcessor();
             processor.ProcessOptions();
         }

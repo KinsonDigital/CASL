@@ -11,7 +11,7 @@ public class SetPlaySpeedOptions
 {
     private float speed;
 
-    [Option('v', "value", Required = true)]
+    [Option('v', "value", Required = true, Default = 1f)]
     public float Value
     {
         get => this.speed;
@@ -20,7 +20,7 @@ public class SetPlaySpeedOptions
             this.speed = value;
 
             this.speed = this.speed < 0f ? 0f : this.speed;
-            this.speed = this.speed > 1f ? 1f : this.speed;
+            this.speed = this.speed > 2f ? 2f : this.speed;
         }
     }
 }

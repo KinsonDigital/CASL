@@ -17,7 +17,7 @@ public class SetLibPathOptions
         get => this.dirPath;
         set
         {
-            this.dirPath = value.Trim();
+            this.dirPath = value.Trim(' ', '"');
             this.dirPath = this.dirPath.Replace('\\', '/');
             this.dirPath = this.dirPath.EndsWith('/') ? this.dirPath[..^1] : this.dirPath;
         }

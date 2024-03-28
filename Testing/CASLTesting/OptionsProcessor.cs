@@ -6,6 +6,7 @@ namespace CASLTesting;
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -25,13 +26,15 @@ public class OptionsProcessor
     private Task? audioPosTask;
     private CancellationTokenSource? audioPosTokenSrc;
     private Audio? audio;
+    private bool isUnloading;
+    private bool isSleeping;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="OptionsProcessor"/> class.
     /// </summary>
     public OptionsProcessor() =>
-        this.options = new[]
-        {
+        this.options =
+        [
             typeof(PlayOptions),
             typeof(PauseOptions),
             typeof(ResetOptions),
@@ -51,9 +54,13 @@ public class OptionsProcessor
             typeof(LoadOptions),
             typeof(UnloadOptions),
             typeof(ClearOptions),
-            typeof(ExitOption),
-        };
+            typeof(ExitOption)
+        ];
 
+    /// <summary>
+    /// Processes all of the possible commands and options.
+    /// </summary>
+    [SuppressMessage("csharpsquid", "S3776", Justification = "Planned for simplification in the future.")]
     public void ProcessOptions()
     {
         this.audioLibDirPath = DefaultAudioLibDirPath.Replace('\\', '/');
@@ -71,101 +78,169 @@ public class OptionsProcessor
             Parser.Default.ParseArguments(Console.ReadLine().Split(), this.options)
                 .WithParsed<PlayOptions>(_ =>
                 {
-                    Console.WriteLine($"Playing the audio file {Path.GetFileName(this.audio.FilePath)}");
+                    if (SkipIfUnloaded())
+                    {
+                        return;
+                    }
+
+                    Console.WriteLine($"Playing the audio file {Path.GetFileName(this.audio.FilePath)}\n");
                     this.audio.Play();
                 })
                 .WithParsed<PauseOptions>(_ =>
                 {
+                    if (SkipIfUnloaded())
+                    {
+                        return;
+                    }
+
                     this.audio.Pause();
-                    Console.WriteLine($"Paused the audio fle {Path.GetFileName(this.audio.FilePath)}");
+                    Console.WriteLine($"Paused the audio fle {Path.GetFileName(this.audio.FilePath)}\n");
                 })
                 .WithParsed<ResetOptions>(_ =>
                 {
+                    if (SkipIfUnloaded())
+                    {
+                        return;
+                    }
+
                     this.audio.Reset();
+                    Console.WriteLine("Audio reset back to the beginning.\n");
                 })
                 .WithParsed<SetPositionOptions>(o =>
                 {
+                    if (SkipIfUnloaded())
+                    {
+                        return;
+                    }
+
                     this.audio.SetTimePosition(o.Seconds);
-                    Console.WriteLine($"Audio Position Set To {o.Seconds}(seconds).");
+                    Console.WriteLine($"Audio Position Set To {o.Seconds}(sec).\n");
                 })
-                .WithParsed<GetPositionOptions>(_ => Console.WriteLine($"Audio position is: {this.audio.Position}"))
+                .WithParsed<GetPositionOptions>(_ => Console.WriteLine($"Audio position is: {Math.Round(this.audio.Position.TotalSeconds, 2)}(sec)."))
                 .WithParsed<FastForwardOptions>(o =>
                 {
+                    if (SkipIfUnloaded())
+                    {
+                        return;
+                    }
+
                     this.audio.FastForward(o.Seconds);
-                    Console.WriteLine($"Audio Fast Forwarded To: {o.Seconds}(seconds).");
+                    Console.WriteLine($"Audio Fast Forwarded To: {o.Seconds}(sec).\n");
                 })
                 .WithParsed<RewindOptions>(o =>
                 {
+                    if (SkipIfUnloaded())
+                    {
+                        return;
+                    }
+
                     this.audio.Rewind(o.Seconds);
-                    Console.WriteLine($"Audio rewound to {o.Seconds} seconds.");
+                    Console.WriteLine($"Audio rewound to {o.Seconds}(sec).\n");
                 })
-                .WithParsed<GetVolumeOptions>(_ => Console.WriteLine($"Volume Set To: {this.audio.Volume}"))
+                .WithParsed<GetVolumeOptions>(_ => Console.WriteLine($"Volume Set To: {this.audio.Volume}\n"))
                 .WithParsed<SetVolumeOptions>(o =>
                 {
+                    if (SkipIfUnloaded())
+                    {
+                        return;
+                    }
+
                     this.audio.Volume = o.Value;
                     Console.WriteLine($"Volume Set To: {o.Value}");
                 })
-                .WithParsed<GetPlaySpeedOptions>(_ => Console.WriteLine($"PLay Speed: {this.audio.PlaySpeed}"))
+                .WithParsed<GetPlaySpeedOptions>(_ => Console.WriteLine($"Play Speed: {this.audio.PlaySpeed}\n"))
                 .WithParsed<SetPlaySpeedOptions>(o =>
                 {
+                    if (SkipIfUnloaded())
+                    {
+                        return;
+                    }
+
                     this.audio.PlaySpeed = o.Value;
-                    Console.WriteLine($"Set Speed to {o.Value}");
+                    Console.WriteLine($"Set Speed to {o.Value}\n");
                 })
                 .WithParsed<ToggleLoopingOptions>(_ =>
                 {
                     this.audio.IsLooping = !this.audio.IsLooping;
-                    Console.WriteLine($"Audio Set To {(this.audio.IsLooping ? "Loop" : "Not Loop")}");
+                    Console.WriteLine($"Audio Set To {(this.audio.IsLooping ? "Loop" : "Not Loop")}\n");
                 })
                 .WithParsed<ListAudioOptions>(ListAudio)
                 .WithParsed<ListDevicesOptions>(ListDevices)
                 .WithParsed<ChangeDeviceOptions>(ChangeDevice)
                 .WithParsed<SetLibPathOptions>(SetLibPath)
                 .WithParsed<LoadOptions>(Load)
-                .WithParsed<UnloadOptions>(_ => this.audio.Dispose())
-                .WithParsed<ClearOptions>(_ => Console.Clear())
-                .WithParsed<ExitOption>(
-                    _ =>
-                    {
-                        Console.WriteLine("Exiting app. . .");
-                        exitApp = true;
-                        this.audioPosTokenSrc.Cancel();
+                .WithParsed<UnloadOptions>(_ =>
+                {
+                    var fileName = Path.GetFileName(this.audio.FilePath);
 
-                        while (!this.audioPosTask.IsCompleted)
+                    this.isUnloading = true;
+
+                    while (true)
+                    {
+                        if (this.isSleeping)
                         {
-                            Thread.Sleep(100);
+                            break;
                         }
 
-                        this.audioPosTokenSrc.Dispose();
-                        this.audioPosTask.Dispose();
-                        this.audio.Dispose();
-                    });
+                        Thread.Sleep(100);
+                    }
+
+                    this.audio.Dispose();
+                    this.audio = null;
+                    Console.Title = "No Sound Loaded";
+
+                    WriteLine($"The audio file '{fileName}' has been unloaded.", enterBlankAfter: true);
+                    this.isUnloading = false;
+                })
+                .WithParsed<ClearOptions>(_ =>
+                {
+                    Console.Clear();
+                    Console.WriteLine("Type 'help' to see a list of commands.\n");
+                })
+                .WithParsed<ExitOption>(_ =>
+                {
+                    Console.WriteLine("Exiting app. . .");
+                    exitApp = true;
+                    this.audioPosTokenSrc.Cancel();
+
+                    while (!this.audioPosTask.IsCompleted)
+                    {
+                        Thread.Sleep(100);
+                    }
+
+                    this.audioPosTokenSrc.Dispose();
+                    this.audioPosTask.Dispose();
+                    this.audio?.Dispose();
+                });
         }
     }
 
+    [SuppressMessage("csharpsquid", "S1172", Justification = "Parameter is required.")]
     private static void ListDevices(ListDevicesOptions o)
     {
         var deviceList = AudioDevice.AudioDevices;
 
-        WriteLine("Audio Devices:", enterBlankBefore: true, enterBlankAfter: true);
+        WriteLine("Audio Devices:", enterBlankBefore: true);
 
         for (var i = 0; i < deviceList.Length; i++)
         {
             WriteLine($"  {i + 1}: {Path.GetFileName(deviceList[i])}");
         }
+
+        WriteLine();
     }
 
+    [SuppressMessage("csharpsquid", "S1172", Justification = "Parameter is required.")]
     private static void ChangeDevice(ChangeDeviceOptions o)
     {
         var deviceNames = AudioDevice.AudioDevices;
 
-        WriteLine("Enter a number to choose from the list of devices.");
+        WriteLine("Enter a number to choose from the list of devices. Use 'q' to cancel.");
 
         for (var i = 0; i < deviceNames.Length; i++)
         {
             TabbedWriteLine($"  {i + 1}: {deviceNames[i]}");
         }
-
-        Console.WriteLine(string.Join("\n", deviceNames));
 
         Write("Enter a device item number: ", enterBlankBefore: true);
 
@@ -173,11 +248,19 @@ public class OptionsProcessor
 
         do
         {
-            parseSuccess = int.TryParse(Console.ReadLine(), out var chosenNumber);
+            var userInput = Console.ReadLine();
+
+            if (userInput.ToLower() == "q")
+            {
+                break;
+            }
+
+            parseSuccess = int.TryParse(userInput, out var chosenNumber);
 
             if (!parseSuccess)
             {
                 WriteLine("Invalid device number.  Please use a number from the device list.");
+                Write("Enter a device item number: ", enterBlankBefore: true);
                 continue;
             }
 
@@ -188,34 +271,6 @@ public class OptionsProcessor
             WriteLine($"The audio device set to '{chosenDevice}'.", enterBlankBefore: true, enterBlankAfter: true);
         }
         while (!parseSuccess);
-    }
-
-    private static void SetLibPath(SetLibPathOptions o)
-    {
-        if (!Directory.Exists(o.Path))
-        {
-            Console.WriteLine($"The music library path '{o.Path}' does not exist.");
-            return;
-        }
-
-        var audioFiles = GetAudioFiles(o.Path);
-        var containsFiles = audioFiles.Length > 0;
-
-        if (containsFiles)
-        {
-            var totalMp3Files = audioFiles.Count(f => f.ToLower().EndsWith(".mp3"));
-            var totalOggFiles = audioFiles.Count(f => f.ToLower().EndsWith(".ogg"));
-
-            Console.WriteLine($"Total MP3 Files: {totalMp3Files}");
-            Console.WriteLine($"Total OGG Files: {totalOggFiles}");
-        }
-        else
-        {
-            var beforeClr = Console.ForegroundColor;
-            Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.WriteLine($"The music library path '{o.Path}' does not exist.\n");
-            Console.ForegroundColor = beforeClr;
-        }
     }
 
     private static string[] GetAudioFiles(string path)
@@ -229,8 +284,14 @@ public class OptionsProcessor
         return validFiles.ToArray();
     }
 
-    private static void Write(string msg, bool enterBlankBefore = false, bool enterBlankAfter = false)
+    private static void Write(string? msg = null, bool enterBlankBefore = false, bool enterBlankAfter = false)
     {
+        if (string.IsNullOrEmpty(msg))
+        {
+            Console.WriteLine();
+            return;
+        }
+
         if (enterBlankBefore)
         {
             WriteBlank();
@@ -244,8 +305,14 @@ public class OptionsProcessor
         }
     }
 
-    private static void WriteLine(string msg, bool enterBlankBefore = false, bool enterBlankAfter = false)
+    private static void WriteLine(string? msg = null, bool enterBlankBefore = false, bool enterBlankAfter = false)
     {
+        if (string.IsNullOrEmpty(msg))
+        {
+            Console.WriteLine();
+            return;
+        }
+
         if (enterBlankBefore)
         {
             WriteBlank();
@@ -271,6 +338,49 @@ public class OptionsProcessor
         WriteLine(msg, enterBlankBefore, enterBlankAfter);
     }
 
+    private bool SkipIfUnloaded()
+    {
+        if (this.audio is null)
+        {
+            Console.WriteLine("No audio file is currently loaded.  Load a file first with the 'load' command.\n");
+        }
+
+        return this.audio is null;
+    }
+
+    [SuppressMessage("csharpsquid", "S1172", Justification = "Parameter is required.")]
+    private void SetLibPath(SetLibPathOptions o)
+    {
+        if (!Directory.Exists(o.Path))
+        {
+            Console.WriteLine($"The music library path '{o.Path}' does not exist.");
+            return;
+        }
+
+        this.audioLibDirPath = o.Path;
+        Console.WriteLine($"\nThe library path has been set to {this.audioLibDirPath}");
+
+        var audioFiles = GetAudioFiles(o.Path);
+        var containsFiles = audioFiles.Length > 0;
+
+        if (containsFiles)
+        {
+            var totalMp3Files = audioFiles.Count(f => f.ToLower().EndsWith(".mp3"));
+            var totalOggFiles = audioFiles.Count(f => f.ToLower().EndsWith(".ogg"));
+
+            Console.WriteLine($"   Total MP3 Files: {totalMp3Files}");
+            Console.WriteLine($"   Total OGG Files: {totalOggFiles}\n");
+        }
+        else
+        {
+            var beforeClr = Console.ForegroundColor;
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine($"The music library path '{o.Path}' does not contain any audio files of type '.mp3' or '.ogg'.\n");
+            Console.ForegroundColor = beforeClr;
+        }
+    }
+
+    [SuppressMessage("csharpsquid", "S1172", Justification = "Parameter is required.")]
     private void ListAudio(ListAudioOptions o)
     {
         var audioFiles = GetAudioFiles(this.audioLibDirPath);
@@ -282,11 +392,25 @@ public class OptionsProcessor
 
             Console.WriteLine($"  {fileName}");
         }
+
+        WriteLine();
     }
 
     private void Load(LoadOptions o)
     {
         var soundList = GetAudioFiles(this.audioLibDirPath);
+
+        if (!string.IsNullOrEmpty(o.Path))
+        {
+            if (!File.Exists(o.Path))
+            {
+                WriteLine($"The audio file '{o.Path}' does not exist.", enterBlankAfter: true);
+                return;
+            }
+
+            LoadSound(o.Path, o.Type);
+            return;
+        }
 
         WriteLine("Enter a number to choose from the list of sounds.", enterBlankBefore: true);
 
@@ -295,13 +419,20 @@ public class OptionsProcessor
             TabbedWriteLine($"  {i + 1}: {Path.GetFileName(soundList[i])}");
         }
 
-        Write("Enter a sound item number: ", enterBlankBefore: true);
+        Write("Enter a sound item number: ", enterBlankBefore: true, enterBlankAfter: true);
 
         bool parseSuccess;
 
         do
         {
-            parseSuccess = int.TryParse(Console.ReadLine(), out var chosenNumber);
+            var userInput = Console.ReadLine();
+
+            if (userInput.ToLower() == "q")
+            {
+                break;
+            }
+
+            parseSuccess = int.TryParse(userInput, out var chosenNumber);
 
             if (!parseSuccess)
             {
@@ -325,14 +456,22 @@ public class OptionsProcessor
             {
                 while (!this.audioPosTokenSrc.IsCancellationRequested)
                 {
+                    if (this.isUnloading || this.audio is null)
+                    {
+                        this.isSleeping = true;
+                        Thread.Sleep(250);
+                        continue;
+                    }
+
                     this.audioPosTokenSrc.Token.WaitHandle.WaitOne(250);
 
                     var minutes = (int)Math.Floor(this.audio.Position.Minutes);
                     var seconds = (int)Math.Round(this.audio.Position.Seconds, 0);
-                    var minSec = $"{minutes}:{seconds}";
+                    var minSec = $"{minutes}:{seconds:D2}";
                     var totalSeconds = (int)Math.Round(this.audio.Position.TotalSeconds, 0);
+                    var fileName = Path.GetFileName(this.audio.FilePath);
 
-                    Console.Title = $"{minSec} |  Total Secs: {totalSeconds}";
+                    Console.Title = $"{minSec} |  Total Secs: {totalSeconds} | {fileName}";
                 }
             },
             this.audioPosTokenSrc.Token);
@@ -342,7 +481,7 @@ public class OptionsProcessor
 
     private void LoadSound(string soundFile, BufferType bufferType)
     {
-        this.audio.Dispose();
+        this.audio?.Dispose();
         this.audio = new Audio(soundFile, bufferType);
 
         var fileName = Path.GetFileName(soundFile);
@@ -356,6 +495,8 @@ public class OptionsProcessor
         };
 
         WriteLine(msg, enterBlankAfter: true);
+        this.isSleeping = false;
+        this.isUnloading = false;
     }
 
     private void SetDefaultSoundFile()
