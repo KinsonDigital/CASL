@@ -33,6 +33,7 @@ internal sealed class StreamBuffer : IAudioBuffer
     private readonly IDisposable posCmdUnsubscriber;
     private readonly IDisposable loopingUnsubscriber;
     private readonly uint[] bufferIds = new uint[TotalDataBuffers];
+    private readonly object lockObject = new ();
     private AudioFormatType audioFormatType;
     private uint srcId;
     private bool isInitialized;
@@ -274,12 +275,24 @@ internal sealed class StreamBuffer : IAudioBuffer
     /// <summary>
     /// Puts the buffer into a state of changing audio devices.
     /// </summary>
-    private void DeviceChanging(object? sender, EventArgs e) => this.audioDeviceChanging = true;
+    private void DeviceChanging(object? sender, EventArgs e)
+    {
+        lock (this.lockObject)
+        {
+            this.audioDeviceChanging = true;
+        }
+    }
 
     /// <summary>
     /// Puts the buffer into a state of not changing audio devices.
     /// </summary>
-    private void DeviceChanged(object? sender, EventArgs e) => this.audioDeviceChanging = false;
+    private void DeviceChanged(object? sender, EventArgs e)
+    {
+        lock (this.lockObject)
+        {
+            this.audioDeviceChanging = false;
+        }
+    }
 
     /// <summary>
     /// Processes audio commands.
@@ -381,10 +394,13 @@ internal sealed class StreamBuffer : IAudioBuffer
                 break;
             }
 
-            if (this.audioDeviceChanging)
+            lock (this.lockObject)
             {
-                this.threadService.Sleep(100);
-                continue;
+                if (this.audioDeviceChanging)
+                {
+                    this.threadService.Sleep(100);
+                    continue;
+                }
             }
 
             // If the current position has reached the end of the audio, reset and start playing
