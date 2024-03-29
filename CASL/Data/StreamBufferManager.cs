@@ -136,6 +136,7 @@ internal sealed class StreamBufferManager : IStreamBufferManager
 
             var sampleData = readSamples();
 
+            // If the end of the data has been reached
             if (sampleData.Length <= 0)
             {
                 continue;
