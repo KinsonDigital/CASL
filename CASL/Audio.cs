@@ -68,6 +68,7 @@ public class Audio : IAudio
         }
 
         FilePath = filePath.ToCrossPlatPath().TrimAllFromEnd(CrossPlatDirSeparatorChar);
+        BufferType = bufferType;
 
         this.alInvoker = IoC.Container.GetInstance<IOpenALInvoker>();
         this.alInvoker.ErrorCallback += ErrorCallback;
