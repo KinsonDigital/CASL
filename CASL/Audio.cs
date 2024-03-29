@@ -1,4 +1,4 @@
-﻿// <copyright file="Audio.cs" company="KinsonDigital">
+// <copyright file="Audio.cs" company="KinsonDigital">
 // Copyright (c) KinsonDigital. All rights reserved.
 // </copyright>
 
@@ -39,6 +39,7 @@ public class Audio : IAudio
     private ALSourceState stateBeforeDeviceChange;
     private float volumeBeforeDeviceChange = -1;
     private float playSpeedBeforeDeviceChange;
+    private bool loopStateBeforeDeviceChange;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="Audio"/> class.
@@ -496,6 +497,7 @@ public class Audio : IAudio
         this.volumeBeforeDeviceChange = Volume;
         this.posBeforeDeviceChange = Position;
         this.playSpeedBeforeDeviceChange = PlaySpeed;
+        this.loopStateBeforeDeviceChange = this.alInvoker.GetSource(this.srcId, ALSourceb.Looping);
 
         this.audioDeviceChanging = true;
 
@@ -517,6 +519,7 @@ public class Audio : IAudio
         Init();
 
         this.audioDeviceChanging = false;
+        this.alInvoker.Source(this.srcId, ALSourceb.Looping, this.loopStateBeforeDeviceChange);
 
         if (this.volumeBeforeDeviceChange >= 0)
         {
