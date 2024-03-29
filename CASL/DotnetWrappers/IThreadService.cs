@@ -7,7 +7,7 @@ namespace CASL.DotnetWrappers;
 using System.Threading;
 
 /// <inheritdoc cref="Thread"/>
-public interface IThreadService
+internal interface IThreadService
 {
     /// <inheritdoc cref="Thread.Sleep(int)"/>
     void Sleep(int millisecondsTimeout);

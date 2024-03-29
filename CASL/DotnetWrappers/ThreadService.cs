@@ -9,7 +9,7 @@ using System.Threading;
 
 /// <inheritdoc/>
 [ExcludeFromCodeCoverage(Justification = "Directly interacts with dotnet.")]
-public class ThreadService : IThreadService
+internal class ThreadService : IThreadService
 {
     /// <inheritdoc/>
     public void Sleep(int millisecondsTimeout) => Thread.Sleep(millisecondsTimeout);
