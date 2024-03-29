@@ -391,7 +391,7 @@ internal sealed class StreamBuffer : IAudioBuffer
 
             // If the current position has reached the end of the audio, reset and start playing
             // again if the audio is set to loop.
-            if (Math.Floor(Position.TotalSeconds) >= Math.Floor(this.audioDecoder.TotalSeconds))
+            if (HasReachedEnd())
             {
                 Reset();
 
@@ -440,6 +440,23 @@ internal sealed class StreamBuffer : IAudioBuffer
             // Thread.Sleep() vs Task.Delay().  Task.Delay() is not efficient for this use case.
             this.threadService.Sleep(sleepTime);
         }
+    }
+
+    /// <summary>
+    /// Returns a value indicating whether or not the end of the audio has been reached.
+    /// </summary>
+    /// <returns>True if the end has been reached, otherwise false.</returns>
+    private bool HasReachedEnd()
+    {
+        if (this.audioDecoder.TotalSeconds >= 1f)
+        {
+            return Math.Floor(Position.TotalSeconds) >= Math.Floor(this.audioDecoder.TotalSeconds);
+        }
+
+        var currentPosSec = (float)Math.Round(Position.TotalSeconds, 1);
+        var totalSec = (float)Math.Round(this.audioDecoder.TotalSeconds, 2);
+
+        return currentPosSec >= totalSec;
     }
 
     /// <summary>
