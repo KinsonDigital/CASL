@@ -235,11 +235,11 @@ public class OptionsProcessor
     {
         var deviceNames = AudioDevice.AudioDevices;
 
-        WriteLine("Enter a number to choose from the list of devices. Use 'q' to cancel.");
+        WriteLine("Enter a number to choose from the list of devices.\nUse 'q' to cancel.", enterBlankBefore: true);
 
         for (var i = 0; i < deviceNames.Length; i++)
         {
-            TabbedWriteLine($"  {i + 1}: {deviceNames[i]}");
+            WriteLine($"  {i + 1}: {deviceNames[i]}");
         }
 
         Write("Enter a device item number: ", enterBlankBefore: true);
@@ -250,8 +250,9 @@ public class OptionsProcessor
         {
             var userInput = Console.ReadLine();
 
-            if (userInput.ToLower() == "q")
+            if (userInput.Equals("q", StringComparison.CurrentCultureIgnoreCase))
             {
+                WriteLine("Device change stopped.", enterBlankAfter: true);
                 break;
             }
 
@@ -328,16 +329,6 @@ public class OptionsProcessor
 
     private static void WriteBlank() => Console.WriteLine();
 
-    private static void TabbedWriteLine(string msg, int tabCount = 1, bool enterBlankBefore = false, bool enterBlankAfter = false)
-    {
-        for (var i = 0; i < tabCount; i++)
-        {
-            msg = $"\t{msg}";
-        }
-
-        WriteLine(msg, enterBlankBefore, enterBlankAfter);
-    }
-
     private bool SkipIfUnloaded()
     {
         if (this.audio is null)
@@ -358,7 +349,7 @@ public class OptionsProcessor
         }
 
         this.audioLibDirPath = o.Path;
-        Console.WriteLine($"\nThe library path has been set to {this.audioLibDirPath}");
+        Console.WriteLine($"\nThe library path has been set to '{this.audioLibDirPath}'");
 
         var audioFiles = GetAudioFiles(o.Path);
         var containsFiles = audioFiles.Length > 0;
@@ -368,6 +359,7 @@ public class OptionsProcessor
             var totalMp3Files = audioFiles.Count(f => f.ToLower().EndsWith(".mp3"));
             var totalOggFiles = audioFiles.Count(f => f.ToLower().EndsWith(".ogg"));
 
+            Console.WriteLine($"   Total Files: {totalMp3Files + totalOggFiles}");
             Console.WriteLine($"   Total MP3 Files: {totalMp3Files}");
             Console.WriteLine($"   Total OGG Files: {totalOggFiles}\n");
         }
@@ -412,14 +404,17 @@ public class OptionsProcessor
             return;
         }
 
-        WriteLine("Enter a number to choose from the list of sounds.", enterBlankBefore: true);
+        var loadType = o.Type == BufferType.Full
+            ? "fully load" : "load as a stream";
+
+        WriteLine($"Enter a number to choose from the list of sounds to {loadType}.\nUse 'q' to cancel.", enterBlankBefore: true);
 
         for (var i = 0; i < soundList.Length; i++)
         {
-            TabbedWriteLine($"  {i + 1}: {Path.GetFileName(soundList[i])}");
+            WriteLine($"  {i + 1}: {Path.GetFileName(soundList[i])}");
         }
 
-        Write("Enter a sound item number: ", enterBlankBefore: true, enterBlankAfter: true);
+        Write("Enter a sound item number: ", enterBlankBefore: true);
 
         bool parseSuccess;
 
@@ -427,8 +422,9 @@ public class OptionsProcessor
         {
             var userInput = Console.ReadLine();
 
-            if (userInput.ToLower() == "q")
+            if (userInput.Equals("q", StringComparison.CurrentCultureIgnoreCase))
             {
+                WriteLine("Load process stopped.", enterBlankAfter: true);
                 break;
             }
 
@@ -465,13 +461,15 @@ public class OptionsProcessor
 
                     this.audioPosTokenSrc.Token.WaitHandle.WaitOne(250);
 
-                    var minutes = (int)Math.Floor(this.audio.Position.Minutes);
-                    var seconds = (int)Math.Round(this.audio.Position.Seconds, 0);
-                    var minSec = $"{minutes}:{seconds:D2}";
+                    var posMin = (int)Math.Floor(this.audio.Position.Minutes);
+                    var posSec = (int)Math.Round(this.audio.Position.Seconds, 0);
+                    var minSec = $"{posMin}:{posSec:D2}";
                     var totalSeconds = (int)Math.Round(this.audio.Position.TotalSeconds, 0);
                     var fileName = Path.GetFileName(this.audio.FilePath);
+                    var totalMin = (int)Math.Floor(this.audio.Length.TotalSeconds / 60);
+                    var totalSec = (int)Math.Round(this.audio.Length.TotalSeconds % 60, 0);
 
-                    Console.Title = $"{minSec} |  Total Secs: {totalSeconds} | {fileName}";
+                    Console.Title = $"{minSec} |  Total Secs: {totalSeconds} | {fileName}({totalMin}:{totalSec})";
                 }
             },
             this.audioPosTokenSrc.Token);
