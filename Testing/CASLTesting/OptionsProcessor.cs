@@ -6,6 +6,7 @@ namespace CASLTesting;
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
@@ -48,6 +49,7 @@ public class OptionsProcessor
             typeof(SetPlaySpeedOptions),
             typeof(ListDevicesOptions),
             typeof(ToggleLoopingOptions),
+            typeof(GetLoopStatusOptions),
             typeof(ListAudioOptions),
             typeof(ChangeDeviceOptions),
             typeof(SetLibPathOptions),
@@ -75,94 +77,80 @@ public class OptionsProcessor
 
         while (!exitApp)
         {
+#pragma warning disable SA1503
             Parser.Default.ParseArguments(Console.ReadLine().Split(), this.options)
                 .WithParsed<PlayOptions>(_ =>
                 {
-                    if (SkipIfUnloaded())
-                    {
-                        return;
-                    }
-
+                    if (AudioNotLoaded()) return;
                     Console.WriteLine($"Playing the audio file {Path.GetFileName(this.audio.FilePath)}\n");
                     this.audio.Play();
                 })
                 .WithParsed<PauseOptions>(_ =>
                 {
-                    if (SkipIfUnloaded())
-                    {
-                        return;
-                    }
-
+                    if (AudioNotLoaded()) return;
                     this.audio.Pause();
                     Console.WriteLine($"Paused the audio fle {Path.GetFileName(this.audio.FilePath)}\n");
                 })
                 .WithParsed<ResetOptions>(_ =>
                 {
-                    if (SkipIfUnloaded())
-                    {
-                        return;
-                    }
-
+                    if (AudioNotLoaded()) return;
                     this.audio.Reset();
                     Console.WriteLine("Audio reset back to the beginning.\n");
                 })
                 .WithParsed<SetPositionOptions>(o =>
                 {
-                    if (SkipIfUnloaded())
-                    {
-                        return;
-                    }
-
+                    if (AudioNotLoaded()) return;
                     this.audio.SetTimePosition(o.Seconds);
                     Console.WriteLine($"Audio Position Set To {o.Seconds}(sec).\n");
                 })
-                .WithParsed<GetPositionOptions>(_ => Console.WriteLine($"Audio position is: {Math.Round(this.audio.Position.TotalSeconds, 2)}(sec)."))
+                .WithParsed<GetPositionOptions>(_ =>
+                {
+                    if (AudioNotLoaded()) return;
+                    WriteLine($"Audio position is: {Math.Round(this.audio.Position.TotalSeconds, 2)}(sec).", enterBlankAfter: true);
+                })
                 .WithParsed<FastForwardOptions>(o =>
                 {
-                    if (SkipIfUnloaded())
-                    {
-                        return;
-                    }
-
+                    if (AudioNotLoaded()) return;
                     this.audio.FastForward(o.Seconds);
                     Console.WriteLine($"Audio Fast Forwarded To: {o.Seconds}(sec).\n");
                 })
                 .WithParsed<RewindOptions>(o =>
                 {
-                    if (SkipIfUnloaded())
-                    {
-                        return;
-                    }
-
+                    if (AudioNotLoaded()) return;
                     this.audio.Rewind(o.Seconds);
                     Console.WriteLine($"Audio rewound to {o.Seconds}(sec).\n");
                 })
                 .WithParsed<GetVolumeOptions>(_ => Console.WriteLine($"Volume Set To: {this.audio.Volume}\n"))
                 .WithParsed<SetVolumeOptions>(o =>
                 {
-                    if (SkipIfUnloaded())
-                    {
-                        return;
-                    }
-
+                    if (AudioNotLoaded()) return;
                     this.audio.Volume = o.Value;
                     Console.WriteLine($"Volume Set To: {o.Value}");
                 })
-                .WithParsed<GetPlaySpeedOptions>(_ => Console.WriteLine($"Play Speed: {this.audio.PlaySpeed}\n"))
+                .WithParsed<GetPlaySpeedOptions>(_ =>
+                {
+                    if (AudioNotLoaded()) return;
+                    Console.WriteLine($"Play Speed: {this.audio.PlaySpeed}\n");
+                })
                 .WithParsed<SetPlaySpeedOptions>(o =>
                 {
-                    if (SkipIfUnloaded())
-                    {
-                        return;
-                    }
-
+                    if (AudioNotLoaded()) return;
                     this.audio.PlaySpeed = o.Value;
-                    Console.WriteLine($"Set Speed to {o.Value}\n");
+                    Console.WriteLine($"Set the speed to {o.Value}\n");
+                })
+                .WithParsed<GetLoopStatusOptions>(_ =>
+                {
+                    if (AudioNotLoaded()) return;
+                    var loopStatus = this.audio.IsLooping ? "enabled" : "disabled";
+                    Console.WriteLine($"Audio looping {loopStatus}.\n");
                 })
                 .WithParsed<ToggleLoopingOptions>(_ =>
                 {
+                    if (AudioNotLoaded()) return;
                     this.audio.IsLooping = !this.audio.IsLooping;
-                    Console.WriteLine($"Audio Set To {(this.audio.IsLooping ? "Loop" : "Not Loop")}\n");
+                    var loopStatus = this.audio.IsLooping ? "enabled" : "disabled";
+
+                    Console.WriteLine($"Audio looping set to {loopStatus}.\n");
                 })
                 .WithParsed<ListAudioOptions>(ListAudio)
                 .WithParsed<ListDevicesOptions>(ListDevices)
@@ -212,6 +200,7 @@ public class OptionsProcessor
                     this.audioPosTask.Dispose();
                     this.audio?.Dispose();
                 });
+#pragma warning restore SA1503
         }
     }
 
@@ -329,7 +318,7 @@ public class OptionsProcessor
 
     private static void WriteBlank() => Console.WriteLine();
 
-    private bool SkipIfUnloaded()
+    private bool AudioNotLoaded()
     {
         if (this.audio is null)
         {
@@ -461,15 +450,19 @@ public class OptionsProcessor
 
                     this.audioPosTokenSrc.Token.WaitHandle.WaitOne(250);
 
-                    var posMin = (int)Math.Floor(this.audio.Position.Minutes);
-                    var posSec = (int)Math.Round(this.audio.Position.Seconds, 0);
-                    var minSec = $"{posMin}:{posSec:D2}";
-                    var totalSeconds = (int)Math.Round(this.audio.Position.TotalSeconds, 0);
+                    var minAndSec = $"{(int)Math.Floor(this.audio.Position.Minutes)}:{(int)Math.Round(this.audio.Position.Seconds, 0):D2}";
+                    var currentPosSec = (int)Math.Round(this.audio.Position.TotalSeconds, 0);
                     var fileName = Path.GetFileName(this.audio.FilePath);
                     var totalMin = (int)Math.Floor(this.audio.Length.TotalSeconds / 60);
-                    var totalSec = (int)Math.Round(this.audio.Length.TotalSeconds % 60, 0);
+                    var lenRemainingSec = (int)Math.Round(this.audio.Length.TotalSeconds % 60, 0);
+                    var totalSec = Math.Round(this.audio.Length.TotalSeconds, 0);
+                    var bufferType = this.audio.BufferType == BufferType.Full ? "full" : "stream";
 
-                    Console.Title = $"{minSec} |  Total Secs: {totalSeconds} | {fileName}({totalMin}:{totalSec})";
+                    var timeStr = $"Time: {minAndSec} m:s | {currentPosSec} s";
+                    var bufferStr = $"Buffer: {bufferType}";
+                    var totalTimeStr = $"{totalMin}:{lenRemainingSec}";
+
+                    Console.Title = $"{timeStr} | {totalSec} s | {fileName}({totalTimeStr} | {bufferStr})";
                 }
             },
             this.audioPosTokenSrc.Token);
