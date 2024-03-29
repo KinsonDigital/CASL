@@ -19,7 +19,7 @@ using NativeInterop.Factories;
 /// Provides access to OpenAL functions.
 /// </summary>
 [ExcludeFromCodeCoverage]
-internal class AL
+internal sealed class AL
 {
     private readonly ALGetError alGetError;
     private readonly ALGenBuffers alGenBuffers;

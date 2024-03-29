@@ -10,7 +10,7 @@ using System.ComponentModel;
 using OpenAL;
 
 /// <inheritdoc/>
-internal class StreamBufferManager : IStreamBufferManager
+internal sealed class StreamBufferManager : IStreamBufferManager
 {
     private const long ChunkSize = 4096L;
     private readonly IOpenALInvoker alInvoker;

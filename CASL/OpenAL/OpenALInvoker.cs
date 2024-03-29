@@ -13,7 +13,7 @@ using System.Diagnostics.CodeAnalysis;
 /// Invokes OpenAL functions.
 /// </summary>
 [ExcludeFromCodeCoverage]
-internal class OpenALInvoker : IOpenALInvoker
+internal sealed class OpenALInvoker : IOpenALInvoker
 {
     private readonly ALC alc;
     private readonly AL al;

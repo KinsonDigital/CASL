@@ -21,7 +21,7 @@ using Exceptions;
 /// <summary>
 /// Loads a native library and returns a pointer for the purpose of interoping with it.
 /// </summary>
-internal class NativeLibraryLoader : ILibraryLoader
+internal sealed class NativeLibraryLoader : ILibraryLoader
 {
     private const char CrossPlatDirSeparatorChar = '/';
     private readonly IDependencyManager dependencyManager;

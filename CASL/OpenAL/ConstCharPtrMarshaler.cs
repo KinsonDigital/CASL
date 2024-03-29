@@ -12,7 +12,7 @@ using System.Runtime.InteropServices;
 /// Provides a wrapper for handling method calls.
 /// </summary>
 [ExcludeFromCodeCoverage]
-internal class ConstCharPtrMarshaler : ICustomMarshaler
+internal sealed class ConstCharPtrMarshaler : ICustomMarshaler
 {
     private static readonly ConstCharPtrMarshaler Instance = new ();
 

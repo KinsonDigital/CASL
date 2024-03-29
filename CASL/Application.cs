@@ -11,7 +11,7 @@ using System.Reflection;
 /// Provides information about the running application.
 /// </summary>
 [ExcludeFromCodeCoverage(Justification = "Directly interacts with dotnet.")]
-internal class Application : IApplication
+internal sealed class Application : IApplication
 {
     /// <inheritdoc/>
     public string Location => Assembly.GetExecutingAssembly().Location;
