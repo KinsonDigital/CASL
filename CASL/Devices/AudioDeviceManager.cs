@@ -35,6 +35,8 @@ internal sealed class AudioDeviceManager : IAudioDeviceManager
 
         this.alInvoker = alInvoker;
         this.alInvoker.ErrorCallback += ErrorCallback;
+
+        InitDevice();
     }
 
     /// <summary>

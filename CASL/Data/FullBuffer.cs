@@ -176,11 +176,6 @@ internal sealed class FullBuffer : IAudioBuffer
             _ => this.audioFormatType
         };
 
-        if (!this.audioDeviceManager.IsInitialized)
-        {
-            this.audioDeviceManager.InitDevice();
-        }
-
         this.srcId = this.alInvoker.GenSource();
         this.bufferId = this.alInvoker.GenBuffer();
 

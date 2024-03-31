@@ -163,11 +163,6 @@ internal sealed class StreamBuffer : IAudioBuffer
             throw new FileNotFoundException($"The audio file could not be found.", filePath);
         }
 
-        if (!this.audioDeviceManager.IsInitialized)
-        {
-            this.audioDeviceManager.InitDevice();
-        }
-
         var extension = this.path.GetExtension(filePath).ToLower();
 
         var exMsg = $"The file extension '{extension}' is not supported.";
