@@ -522,15 +522,20 @@ public class Audio : IAudio
         this.audioDeviceChanging = false;
         this.alInvoker.Source(this.srcId, ALSourceb.Looping, this.loopStateBeforeDeviceChange);
 
-        if (this.volumeBeforeDeviceChange >= 0)
+        if (this.volumeBeforeDeviceChange >= 0f)
         {
             Volume = this.volumeBeforeDeviceChange;
-            this.volumeBeforeDeviceChange = -1;
+            this.volumeBeforeDeviceChange = -1f;
         }
 
         if (this.posBeforeDeviceChange != default)
         {
-            SetTimePosition(this.posBeforeDeviceChange.TotalSeconds);
+            // Only set the position back the previous value if the total seconds is greater than a second
+            if (this.audioBuffer.TotalSeconds > 1f)
+            {
+                SetTimePosition(this.posBeforeDeviceChange.TotalSeconds);
+            }
+
             this.posBeforeDeviceChange = default;
         }
 
