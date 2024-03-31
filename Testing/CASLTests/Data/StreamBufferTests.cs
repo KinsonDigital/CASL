@@ -704,9 +704,10 @@ public class StreamBufferTests
 
         // Act
         this.audioCmdSubscription.OnReceive(new AudioCommandData { Command = audioCmd, SourceId = SourceId });
+        var actualLoopState = sut.GetBoolFieldValue("isLooping");
 
         // Assert
-        sut.IsLooping.Should().Be(expected);
+        actualLoopState.Should().Be(expected);
     }
 
     [Fact]

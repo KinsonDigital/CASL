@@ -1,4 +1,4 @@
-﻿// <copyright file="StreamBuffer.cs" company="KinsonDigital">
+// <copyright file="StreamBuffer.cs" company="KinsonDigital">
 // Copyright (c) KinsonDigital. All rights reserved.
 // </copyright>
 
@@ -38,6 +38,7 @@ internal sealed class StreamBuffer : IAudioBuffer
     private bool isInitialized;
     private bool isDisposed;
     private bool audioDeviceChanging;
+    private bool isLooping;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="StreamBuffer"/> class.
@@ -114,7 +115,7 @@ internal sealed class StreamBuffer : IAudioBuffer
         this.loopingUnsubscriber = loopingReactable.CreateOneWayRespond(
             PullNotifications.GetLoopState,
             name: nameof(FullBuffer),
-            () => IsLooping,
+            () => this.isLooping,
             () => this.loopingUnsubscriber?.Dispose());
 
         this.audioDeviceManager.DeviceChanging += DeviceChanging;
@@ -142,9 +143,6 @@ internal sealed class StreamBuffer : IAudioBuffer
             return new (totalSeconds);
         }
     }
-
-    /// <inheritdoc/>
-    public bool IsLooping { get; private set; }
 
     /// <inheritdoc/>
     /// <exception cref="ArgumentException">
@@ -306,10 +304,10 @@ internal sealed class StreamBuffer : IAudioBuffer
                 Reset();
                 break;
             case AudioCommands.EnableLooping:
-                IsLooping = true;
+                this.isLooping = true;
                 break;
             case AudioCommands.DisableLooping:
-                IsLooping = false;
+                this.isLooping = false;
                 break;
         }
     }
@@ -332,7 +330,7 @@ internal sealed class StreamBuffer : IAudioBuffer
         {
             FillBuffersFromStart();
 
-            if (IsLooping)
+            if (this.isLooping)
             {
                 this.alInvoker.SourcePlay(this.srcId);
             }
@@ -395,7 +393,7 @@ internal sealed class StreamBuffer : IAudioBuffer
             {
                 Reset();
 
-                if (IsLooping)
+                if (this.isLooping)
                 {
                     this.alInvoker.SourcePlay(this.srcId);
                 }

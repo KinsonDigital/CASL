@@ -156,9 +156,6 @@ internal sealed class FullBuffer : IAudioBuffer
     }
 
     /// <inheritdoc/>
-    public bool IsLooping => this.alInvoker.GetSource(this.srcId, ALSourceb.Looping);
-
-    /// <inheritdoc/>
     /// <exception cref="ArgumentException">Thrown if the given <paramref name="filePath"/> is null or empty.</exception>
     /// <exception cref="FileNotFoundException">Thrown if the given <paramref name="filePath"/> does not exist.</exception>
     public uint Init(string filePath)

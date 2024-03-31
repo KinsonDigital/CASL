@@ -22,11 +22,6 @@ internal interface IAudioBuffer : IDisposable
     AudioTime Position { get; }
 
     /// <summary>
-    /// Gets a value indicating whether the audio is currently set to loop.
-    /// </summary>
-    bool IsLooping { get; }
-
-    /// <summary>
     /// Initializes the buffer.
     /// </summary>
     /// <param name="filePath">The fully qualified file path to the audio file that contains the audio data.</param>
