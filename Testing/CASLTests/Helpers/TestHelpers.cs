@@ -1,4 +1,4 @@
-﻿// <copyright file="TestHelpers.cs" company="KinsonDigital">
+// <copyright file="TestHelpers.cs" company="KinsonDigital">
 // Copyright (c) KinsonDigital. All rights reserved.
 // </copyright>
 
@@ -184,13 +184,13 @@ public static class TestHelpers
 
         allEnumFields.Should().HaveCountGreaterThan(0, $"no enum fields exist in the object.");
 
-        var arrayField = Array.Find(allEnumFields, f => f.Name == fieldName);
+        var foundField = Array.Find(allEnumFields, f => f.Name == fieldName);
 
-        arrayField.Should().NotBeNull($"a field with the name '{fieldName}' does not exist in the object.");
-        arrayField.FieldType.IsArray.Should().BeTrue("the field is not an array.");
-        arrayField.FieldType.GetElementType().Should().Be(typeof(TElements), $"the array's elements are not of type {typeof(TElements)}");
+        foundField.Should().NotBeNull($"a field with the name '{fieldName}' does not exist in the object.");
+        foundField.FieldType.IsArray.Should().BeTrue("the field is not an array.");
+        foundField.FieldType.GetElementType().Should().Be(typeof(TElements), $"the array's elements are not of type {typeof(TElements)}");
 
-        arrayField.SetValue(fieldContainer, null);
+        foundField.SetValue(fieldContainer, null);
     }
 
     /// <summary>
@@ -207,12 +207,12 @@ public static class TestHelpers
 
         allEnumFields.Should().HaveCountGreaterThan(0, $"no enum fields exist in the object.");
 
-        var arrayField = Array.Find(allEnumFields, f => f.Name == fieldName);
+        var foundField = Array.Find(allEnumFields, f => f.Name == fieldName);
 
-        arrayField.Should().NotBeNull($"a field with the name '{fieldName}' does not exist in the object.");
-        arrayField.FieldType.IsValueType.Should().BeFalse("the field is not a value type.");
+        foundField.Should().NotBeNull($"a field with the name '{fieldName}' does not exist in the object.");
+        foundField.FieldType.IsValueType.Should().BeFalse("the field is not a value type.");
 
-        arrayField.SetValue(fieldContainer, null);
+        foundField.SetValue(fieldContainer, null);
     }
 
     /// <summary>
@@ -231,12 +231,12 @@ public static class TestHelpers
 
         allEnumFields.Should().HaveCountGreaterThan(0, $"no enum fields exist in the object.");
 
-        var arrayField = Array.Find(allEnumFields, f => f.Name == fieldName);
+        var foundField = Array.Find(allEnumFields, f => f.Name == fieldName);
 
-        arrayField.Should().NotBeNull($"a field with the name '{fieldName}' does not exist in the object.");
-        arrayField.FieldType.Should().Be(typeof(bool), "the field is not a boolean type.");
+        foundField.Should().NotBeNull($"a field with the name '{fieldName}' does not exist in the object.");
+        foundField.FieldType.Should().Be(typeof(bool), "the field is not a boolean type.");
 
-        return arrayField.GetValue(fieldContainer) as bool? ?? false;
+        return foundField.GetValue(fieldContainer) as bool? ?? false;
     }
 
     /// <summary>
@@ -254,9 +254,9 @@ public static class TestHelpers
 
         allEnumFields.Should().HaveCountGreaterThan(0, $"no enum fields exist in the object.");
 
-        var arrayField = Array.Find(allEnumFields, f => f.Name == fieldName);
+        var foundField = Array.Find(allEnumFields, f => f.Name == fieldName);
 
-        arrayField.Should().NotBeNull($"a field with the name '{fieldName}' does not exist in the object.");
+        foundField.Should().NotBeNull($"a field with the name '{fieldName}' does not exist in the object.");
         arrayField.FieldType.Should().Be(typeof(bool), "the field is not a boolean type.");
 
         arrayField.SetValue(fieldContainer, value);
