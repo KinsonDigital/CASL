@@ -6,7 +6,6 @@ namespace CASL.Devices;
 
 using System;
 using System.Collections.Immutable;
-using Exceptions;
 
 /// <summary>
 /// Manages audio devices on the system using OpenAL.
@@ -40,22 +39,8 @@ internal interface IAudioDeviceManager : IDisposable
     ImmutableArray<string> GetDeviceNames();
 
     /// <summary>
-    /// Initializes an audio device that matches the given <paramref name="name"/>.
-    /// </summary>
-    /// <param name="name">The name of the device to initialize for use.</param>
-    /// <remarks>The value of null will initialize the current default device.</remarks>
-    void InitDevice(string? name = null);
-
-    /// <summary>
     /// Changes the audio device that matches the given <paramref name="name"/>.
     /// </summary>
     /// <param name="name">The name of the audio device to change to.</param>
-    /// <exception cref="AudioDeviceManagerNotInitializedException">
-    ///     Occurs if this method is executed without initializing the <see cref="InitDevice"/>() method.
-    ///     This can be done by invoking the <see cref="InitDevice(string?)"/>.
-    /// </exception>
-    /// <exception cref="AudioDeviceDoesNotExistException">
-    ///     Occurs if attempting to change to a device that does not exist on the system.
-    /// </exception>
     void ChangeDevice(string name);
 }

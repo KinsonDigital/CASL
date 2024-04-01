@@ -19,8 +19,7 @@ internal sealed class AudioDeviceManager : IAudioDeviceManager
 {
     private const string DeviceNamePrefix = "OpenAL Soft on "; // All device names returned are prefixed with this
     private readonly IOpenALInvoker alInvoker;
-    private readonly string isDisposedExceptionMessage = $"The '{nameof(AudioDeviceManager)}' has not been initialized.\nInvoked the '{nameof(InitDevice)}()' to initialize the device manager.";
-    private nint device;
+    private ALDevice device;
     private ALContext context;
     private ALContextAttributes? attributes;
     private bool isDisposed;
@@ -59,48 +58,12 @@ internal sealed class AudioDeviceManager : IAudioDeviceManager
 
     /// <inheritdoc/>
     /// <returns>The list of device names.</returns>
-    /// <exception cref="AudioDeviceManagerNotInitializedException">
-    ///     Occurs if this method is executed without initializing the <see cref="IAudioDeviceManager.InitDevice"/>() method.
-    ///     This can be done by invoking the <see cref="InitDevice(string?)"/>.
-    /// </exception>
     public ImmutableArray<string> GetDeviceNames()
     {
-        if (!IsInitialized)
-        {
-            throw new AudioDeviceManagerNotInitializedException(this.isDisposedExceptionMessage);
-        }
-
         var result = this.alInvoker.GetDeviceList()
             .Select(n => n.Replace(DeviceNamePrefix, string.Empty, StringComparison.Ordinal)).ToArray();
 
         return result.ToImmutableArray();
-    }
-
-    /// <inheritdoc/>
-    public void InitDevice(string? name = null)
-    {
-        var nameResult = name == null ? name : $"{DeviceNamePrefix}{name}";
-
-        if (this.device == 0)
-        {
-            this.device = this.alInvoker.OpenDevice(nameResult);
-        }
-
-        this.attributes ??= new ALContextAttributes();
-
-        if (this.context.Handle == 0)
-        {
-            this.context = new ALContext(this.alInvoker.CreateContext(new ALDevice(this.device), this.attributes));
-        }
-
-        var setCurrentResult = this.alInvoker.MakeContextCurrent(this.context);
-
-        DeviceInUse = this.alInvoker.GetDefaultDevice();
-
-        if (!setCurrentResult)
-        {
-            throw new InitializeDeviceException();
-        }
     }
 
     /// <inheritdoc/>
@@ -109,11 +72,6 @@ internal sealed class AudioDeviceManager : IAudioDeviceManager
         if (name == DeviceInUse)
         {
             return;
-        }
-
-        if (!IsInitialized)
-        {
-            throw new AudioDeviceManagerNotInitializedException(this.isDisposedExceptionMessage);
         }
 
         var deviceNames = GetDeviceNames();
@@ -144,6 +102,37 @@ internal sealed class AudioDeviceManager : IAudioDeviceManager
     /// <param name="errorMsg">The error message from OpenAL.</param>
     [ExcludeFromCodeCoverage]
     private static void ErrorCallback(string errorMsg) => throw new AudioException(errorMsg);
+
+    /// <summary>
+    /// Initializes the device.
+    /// </summary>
+    /// <param name="name">The name of the device.</param>
+    /// <exception cref="InitializeDeviceException">Thrown if the device context could not be made current.</exception>
+    private void InitDevice(string? name = null)
+    {
+        var nameResult = name == null ? name : $"{DeviceNamePrefix}{name}";
+
+        if (this.device == 0)
+        {
+            this.device = this.alInvoker.OpenDevice(nameResult);
+        }
+
+        this.attributes ??= new ALContextAttributes();
+
+        if (this.context.Handle == 0)
+        {
+            this.context = new ALContext(this.alInvoker.CreateContext(new ALDevice(this.device), this.attributes));
+        }
+
+        var setCurrentResult = this.alInvoker.MakeContextCurrent(this.context);
+
+        DeviceInUse = this.alInvoker.GetDefaultDevice();
+
+        if (!setCurrentResult)
+        {
+            throw new InitializeDeviceException();
+        }
+    }
 
     /// <inheritdoc cref="IDisposable.Dispose"/>
     /// <param name="disposing"><see langword="true"/> to dispose of managed resources.</param>
@@ -189,5 +178,5 @@ internal sealed class AudioDeviceManager : IAudioDeviceManager
     /// Returns a value indicating if the audio device and context are null.
     /// </summary>
     /// <returns><see langword="true"/> if the device and context are null.</returns>
-    private bool AudioIsNull() => this.device == ALDevice.Null() && this.context == ALContext.Null() && this.attributes is null;
+    private bool AudioIsNull() => this.device == ALDevice.Null() && this.context == ALContext.Null();
 }

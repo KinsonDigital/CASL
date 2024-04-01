@@ -24,14 +24,7 @@ public static class AudioDevice
     /// <summary>
     /// Gets a list of all the audio devices in the system.
     /// </summary>
-    public static ImmutableArray<string> AudioDevices
-    {
-        get
-        {
-            AudioManager.InitDevice();
-            return AudioManager.GetDeviceNames();
-        }
-    }
+    public static ImmutableArray<string> AudioDevices => AudioManager.GetDeviceNames();
 
     /// <summary>
     /// Changes the audio device for the audio to the given name.
