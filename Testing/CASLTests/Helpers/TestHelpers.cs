@@ -1,4 +1,4 @@
-// <copyright file="TestHelpers.cs" company="KinsonDigital">
+﻿// <copyright file="TestHelpers.cs" company="KinsonDigital">
 // Copyright (c) KinsonDigital. All rights reserved.
 // </copyright>
 
@@ -194,7 +194,7 @@ public static class TestHelpers
     }
 
     /// <summary>
-    /// Sets an array field with a name that matches the given <paramref name="fieldName"/> to the value of null.
+    /// Sets a field with a name that matches the given <paramref name="fieldName"/> to the value of null.
     /// </summary>
     /// <param name="fieldContainer">The object that contains the field.</param>
     /// <param name="fieldName">The name of the field.</param>
@@ -257,8 +257,62 @@ public static class TestHelpers
         var foundField = Array.Find(allEnumFields, f => f.Name == fieldName);
 
         foundField.Should().NotBeNull($"a field with the name '{fieldName}' does not exist in the object.");
-        arrayField.FieldType.Should().Be(typeof(bool), "the field is not a boolean type.");
+        foundField.FieldType.Should().Be(typeof(bool), "the field is not a boolean type.");
 
-        arrayField.SetValue(fieldContainer, value);
+        foundField.SetValue(fieldContainer, value);
+    }
+
+    /// <summary>
+    /// Gets the boolean field value with a name that matches the given <paramref name="fieldName"/> inside of the object
+    /// <paramref name="fieldContainer"/>.
+    /// </summary>
+    /// <param name="fieldContainer">The object that contains the field.</param>
+    /// <param name="fieldName">The name of the field.</param>
+    /// <returns>The struct field.</returns>
+    public static T GetStructFieldValue<T>(this object fieldContainer, string fieldName)
+        where T : struct
+    {
+        fieldContainer.Should().NotBeNull("setting the enum field value of a null object is not possible.");
+        fieldName.Should().NotBeNullOrEmpty("setting an enum field value requires a non-empty or null field name.");
+
+        var allEnumFields = fieldContainer.GetType().GetFields(BindingFlags.NonPublic | BindingFlags.Instance);
+
+        allEnumFields.Should().HaveCountGreaterThan(0, $"no enum fields exist in the object.");
+
+        var foundField = Array.Find(allEnumFields, f => f.Name == fieldName);
+
+        foundField.Should().NotBeNull($"a field with the name '{fieldName}' does not exist in the object.");
+        foundField.FieldType.IsValueType.Should().BeTrue("the field is not a value type.");
+
+        var fieldValue = (T)(foundField.GetValue(fieldContainer) ?? default(T));
+
+        fieldValue.Should().NotBeNull("the returned struct field value was null.");
+
+        return fieldValue;
+    }
+
+    /// <summary>
+    /// Sets a field with a name that matches the given <paramref name="fieldName"/> to the given <paramref name="value"/>.
+    /// </summary>
+    /// <param name="fieldContainer">The object that contains the field.</param>
+    /// <param name="fieldName">The name of the field.</param>
+    /// <param name="value">The value to set the struct field to.</param>
+    /// <typeparam name="T">The struct value.</typeparam>
+    public static void SetStructFieldValue<T>(this object fieldContainer, string fieldName, T value)
+        where T : struct
+    {
+        fieldContainer.Should().NotBeNull("setting the enum field value of a null object is not possible.");
+        fieldName.Should().NotBeNullOrEmpty("setting an enum field value requires a non-empty or null field name.");
+
+        var allEnumFields = fieldContainer.GetType().GetFields(BindingFlags.NonPublic | BindingFlags.Instance);
+
+        allEnumFields.Should().HaveCountGreaterThan(0, $"no enum fields exist in the object.");
+
+        var foundField = Array.Find(allEnumFields, f => f.Name == fieldName);
+
+        foundField.Should().NotBeNull($"a field with the name '{fieldName}' does not exist in the object.");
+        foundField.FieldType.IsValueType.Should().BeTrue("the field is not a value type.");
+
+        foundField.SetValue(fieldContainer, value);
     }
 }
