@@ -320,5 +320,32 @@ public class StreamBufferManagerTests
         this.mockAlInvoker.Received(1).SourceQueueBuffer(srcId, ref Arg.Is<uint>(arg => arg == 456u));
         actualSamplePos.Should().Be(0);
     }
+
+    [Fact]
+    public void ToPositionSamples_WhenInvoked_ReturnsCorrectResult()
+    {
+        // Arrange
+        var sut = new StreamBufferManager(this.mockAlInvoker);
+
+        // Act
+        var actual = sut.ToPositionSamples(123f, 200f, 1000L);
+
+        // Assert
+        actual.Should().Be(615);
+    }
+
+    [Fact]
+    public void ToPositionSeconds_WhenInvoked_ReturnsCorrectResult()
+    {
+        // Arrange
+        var sut = new StreamBufferManager(this.mockAlInvoker);
+        sut.SetSamplePos(123L);
+
+        // Act
+        var actual = sut.ToPositionSeconds(500L, 2000f);
+
+        // Assert
+        actual.Should().Be(492);
+    }
     #endregion
 }

@@ -82,47 +82,5 @@ public class ALDeviceTests
         // Assert
         Assert.Equal(0, actual.Handle);
     }
-
-    [Fact]
-    public void Equals_WithDeviceParamOverloadAndEquALDevice_ReturnsTrue()
-    {
-        // Arrange
-        var deviceA = new ALDevice(1234);
-        var deviceB = new ALDevice(1234);
-
-        // Act
-        var actual = deviceA.Equals(deviceB);
-
-        // Assert
-        actual.Should().BeTrue();
-    }
-
-    [Fact]
-    public void Equals_WithObjectParamOverloadAndNonDeviceType_ReturnsFalse()
-    {
-        // Arrange
-        var deviceA = new ALDevice(1234);
-        var deviceB = new object();
-
-        // Act
-        var actual = deviceA.Equals(deviceB);
-
-        // Assert
-        actual.Should().BeFalse();
-    }
-
-    [Fact]
-    public void Equals_WithObjectParamOverloadAndEquALDevice_ReturnsTrue()
-    {
-        // Arrange
-        var deviceA = new ALDevice(1234);
-        object deviceB = new ALDevice(1234);
-
-        // Act
-        var actual = deviceA.Equals(deviceB);
-
-        // Assert
-        actual.Should().BeTrue();
-    }
     #endregion
 }

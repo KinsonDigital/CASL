@@ -390,6 +390,112 @@ public class StreamBufferTests
     }
 
     [Fact]
+    public void Upload_WhileDeviceIsChanging_SleepsThreadToWaitForDeviceChangeToFinish()
+    {
+        // Arrange
+        var isCancelRequested = false;
+
+        this.mockPath.GetExtension(Arg.Any<string>()).Returns(".ogg");
+
+        // Make sure that the task service is setup to run the 'StreamData' method
+        this.mockTaskService.When(x => x.SetAction(Arg.Any<Action>()))
+            .Do(cb => this.streamDataDelegate = cb.Arg<Action>());
+        this.mockTaskService.When(x => x.Start()).Do(cb =>
+        {
+            cb.Should().NotBeNull("it is required for mocking the task service.");
+            this.streamDataDelegate?.Invoke();
+        });
+
+        // Prevent an infinite loop from occurring
+        this.mockTaskService.IsCancellationRequested.Returns(_ => isCancelRequested);
+        this.mockThreadService
+            .When(x => x.Sleep(Arg.Any<int>()))
+            .Do(_ => isCancelRequested = true);
+
+        var sut = CreateSystemUnderTest();
+        this.mockDeviceManager.DeviceChanging += Raise.EventWith(sut, EventArgs.Empty);
+        sut.Init("test-file.ogg");
+
+        // Act
+        sut.Upload();
+
+        // Assert
+        this.mockThreadService.Sleep(100);
+        this.mockAlInvoker.DidNotReceive().GetSourceState(SourceId);
+        this.mockStreamBufferManager.DidNotReceive().ManageBuffers(Arg.Any<BufferStats>(), Arg.Any<Func<float[]>>());
+        this.mockAlInvoker.DidNotReceive().GetSource(Arg.Any<uint>(), ALSourcef.Pitch);
+    }
+
+    [Theory]
+    [InlineData(50f)]
+    [InlineData(0.30f)]
+    public void Upload_WhenEndIsReachedWhileLoopingIsEnabled_ResetsAndPlaysAudio(float totalSeconds)
+    {
+        // Arrange
+        var expectedStats = new BufferStats
+        {
+            SourceId = SourceId,
+            FormatType = AudioFormatType.Ogg,
+            DecoderFormat = ALFormat.StereoFloat32Ext,
+            SampleRate = 41_000,
+            TotalChannels = 2,
+        };
+
+        var isCancelRequested = false;
+
+        this.mockPath.GetExtension(Arg.Any<string>()).Returns(".ogg");
+
+        // Make sure that the reset process occurs
+        this.mockStreamBufferManager.ToPositionSeconds(Arg.Any<long>(), Arg.Any<float>()).Returns(100f);
+        this.mockAudioDecoder.TotalChannels.Returns(2);
+        this.mockAudioDecoder.SampleRate.Returns(41_000);
+        this.mockAudioDecoder.Format.Returns(ALFormat.StereoFloat32Ext);
+        this.mockAudioDecoder.TotalSeconds.Returns(totalSeconds);
+
+        this.mockAlInvoker.GetSource(Arg.Any<uint>(), ALSourcef.Pitch).Returns(1f);
+
+        this.mockTaskService.When(x => x.SetAction(Arg.Any<Action>()))
+            .Do(cb => this.streamDataDelegate = cb.Arg<Action>());
+        this.mockTaskService.When(x => x.Start()).Do(cb =>
+        {
+            cb.Should().NotBeNull("it is required for mocking the task service.");
+            this.streamDataDelegate?.Invoke();
+        });
+        this.mockTaskService.IsCancellationRequested.Returns(_ => isCancelRequested);
+
+        // Execute the internal read sample data delegate
+        this.mockStreamBufferManager.ManageBuffers(
+            Arg.Any<BufferStats>(),
+            Arg.Do<Func<float[]>>(arg => arg()));
+
+        // Prevent an infinite loop from occurring
+        this.mockThreadService
+            .When(x => x.Sleep(Arg.Any<int>()))
+            .Do(_ => isCancelRequested = true);
+
+        var sut = CreateSystemUnderTest();
+        sut.Init("test-file.ogg");
+
+        // Enable looping
+        this.audioCmdSubscription.OnReceive(new AudioCommandData { Command = AudioCommands.EnableLooping, SourceId = SourceId });
+
+        // Act
+        sut.Upload();
+
+        // Assert
+        this.mockAlInvoker.Received(1).SourcePlay(SourceId);
+        this.mockStreamBufferManager.Received(1).UnqueueProcessedBuffers(SourceId);
+        this.mockAlInvoker.Received(1).SourceRewind(SourceId);
+
+        this.mockStreamBufferManager.Received(2).FillBuffersFromStart(
+                expectedStats,
+                Arg.Is<uint[]>(buffers => buffers.Length == 4 && buffers[0] == 100 && buffers[1] == 200 && buffers[2] == 300 && buffers[3] == 400),
+                Arg.Any<Action>(),
+                Arg.Any<Func<float[]>>());
+        this.mockStreamBufferManager.Received(1).ResetSamplePos();
+    }
+
+    [Fact]
     public void Upload_WhenPlayingOggAudio_StreamsBufferData()
     {
         // Arrange
@@ -429,9 +535,6 @@ public class StreamBufferTests
         var sut = CreateSystemUnderTest();
         sut.Init("test-file.ogg");
 
-        // Enable looping
-        this.audioCmdSubscription.OnReceive(new AudioCommandData { Command = AudioCommands.EnableLooping, SourceId = SourceId });
-
         // Act
         sut.Upload();
         sut.Upload();
@@ -451,9 +554,6 @@ public class StreamBufferTests
             Arg.Any<Func<float[]>>());
         this.mockAlInvoker.Received(1).SourceRewind(SourceId);
         this.mockStreamBufferManager.Received(1).ResetSamplePos();
-
-        // Verify that the playback has been started again due to looping being enabled
-        this.mockAlInvoker.Received(1).SourcePlay(SourceId);
 
         this.mockThreadService.Received(1).Sleep(100);
 

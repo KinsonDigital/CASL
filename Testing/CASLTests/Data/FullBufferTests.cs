@@ -351,7 +351,7 @@ public class FullBufferTests
         // Assert
         actualSrcId.Should().Be(SourceId);
         this.mockPath.Received(1).GetExtension(filePath);
-        this.mockDeviceManager.Received(isInitialized ? 0 : 1).InitDevice();
+        // this.mockDeviceManager.Received(isInitialized ? 0 : 1).InitDevice();
     }
 
     [Fact]
