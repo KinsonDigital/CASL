@@ -1,4 +1,4 @@
-﻿// <copyright file="OptionsProcessor.cs" company="KinsonDigital">
+// <copyright file="OptionsProcessor.cs" company="KinsonDigital">
 // Copyright (c) KinsonDigital. All rights reserved.
 // </copyright>
 
@@ -491,11 +491,11 @@ public class OptionsProcessor
 
     private void SetDefaultSoundFile()
     {
-        var soundFileName = Path.GetFileName(GetAudioFiles(this.audioLibDirPath)[0]);
-        var soundLibPath = $"{this.audioLibDirPath}/{soundFileName}";
-        this.audio = new Audio(soundLibPath, BufferType.Stream);
+        var audioFileName = Path.GetFileName(GetAudioFiles(this.audioLibDirPath)[0]);
+        var audioFilePath = $"{this.audioLibDirPath}/{audioFileName}";
+        this.audio = new Audio(audioFilePath, BufferType.Stream);
 
         WriteLine($"Music Library set to '{this.audioLibDirPath}'.");
-        WriteLine($"Default sound file set to '{soundFileName}'", enterBlankAfter: true);
+        WriteLine($"Default sound file set to '{audioFileName}'", enterBlankAfter: true);
     }
 }
