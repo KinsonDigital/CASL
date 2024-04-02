@@ -9,7 +9,7 @@ using System;
 /// <summary>
 /// Convenience class for handling ALContext attributes.
 /// </summary>
-internal class ALContextAttributes
+internal sealed class ALContextAttributes
 {
     private int[] additionalAttributes = Array.Empty<int>();
 
