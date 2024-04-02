@@ -68,7 +68,7 @@ public class NativeLibraryLoaderTests
 
         // Assert
         act.Should().Throw<ArgumentNullException>()
-            .WithMessage("The parameter must not be null. (Parameter 'dependencyManager')");
+            .WithMessage("Value cannot be null. (Parameter 'dependencyManager')");
     }
 
     [Fact]
@@ -85,7 +85,7 @@ public class NativeLibraryLoaderTests
 
         // Assert
         act.Should().Throw<ArgumentNullException>()
-            .WithMessage("The parameter must not be null. (Parameter 'platform')");
+            .WithMessage("Value cannot be null. (Parameter 'platform')");
     }
 
     [Fact]
@@ -102,7 +102,7 @@ public class NativeLibraryLoaderTests
 
         // Assert
         act.Should().Throw<ArgumentNullException>()
-            .WithMessage("The parameter must not be null. (Parameter 'directory')");
+            .WithMessage("Value cannot be null. (Parameter 'directory')");
     }
 
     [Fact]
@@ -119,7 +119,7 @@ public class NativeLibraryLoaderTests
 
         // Assert
         act.Should().Throw<ArgumentNullException>()
-            .WithMessage("The parameter must not be null. (Parameter 'file')");
+            .WithMessage("Value cannot be null. (Parameter 'file')");
     }
 
     [Fact]
@@ -136,7 +136,7 @@ public class NativeLibraryLoaderTests
 
         // Assert
         act.Should().Throw<ArgumentNullException>()
-            .WithMessage("The parameter must not be null. (Parameter 'path')");
+            .WithMessage("Value cannot be null. (Parameter 'path')");
     }
 
     [Fact]
@@ -153,7 +153,7 @@ public class NativeLibraryLoaderTests
 
         // Assert
         act.Should().Throw<ArgumentNullException>()
-            .WithMessage("The parameter must not be null. (Parameter 'library')");
+            .WithMessage("Value cannot be null. (Parameter 'library')");
     }
 
     [Fact]

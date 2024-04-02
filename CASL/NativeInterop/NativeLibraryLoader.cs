@@ -1,4 +1,4 @@
-// <copyright file="NativeLibraryLoader.cs" company="KinsonDigital">
+﻿// <copyright file="NativeLibraryLoader.cs" company="KinsonDigital">
 // Copyright (c) KinsonDigital. All rights reserved.
 // </copyright>
 
@@ -47,17 +47,18 @@ internal sealed class NativeLibraryLoader : ILibraryLoader
         IPath path,
         ILibrary library)
     {
-        const string errorMsg = "The parameter must not be null.";
-        this.dependencyManager = dependencyManager ?? throw new ArgumentNullException(nameof(dependencyManager), errorMsg);
-        this.platform = platform ?? throw new ArgumentNullException(nameof(platform), errorMsg);
-        this.directory = directory ?? throw new ArgumentNullException(nameof(directory), errorMsg);
-        this.file = file ?? throw new ArgumentNullException(nameof(file), errorMsg);
-        this.path = path ?? throw new ArgumentNullException(nameof(path), errorMsg);
+        ArgumentNullException.ThrowIfNull(dependencyManager);
+        ArgumentNullException.ThrowIfNull(platform);
+        ArgumentNullException.ThrowIfNull(directory);
+        ArgumentNullException.ThrowIfNull(file);
+        ArgumentNullException.ThrowIfNull(path);
+        ArgumentNullException.ThrowIfNull(library);
 
-        if (library is null)
-        {
-            throw new ArgumentNullException(nameof(library), "The parameter must not be null.");
-        }
+        this.dependencyManager = dependencyManager;
+        this.platform = platform;
+        this.directory = directory;
+        this.file = file;
+        this.path = path;
 
         LibraryName = ProcessLibExtension(library.GetLibraryName());
 
