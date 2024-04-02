@@ -20,7 +20,6 @@ internal sealed class AudioBufferFactory : IAudioBufferFactory
     public IAudioBuffer CreateFullBuffer(string filePath)
     {
         var alInvoker = IoC.Container.GetInstance<IOpenALInvoker>();
-        var audioManager = IoC.Container.GetInstance<IAudioDeviceManager>();
         var dataStreamFactory = IoC.Container.GetInstance<IAudioDecoderFactory>();
         var reactableFactory = IoC.Container.GetInstance<IReactableFactory>();
         var path = IoC.Container.GetInstance<IPath>();
@@ -29,7 +28,6 @@ internal sealed class AudioBufferFactory : IAudioBufferFactory
 
         return new FullBuffer(
             alInvoker,
-            audioManager,
             audioStream,
             reactableFactory,
             path,

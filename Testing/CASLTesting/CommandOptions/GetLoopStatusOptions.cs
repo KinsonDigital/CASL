@@ -11,4 +11,3 @@ public class GetLoopStatusOptions
 {
     // No implementation required
 }
-

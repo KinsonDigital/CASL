@@ -100,7 +100,6 @@ public class FullBufferTests
         {
             _ = new FullBuffer(
                 null,
-                this.mockDeviceManager,
                 this.mockAudioDecoder,
                 this.mockReactableFactory,
                 this.mockPath,
@@ -112,25 +111,6 @@ public class FullBufferTests
     }
 
     [Fact]
-    public void Ctor_WithNullAudioDeviceManagerParam_ThrowsException()
-    {
-        // Arrange & Act
-        var act = () =>
-        {
-            _ = new FullBuffer(
-                this.mockAlInvoker,
-                null,
-                this.mockAudioDecoder,
-                this.mockReactableFactory,
-                this.mockPath,
-                this.mockFile);
-        };
-
-        // Assert
-        act.Should().ThrowArgNullException().WithNullParamMsg("audioDeviceManager");
-    }
-
-    [Fact]
     public void Ctor_WithNullAudioDecoderParam_ThrowsException()
     {
         // Arrange & Act
@@ -138,7 +118,6 @@ public class FullBufferTests
         {
             _ = new FullBuffer(
                 this.mockAlInvoker,
-                this.mockDeviceManager,
                 null,
                 this.mockReactableFactory,
                 this.mockPath,
@@ -157,7 +136,6 @@ public class FullBufferTests
         {
             _ = new FullBuffer(
                 this.mockAlInvoker,
-                this.mockDeviceManager,
                 this.mockAudioDecoder,
                 null,
                 this.mockPath,
@@ -176,7 +154,6 @@ public class FullBufferTests
         {
             _ = new FullBuffer(
                 this.mockAlInvoker,
-                this.mockDeviceManager,
                 this.mockAudioDecoder,
                 this.mockReactableFactory,
                 null,
@@ -195,7 +172,6 @@ public class FullBufferTests
         {
             _ = new FullBuffer(
                 this.mockAlInvoker,
-                this.mockDeviceManager,
                 this.mockAudioDecoder,
                 this.mockReactableFactory,
                 this.mockPath,
@@ -351,7 +327,6 @@ public class FullBufferTests
         // Assert
         actualSrcId.Should().Be(SourceId);
         this.mockPath.Received(1).GetExtension(filePath);
-        // this.mockDeviceManager.Received(isInitialized ? 0 : 1).InitDevice();
     }
 
     [Fact]
@@ -619,7 +594,6 @@ public class FullBufferTests
     private FullBuffer CreateSystemUnderTest()
         => new (
             this.mockAlInvoker,
-            this.mockDeviceManager,
             this.mockAudioDecoder,
             this.mockReactableFactory,
             this.mockPath,
