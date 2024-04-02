@@ -9,7 +9,7 @@ using System.IO.Abstractions;
 /// <summary>
 /// Manages the library dependencies.
 /// </summary>
-internal class OpenALDependencyManager : NativeDependencyManager
+internal sealed class OpenALDependencyManager : NativeDependencyManager
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="OpenALDependencyManager"/> class.

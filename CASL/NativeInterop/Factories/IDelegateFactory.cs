@@ -7,7 +7,7 @@ namespace CASL.NativeInterop.Factories;
 /// <summary>
 /// Creates delegates to native library functions.
 /// </summary>
-public interface IDelegateFactory
+internal interface IDelegateFactory
 {
     /// <summary>
     /// Creates a delegate of the given type <typeparamref name="TDelegate"/>

@@ -1,16 +1,21 @@
-﻿// <copyright file="IoC.cs" company="KinsonDigital">
+// <copyright file="IoC.cs" company="KinsonDigital">
 // Copyright (c) KinsonDigital. All rights reserved.
 // </copyright>
 
 namespace CASL;
 
+using System;
 using System.Diagnostics.CodeAnalysis;
 using System.IO.Abstractions;
+using Carbonate.OneWay;
 using Data;
 using Devices;
+using DotnetWrappers;
+using Factories;
 using NativeInterop;
 using NativeInterop.Factories;
 using OpenAL;
+using ReactableData;
 using SimpleInjector;
 
 /// <summary>
@@ -22,6 +27,8 @@ internal static class IoC
     private static readonly FileSystem FileSystem = new ();
     private static readonly Container IoCContainer = new ();
     private static bool isInitialized;
+    private static bool unloadSetup;
+    private static IAssembly? assembly;
 
     /// <summary>
     /// Gets the inversion of control container used to get instances of objects.
@@ -33,6 +40,13 @@ internal static class IoC
             if (!isInitialized)
             {
                 SetupContainer();
+            }
+
+            if (!unloadSetup)
+            {
+                unloadSetup = true;
+                assembly = IoCContainer.GetInstance<IAssembly>();
+                assembly.Unloading += AssemblyOnUnloading;
             }
 
             return IoCContainer;
@@ -48,6 +62,9 @@ internal static class IoC
         IoCContainer.Register(() => FileSystem.Directory, Lifestyle.Singleton);
         IoCContainer.Register(() => FileSystem.Path, Lifestyle.Singleton);
 
+        IoCContainer.Register<IAssembly, Assembly>(Lifestyle.Singleton);
+        IoCContainer.Register<ITaskService, TaskService>(true);
+        IoCContainer.Register<IThreadService, ThreadService>(Lifestyle.Singleton);
         IoCContainer.Register<IApplication, Application>(Lifestyle.Singleton);
         IoCContainer.Register<IPlatform, Platform>(Lifestyle.Singleton);
         IoCContainer.Register<ILibrary, OpenALLibrary>(Lifestyle.Singleton);
@@ -55,8 +72,11 @@ internal static class IoC
         IoCContainer.Register<IDependencyManager, OpenALDependencyManager>(Lifestyle.Singleton);
         IoCContainer.Register<ILibraryLoader, NativeLibraryLoader>(Lifestyle.Singleton);
         IoCContainer.Register<IFilePathResolver, NativeLibPathResolver>(Lifestyle.Singleton);
+        IoCContainer.Register<IAudioDecoderFactory, AudioDecoderFactory>(Lifestyle.Singleton);
+        IoCContainer.Register<IAudioBufferFactory, AudioBufferFactory>(Lifestyle.Singleton);
 
         SetupAudio();
+        SetupReactables();
 
         isInitialized = true;
     }
@@ -69,18 +89,32 @@ internal static class IoC
         IoCContainer.Register<ALC>(Lifestyle.Singleton);
         IoCContainer.Register<AL>(Lifestyle.Singleton);
         IoCContainer.Register<IOpenALInvoker, OpenALInvoker>(Lifestyle.Singleton);
-
         IoCContainer.Register<IAudioDeviceManager, AudioDeviceManager>(Lifestyle.Singleton);
+        IoCContainer.Register<IStreamBufferManager, StreamBufferManager>(Lifestyle.Singleton);
+    }
 
-        // Register the proper data stream to be the implementation if the consumer is a certain decoder
-        IoCContainer.RegisterConditional<IAudioDataStream<float>, OggAudioDataStream>(
-            context => !context.HasConsumer || context.Consumer.ImplementationType == typeof(OggSoundDecoder), true);
+    /// <summary>
+    /// Setup container registration related to reactables.
+    /// </summary>
+    private static void SetupReactables()
+    {
+        IoCContainer.Register<IReactableFactory, ReactableFactory>(Lifestyle.Singleton);
+        IoCContainer.Register<IPushReactable<AudioCommandData>, PushReactable<AudioCommandData>>(Lifestyle.Singleton);
+        IoCContainer.Register<IPushReactable<PosCommandData>, PushReactable<PosCommandData>>(Lifestyle.Singleton);
+        IoCContainer.Register<IPullReactable<bool>, PullReactable<bool>>(Lifestyle.Singleton);
+    }
 
-        IoCContainer.Register<ISoundDecoder<float>, OggSoundDecoder>(true);
+    /// <summary>
+    /// Invoked during the unloading process of the assembly.
+    /// </summary>
+    private static void AssemblyOnUnloading()
+    {
+        ArgumentNullException.ThrowIfNull(assembly);
 
-        IoCContainer.RegisterConditional<IAudioDataStream<byte>, Mp3AudioDataStream>(
-            context => !context.HasConsumer || context.Consumer.ImplementationType == typeof(MP3SoundDecoder), true);
+        assembly.Unloading -= AssemblyOnUnloading;
 
-        IoCContainer.Register<ISoundDecoder<byte>, MP3SoundDecoder>(true);
+        // Clean up by using OpenAL operations to destroy the device context and device
+        var audioDeviceManager = IoCContainer.GetInstance<IAudioDeviceManager>();
+        audioDeviceManager.Dispose();
     }
 }

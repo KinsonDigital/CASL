@@ -40,7 +40,7 @@ public class NativeLibPathResolverTests
     #region Method Tests
     [Theory]
     [InlineData(WinExtension, true, Architecture.X64, false, "win-x64")]
-    [InlineData("",           false, Architecture.X64, false, "win-x64")]
+    [InlineData("", false, Architecture.X64, false, "win-x64")]
     [InlineData(WinExtension, true, Architecture.X86, false, "win-x86")]
     public void GetPath_WhenWindows_ReturnsCorrectPath(
         string extension,

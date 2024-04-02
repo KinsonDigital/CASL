@@ -9,7 +9,7 @@ using Exceptions;
 /// <summary>
 /// Represents the OpenAL library.
 /// </summary>
-internal class OpenALLibrary : ILibrary
+internal sealed class OpenALLibrary : ILibrary
 {
     private const string WinLibName = "soft_oal.dll";
     private const string PosixLibName = "libopenal.so";

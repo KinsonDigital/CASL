@@ -10,8 +10,8 @@ using System.Reflection;
 /// <summary>
 /// Provides information about the running application.
 /// </summary>
-[ExcludeFromCodeCoverage]
-public class Application : IApplication
+[ExcludeFromCodeCoverage(Justification = "Directly interacts with dotnet.")]
+internal sealed class Application : IApplication
 {
     /// <inheritdoc/>
     public string Location => Assembly.GetExecutingAssembly().Location;

@@ -21,7 +21,7 @@ using Exceptions;
 /// <summary>
 /// Loads a native library and returns a pointer for the purpose of interoping with it.
 /// </summary>
-internal class NativeLibraryLoader : ILibraryLoader
+internal sealed class NativeLibraryLoader : ILibraryLoader
 {
     private const char CrossPlatDirSeparatorChar = '/';
     private readonly IDependencyManager dependencyManager;
@@ -47,11 +47,12 @@ internal class NativeLibraryLoader : ILibraryLoader
         IPath path,
         ILibrary library)
     {
-        this.dependencyManager = dependencyManager ?? throw new ArgumentNullException(nameof(dependencyManager), "The parameter must not be null.");
-        this.platform = platform ?? throw new ArgumentNullException(nameof(platform), "The parameter must not be null.");
-        this.directory = directory ?? throw new ArgumentNullException(nameof(directory), "The parameter must not be null.");
-        this.file = file ?? throw new ArgumentNullException(nameof(file), "The parameter must not be null.");
-        this.path = path ?? throw new ArgumentNullException(nameof(path), "The parameter must not be null.");
+        const string errorMsg = "The parameter must not be null.";
+        this.dependencyManager = dependencyManager ?? throw new ArgumentNullException(nameof(dependencyManager), errorMsg);
+        this.platform = platform ?? throw new ArgumentNullException(nameof(platform), errorMsg);
+        this.directory = directory ?? throw new ArgumentNullException(nameof(directory), errorMsg);
+        this.file = file ?? throw new ArgumentNullException(nameof(file), errorMsg);
+        this.path = path ?? throw new ArgumentNullException(nameof(path), errorMsg);
 
         if (library is null)
         {
