@@ -16,7 +16,7 @@ using NativeInterop.Factories;
 /// </summary>
 [ExcludeFromCodeCoverage]
 [SuppressMessage("csharpsquid", "S101", Justification = "Naming left alone to match original OpenAL type names.")]
-internal class ALC
+internal sealed class ALC
 {
     private readonly ALCGetError alcGetError;
     private readonly ALCOpenDevice alcOpenDevice;
