@@ -1,4 +1,4 @@
-﻿// <copyright file="NativeLibraryLoader.cs" company="KinsonDigital">
+// <copyright file="NativeLibraryLoader.cs" company="KinsonDigital">
 // Copyright (c) KinsonDigital. All rights reserved.
 // </copyright>
 
@@ -59,7 +59,7 @@ internal sealed class NativeLibraryLoader : ILibraryLoader
             throw new ArgumentNullException(nameof(library), "The parameter must not be null.");
         }
 
-        LibraryName = ProcessLibExtension(library.LibraryName);
+        LibraryName = ProcessLibExtension(library.GetLibraryName());
 
         dependencyManager.VerifyDependencies();
     }

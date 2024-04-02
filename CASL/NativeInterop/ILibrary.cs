@@ -12,5 +12,5 @@ internal interface ILibrary
     /// <summary>
     /// Gets the name of the library.
     /// </summary>
-    string LibraryName { get; }
+    string GetLibraryName();
 }

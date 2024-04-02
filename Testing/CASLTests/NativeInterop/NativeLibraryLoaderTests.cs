@@ -161,7 +161,7 @@ public class NativeLibraryLoaderTests
     {
         // Arrange
         MockPlatformAsWindows();
-        this.mockLibrary.LibraryName.Returns(string.Empty);
+        this.mockLibrary.GetLibraryName().Returns(string.Empty);
 
         // Act
         var act = CreateLoader;
@@ -178,7 +178,7 @@ public class NativeLibraryLoaderTests
         string extension)
     {
         //Arrange
-        this.mockLibrary.LibraryName.Returns(libName);
+        this.mockLibrary.GetLibraryName().Returns(libName);
         this.mockPath.GetFileNameWithoutExtension(libName).Returns(LibNameWithoutExt);
         this.mockPath.HasExtension(Arg.Any<string>()).Returns(callInfo => callInfo.Arg<string>().Contains('.'));
         this.mockPlatform.GetPlatformLibFileExtension().Returns(extension);
@@ -209,7 +209,7 @@ public class NativeLibraryLoaderTests
 
         this.mockDependencyManager.NativeLibDirPath.Returns(dirPath);
 
-        this.mockLibrary.LibraryName.Returns(libName);
+        this.mockLibrary.GetLibraryName().Returns(libName);
 
         this.mockPath.GetFileNameWithoutExtension(libName).Returns(LibNameWithoutExt);
         this.mockPath.HasExtension(Arg.Any<string>()).Returns(callInfo => callInfo.Arg<string>().Contains('.'));
@@ -235,7 +235,7 @@ public class NativeLibraryLoaderTests
         const string libFilePath = $"{CrossPlatWinDirPath}/{WinLibNameWithExt}";
         this.mockFile.Exists(libFilePath).Returns(true);
         this.mockDependencyManager.NativeLibDirPath.Returns(WinDirPath);
-        this.mockLibrary.LibraryName.Returns(WinLibNameWithExt);
+        this.mockLibrary.GetLibraryName().Returns(WinLibNameWithExt);
 
         this.mockPath.GetFileNameWithoutExtension(WinLibNameWithExt).Returns(LibNameWithoutExt);
         this.mockPath.HasExtension(Arg.Any<string>()).Returns(callInfo => callInfo.Arg<string>().Contains('.'));
@@ -259,7 +259,7 @@ public class NativeLibraryLoaderTests
         var libFilePath = $"{CrossPlatWinDirPath}/{WinLibNameWithExt}";
         this.mockFile.Exists(Arg.Any<string>()).Returns(false);
         this.mockDependencyManager.NativeLibDirPath.Returns(WinDirPath);
-        this.mockLibrary.LibraryName.Returns(WinLibNameWithExt);
+        this.mockLibrary.GetLibraryName().Returns(WinLibNameWithExt);
 
         this.mockPath.GetFileNameWithoutExtension(WinLibNameWithExt).Returns(LibNameWithoutExt);
         this.mockPath.HasExtension(Arg.Any<string>()).Returns(callInfo => callInfo.Arg<string>().Contains('.'));
@@ -302,7 +302,7 @@ public class NativeLibraryLoaderTests
         this.mockPath.GetFileNameWithoutExtension(Arg.Any<string>())
             .Returns(WinLibNameWithExt.Replace(".dll", string.Empty));
 
-        this.mockLibrary.LibraryName.Returns(WinLibNameWithExt);
+        this.mockLibrary.GetLibraryName().Returns(WinLibNameWithExt);
     }
 
     /// <summary>

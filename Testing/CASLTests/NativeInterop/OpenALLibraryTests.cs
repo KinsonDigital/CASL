@@ -35,7 +35,7 @@ public class OpenALLibraryTests
         var library = new OpenALLibrary(this.mockPlatform);
 
         // Act
-        var actual = library.LibraryName;
+        var actual = library.GetLibraryName();
 
         // Assert
         actual.Should().Be("soft_oal.dll");
@@ -49,7 +49,7 @@ public class OpenALLibraryTests
         var library = new OpenALLibrary(this.mockPlatform);
 
         // Act
-        var actual = library.LibraryName;
+        var actual = library.GetLibraryName();
 
         // Assert
         actual.Should().Be("libopenal.so");
@@ -66,7 +66,7 @@ public class OpenALLibraryTests
         var library = new OpenALLibrary(this.mockPlatform);
 
         // Act
-        var act = () => library.LibraryName;
+        var act = () => library.GetLibraryName();
 
         // Assert
         act.Should().Throw<UnknownPlatformException>()
