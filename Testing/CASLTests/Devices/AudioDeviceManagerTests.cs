@@ -11,21 +11,19 @@ using CASL.Devices;
 using CASL.Devices.Exceptions;
 using CASL.Exceptions;
 using CASL.OpenAL;
-using Moq;
 using Xunit;
 using FluentAssertions;
 using Helpers;
+using NSubstitute;
 
 /// <summary>
 /// Tests the <see cref="AudioDeviceManager"/> class.
 /// </summary>
 public class AudioDeviceManagerTests
 {
-    private const string IsDisposedExceptionMessage =
-        $"The '{nameof(AudioDeviceManager)}' has not been initialized.";
     private const uint SrcId = 4321;
     private const uint BufferId = 9876;
-    private readonly Mock<IOpenALInvoker> mockALInvoker;
+    private readonly IOpenALInvoker mockALInvoker;
     private readonly ALContext context;
     private readonly ALDevice device;
 
@@ -37,17 +35,16 @@ public class AudioDeviceManagerTests
         this.device = new ALDevice(1234);
         this.context = new ALContext(5678);
 
-        this.mockALInvoker = new Mock<IOpenALInvoker>();
+        this.mockALInvoker = Substitute.For<IOpenALInvoker>();
 
         MockAudioLength(60);
 
-        this.mockALInvoker.Setup(m => m.GenSource()).Returns(SrcId);
-        this.mockALInvoker.Setup(m => m.GenBuffer()).Returns(BufferId);
-        this.mockALInvoker.Setup(m => m.GetDeviceList()).Returns(new[] { "Device-1", "Device-2" });
-        this.mockALInvoker.Setup(m => m.OpenDevice(It.IsAny<string>())).Returns(this.device);
-        this.mockALInvoker.Setup(m => m.CreateContext(this.device, It.IsAny<ALContextAttributes>()))
-            .Returns(this.context);
-        this.mockALInvoker.Setup(m => m.MakeContextCurrent(this.context)).Returns(true);
+        this.mockALInvoker.GenSource().Returns(SrcId);
+        this.mockALInvoker.GenBuffer().Returns(BufferId);
+        this.mockALInvoker.GetDeviceList().Returns(new[] { "Device-1", "Device-2" });
+        this.mockALInvoker.OpenDevice(Arg.Any<string>()).Returns(this.device);
+        this.mockALInvoker.CreateContext(this.device, Arg.Any<ALContextAttributes>()).Returns(this.context);
+        this.mockALInvoker.MakeContextCurrent(this.context).Returns(true);
     }
 
     #region Constructor Tests
@@ -71,7 +68,7 @@ public class AudioDeviceManagerTests
         _ = CreateSystemUnderTest();
 
         // Assert
-        this.mockALInvoker.VerifyAdd(e => e.ErrorCallback += It.IsAny<Action<string>>(), Times.Once());
+        this.mockALInvoker.Received(1).ErrorCallback += Arg.Any<Action<string>>();
     }
 
     [Fact]
@@ -79,7 +76,7 @@ public class AudioDeviceManagerTests
     {
         // Arrange
         // The MakeContextCurrent call does not take nullable bool.  This fixes that issue
-        this.mockALInvoker.Setup(m => m.MakeContextCurrent(this.context)).Returns(false);
+        this.mockALInvoker.MakeContextCurrent(this.context).Returns(false);
 
         // Act
         // ReSharper disable once ConvertClosureToMethodGroup
@@ -192,18 +189,18 @@ public class AudioDeviceManagerTests
     public void ChangeDevice_WhenRequestedDeviceIsAlreadyInUse_DoesNotChangeDevices()
     {
         // Arrange
-        this.mockALInvoker.Setup(m => m.GetDeviceList()).Returns(["test-device"]);
-        this.mockALInvoker.Setup(m => m.GetDefaultDevice()).Returns("test-device");
+        this.mockALInvoker.GetDeviceList().Returns(["test-device"]);
+        this.mockALInvoker.GetDefaultDevice().Returns("test-device");
         var sut = CreateSystemUnderTest();
 
         // Act
         sut.ChangeDevice("test-device");
 
         // Assert
-        this.mockALInvoker.Verify(m => m.GetDeviceList(), Times.Never);
-        this.mockALInvoker.Verify(m => m.MakeContextCurrent(It.IsAny<ALContext>()), Times.Exactly(1));
-        this.mockALInvoker.Verify(m => m.DestroyContext(It.IsAny<ALContext>()), Times.Never);
-        this.mockALInvoker.Verify(m => m.CloseDevice(It.IsAny<ALDevice>()), Times.Never);
+        this.mockALInvoker.DidNotReceive().GetDeviceList();
+        this.mockALInvoker.Received(1).MakeContextCurrent(Arg.Any<ALContext>());
+        this.mockALInvoker.DidNotReceive().DestroyContext(Arg.Any<ALContext>());
+        this.mockALInvoker.DidNotReceive().CloseDevice(Arg.Any<ALDevice>());
     }
 
     [Theory]
@@ -214,17 +211,16 @@ public class AudioDeviceManagerTests
         // Arrange
         MockAudioLength(5);
 
-        this.mockALInvoker.Setup(m => m.GetSourceState(SrcId))
-            .Returns((ALSourceState)playState);
-        this.mockALInvoker.Setup(m => m.GetSource(SrcId, ALSourcef.SecOffset)).Returns(SrcId);
-        this.mockALInvoker.Setup(m => m.GetSource(SrcId, ALSourcef.Pitch)).Returns(1f);
+        this.mockALInvoker.GetSourceState(SrcId).Returns((ALSourceState)playState);
+        this.mockALInvoker.GetSource(SrcId, ALSourcef.SecOffset).Returns(SrcId);
+        this.mockALInvoker.GetSource(SrcId, ALSourcef.Pitch).Returns(1f);
 
         var newDevice = new ALDevice(2222);
         var newContext = new ALContext(4444);
 
-        this.mockALInvoker.Setup(m => m.MakeContextCurrent(It.IsAny<ALContext>())).Returns(true);
-        this.mockALInvoker.Setup(m => m.OpenDevice("OpenAL Soft on Device-2")).Returns(newDevice);
-        this.mockALInvoker.Setup(m => m.CreateContext(newDevice, It.IsAny<ALContextAttributes>())).Returns(newContext);
+        this.mockALInvoker.MakeContextCurrent(Arg.Any<ALContext>()).Returns(true);
+        this.mockALInvoker.OpenDevice("OpenAL Soft on Device-2").Returns(newDevice);
+        this.mockALInvoker.CreateContext(newDevice, Arg.Any<ALContextAttributes>()).Returns(newContext);
 
         var deviceChangingEventRaised = false;
         var deviceChangedEventRaised = false;
@@ -241,19 +237,19 @@ public class AudioDeviceManagerTests
 
         // Verify that the device was destroyed
         // GetDeviceList
-        this.mockALInvoker.Verify(m => m.GetDeviceList(), Times.Once);
-        this.mockALInvoker.Verify(m => m.MakeContextCurrent(ALContext.Null()));
-        this.mockALInvoker.Verify(m => m.DestroyContext(this.context));
-        this.mockALInvoker.Verify(m => m.CloseDevice(this.device));
+        this.mockALInvoker.Received(1).GetDeviceList();
+        this.mockALInvoker.Received(1).MakeContextCurrent(ALContext.Null());
+        this.mockALInvoker.Received(1).DestroyContext(this.context);
+        this.mockALInvoker.Received(1).CloseDevice(this.device);
 
         sut.GetStructFieldValue<ALDevice>("device").Should().Be(newDevice);
         sut.GetStructFieldValue<ALContext>("context").Should().Be(newContext);
 
         // Verify that the new device was initialized
-        this.mockALInvoker.Verify(m => m.OpenDevice("OpenAL Soft on Device-2"), Times.Once);
-        this.mockALInvoker.Verify(m => m.CreateContext(newDevice, It.IsAny<ALContextAttributes>()), Times.Once);
-        this.mockALInvoker.Verify(m => m.MakeContextCurrent(newContext), Times.Once);
-        this.mockALInvoker.Verify(m => m.GetDefaultDevice());
+        this.mockALInvoker.Received(1).OpenDevice("OpenAL Soft on Device-2");
+        this.mockALInvoker.Received(1).CreateContext(newDevice, Arg.Any<ALContextAttributes>());
+        this.mockALInvoker.Received(1).MakeContextCurrent(newContext);
+        this.mockALInvoker.Received(2).GetDefaultDevice();
 
         deviceChangedEventRaised.Should().BeTrue();
     }
@@ -270,7 +266,7 @@ public class AudioDeviceManagerTests
         sut.Dispose();
 
         // Assert
-        this.mockALInvoker.Verify(m => m.MakeContextCurrent(ALContext.Null()), Times.Once());
+        this.mockALInvoker.Received(1).MakeContextCurrent(ALContext.Null());
     }
     #endregion
 
@@ -282,7 +278,7 @@ public class AudioDeviceManagerTests
         _ = CreateSystemUnderTest();
 
         // Act
-        var act = () => this.mockALInvoker.Raise(x => x.ErrorCallback += null, "test-error");
+        var act = () => this.mockALInvoker.ErrorCallback += Raise.Event<Action<string>>("test-error");
 
         // Assert
         act.Should().Throw<AudioException>().WithMessage("test-error");
@@ -290,21 +286,10 @@ public class AudioDeviceManagerTests
     #endregion
 
     /// <summary>
-    /// Mocks the device as not initialized.
-    /// </summary>
-    private void MockDeviceAsNotInitialized()
-    {
-        this.mockALInvoker.Setup(m => m.OpenDevice(It.IsAny<string>())).Returns(ALDevice.Null);
-        this.mockALInvoker.Setup(m => m.CreateContext(It.IsAny<ALDevice>(), It.IsAny<ALContextAttributes>()))
-            .Returns(ALContext.Null);
-        this.mockALInvoker.Setup(m => m.MakeContextCurrent(It.IsAny<ALContext>())).Returns(true);
-    }
-
-    /// <summary>
     /// Creates a new instance of <see cref="AudioDeviceManager"/> for the purpose of testing.
     /// </summary>
     /// <returns>The instance to test.</returns>
-    private AudioDeviceManager CreateSystemUnderTest() => new (this.mockALInvoker.Object);
+    private AudioDeviceManager CreateSystemUnderTest() => new (this.mockALInvoker);
 
     /// <summary>
     /// Mocks the buffer data stats to influence the total seconds that the  audio has.
@@ -324,9 +309,9 @@ public class AudioDeviceManagerTests
 
         var size = (int)(totalSeconds * bytesPerSec);
 
-        this.mockALInvoker.Setup(m => m.GetBuffer(BufferId, ALGetBufferi.Size)).Returns(size);
-        this.mockALInvoker.Setup(m => m.GetBuffer(BufferId, ALGetBufferi.Channels)).Returns(channels);
-        this.mockALInvoker.Setup(m => m.GetBuffer(BufferId, ALGetBufferi.Bits)).Returns(bitDepth);
-        this.mockALInvoker.Setup(m => m.GetBuffer(BufferId, ALGetBufferi.Frequency)).Returns(freq);
+        this.mockALInvoker.GetBuffer(BufferId, ALGetBufferi.Size).Returns(size);
+        this.mockALInvoker.GetBuffer(BufferId, ALGetBufferi.Channels).Returns(channels);
+        this.mockALInvoker.GetBuffer(BufferId, ALGetBufferi.Bits).Returns(bitDepth);
+        this.mockALInvoker.GetBuffer(BufferId, ALGetBufferi.Frequency).Returns(freq);
     }
 }

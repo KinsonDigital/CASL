@@ -8,9 +8,10 @@ namespace CASLTests.NativeInterop;
 #pragma warning disable IDE0001 // The name can be simplified
 using CASL.Exceptions;
 using CASL.NativeInterop;
-using Moq;
 using Xunit;
 using FluentAssertions;
+using NSubstitute;
+
 #pragma warning restore IDE0001 // The name can be simplified
 
 /// <summary>
@@ -18,12 +19,12 @@ using FluentAssertions;
 /// </summary>
 public class OpenALLibraryTests
 {
-    private readonly Mock<IPlatform> mockPlatform;
+    private readonly IPlatform mockPlatform;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="OpenALLibraryTests"/> class.
     /// </summary>
-    public OpenALLibraryTests() => this.mockPlatform = new Mock<IPlatform>();
+    public OpenALLibraryTests() => this.mockPlatform = Substitute.For<IPlatform>();
 
     #region Prop Tests
     [Fact]
@@ -31,10 +32,10 @@ public class OpenALLibraryTests
     {
         // Arrange
         MockWindowsPlatform();
-        var library = new OpenALLibrary(this.mockPlatform.Object);
+        var library = new OpenALLibrary(this.mockPlatform);
 
         // Act
-        var actual = library.LibraryName;
+        var actual = library.GetLibraryName();
 
         // Assert
         actual.Should().Be("soft_oal.dll");
@@ -45,10 +46,10 @@ public class OpenALLibraryTests
     {
         // Arrange
         MockPosixPlatform();
-        var library = new OpenALLibrary(this.mockPlatform.Object);
+        var library = new OpenALLibrary(this.mockPlatform);
 
         // Act
-        var actual = library.LibraryName;
+        var actual = library.GetLibraryName();
 
         // Assert
         actual.Should().Be("libopenal.so");
@@ -58,14 +59,14 @@ public class OpenALLibraryTests
     public void LibraryName_WithUnknownPlatform_ThrowsException()
     {
         // Arrange
-        this.mockPlatform.Setup(m => m.IsWinPlatform()).Returns(false);
-        this.mockPlatform.Setup(m => m.IsPosixPlatform()).Returns(false);
-        this.mockPlatform.SetupGet(p => p.CurrentOSPlatform).Returns("unknown-platform");
+        this.mockPlatform.IsWinPlatform().Returns(false);
+        this.mockPlatform.IsPosixPlatform().Returns(false);
+        this.mockPlatform.CurrentOSPlatform.Returns("unknown-platform");
 
-        var library = new OpenALLibrary(this.mockPlatform.Object);
+        var library = new OpenALLibrary(this.mockPlatform);
 
         // Act
-        var act = () => library.LibraryName;
+        var act = () => library.GetLibraryName();
 
         // Assert
         act.Should().Throw<UnknownPlatformException>()
@@ -78,8 +79,8 @@ public class OpenALLibraryTests
     /// </summary>
     private void MockWindowsPlatform()
     {
-        this.mockPlatform.Setup(m => m.IsWinPlatform()).Returns(true);
-        this.mockPlatform.Setup(m => m.IsPosixPlatform()).Returns(false);
+        this.mockPlatform.IsWinPlatform().Returns(true);
+        this.mockPlatform.IsPosixPlatform().Returns(false);
     }
 
     /// <summary>
@@ -87,7 +88,7 @@ public class OpenALLibraryTests
     /// </summary>
     private void MockPosixPlatform()
     {
-        this.mockPlatform.Setup(m => m.IsWinPlatform()).Returns(false);
-        this.mockPlatform.Setup(m => m.IsPosixPlatform()).Returns(true);
+        this.mockPlatform.IsWinPlatform().Returns(false);
+        this.mockPlatform.IsPosixPlatform().Returns(true);
     }
 }

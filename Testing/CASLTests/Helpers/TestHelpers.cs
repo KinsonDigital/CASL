@@ -269,6 +269,7 @@ public static class TestHelpers
     /// <param name="fieldContainer">The object that contains the field.</param>
     /// <param name="fieldName">The name of the field.</param>
     /// <returns>The struct field.</returns>
+    /// <typeparam name="T">The type of field value.</typeparam>
     public static T GetStructFieldValue<T>(this object fieldContainer, string fieldName)
         where T : struct
     {

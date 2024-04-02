@@ -11,7 +11,6 @@ using System.IO.Abstractions;
 using Carbonate;
 using CASL.Exceptions;
 using Decoders;
-using Devices;
 using Factories;
 using OpenAL;
 using ReactableData;
@@ -20,7 +19,6 @@ using ReactableData;
 internal sealed class FullBuffer : IAudioBuffer
 {
     private readonly IOpenALInvoker alInvoker;
-    private readonly IAudioDeviceManager audioDeviceManager;
     private readonly IPath path;
     private readonly IFile file;
     private readonly IDisposable audioCmdUnsubscriber;
@@ -37,7 +35,6 @@ internal sealed class FullBuffer : IAudioBuffer
     /// Initializes a new instance of the <see cref="FullBuffer"/> class.
     /// </summary>
     /// <param name="alInvoker">Provides access to OpenAL.</param>
-    /// <param name="audioDeviceManager">Manages audio device related operations.</param>
     /// <param name="audioDecoder">Decodes audio data from an audio file.</param>
     /// <param name="reactableFactory">Creates reactables.</param>
     /// <param name="path">Manages file paths.</param>
@@ -46,7 +43,6 @@ internal sealed class FullBuffer : IAudioBuffer
     /// Thrown when the following constructor parameters are null:
     ///     <list type="bullet">
     ///         <item><paramref name="alInvoker"/></item>
-    ///         <item><paramref name="audioDeviceManager"/></item>
     ///         <item><paramref name="audioDecoder"/></item>
     ///         <item><paramref name="reactableFactory"/></item>
     ///         <item><paramref name="path"/></item>
@@ -55,21 +51,18 @@ internal sealed class FullBuffer : IAudioBuffer
     /// </exception>
     public FullBuffer(
         IOpenALInvoker alInvoker,
-        IAudioDeviceManager audioDeviceManager,
         IAudioDecoder audioDecoder,
         IReactableFactory reactableFactory,
         IPath path,
         IFile file)
     {
         ArgumentNullException.ThrowIfNull(alInvoker);
-        ArgumentNullException.ThrowIfNull(audioDeviceManager);
         ArgumentNullException.ThrowIfNull(audioDecoder);
         ArgumentNullException.ThrowIfNull(reactableFactory);
         ArgumentNullException.ThrowIfNull(path);
         ArgumentNullException.ThrowIfNull(file);
 
         this.alInvoker = alInvoker;
-        this.audioDeviceManager = audioDeviceManager;
         this.audioDecoder = audioDecoder;
         this.path = path;
         this.file = file;

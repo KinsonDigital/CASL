@@ -13,9 +13,10 @@ using System.IO;
 using System.IO.Abstractions;
 using System.Linq;
 using CASL.NativeInterop;
-using Moq;
 using Xunit;
 using FluentAssertions;
+using NSubstitute;
+
 #pragma warning restore IDE0001 // Name can be simplified
 
 /// <summary>
@@ -23,18 +24,18 @@ using FluentAssertions;
 /// </summary>
 public class NativeDependencyManagerTests
 {
-    private readonly Mock<IFile> mockFile;
-    private readonly Mock<IPath> mockPath;
-    private readonly Mock<IFilePathResolver> mockPathResolver;
+    private readonly IFile mockFile;
+    private readonly IPath mockPath;
+    private readonly IFilePathResolver mockPathResolver;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="NativeDependencyManagerTests"/> class.
     /// </summary>
     public NativeDependencyManagerTests()
     {
-        this.mockFile = new Mock<IFile>();
-        this.mockPath = new Mock<IPath>();
-        this.mockPathResolver = new Mock<IFilePathResolver>();
+        this.mockFile = Substitute.For<IFile>();
+        this.mockPath = Substitute.For<IPath>();
+        this.mockPathResolver = Substitute.For<IFilePathResolver>();
     }
 
     #region Constructor Tests
@@ -44,8 +45,8 @@ public class NativeDependencyManagerTests
         // Act
         var act = () => new OpenALDependencyManager(
                 null,
-                this.mockPath.Object,
-                this.mockPathResolver.Object);
+                this.mockPath,
+                this.mockPathResolver);
 
         // Assert
         act.Should().Throw<ArgumentNullException>()
@@ -57,9 +58,9 @@ public class NativeDependencyManagerTests
     {
         // Act
         var act = () => new OpenALDependencyManager(
-                this.mockFile.Object,
+                this.mockFile,
                 null,
-                this.mockPathResolver.Object);
+                this.mockPathResolver);
 
         // Assert
         act.Should().Throw<ArgumentNullException>()
@@ -71,8 +72,8 @@ public class NativeDependencyManagerTests
     {
         // Act
         var act = () => new OpenALDependencyManager(
-                this.mockFile.Object,
-                this.mockPath.Object,
+                this.mockFile,
+                this.mockPath,
                 null);
 
         // Assert
@@ -90,9 +91,8 @@ public class NativeDependencyManagerTests
         const string libNameWithExtension = "test-native-lib.dll";
         const string libNameWithoutExtension = "test-native-lib";
 
-        this.mockPathResolver.Setup(m => m.GetDirPath()).Returns(dirPath);
-        this.mockPath.Setup(m => m.GetFileNameWithoutExtension(libNameWithExtension))
-            .Returns(libNameWithoutExtension);
+        this.mockPathResolver.GetDirPath().Returns(dirPath);
+        this.mockPath.GetFileNameWithoutExtension(libNameWithExtension).Returns(libNameWithoutExtension);
 
         var manager = CreateManager();
 
@@ -102,7 +102,7 @@ public class NativeDependencyManagerTests
 
         // Assert
         actual.Should().HaveCount(1);
-        actual.First().Should().Be(libNameWithoutExtension);
+        actual[0].Should().Be(libNameWithoutExtension);
     }
 
     [Theory]
@@ -117,7 +117,7 @@ public class NativeDependencyManagerTests
         // Arrange
         const string expected = "C:/test-dir";
 
-        this.mockPathResolver.Setup(m => m.GetDirPath()).Returns(dirPath);
+        this.mockPathResolver.GetDirPath().Returns(dirPath);
 
         var sut = CreateManager();
 
@@ -137,11 +137,11 @@ public class NativeDependencyManagerTests
         const string assemblyDirPath = @"C:/test-dir";
         const string srcDirPath = $@"{assemblyDirPath}/runtimes/win-x64/native";
 
-        this.mockFile.Setup(m => m.Exists($"{srcDirPath}/lib.dll")).Returns(false);
-        this.mockPathResolver.Setup(m => m.GetDirPath()).Returns(srcDirPath);
+        this.mockFile.Exists($"{srcDirPath}/lib.dll").Returns(false);
+        this.mockPathResolver.GetDirPath().Returns(srcDirPath);
 
-        this.mockPath.Setup(m => m.GetExtension("lib.dll")).Returns(".dll");
-        this.mockPath.Setup(m => m.GetFileNameWithoutExtension("lib.dll")).Returns("lib");
+        this.mockPath.GetExtension("lib.dll").Returns(".dll");
+        this.mockPath.GetFileNameWithoutExtension("lib.dll").Returns("lib");
 
         var manager = CreateManager();
         manager.NativeLibraries = new ReadOnlyCollection<string>(new[] { "lib.dll" }.ToList());
@@ -158,14 +158,14 @@ public class NativeDependencyManagerTests
     public void VerifyDependencies_WhenNativeLibExists_DoesNotThrowException()
     {
         // Arrange
-        var assemblyDirPath = @"C:\test-dir\";
-        var srcDirPath = $@"{assemblyDirPath}runtimes\win-x64\native\";
+        const string assemblyDirPath = @"C:\test-dir\";
+        const string srcDirPath = $@"{assemblyDirPath}runtimes\win-x64\native\";
 
-        this.mockFile.Setup(m => m.Exists(It.IsAny<string>())).Returns(true);
-        this.mockPathResolver.Setup(m => m.GetDirPath()).Returns(srcDirPath);
+        this.mockFile.Exists(Arg.Any<string>()).Returns(true);
+        this.mockPathResolver.GetDirPath().Returns(srcDirPath);
 
-        this.mockPath.Setup(m => m.GetExtension("lib.dll")).Returns(".dll");
-        this.mockPath.Setup(m => m.GetFileNameWithoutExtension("lib.dll")).Returns("lib");
+        this.mockPath.GetExtension("lib.dll").Returns(".dll");
+        this.mockPath.GetFileNameWithoutExtension("lib.dll").Returns("lib");
 
         var manager = CreateManager();
         manager.NativeLibraries = new ReadOnlyCollection<string>(new[] { "lib.dll" }.ToList());
@@ -183,7 +183,7 @@ public class NativeDependencyManagerTests
     /// </summary>
     /// <returns>The instance to test.</returns>
     private OpenALDependencyManager CreateManager()
-        => new (this.mockFile.Object,
-            this.mockPath.Object,
-            this.mockPathResolver.Object);
+        => new (this.mockFile,
+            this.mockPath,
+            this.mockPathResolver);
 }
