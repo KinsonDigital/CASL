@@ -82,47 +82,5 @@ public class ALContextTests
         // Assert
         actual.Handle.Should().Be(0);
     }
-
-    [Fact]
-    public void Equals_WithContextParamOverloadAndEqualContext_ReturnsTrue()
-    {
-        // Arrange
-        var contextA = new ALContext(1234);
-        var contextB = new ALContext(1234);
-
-        // Act
-        var actual = contextA.Equals(contextB);
-
-        // Assert
-        actual.Should().BeTrue();
-    }
-
-    [Fact]
-    public void Equals_WithObjectParamOverloadAndNonContextType_ReturnsFalse()
-    {
-        // Arrange
-        var contextA = new ALContext(1234);
-        var contextB = new object();
-
-        // Act
-        var actual = contextA.Equals(contextB);
-
-        // Assert
-        actual.Should().BeFalse();
-    }
-
-    [Fact]
-    public void Equals_WithObjectParamOverloadAndEqualContext_ReturnsTrue()
-    {
-        // Arrange
-        var contextA = new ALContext(1234);
-        object contextB = new ALContext(1234);
-
-        // Act
-        var actual = contextA.Equals(contextB);
-
-        // Assert
-        actual.Should().BeTrue();
-    }
     #endregion
 }

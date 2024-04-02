@@ -12,7 +12,7 @@ using System.Runtime.InteropServices;
 /// Creates delegates to native library functions.
 /// </summary>
 [ExcludeFromCodeCoverage]
-internal class DelegateFactory : IDelegateFactory
+internal sealed class DelegateFactory : IDelegateFactory
 {
     private readonly IPlatform platform;
 
