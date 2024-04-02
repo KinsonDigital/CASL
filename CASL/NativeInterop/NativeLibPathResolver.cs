@@ -9,7 +9,7 @@ using System.IO.Abstractions;
 /// <summary>
 /// Resolves paths to native libraries.
 /// </summary>
-internal class NativeLibPathResolver : IFilePathResolver
+internal sealed class NativeLibPathResolver : IFilePathResolver
 {
     private const char CrossPlatDirSeparatorChar = '/';
     private readonly IPlatform platform;

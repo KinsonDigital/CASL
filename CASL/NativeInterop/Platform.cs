@@ -13,7 +13,7 @@ using System.Runtime.InteropServices;
 /// Provides information about the current platform.
 /// </summary>
 [ExcludeFromCodeCoverage]
-internal class Platform : IPlatform
+internal sealed class Platform : IPlatform
 {
     /// <inheritdoc/>
     public string CurrentOSPlatform

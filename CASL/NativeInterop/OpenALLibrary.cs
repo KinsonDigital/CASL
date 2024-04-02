@@ -9,7 +9,7 @@ using Exceptions;
 /// <summary>
 /// Represents the OpenAL library.
 /// </summary>
-internal class OpenALLibrary : ILibrary
+internal sealed class OpenALLibrary : ILibrary
 {
     private const string WinLibName = "soft_oal.dll";
     private const string PosixLibName = "libopenal.so";
@@ -22,22 +22,18 @@ internal class OpenALLibrary : ILibrary
     public OpenALLibrary(IPlatform platform) => this.platform = platform;
 
     /// <inheritdoc/>
-    public string LibraryName
+    public string GetLibraryName()
     {
-        get
+        if (this.platform.IsWinPlatform())
         {
-            if (this.platform.IsWinPlatform())
-            {
-                return WinLibName;
-            }
-            else if (this.platform.IsPosixPlatform())
-            {
-                return PosixLibName;
-            }
-            else
-            {
-                throw new UnknownPlatformException($"The platform '{this.platform.CurrentOSPlatform}' is unknown.");
-            }
+            return WinLibName;
         }
+
+        if (this.platform.IsPosixPlatform())
+        {
+            return PosixLibName;
+        }
+
+        throw new UnknownPlatformException($"The platform '{this.platform.CurrentOSPlatform}' is unknown.");
     }
 }

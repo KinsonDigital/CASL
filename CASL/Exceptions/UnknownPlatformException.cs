@@ -5,14 +5,10 @@
 namespace CASL.Exceptions;
 
 using System;
-using System.Diagnostics.CodeAnalysis;
-using System.Runtime.Serialization;
-using System.Security;
 
 /// <summary>
 /// Occurs when an unknown platform has been encountered.
 /// </summary>
-[Serializable]
 public sealed class UnknownPlatformException : Exception
 {
     /// <summary>
@@ -42,18 +38,6 @@ public sealed class UnknownPlatformException : Exception
     /// </param>
     public UnknownPlatformException(string message, Exception innerException)
         : base(message, innerException)
-    {
-    }
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="UnknownPlatformException"/> class.
-    /// </summary>
-    /// <param name="info">The <see cref="SerializationInfo"/> to populate the data.</param>
-    /// <param name="context">The destination (see <see cref="StreamingContext"/>) for this serialization.</param>
-    /// <exception cref="SecurityException">The caller does not have the required permissions.</exception>
-    [ExcludeFromCodeCoverage(Justification = "No need to test empty private method.")]
-    private UnknownPlatformException(SerializationInfo info, StreamingContext context)
-        : base(info, context)
     {
     }
 }
