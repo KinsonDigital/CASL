@@ -13,7 +13,7 @@ using System.IO.Abstractions;
 using CASL.Exceptions;
 using CASL.NativeInterop;
 using FluentAssertions;
-using Moq;
+using NSubstitute;
 using Xunit;
 #pragma warning restore IDE0001 // Name can be simplified
 
@@ -31,12 +31,12 @@ public class NativeLibraryLoaderTests
     private const string WinLibNameWithExt = LibNameWithoutExt + WinExtension;
     private const string PosixLibNameWithExt = LibNameWithoutExt + PosixExtenstion;
     private const char PosixSeparatorChar = '/'; //MacOSX and Linux systems
-    private readonly Mock<IDependencyManager> mockDependencyManager;
-    private readonly Mock<IPlatform> mockPlatform;
-    private readonly Mock<IDirectory> mockDirectory;
-    private readonly Mock<IFile> mockFile;
-    private readonly Mock<IPath> mockPath;
-    private readonly Mock<ILibrary> mockLibrary;
+    private readonly IDependencyManager mockDependencyManager;
+    private readonly IPlatform mockPlatform;
+    private readonly IDirectory mockDirectory;
+    private readonly IFile mockFile;
+    private readonly IPath mockPath;
+    private readonly ILibrary mockLibrary;
     private string? libPath;
     private ReadOnlyCollection<string>? libDirPaths;
 
@@ -45,12 +45,12 @@ public class NativeLibraryLoaderTests
     /// </summary>
     public NativeLibraryLoaderTests()
     {
-        this.mockDependencyManager = new Mock<IDependencyManager>();
-        this.mockPlatform = new Mock<IPlatform>();
-        this.mockDirectory = new Mock<IDirectory>();
-        this.mockFile = new Mock<IFile>();
-        this.mockPath = new Mock<IPath>();
-        this.mockLibrary = new Mock<ILibrary>();
+        this.mockDependencyManager = Substitute.For<IDependencyManager>();
+        this.mockPlatform = Substitute.For<IPlatform>();
+        this.mockDirectory = Substitute.For<IDirectory>();
+        this.mockFile = Substitute.For<IFile>();
+        this.mockPath = Substitute.For<IPath>();
+        this.mockLibrary = Substitute.For<ILibrary>();
     }
 
     #region Constructor Tests
@@ -60,11 +60,11 @@ public class NativeLibraryLoaderTests
         // Act
         var act = () => new NativeLibraryLoader(
                 null,
-                this.mockPlatform.Object,
-                this.mockDirectory.Object,
-                this.mockFile.Object,
-                this.mockPath.Object,
-                this.mockLibrary.Object);
+                this.mockPlatform,
+                this.mockDirectory,
+                this.mockFile,
+                this.mockPath,
+                this.mockLibrary);
 
         // Assert
         act.Should().Throw<ArgumentNullException>()
@@ -76,12 +76,12 @@ public class NativeLibraryLoaderTests
     {
         // Act
         var act = () => new NativeLibraryLoader(
-                this.mockDependencyManager.Object,
+                this.mockDependencyManager,
                 null,
-                this.mockDirectory.Object,
-                this.mockFile.Object,
-                this.mockPath.Object,
-                this.mockLibrary.Object);
+                this.mockDirectory,
+                this.mockFile,
+                this.mockPath,
+                this.mockLibrary);
 
         // Assert
         act.Should().Throw<ArgumentNullException>()
@@ -93,12 +93,12 @@ public class NativeLibraryLoaderTests
     {
         // Act
         var act = () => new NativeLibraryLoader(
-                this.mockDependencyManager.Object,
-                this.mockPlatform.Object,
+                this.mockDependencyManager,
+                this.mockPlatform,
                 null,
-                this.mockFile.Object,
-                this.mockPath.Object,
-                this.mockLibrary.Object);
+                this.mockFile,
+                this.mockPath,
+                this.mockLibrary);
 
         // Assert
         act.Should().Throw<ArgumentNullException>()
@@ -110,12 +110,12 @@ public class NativeLibraryLoaderTests
     {
         // Act
         var act = () => new NativeLibraryLoader(
-                this.mockDependencyManager.Object,
-                this.mockPlatform.Object,
-                this.mockDirectory.Object,
+                this.mockDependencyManager,
+                this.mockPlatform,
+                this.mockDirectory,
                 null,
-                this.mockPath.Object,
-                this.mockLibrary.Object);
+                this.mockPath,
+                this.mockLibrary);
 
         // Assert
         act.Should().Throw<ArgumentNullException>()
@@ -127,12 +127,12 @@ public class NativeLibraryLoaderTests
     {
         // Act
         var act = () => new NativeLibraryLoader(
-                this.mockDependencyManager.Object,
-                this.mockPlatform.Object,
-                this.mockDirectory.Object,
-                this.mockFile.Object,
+                this.mockDependencyManager,
+                this.mockPlatform,
+                this.mockDirectory,
+                this.mockFile,
                 null,
-                this.mockLibrary.Object);
+                this.mockLibrary);
 
         // Assert
         act.Should().Throw<ArgumentNullException>()
@@ -144,11 +144,11 @@ public class NativeLibraryLoaderTests
     {
         // Act
         var act = () => new NativeLibraryLoader(
-                this.mockDependencyManager.Object,
-                this.mockPlatform.Object,
-                this.mockDirectory.Object,
-                this.mockFile.Object,
-                this.mockPath.Object,
+                this.mockDependencyManager,
+                this.mockPlatform,
+                this.mockDirectory,
+                this.mockFile,
+                this.mockPath,
                 null);
 
         // Assert
@@ -161,7 +161,7 @@ public class NativeLibraryLoaderTests
     {
         // Arrange
         MockPlatformAsWindows();
-        this.mockLibrary.SetupGet(p => p.LibraryName).Returns(string.Empty);
+        this.mockLibrary.LibraryName.Returns(string.Empty);
 
         // Act
         var act = CreateLoader;
@@ -178,11 +178,10 @@ public class NativeLibraryLoaderTests
         string extension)
     {
         //Arrange
-        this.mockLibrary.SetupGet(p => p.LibraryName).Returns(libName);
-        this.mockPath.Setup(m => m.GetFileNameWithoutExtension(libName)).Returns(LibNameWithoutExt);
-        this.mockPath.Setup(m => m.HasExtension(It.IsAny<string>()))
-            .Returns<string>(path => path.Contains('.'));
-        this.mockPlatform.Setup(m => m.GetPlatformLibFileExtension()).Returns(extension);
+        this.mockLibrary.LibraryName.Returns(libName);
+        this.mockPath.GetFileNameWithoutExtension(libName).Returns(LibNameWithoutExt);
+        this.mockPath.HasExtension(Arg.Any<string>()).Returns(callInfo => callInfo.Arg<string>().Contains('.'));
+        this.mockPlatform.GetPlatformLibFileExtension().Returns(extension);
 
         //Act
         var loader = CreateLoader();
@@ -206,18 +205,17 @@ public class NativeLibraryLoaderTests
         const string systemError = "Could not load the library";
 
         var expectedPath = $"{expectedDirPath}{PosixSeparatorChar}{libName}";
-        this.mockFile.Setup(m => m.Exists(It.IsAny<string?>())).Returns(true);
+        this.mockFile.Exists(Arg.Any<string?>()).Returns(true);
 
-        this.mockDependencyManager.SetupGet(p => p.NativeLibDirPath).Returns(dirPath);
+        this.mockDependencyManager.NativeLibDirPath.Returns(dirPath);
 
-        this.mockLibrary.SetupGet(p => p.LibraryName).Returns(libName);
+        this.mockLibrary.LibraryName.Returns(libName);
 
-        this.mockPath.Setup(m => m.GetFileNameWithoutExtension(libName)).Returns(LibNameWithoutExt);
-        this.mockPath.Setup(m => m.HasExtension(It.IsAny<string>()))
-            .Returns<string>(path => path.Contains('.'));
+        this.mockPath.GetFileNameWithoutExtension(libName).Returns(LibNameWithoutExt);
+        this.mockPath.HasExtension(Arg.Any<string>()).Returns(callInfo => callInfo.Arg<string>().Contains('.'));
 
-        this.mockPlatform.Setup(m => m.GetPlatformLibFileExtension()).Returns(extension);
-        this.mockPlatform.Setup(m => m.GetLastSystemError()).Returns(systemError);
+        this.mockPlatform.GetPlatformLibFileExtension().Returns(extension);
+        this.mockPlatform.GetLastSystemError().Returns(systemError);
 
         var loader = CreateLoader();
 
@@ -235,16 +233,15 @@ public class NativeLibraryLoaderTests
         // Arrange
         const IntPtr expected = 1234;
         const string libFilePath = $"{CrossPlatWinDirPath}/{WinLibNameWithExt}";
-        this.mockFile.Setup(m => m.Exists(libFilePath)).Returns(true);
-        this.mockDependencyManager.SetupGet(p => p.NativeLibDirPath).Returns(WinDirPath);
-        this.mockLibrary.SetupGet(p => p.LibraryName).Returns(WinLibNameWithExt);
+        this.mockFile.Exists(libFilePath).Returns(true);
+        this.mockDependencyManager.NativeLibDirPath.Returns(WinDirPath);
+        this.mockLibrary.LibraryName.Returns(WinLibNameWithExt);
 
-        this.mockPath.Setup(m => m.GetFileNameWithoutExtension(WinLibNameWithExt)).Returns(LibNameWithoutExt);
-        this.mockPath.Setup(m => m.HasExtension(It.IsAny<string>()))
-            .Returns<string>(path => path.Contains('.'));
+        this.mockPath.GetFileNameWithoutExtension(WinLibNameWithExt).Returns(LibNameWithoutExt);
+        this.mockPath.HasExtension(Arg.Any<string>()).Returns(callInfo => callInfo.Arg<string>().Contains('.'));
 
-        this.mockPlatform.Setup(m => m.GetPlatformLibFileExtension()).Returns(WinExtension);
-        this.mockPlatform.Setup(m => m.LoadLibrary(libFilePath)).Returns(expected);
+        this.mockPlatform.GetPlatformLibFileExtension().Returns(WinExtension);
+        this.mockPlatform.LoadLibrary(libFilePath).Returns(expected);
 
         var loader = CreateLoader();
 
@@ -260,16 +257,15 @@ public class NativeLibraryLoaderTests
     {
         nint expected = 1234;
         var libFilePath = $"{CrossPlatWinDirPath}/{WinLibNameWithExt}";
-        this.mockFile.Setup(m => m.Exists(It.IsAny<string>())).Returns(false);
-        this.mockDependencyManager.SetupGet(p => p.NativeLibDirPath).Returns(WinDirPath);
-        this.mockLibrary.SetupGet(p => p.LibraryName).Returns(WinLibNameWithExt);
+        this.mockFile.Exists(Arg.Any<string>()).Returns(false);
+        this.mockDependencyManager.NativeLibDirPath.Returns(WinDirPath);
+        this.mockLibrary.LibraryName.Returns(WinLibNameWithExt);
 
-        this.mockPath.Setup(m => m.GetFileNameWithoutExtension(WinLibNameWithExt)).Returns(LibNameWithoutExt);
-        this.mockPath.Setup(m => m.HasExtension(It.IsAny<string>()))
-            .Returns<string>(path => path.Contains('.'));
+        this.mockPath.GetFileNameWithoutExtension(WinLibNameWithExt).Returns(LibNameWithoutExt);
+        this.mockPath.HasExtension(Arg.Any<string>()).Returns(callInfo => callInfo.Arg<string>().Contains('.'));
 
-        this.mockPlatform.Setup(m => m.GetPlatformLibFileExtension()).Returns(WinExtension);
-        this.mockPlatform.Setup(m => m.LoadLibrary(libFilePath)).Returns(expected);
+        this.mockPlatform.GetPlatformLibFileExtension().Returns(WinExtension);
+        this.mockPlatform.LoadLibrary(libFilePath).Returns(expected);
 
         var loader = CreateLoader();
 
@@ -290,23 +286,23 @@ public class NativeLibraryLoaderTests
         this.libDirPaths = new ReadOnlyCollection<string>(new[] { $@"C:\test-dir\" });
         this.libPath = $"{this.libDirPaths[0]}{WinLibNameWithExt}";
 
-        this.mockPlatform.Setup(m => m.IsWinPlatform()).Returns(true);
-        this.mockPlatform.Setup(m => m.IsPosixPlatform()).Returns(false);
-        this.mockPlatform.Setup(m => m.GetPlatformLibFileExtension()).Returns(".dll");
-        this.mockPlatform.Setup(m => m.Is32BitProcess()).Returns(false);
-        this.mockPlatform.Setup(m => m.Is64BitProcess()).Returns(true);
-        this.mockPlatform.Setup(m => m.LoadLibrary(this.libPath)).Returns(new nint(1234));
-        this.mockPlatform.Setup(m => m.GetLastSystemError()).Returns("Could not load module.");
+        this.mockPlatform.IsWinPlatform().Returns(true);
+        this.mockPlatform.IsPosixPlatform().Returns(false);
+        this.mockPlatform.GetPlatformLibFileExtension().Returns(".dll");
+        this.mockPlatform.Is32BitProcess().Returns(false);
+        this.mockPlatform.Is64BitProcess().Returns(true);
+        this.mockPlatform.LoadLibrary(this.libPath).Returns(new nint(1234));
+        this.mockPlatform.GetLastSystemError().Returns("Could not load module.");
 
-        this.mockDirectory.Setup(m => m.Exists(this.libDirPaths[0])).Returns(true);
+        this.mockDirectory.Exists(this.libDirPaths[0]).Returns(true);
 
-        this.mockFile.Setup(m => m.Exists(this.libPath)).Returns(true);
+        this.mockFile.Exists(this.libPath).Returns(true);
 
-        this.mockPath.Setup(m => m.HasExtension(WinLibNameWithExt)).Returns(true);
-        this.mockPath.Setup(m => m.GetFileNameWithoutExtension(It.IsAny<string>()))
+        this.mockPath.HasExtension(WinLibNameWithExt).Returns(true);
+        this.mockPath.GetFileNameWithoutExtension(Arg.Any<string>())
             .Returns(WinLibNameWithExt.Replace(".dll", string.Empty));
 
-        this.mockLibrary.SetupGet(p => p.LibraryName).Returns(WinLibNameWithExt);
+        this.mockLibrary.LibraryName.Returns(WinLibNameWithExt);
     }
 
     /// <summary>
@@ -314,10 +310,10 @@ public class NativeLibraryLoaderTests
     /// </summary>
     /// <returns>The instance to test.</returns>
     private NativeLibraryLoader CreateLoader()
-        => new (this.mockDependencyManager.Object,
-            this.mockPlatform.Object,
-            this.mockDirectory.Object,
-            this.mockFile.Object,
-            this.mockPath.Object,
-            this.mockLibrary.Object);
+        => new (this.mockDependencyManager,
+            this.mockPlatform,
+            this.mockDirectory,
+            this.mockFile,
+            this.mockPath,
+            this.mockLibrary);
 }
