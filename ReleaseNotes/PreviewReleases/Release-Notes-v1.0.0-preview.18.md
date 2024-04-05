@@ -51,14 +51,15 @@ As with all software, there is always a chance for issues and bugs, especially f
 
 <h2 align="center" style="font-weight: bold;">Dependency Updates 📦</h2>
 
-1. [#321](https://github.com/KinsonDigital/CASL/pull/321), [#333](https://github.com/KinsonDigital/CASL/pull/333), [#343](https://github.com/KinsonDigital/CASL/pull/343) - Updated dependency _**system.io.abstractions**_ to _**v21.0.0**_
-2. [#331](https://github.com/KinsonDigital/CASL/pull/331), [#327](https://github.com/KinsonDigital/CASL/pull/327) - Updated dependency _**simpleinjector**_ to _**v5.4.4**_
-3. [#330](https://github.com/KinsonDigital/CASL/pull/330), [#339](https://github.com/KinsonDigital/CASL/pull/339), [#329](https://github.com/KinsonDigital/CASL/pull/329), [#322](https://github.com/KinsonDigital/CASL/pull/322) - Updated dependency _**xunit**_ to _**v2.7.0**_
-4. [#339](https://github.com/KinsonDigital/CASL/pull/339), [#329](https://github.com/KinsonDigital/CASL/pull/329), [#322](https://github.com/KinsonDigital/CASL/pull/322) - Updated dependency _**xunit.runner.visualstudio**_ to _**v2.5.6**_
-5. [#325](https://github.com/KinsonDigital/CASL/pull/325), [#326](https://github.com/KinsonDigital/CASL/pull/326), [#328](https://github.com/KinsonDigital/CASL/pull/328) - Updated _**kinsondigital/infrastructure action**_ to _**v13.6.3**_
-6. [#341](https://github.com/KinsonDigital/CASL/pull/341) - Updated dependency _**coverlet.msbuild**_ to _**v6.0.2**_
-7. [#340](https://github.com/KinsonDigital/CASL/pull/340) - Updated dependency _**coverlet.collector**_ to _**v6.0.2**_
-8. [#336](https://github.com/KinsonDigital/CASL/pull/336) - Updated dependency _**microsoft.net.test.sdk**_ to _**v17.9.0**_
+1. [#348](https://github.com/KinsonDigital/CASL/pull/348) - Updated dependency _**KinsonDigital.CASL**_ to _**v1.0.0-preview.18**_
+2. [#321](https://github.com/KinsonDigital/CASL/pull/321), [#333](https://github.com/KinsonDigital/CASL/pull/333), [#343](https://github.com/KinsonDigital/CASL/pull/343) - Updated dependency _**system.io.abstractions**_ to _**v21.0.0**_
+3. [#331](https://github.com/KinsonDigital/CASL/pull/331), [#327](https://github.com/KinsonDigital/CASL/pull/327) - Updated dependency _**simpleinjector**_ to _**v5.4.4**_
+4. [#330](https://github.com/KinsonDigital/CASL/pull/330), [#339](https://github.com/KinsonDigital/CASL/pull/339), [#329](https://github.com/KinsonDigital/CASL/pull/329), [#322](https://github.com/KinsonDigital/CASL/pull/322) - Updated dependency _**xunit**_ to _**v2.7.0**_
+5. [#339](https://github.com/KinsonDigital/CASL/pull/339), [#329](https://github.com/KinsonDigital/CASL/pull/329), [#322](https://github.com/KinsonDigital/CASL/pull/322) - Updated dependency _**xunit.runner.visualstudio**_ to _**v2.5.6**_
+6. [#325](https://github.com/KinsonDigital/CASL/pull/325), [#326](https://github.com/KinsonDigital/CASL/pull/326), [#328](https://github.com/KinsonDigital/CASL/pull/328) - Updated _**kinsondigital/infrastructure action**_ to _**v13.6.3**_
+7. [#341](https://github.com/KinsonDigital/CASL/pull/341) - Updated dependency _**coverlet.msbuild**_ to _**v6.0.2**_
+8. [#340](https://github.com/KinsonDigital/CASL/pull/340) - Updated dependency _**coverlet.collector**_ to _**v6.0.2**_
+9. [#336](https://github.com/KinsonDigital/CASL/pull/336) - Updated dependency _**microsoft.net.test.sdk**_ to _**v17.9.0**_
 
 <h2 align="center" style="font-weight: bold;">Other 🪧</h2>
 
