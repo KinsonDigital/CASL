@@ -349,7 +349,6 @@ public class StreamBufferTests
         var isCancelRequested = false;
 
         // Make sure that the reset process does not occur
-        this.mockStreamBufferManager.ToPositionSeconds(Arg.Any<long>(), Arg.Any<float>()).Returns(50f);
         this.mockAudioDecoder.TotalSeconds.Returns(100f);
 
         this.mockAlInvoker.GetSourceState(Arg.Any<uint>()).Returns(srcState);
@@ -503,7 +502,6 @@ public class StreamBufferTests
         this.mockPath.GetExtension(Arg.Any<string>()).Returns(".ogg");
 
         // Make sure that the reset process occurs
-        this.mockStreamBufferManager.ToPositionSeconds(Arg.Any<long>(), Arg.Any<float>()).Returns(100f);
         this.mockAudioDecoder.TotalSeconds.Returns(50f);
 
         this.mockAlInvoker.GetSource(Arg.Any<uint>(), ALSourcef.Pitch).Returns(1f);
@@ -549,8 +547,6 @@ public class StreamBufferTests
             this.bufferIds,
             this.mockAudioDecoder.Flush,
             Arg.Any<Func<float[]>>());
-        this.mockAlInvoker.Received(1).SourceRewind(SourceId);
-        this.mockStreamBufferManager.Received(1).ResetSamplePos();
 
         this.mockThreadService.Received(1).Sleep(100);
 
@@ -567,7 +563,6 @@ public class StreamBufferTests
         this.mockPath.GetExtension(Arg.Any<string>()).Returns(".mp3");
 
         // Make sure that the reset process occurs
-        this.mockStreamBufferManager.ToPositionSeconds(Arg.Any<long>(), Arg.Any<float>()).Returns(100f);
         this.mockAudioDecoder.TotalSeconds.Returns(50f);
 
         this.mockAlInvoker.GetSource(Arg.Any<uint>(), ALSourcef.Pitch).Returns(1f);
@@ -591,9 +586,6 @@ public class StreamBufferTests
         var sut = CreateSystemUnderTest();
         sut.Init("test-file.mp3");
 
-        // Enable looping
-        this.audioCmdSubscription.OnReceive(new AudioCommandData { Command = AudioCommands.EnableLooping, SourceId = SourceId });
-
         // Act
         sut.Upload();
 
@@ -609,11 +601,6 @@ public class StreamBufferTests
             this.bufferIds,
             this.mockAudioDecoder.Flush,
             Arg.Any<Func<byte[]>>());
-        this.mockAlInvoker.Received(1).SourceRewind(SourceId);
-        this.mockStreamBufferManager.Received(1).ResetSamplePos();
-
-        // Verify that the playback has been started again due to looping being enabled
-        this.mockAlInvoker.Received(1).SourcePlay(SourceId);
 
         this.mockThreadService.Received(1).Sleep(100);
     }
@@ -726,7 +713,6 @@ public class StreamBufferTests
             this.mockAudioDecoder.Flush,
             Arg.Any<Func<byte[]>>());
         this.mockAlInvoker.Received(1).SourceRewind(SourceId);
-        this.mockStreamBufferManager.Received(1).ResetSamplePos();
     }
 
     [Fact]
@@ -761,7 +747,6 @@ public class StreamBufferTests
             this.mockAudioDecoder.Flush,
             Arg.Any<Func<float[]>>());
         this.mockAlInvoker.Received(1).SourceRewind(SourceId);
-        this.mockStreamBufferManager.Received(1).ResetSamplePos();
     }
 
     [Fact]
