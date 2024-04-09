@@ -1,4 +1,4 @@
-﻿// <copyright file="StreamBufferTests.cs" company="KinsonDigital">
+// <copyright file="StreamBufferTests.cs" company="KinsonDigital">
 // Copyright (c) KinsonDigital. All rights reserved.
 // </copyright>
 
@@ -484,9 +484,7 @@ public class StreamBufferTests
 
         // Assert
         this.mockAlInvoker.Received(1).SourcePlay(SourceId);
-        this.mockStreamBufferManager.Received(1).UnqueueProcessedBuffers(SourceId);
         this.mockAlInvoker.Received(1).SourceRewind(SourceId);
-
         this.mockStreamBufferManager.Received(2).FillBuffersFromStart(
                 expectedStats,
                 Arg.Is<uint[]>(buffers => buffers.Length == 4 && buffers[0] == 100 && buffers[1] == 200 && buffers[2] == 300 && buffers[3] == 400),
@@ -546,7 +544,6 @@ public class StreamBufferTests
         this.mockAudioDecoder.Received(1).GetSampleData<float>();
 
         // Verify that the reset process has been performed
-        this.mockStreamBufferManager.Received(1).UnqueueProcessedBuffers(SourceId);
         this.mockStreamBufferManager.FillBuffersFromStart(
             Arg.Any<BufferStats>(),
             this.bufferIds,
@@ -607,7 +604,6 @@ public class StreamBufferTests
         this.mockAudioDecoder.Received(1).GetSampleData<byte>();
 
         // Verify that the reset process has been performed
-        this.mockStreamBufferManager.Received(1).UnqueueProcessedBuffers(SourceId);
         this.mockStreamBufferManager.FillBuffersFromStart(
             Arg.Any<BufferStats>(),
             this.bufferIds,
@@ -724,8 +720,6 @@ public class StreamBufferTests
         this.audioCmdSubscription.OnReceive(new AudioCommandData { Command = AudioCommands.Reset, SourceId = SourceId });
 
         // Assert
-        this.mockStreamBufferManager.Received(1).UnqueueProcessedBuffers(SourceId);
-
         this.mockStreamBufferManager.Received(1).FillBuffersFromStart(
             expectedBufferStats,
             Arg.Do<uint[]>(bufferIdsArg => bufferIdsArg.Should().BeEquivalentTo(this.bufferIds)),
@@ -761,7 +755,6 @@ public class StreamBufferTests
         this.audioCmdSubscription.OnReceive(new AudioCommandData { Command = AudioCommands.Reset, SourceId = SourceId });
 
         // Assert
-        this.mockStreamBufferManager.Received(1).UnqueueProcessedBuffers(SourceId);
         this.mockStreamBufferManager.Received(1).FillBuffersFromStart(
             expectedBufferStats,
             Arg.Do<uint[]>(bufferIdsArg => bufferIdsArg.Should().BeEquivalentTo(this.bufferIds)),

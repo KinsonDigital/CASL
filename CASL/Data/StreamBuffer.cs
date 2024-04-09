@@ -473,7 +473,6 @@ internal sealed class StreamBuffer : IAudioBuffer
     /// </summary>
     private void Reset()
     {
-        this.streamBufferManager.UnqueueProcessedBuffers(this.srcId);
         FillBuffersFromStart();
         this.alInvoker.SourceRewind(this.srcId);
         this.streamBufferManager.ResetSamplePos();
