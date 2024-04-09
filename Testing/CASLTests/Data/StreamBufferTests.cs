@@ -1,4 +1,4 @@
-﻿// <copyright file="StreamBufferTests.cs" company="KinsonDigital">
+// <copyright file="StreamBufferTests.cs" company="KinsonDigital">
 // Copyright (c) KinsonDigital. All rights reserved.
 // </copyright>
 
@@ -349,7 +349,6 @@ public class StreamBufferTests
         var isCancelRequested = false;
 
         // Make sure that the reset process does not occur
-        this.mockStreamBufferManager.ToPositionSeconds(Arg.Any<long>(), Arg.Any<float>()).Returns(50f);
         this.mockAudioDecoder.TotalSeconds.Returns(100f);
 
         this.mockAlInvoker.GetSourceState(Arg.Any<uint>()).Returns(srcState);
@@ -484,9 +483,7 @@ public class StreamBufferTests
 
         // Assert
         this.mockAlInvoker.Received(1).SourcePlay(SourceId);
-        this.mockStreamBufferManager.Received(1).UnqueueProcessedBuffers(SourceId);
         this.mockAlInvoker.Received(1).SourceRewind(SourceId);
-
         this.mockStreamBufferManager.Received(2).FillBuffersFromStart(
                 expectedStats,
                 Arg.Is<uint[]>(buffers => buffers.Length == 4 && buffers[0] == 100 && buffers[1] == 200 && buffers[2] == 300 && buffers[3] == 400),
@@ -505,7 +502,6 @@ public class StreamBufferTests
         this.mockPath.GetExtension(Arg.Any<string>()).Returns(".ogg");
 
         // Make sure that the reset process occurs
-        this.mockStreamBufferManager.ToPositionSeconds(Arg.Any<long>(), Arg.Any<float>()).Returns(100f);
         this.mockAudioDecoder.TotalSeconds.Returns(50f);
 
         this.mockAlInvoker.GetSource(Arg.Any<uint>(), ALSourcef.Pitch).Returns(1f);
@@ -546,14 +542,11 @@ public class StreamBufferTests
         this.mockAudioDecoder.Received(1).GetSampleData<float>();
 
         // Verify that the reset process has been performed
-        this.mockStreamBufferManager.Received(1).UnqueueProcessedBuffers(SourceId);
         this.mockStreamBufferManager.FillBuffersFromStart(
             Arg.Any<BufferStats>(),
             this.bufferIds,
             this.mockAudioDecoder.Flush,
             Arg.Any<Func<float[]>>());
-        this.mockAlInvoker.Received(1).SourceRewind(SourceId);
-        this.mockStreamBufferManager.Received(1).ResetSamplePos();
 
         this.mockThreadService.Received(1).Sleep(100);
 
@@ -570,7 +563,6 @@ public class StreamBufferTests
         this.mockPath.GetExtension(Arg.Any<string>()).Returns(".mp3");
 
         // Make sure that the reset process occurs
-        this.mockStreamBufferManager.ToPositionSeconds(Arg.Any<long>(), Arg.Any<float>()).Returns(100f);
         this.mockAudioDecoder.TotalSeconds.Returns(50f);
 
         this.mockAlInvoker.GetSource(Arg.Any<uint>(), ALSourcef.Pitch).Returns(1f);
@@ -594,9 +586,6 @@ public class StreamBufferTests
         var sut = CreateSystemUnderTest();
         sut.Init("test-file.mp3");
 
-        // Enable looping
-        this.audioCmdSubscription.OnReceive(new AudioCommandData { Command = AudioCommands.EnableLooping, SourceId = SourceId });
-
         // Act
         sut.Upload();
 
@@ -607,17 +596,11 @@ public class StreamBufferTests
         this.mockAudioDecoder.Received(1).GetSampleData<byte>();
 
         // Verify that the reset process has been performed
-        this.mockStreamBufferManager.Received(1).UnqueueProcessedBuffers(SourceId);
         this.mockStreamBufferManager.FillBuffersFromStart(
             Arg.Any<BufferStats>(),
             this.bufferIds,
             this.mockAudioDecoder.Flush,
             Arg.Any<Func<byte[]>>());
-        this.mockAlInvoker.Received(1).SourceRewind(SourceId);
-        this.mockStreamBufferManager.Received(1).ResetSamplePos();
-
-        // Verify that the playback has been started again due to looping being enabled
-        this.mockAlInvoker.Received(1).SourcePlay(SourceId);
 
         this.mockThreadService.Received(1).Sleep(100);
     }
@@ -698,6 +681,31 @@ public class StreamBufferTests
         this.mockAlInvoker.Received(sourceId == SourceId ? 1 : 0).SourcePause(SourceId);
     }
 
+    [Theory]
+    [InlineData(ALSourceState.Initial)]
+    [InlineData(ALSourceState.Stopped)]
+    internal void AudioCmdReactable_WhenSendingResetWhileInStoppedOrInitialState_DoesNotReset(ALSourceState state)
+    {
+        // Arrange
+        this.mockAlInvoker.GetSourceState(Arg.Any<uint>()).Returns(state);
+
+        var sut = CreateSystemUnderTest();
+        sut.Init($"test-file.mp3");
+
+        // Act
+        this.audioCmdSubscription.OnReceive(new AudioCommandData { Command = AudioCommands.Reset, SourceId = SourceId });
+
+        // Assert
+        this.mockAlInvoker.Received(1).GetSourceState(SourceId);
+        this.mockStreamBufferManager.DidNotReceive().FillBuffersFromStart(
+            Arg.Any<BufferStats>(),
+            Arg.Any<uint[]>(),
+            Arg.Any<Action>(),
+            Arg.Any<Func<byte[]>>());
+        this.mockAlInvoker.DidNotReceive().SourceRewind(Arg.Any<uint>());
+        this.mockStreamBufferManager.DidNotReceive().ResetSamplePos();
+    }
+
     [Fact]
     public void AudioCmdReactable_WhenSendingResetCmdForMp3Data_ResetsDecoderAndBuffers()
     {
@@ -724,8 +732,6 @@ public class StreamBufferTests
         this.audioCmdSubscription.OnReceive(new AudioCommandData { Command = AudioCommands.Reset, SourceId = SourceId });
 
         // Assert
-        this.mockStreamBufferManager.Received(1).UnqueueProcessedBuffers(SourceId);
-
         this.mockStreamBufferManager.Received(1).FillBuffersFromStart(
             expectedBufferStats,
             Arg.Do<uint[]>(bufferIdsArg => bufferIdsArg.Should().BeEquivalentTo(this.bufferIds)),
@@ -761,7 +767,6 @@ public class StreamBufferTests
         this.audioCmdSubscription.OnReceive(new AudioCommandData { Command = AudioCommands.Reset, SourceId = SourceId });
 
         // Assert
-        this.mockStreamBufferManager.Received(1).UnqueueProcessedBuffers(SourceId);
         this.mockStreamBufferManager.Received(1).FillBuffersFromStart(
             expectedBufferStats,
             Arg.Do<uint[]>(bufferIdsArg => bufferIdsArg.Should().BeEquivalentTo(this.bufferIds)),
