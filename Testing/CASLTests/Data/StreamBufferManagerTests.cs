@@ -1,4 +1,4 @@
-﻿// <copyright file="StreamBufferManagerTests.cs" company="KinsonDigital">
+// <copyright file="StreamBufferManagerTests.cs" company="KinsonDigital">
 // Copyright (c) KinsonDigital. All rights reserved.
 // </copyright>
 
@@ -251,7 +251,6 @@ public class StreamBufferManagerTests
         var actualSamplePos = sut.GetCurrentSamplePos();
 
         // Assert
-        this.mockAlInvoker.Received(2).SourceStop(srcId);
         this.mockAlInvoker.Received(1).GetSource(srcId, ALGetSourcei.BuffersProcessed);
         this.mockAlInvoker.Received(1).SourceUnqueueBuffers(srcId, 1, ref Arg.Any<uint[]>());
         flushDataInvoked.Should().BeTrue();
@@ -310,7 +309,7 @@ public class StreamBufferManagerTests
         var actualSamplePos = sut.GetCurrentSamplePos();
 
         // Assert
-        this.mockAlInvoker.Received(2).SourceStop(srcId);
+        this.mockAlInvoker.Received(1).SourceStop(srcId);
         this.mockAlInvoker.Received(1).GetSource(srcId, ALGetSourcei.BuffersProcessed);
         this.mockAlInvoker.Received(1).SourceUnqueueBuffers(srcId, 1, ref Arg.Any<uint[]>());
         flushDataInvoked.Should().BeTrue();

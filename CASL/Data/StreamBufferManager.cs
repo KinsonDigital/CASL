@@ -125,7 +125,6 @@ internal sealed class StreamBufferManager : IStreamBufferManager
     public void FillBuffersFromStart<T>(BufferStats bufferStats, IEnumerable<uint> bufferIds, Action flushDecoderData, Func<T[]> readSamples)
         where T : unmanaged
     {
-        this.alInvoker.SourceStop(bufferStats.SourceId);
         UnqueueProcessedBuffers(bufferStats.SourceId);
 
         flushDecoderData();
