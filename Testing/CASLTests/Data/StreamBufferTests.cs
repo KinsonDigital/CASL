@@ -681,6 +681,31 @@ public class StreamBufferTests
         this.mockAlInvoker.Received(sourceId == SourceId ? 1 : 0).SourcePause(SourceId);
     }
 
+    [Theory]
+    [InlineData(ALSourceState.Initial)]
+    [InlineData(ALSourceState.Stopped)]
+    internal void AudioCmdReactable_WhenSendingResetWhileInStoppedOrInitialState_DoesNotReset(ALSourceState state)
+    {
+        // Arrange
+        this.mockAlInvoker.GetSourceState(Arg.Any<uint>()).Returns(state);
+
+        var sut = CreateSystemUnderTest();
+        sut.Init($"test-file.mp3");
+
+        // Act
+        this.audioCmdSubscription.OnReceive(new AudioCommandData { Command = AudioCommands.Reset, SourceId = SourceId });
+
+        // Assert
+        this.mockAlInvoker.Received(1).GetSourceState(SourceId);
+        this.mockStreamBufferManager.DidNotReceive().FillBuffersFromStart(
+            Arg.Any<BufferStats>(),
+            Arg.Any<uint[]>(),
+            Arg.Any<Action>(),
+            Arg.Any<Func<byte[]>>());
+        this.mockAlInvoker.DidNotReceive().SourceRewind(Arg.Any<uint>());
+        this.mockStreamBufferManager.DidNotReceive().ResetSamplePos();
+    }
+
     [Fact]
     public void AudioCmdReactable_WhenSendingResetCmdForMp3Data_ResetsDecoderAndBuffers()
     {
