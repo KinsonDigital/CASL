@@ -713,6 +713,7 @@ public class StreamBufferTests
             this.mockAudioDecoder.Flush,
             Arg.Any<Func<byte[]>>());
         this.mockAlInvoker.Received(1).SourceRewind(SourceId);
+        this.mockStreamBufferManager.Received(1).ResetSamplePos();
     }
 
     [Fact]
@@ -747,6 +748,7 @@ public class StreamBufferTests
             this.mockAudioDecoder.Flush,
             Arg.Any<Func<float[]>>());
         this.mockAlInvoker.Received(1).SourceRewind(SourceId);
+        this.mockStreamBufferManager.Received(1).ResetSamplePos();
     }
 
     [Fact]
