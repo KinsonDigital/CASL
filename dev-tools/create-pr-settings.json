@@ -1,0 +1,10 @@
+{
+    "$schema": "https://raw.githubusercontent.com/KinsonDigital/kd-admin/preview/schemas/create-pr-schema.json",
+    "ownerName": "KinsonDigital",
+    "repoName": "CASL",
+    "githubTokenEnvVarName": "CICD_TOKEN",
+    "baseBranches": [
+        "main",
+        "preview"
+    ]
+}
