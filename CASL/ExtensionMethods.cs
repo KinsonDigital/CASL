@@ -120,6 +120,7 @@ internal static class ExtensionMethods
         return result.ToArray();
     }
 
+    // TODO: refactor usages of this method and remove the method
     /// <summary>
     /// Converts the given <paramref name="path"/> to a cross-platform path.
     /// </summary>
@@ -131,6 +132,7 @@ internal static class ExtensionMethods
     /// </returns>
     public static string ToCrossPlatPath(this string path) => path.Replace(WinDirSeparatorChar, CrossPlatDirSeparatorChar);
 
+    // todo: look into all refs of this method
     /// <summary>
     /// Trims all the consecutive characters that match the given <paramref name="character"/> from the <c>string</c>.
     /// </summary>

@@ -396,7 +396,7 @@ public class StreamBufferTests
 
         this.mockPath.GetExtension(Arg.Any<string>()).Returns(".ogg");
 
-        // Make sure that the task service is setup to run the 'StreamData' method
+        // Make sure that the task service is set up to run the 'StreamData' method
         this.mockTaskService.When(x => x.SetAction(Arg.Any<Action>()))
             .Do(cb => this.streamDataDelegate = cb.Arg<Action>());
         this.mockTaskService.When(x => x.Start()).Do(cb =>
