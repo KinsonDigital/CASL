@@ -1,4 +1,4 @@
-﻿// <copyright file="FullBuffer.cs" company="KinsonDigital">
+// <copyright file="FullBuffer.cs" company="KinsonDigital">
 // Copyright (c) KinsonDigital. All rights reserved.
 // </copyright>
 
@@ -187,7 +187,7 @@ internal sealed class FullBuffer : IAudioBuffer
             throw new InvalidOperationException("The buffer has not been initialized.");
         }
 
-        // Buffer all of the data
+        // Buffer all the data
         this.audioDecoder.ReadAllSamples();
 
         switch (this.audioFormatType)

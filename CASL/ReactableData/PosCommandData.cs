@@ -18,7 +18,7 @@ internal struct PosCommandData
     public uint SourceId { get; init; }
 
     /// <summary>
-    /// Gets the position in the audio.
+    /// Gets the position of the audio.
     /// </summary>
     public float PositionSeconds { get; init; }
 }

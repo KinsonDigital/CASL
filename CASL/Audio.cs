@@ -47,10 +47,10 @@ public class Audio : IAudio
     /// <param name="filePath">The path to the audio file.</param>
     /// <param name="bufferType">The type of audio buffer used.</param>
     /// <remarks>
-    ///     Using <see cref="CASL.BufferType"/>.<see cref="CASL.BufferType.Full"/> means all of the audio data will be loaded into memory.
+    ///     Using <see cref="CASL.BufferType"/>.<see cref="CASL.BufferType.Full"/> means all the audio data will be loaded into memory.
     ///     This is fine for small audio files like audio effects.  Large audio files will consume more memory and take longer to load.
     ///     <para/>
-    ///     Using <see cref="CASL.BufferType"/>.<see cref="CASL.BufferType.Stream"/> means all of the audio data will be loaded/streamed into
+    ///     Using <see cref="CASL.BufferType"/>.<see cref="CASL.BufferType.Stream"/> means all the audio data will be loaded/streamed into
     ///     This is better for larger audio files like music. It will consume less memory and much better for performances from a loading perspective.
     ///     in chunks as needed memory.
     /// </remarks>
@@ -64,7 +64,7 @@ public class Audio : IAudio
 
         if (!file.Exists(filePath))
         {
-            throw new FileNotFoundException($"The audio file could not be found.", filePath);
+            throw new FileNotFoundException("The audio file could not be found.", filePath);
         }
 
         FilePath = filePath.ToCrossPlatPath().TrimAllFromEnd(CrossPlatDirSeparatorChar);

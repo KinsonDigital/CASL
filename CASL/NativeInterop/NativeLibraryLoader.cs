@@ -115,7 +115,7 @@ internal sealed class NativeLibraryLoader : ILibraryLoader
 
         var loadLibExceptionMsg = this.platform.GetLastSystemError();
 
-        // Add the library path that is is attempting to be loaded
+        // Add the library path that is attempting to be loaded
         loadLibExceptionMsg += $"\n\nLibrary Path: '{libraryFilePath}'";
 
         throw new LoadLibraryException(loadLibExceptionMsg);
@@ -127,7 +127,7 @@ internal sealed class NativeLibraryLoader : ILibraryLoader
     /// <param name="libraryName">The library name to process.</param>
     /// <returns>The name of the library with the extension on it.</returns>
     /// <remarks>
-    ///     If the library already has a valid extension, then nothing is changed. It if does not have an extension,
+    ///     If the library already has a valid extension, then nothing is changed. If it does not have an extension,
     ///     or the extension is incorrect, it will fix it.
     /// </remarks>
     private string ProcessLibExtension(string libraryName)

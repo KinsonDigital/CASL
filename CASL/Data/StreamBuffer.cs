@@ -452,7 +452,7 @@ internal sealed class StreamBuffer : IAudioBuffer
     }
 
     /// <summary>
-    /// Returns a value indicating whether or not the end of the audio has been reached.
+    /// Returns a value indicating whether the end of the audio has been reached.
     /// </summary>
     /// <returns>True if the end has been reached, otherwise false.</returns>
     private bool HasReachedEnd()
@@ -504,7 +504,7 @@ internal sealed class StreamBuffer : IAudioBuffer
     /// <exception cref="InvalidEnumArgumentException">
     ///     Thrown if the <see cref="AudioFormat"/> is not a valid enum value.
     /// </exception>
-    [SuppressMessage("ReSharper", "ForCanBeConvertedToForeach", Justification = "Need as for loop for reference to buffer id.")]
+    [SuppressMessage("ReSharper", "ForCanBeConvertedToForeach", Justification = "Need for loop for reference to buffer id.")]
     private void FillBuffersFromStart()
     {
         var bufferStats = new BufferStats
