@@ -9,5 +9,6 @@ using CommandLine;
 public class InteractiveOptions
 {
     [Option("interactive", Required = false)]
+    // ReSharper disable once UnusedAutoPropertyAccessor.Global
     public bool Interactive { get; set; }
 }
