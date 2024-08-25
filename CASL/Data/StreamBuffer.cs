@@ -97,8 +97,8 @@ internal sealed class StreamBuffer : IAudioBuffer
         this.path = path;
         this.file = file;
 
-        var audioCmdReactable = reactableFactory.CreateAudioCmndReactable();
-        var posCmdReactable = reactableFactory.CreatePositionCmndReactable();
+        var audioCmdReactable = reactableFactory.CreateAudioCmdReactable();
+        var posCmdReactable = reactableFactory.CreatePositionCmdReactable();
         var loopingReactable = reactableFactory.CreateIsLoopingReactable();
 
         this.audioCmdUnsubscriber = audioCmdReactable.CreateOneWayReceive(

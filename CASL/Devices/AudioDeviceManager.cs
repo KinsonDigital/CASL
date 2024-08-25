@@ -63,7 +63,7 @@ internal sealed class AudioDeviceManager : IAudioDeviceManager
         var result = this.alInvoker.GetDeviceList()
             .Select(n => n.Replace(DeviceNamePrefix, string.Empty, StringComparison.Ordinal)).ToArray();
 
-        return result.ToImmutableArray();
+        return [..result];
     }
 
     /// <inheritdoc/>

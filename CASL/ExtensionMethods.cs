@@ -84,19 +84,6 @@ internal static class ExtensionMethods
     }
 
     /// <summary>
-    /// Suppresses SimpleInjector diagnostic warnings related to disposing of objects when they
-    /// inherit from <see cref="IDisposable"/>.
-    /// </summary>
-    /// <typeparam name="T">The type to suppress against.</typeparam>
-    /// <param name="container">The container that the suppression applies to.</param>
-    [ExcludeFromCodeCoverage]
-    public static void SuppressDisposableTransientWarning<T>(this Container container)
-    {
-        var registration = container.GetRegistration(typeof(T))?.Registration;
-        registration?.SuppressDiagnosticWarning(DiagnosticType.DisposableTransientComponent, "Disposing of objects to be disposed of manually by the library.");
-    }
-
-    /// <summary>
     /// Returns a list of strings based on the space delimited string pointed to by <paramref name="strPtr"/>.
     /// </summary>
     /// <param name="strPtr">A pointer to the string of unknown length.</param>
@@ -199,4 +186,17 @@ internal static class ExtensionMethods
     /// <returns>A value that has been mapped to a range between <paramref name="toStart"/> and <paramref name="toStop"/>.</returns>
     public static float MapValue(this long value, long fromStart, long fromStop, float toStart, float toStop)
         => toStart + ((toStop - toStart) * (float)((value - fromStart) / (double)(fromStop - fromStart)));
+
+    /// <summary>
+    /// Suppresses SimpleInjector diagnostic warnings related to disposing of objects when they
+    /// inherit from <see cref="IDisposable"/>.
+    /// </summary>
+    /// <typeparam name="T">The type to suppress against.</typeparam>
+    /// <param name="container">The container that the suppression applies to.</param>
+    [ExcludeFromCodeCoverage]
+    private static void SuppressDisposableTransientWarning<T>(this Container container)
+    {
+        var registration = container.GetRegistration(typeof(T))?.Registration;
+        registration?.SuppressDiagnosticWarning(DiagnosticType.DisposableTransientComponent, "Disposing of objects to be disposed of manually by the library.");
+    }
 }

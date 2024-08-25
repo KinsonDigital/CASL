@@ -91,8 +91,8 @@ public class StreamBufferTests
             .AndDoes(callInfo => this.loopSubscription = callInfo.Arg<IRespondSubscription<bool>>());
 
         this.mockReactableFactory = Substitute.For<IReactableFactory>();
-        this.mockReactableFactory.CreateAudioCmndReactable().Returns(mockAudioCmdReactable);
-        this.mockReactableFactory.CreatePositionCmndReactable().Returns(mockPosCmdReactable);
+        this.mockReactableFactory.CreateAudioCmdReactable().Returns(mockAudioCmdReactable);
+        this.mockReactableFactory.CreatePositionCmdReactable().Returns(mockPosCmdReactable);
         this.mockReactableFactory.CreateIsLoopingReactable().Returns(mockLoopingReactable);
 
         this.mockTaskService = Substitute.For<ITaskService>();

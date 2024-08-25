@@ -79,8 +79,8 @@ public class Audio : IAudio
         this.path = IoC.Container.GetInstance<IPath>();
 
         var reactableFactory = IoC.Container.GetInstance<IReactableFactory>();
-        this.audioCommandReactable = reactableFactory.CreateAudioCmndReactable();
-        this.posCommandReactable = reactableFactory.CreatePositionCmndReactable();
+        this.audioCommandReactable = reactableFactory.CreateAudioCmdReactable();
+        this.posCommandReactable = reactableFactory.CreatePositionCmdReactable();
         this.loopingReactable = reactableFactory.CreateIsLoopingReactable();
 
         var bufferFactory = IoC.Container.GetInstance<IAudioBufferFactory>();
@@ -165,8 +165,8 @@ public class Audio : IAudio
             _ => throw new InvalidEnumArgumentException(nameof(bufferType), (int)bufferType, typeof(BufferType))
         };
 
-        this.audioCommandReactable = reactableFactory.CreateAudioCmndReactable();
-        this.posCommandReactable = reactableFactory.CreatePositionCmndReactable();
+        this.audioCommandReactable = reactableFactory.CreateAudioCmdReactable();
+        this.posCommandReactable = reactableFactory.CreatePositionCmdReactable();
         this.loopingReactable = reactableFactory.CreateIsLoopingReactable();
 
         this.audioManager = audioManager;

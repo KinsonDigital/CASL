@@ -74,8 +74,8 @@ public class AudioTests
         this.mockLoopingReactable = Substitute.For<IPullReactable<bool>>();
 
         this.mockReactableFactory = Substitute.For<IReactableFactory>();
-        this.mockReactableFactory.CreateAudioCmndReactable().Returns(this.mockAudioCmdReactable);
-        this.mockReactableFactory.CreatePositionCmndReactable().Returns(this.mockPosCmnReactable);
+        this.mockReactableFactory.CreateAudioCmdReactable().Returns(this.mockAudioCmdReactable);
+        this.mockReactableFactory.CreatePositionCmdReactable().Returns(this.mockPosCmnReactable);
         this.mockReactableFactory.CreateIsLoopingReactable().Returns(this.mockLoopingReactable);
 
         this.mockPath = Substitute.For<IPath>();
