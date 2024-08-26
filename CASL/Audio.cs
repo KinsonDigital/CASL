@@ -14,6 +14,7 @@ using Data;
 using Devices;
 using Exceptions;
 using Factories;
+using NativeInterop;
 using OpenAL;
 using ReactableData;
 
@@ -23,7 +24,6 @@ using ReactableData;
 [SuppressMessage("ReSharper", "ClassWithVirtualMembersNeverInherited.Global", Justification = "Users need to inherit.")]
 public class Audio : IAudio
 {
-    private const char CrossPlatDirSeparatorChar = '/';
     private const string IsDisposedExceptionMessage = "The audio is disposed.  You must create another audio instance.";
     private readonly IAudioDeviceManager audioManager;
     private readonly IPushReactable<AudioCommandData> audioCommandReactable;
@@ -32,6 +32,8 @@ public class Audio : IAudio
     private readonly IOpenALInvoker alInvoker;
     private readonly IAudioBuffer audioBuffer;
     private readonly IPath path;
+    private readonly IFile file;
+    private readonly IPlatform platform;
     private uint srcId;
     private bool isDisposed;
     private bool audioDeviceChanging;
@@ -60,16 +62,11 @@ public class Audio : IAudio
     [ExcludeFromCodeCoverage(Justification = "Directly interacts with the IoC container.")]
     public Audio(string filePath, BufferType bufferType)
     {
-        var file = IoC.Container.GetInstance<IFile>();
+        this.file = IoC.Container.GetInstance<IFile>();
 
-        if (!file.Exists(filePath))
-        {
-            throw new FileNotFoundException("The audio file could not be found.", filePath);
-        }
-
-        FilePath = filePath.ToCrossPlatPath().TrimAllFromEnd(CrossPlatDirSeparatorChar);
         BufferType = bufferType;
 
+        this.platform = IoC.Container.GetInstance<IPlatform>();
         this.alInvoker = IoC.Container.GetInstance<IOpenALInvoker>();
         this.alInvoker.ErrorCallback += ErrorCallback;
 
@@ -92,13 +89,14 @@ public class Audio : IAudio
             _ => throw new InvalidEnumArgumentException(nameof(bufferType), (int)bufferType, typeof(BufferType))
         };
 
-        Init();
+        Init(filePath);
     }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="Audio"/> class.
     /// </summary>
     /// <param name="filePath">The path to the audio file.</param>
+    /// <param name="platform">Provides platform specific information.</param>
     /// <param name="bufferType">The type of audio buffer used.</param>
     /// <param name="alInvoker">Provides access to OpenAL.</param>
     /// <param name="audioManager">Manages audio device related operations.</param>
@@ -121,6 +119,7 @@ public class Audio : IAudio
     [SuppressMessage("csharpsquid", "S107", Justification = "Not part of the public API.")]
     internal Audio(
         string filePath,
+        IPlatform platform,
         BufferType bufferType,
         IOpenALInvoker alInvoker,
         IAudioDeviceManager audioManager,
@@ -130,6 +129,7 @@ public class Audio : IAudio
         IFile file)
     {
         ArgumentException.ThrowIfNullOrEmpty(filePath);
+        ArgumentNullException.ThrowIfNull(platform);
         ArgumentNullException.ThrowIfNull(alInvoker);
         ArgumentNullException.ThrowIfNull(audioManager);
         ArgumentNullException.ThrowIfNull(bufferFactory);
@@ -137,24 +137,9 @@ public class Audio : IAudio
         ArgumentNullException.ThrowIfNull(path);
         ArgumentNullException.ThrowIfNull(file);
 
-        if (!file.Exists(filePath))
-        {
-            throw new FileNotFoundException($"The audio file could not be found.", filePath);
-        }
-
-        var extension = path.GetExtension(filePath).ToLower();
-
-        var exMsg = $"The file extension '{extension}' is not supported.";
-        exMsg += " Supported extensions are '.ogg' and '.mp3'.";
-
-        if (extension != ".ogg" && extension != ".mp3")
-        {
-            throw new AudioException(exMsg);
-        }
-
-        FilePath = filePath.ToCrossPlatPath().TrimAllFromEnd(CrossPlatDirSeparatorChar);
         BufferType = bufferType;
 
+        this.platform = platform;
         this.alInvoker = alInvoker;
         this.alInvoker.ErrorCallback += ErrorCallback;
 
@@ -171,11 +156,12 @@ public class Audio : IAudio
 
         this.audioManager = audioManager;
         this.path = path;
+        this.file = file;
 
         this.audioManager.DeviceChanging += AudioManager_DeviceChanging;
         this.audioManager.DeviceChanged += AudioManager_DeviceChanged;
 
-        Init();
+        Init(filePath);
     }
 
     /// <summary>
@@ -188,7 +174,7 @@ public class Audio : IAudio
     public string Name => this.path.GetFileNameWithoutExtension(FilePath);
 
     /// <inheritdoc/>
-    public string FilePath { get; }
+    public string FilePath { get; private set; } = string.Empty;
 
     /// <inheritdoc/>
     /// <exception cref="InvalidOperationException">Thrown if the <see cref="Audio"/> has been disposed.</exception>
@@ -481,9 +467,33 @@ public class Audio : IAudio
 
     /// <summary>
     /// Initializes the audio.
+    /// <param name="filePath">The path to the audio file.</param>
     /// </summary>
-    private void Init()
+    private void Init(string filePath)
     {
+        var extension = this.path.GetExtension(filePath).ToLower();
+
+        var exMsg = $"The file extension '{extension}' is not supported.";
+        exMsg += " Supported extensions are '.ogg' and '.mp3'.";
+
+        if (extension != ".ogg" && extension != ".mp3")
+        {
+            throw new AudioException(exMsg);
+        }
+
+        FilePath = filePath.TrimAllFromEnd(this.path.DirectorySeparatorChar)
+            .TrimAllFromEnd(this.path.AltDirectorySeparatorChar);
+
+        if (this.platform.IsWinPlatform())
+        {
+            FilePath = filePath.Replace(this.path.AltDirectorySeparatorChar, this.path.DirectorySeparatorChar);
+        }
+
+        if (!this.file.Exists(filePath))
+        {
+            throw new FileNotFoundException("The audio file could not be found.", filePath);
+        }
+
         this.srcId = this.audioBuffer.Init(FilePath);
         this.audioBuffer.Upload();
     }
@@ -517,7 +527,7 @@ public class Audio : IAudio
     /// </summary>
     private void AudioManager_DeviceChanged(object? sender, EventArgs e)
     {
-        Init();
+        Init(FilePath);
 
         this.audioDeviceChanging = false;
         this.alInvoker.Source(this.srcId, ALSourceb.Looping, this.loopStateBeforeDeviceChange);
