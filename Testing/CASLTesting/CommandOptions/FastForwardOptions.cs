@@ -18,6 +18,7 @@ public class FastForwardOptions
     public float Seconds
     {
         get => this.seconds;
+        // ReSharper disable once UnusedMember.Global
         set
         {
             this.seconds = value;

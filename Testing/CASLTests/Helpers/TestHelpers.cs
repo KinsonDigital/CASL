@@ -201,7 +201,7 @@ public static class TestHelpers
     public static void SetFieldToNull(this object fieldContainer, string fieldName)
     {
         fieldContainer.Should().NotBeNull("setting the field value of a null object is not possible.");
-        fieldName.Should().NotBeNullOrEmpty("setting an field value requires a non-empty or null field name.");
+        fieldName.Should().NotBeNullOrEmpty("setting the field value requires a non-empty or null field name.");
 
         var fields = fieldContainer.GetType().GetFields(BindingFlags.NonPublic | BindingFlags.Instance);
 
@@ -225,7 +225,7 @@ public static class TestHelpers
     public static void SetFieldValue<T>(this object fieldContainer, string fieldName, T value)
     {
         fieldContainer.Should().NotBeNull("setting the field value of a null object is not possible.");
-        fieldName.Should().NotBeNullOrEmpty("setting an field value requires a non-empty or null field name.");
+        fieldName.Should().NotBeNullOrEmpty("setting the field value requires a non-empty or null field name.");
 
         var fields = fieldContainer.GetType().GetFields(BindingFlags.NonPublic | BindingFlags.Instance);
 
@@ -249,7 +249,7 @@ public static class TestHelpers
     public static bool GetBoolFieldValue(this object fieldContainer, string fieldName)
     {
         fieldContainer.Should().NotBeNull("getting the bool field value of a null object is not possible.");
-        fieldName.Should().NotBeNullOrEmpty("getting an bool field value requires a non-empty or null field name.");
+        fieldName.Should().NotBeNullOrEmpty("getting the bool field value requires a non-empty or null field name.");
 
         var allEnumFields = fieldContainer.GetType().GetFields(BindingFlags.NonPublic | BindingFlags.Instance);
         allEnumFields.Should().HaveCountGreaterThan(0, $"no fields exist in the object.");

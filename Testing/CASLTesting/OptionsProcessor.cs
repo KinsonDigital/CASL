@@ -59,7 +59,7 @@ public class OptionsProcessor
         ];
 
     /// <summary>
-    /// Processes all of the possible commands and options.
+    /// Processes all the possible commands and options.
     /// </summary>
     [SuppressMessage("csharpsquid", "S3776", Justification = "Planned for simplification in the future.")]
     public void ProcessOptions()
@@ -80,72 +80,120 @@ public class OptionsProcessor
             Parser.Default.ParseArguments(Console.ReadLine().Split(), this.options)
                 .WithParsed<PlayOptions>(_ =>
                 {
-                    if (AudioNotLoaded()) return;
+                    if (AudioNotLoaded())
+                    {
+                        return;
+                    }
+
                     Console.WriteLine($"Playing the audio file {Path.GetFileName(this.audio.FilePath)}\n");
                     this.audio.Play();
                 })
                 .WithParsed<PauseOptions>(_ =>
                 {
-                    if (AudioNotLoaded()) return;
+                    if (AudioNotLoaded())
+                    {
+                        return;
+                    }
+
                     this.audio.Pause();
                     Console.WriteLine($"Paused the audio fle {Path.GetFileName(this.audio.FilePath)}\n");
                 })
                 .WithParsed<ResetOptions>(_ =>
                 {
-                    if (AudioNotLoaded()) return;
+                    if (AudioNotLoaded())
+                    {
+                        return;
+                    }
+
                     this.audio.Reset();
                     Console.WriteLine("Audio reset back to the beginning.\n");
                 })
                 .WithParsed<SetPositionOptions>(o =>
                 {
-                    if (AudioNotLoaded()) return;
+                    if (AudioNotLoaded())
+                    {
+                        return;
+                    }
+
                     this.audio.SetTimePosition(o.Seconds);
                     Console.WriteLine($"Audio Position Set To {o.Seconds}(sec).\n");
                 })
                 .WithParsed<GetPositionOptions>(_ =>
                 {
-                    if (AudioNotLoaded()) return;
+                    if (AudioNotLoaded())
+                    {
+                        return;
+                    }
+
                     WriteLine($"Audio position is: {Math.Round(this.audio.Position.TotalSeconds, 2)}(sec).", enterBlankAfter: true);
                 })
                 .WithParsed<FastForwardOptions>(o =>
                 {
-                    if (AudioNotLoaded()) return;
+                    if (AudioNotLoaded())
+                    {
+                        return;
+                    }
+
                     this.audio.FastForward(o.Seconds);
                     Console.WriteLine($"Audio Fast Forwarded To: {o.Seconds}(sec).\n");
                 })
                 .WithParsed<RewindOptions>(o =>
                 {
-                    if (AudioNotLoaded()) return;
+                    if (AudioNotLoaded())
+                    {
+                        return;
+                    }
+
                     this.audio.Rewind(o.Seconds);
                     Console.WriteLine($"Audio rewound to {o.Seconds}(sec).\n");
                 })
                 .WithParsed<GetVolumeOptions>(_ => Console.WriteLine($"Volume Set To: {this.audio.Volume}\n"))
                 .WithParsed<SetVolumeOptions>(o =>
                 {
-                    if (AudioNotLoaded()) return;
+                    if (AudioNotLoaded())
+                    {
+                        return;
+                    }
+
                     this.audio.Volume = o.Value;
                     Console.WriteLine($"Volume Set To: {o.Value}");
                 })
                 .WithParsed<GetPlaySpeedOptions>(_ =>
                 {
-                    if (AudioNotLoaded()) return;
+                    if (AudioNotLoaded())
+                    {
+                        return;
+                    }
+
                     Console.WriteLine($"Play Speed: {this.audio.PlaySpeed}\n");
                 })
                 .WithParsed<SetPlaySpeedOptions>(o =>
                 {
-                    if (AudioNotLoaded()) return;
+                    if (AudioNotLoaded())
+                    {
+                        return;
+                    }
+
                     this.audio.PlaySpeed = o.Value;
                     Console.WriteLine($"Set the speed to {o.Value}\n");
                 })
                 .WithParsed<GetLoopStatusOptions>(_ =>
                 {
-                    if (AudioNotLoaded()) return;
+                    if (AudioNotLoaded())
+                    {
+                        return;
+                    }
+
                     var loopStatus = this.audio.IsLooping ? "enabled" : "disabled";
                     Console.WriteLine($"Audio looping {loopStatus}.\n");
                 })
                 .WithParsed<ToggleLoopingOptions>(_ =>
                 {
-                    if (AudioNotLoaded()) return;
+                    if (AudioNotLoaded())
+                    {
+                        return;
+                    }
+
                     this.audio.IsLooping = !this.audio.IsLooping;
                     var loopStatus = this.audio.IsLooping ? "enabled" : "disabled";
 

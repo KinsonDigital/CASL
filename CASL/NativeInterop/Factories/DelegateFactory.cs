@@ -30,16 +30,9 @@ internal sealed class DelegateFactory : IDelegateFactory
             throw new ArgumentException("The pointer must not be zero.", nameof(libraryPtr));
         }
 
-        nint libFunctionPtr;
-
-        if (this.platform.IsWinPlatform())
-        {
-            libFunctionPtr = NativeMethods.GetProcAddress_WIN(libraryPtr, procName);
-        }
-        else
-        {
-            libFunctionPtr = NativeMethods.dlsym_POSIX(libraryPtr, procName);
-        }
+        var libFunctionPtr = this.platform.IsWinPlatform()
+            ? NativeMethods.GetProcAddress_WIN(libraryPtr, procName)
+            : NativeMethods.dlsym_POSIX(libraryPtr, procName);
 
         if (libFunctionPtr == 0)
         {
