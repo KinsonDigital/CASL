@@ -11,7 +11,7 @@ using OpenAL;
 /// Streams mp3 audio data from a mp3 file.
 /// </summary>
 /// <typeparam name="T">The type of data from the audio stream.</typeparam>
-internal interface IAudioFileDecoder<T> : IDisposable
+internal interface IAudioFileDecoder<in T> : IDisposable
 {
     /// <summary>
     /// Gets the number of audio channels.

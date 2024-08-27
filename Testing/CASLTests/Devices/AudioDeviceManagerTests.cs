@@ -300,7 +300,7 @@ public class AudioDeviceManagerTests
         /* This is the total seconds for every byte of data
          * based on 2 Channels, 32 bit depth and a frequency of 44100.
          *
-         * Changing the channels, bit depth, or frequency changes the conversion factor.
+         * Changing the channels, the bit depth, or frequency changes the conversion factor.
          */
         const int bytesPerSec = 352801; // Conversion factor
         const int channels = 2;

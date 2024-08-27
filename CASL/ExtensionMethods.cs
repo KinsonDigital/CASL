@@ -1,4 +1,4 @@
-﻿// <copyright file="ExtensionMethods.cs" company="KinsonDigital">
+// <copyright file="ExtensionMethods.cs" company="KinsonDigital">
 // Copyright (c) KinsonDigital. All rights reserved.
 // </copyright>
 
@@ -16,6 +16,7 @@ using SimpleInjector.Diagnostics;
 /// </summary>
 internal static class ExtensionMethods
 {
+    // TODO: Need to exchange these with the path api versions
     private const char WinDirSeparatorChar = '\\';
     private const char CrossPlatDirSeparatorChar = '/';
 
@@ -29,7 +30,7 @@ internal static class ExtensionMethods
     /// <param name="suppressDisposal"><see langword="true"/> to ignore dispose warnings if the original code invokes dispose.</param>
     /// <remarks>
     ///     This method uses the container's LifestyleSelectionBehavior to select the exact
-    ///     lifestyle for the specified type. By default this will be Transient.
+    ///     lifestyle for the specified type. By default, this will be Transient.
     /// </remarks>
     /// <exception cref="ArgumentNullException">Thrown when one of the arguments is a null reference.</exception>
     /// <exception cref="InvalidOperationException">Thrown when this container instance is locked and can not be altered.</exception>
@@ -66,7 +67,7 @@ internal static class ExtensionMethods
     /// <param name="suppressDisposal"><see langword="true"/> to ignore dispose warnings if the original code invokes dispose.</param>
     /// <remarks>
     ///     This method uses the container's LifestyleSelectionBehavior to select the exact
-    ///     lifestyle for the specified type. By default this will be Transient.
+    ///     lifestyle for the specified type. By default, this will be Transient.
     /// </remarks>
     /// <exception cref="ArgumentNullException">Thrown when one of the arguments is a null reference.</exception>
     /// <exception cref="InvalidOperationException">Thrown when this container instance is locked and can not be altered.</exception>
@@ -81,19 +82,6 @@ internal static class ExtensionMethods
         {
             SuppressDisposableTransientWarning<TService>(container);
         }
-    }
-
-    /// <summary>
-    /// Suppresses SimpleInjector diagnostic warnings related to disposing of objects when they
-    /// inherit from <see cref="IDisposable"/>.
-    /// </summary>
-    /// <typeparam name="T">The type to suppress against.</typeparam>
-    /// <param name="container">The container that the suppression applies to.</param>
-    [ExcludeFromCodeCoverage]
-    public static void SuppressDisposableTransientWarning<T>(this Container container)
-    {
-        var registration = container.GetRegistration(typeof(T))?.Registration;
-        registration?.SuppressDiagnosticWarning(DiagnosticType.DisposableTransientComponent, "Disposing of objects to be disposed of manually by the library.");
     }
 
     /// <summary>
@@ -132,19 +120,21 @@ internal static class ExtensionMethods
         return result.ToArray();
     }
 
+    // TODO: refactor usages of this method and remove the method
     /// <summary>
-    /// Converts the given <paramref name="path"/> to a cross platform path.
+    /// Converts the given <paramref name="path"/> to a cross-platform path.
     /// </summary>
     /// <param name="path">Manages file paths.</param>
-    /// <returns>The cross platform version of the <paramref name="path"/>.</returns>
+    /// <returns>The cross-platform version of the <paramref name="path"/>.</returns>
     /// <returns>
     ///     This changes all '\' characters to '/' characters.
     ///     The '/' directory separator is valid on Windows and Linux systems.
     /// </returns>
     public static string ToCrossPlatPath(this string path) => path.Replace(WinDirSeparatorChar, CrossPlatDirSeparatorChar);
 
+    // todo: look into all refs of this method
     /// <summary>
-    /// Trims all of the consecutive characters that match the given <paramref name="character"/> from the <c>string</c>.
+    /// Trims all the consecutive characters that match the given <paramref name="character"/> from the <c>string</c>.
     /// </summary>
     /// <param name="value">The <c>string</c> to trim.</param>
     /// <param name="character">The character to trim.</param>
@@ -168,10 +158,10 @@ internal static class ExtensionMethods
     /// Maps the given <paramref name="value"/> from one range to another.
     /// </summary>
     /// <param name="value">The value to map.</param>
-    /// <param name="fromStart">The from starting range value.</param>
-    /// <param name="fromStop">The from ending range value.</param>
-    /// <param name="toStart">The to starting range value.</param>
-    /// <param name="toStop">The to ending range value.</param>
+    /// <param name="fromStart">The starting value of the start range.</param>
+    /// <param name="fromStop">The ending value of the start range.</param>
+    /// <param name="toStart">The starting value of the end range.</param>
+    /// <param name="toStop">The ending value of the end range.</param>
     /// <returns>A value that has been mapped to a range between <paramref name="toStart"/> and <paramref name="toStop"/>.</returns>
     public static int MapValue(this float value, float fromStart, float fromStop, int toStart, int toStop)
         => (int)(toStart + ((toStop - toStart) * ((value - fromStart) / (fromStop - fromStart))));
@@ -180,10 +170,10 @@ internal static class ExtensionMethods
     /// Maps the given <paramref name="value"/> from one range to another.
     /// </summary>
     /// <param name="value">The value to map.</param>
-    /// <param name="fromStart">The from starting range value.</param>
-    /// <param name="fromStop">The from ending range value.</param>
-    /// <param name="toStart">The to starting range value.</param>
-    /// <param name="toStop">The to ending range value.</param>
+    /// <param name="fromStart">The starting value of the start range.</param>
+    /// <param name="fromStop">The ending value of the start range.</param>
+    /// <param name="toStart">The starting value of the end range.</param>
+    /// <param name="toStop">The ending value of the end range.</param>
     /// <returns>A value that has been mapped to a range between <paramref name="toStart"/> and <paramref name="toStop"/>.</returns>
     public static long MapValue(this float value, float fromStart, float fromStop, long toStart, long toStop)
         => (long)(toStart + ((toStop - toStart) * ((value - fromStart) / (fromStop - fromStart))));
@@ -192,11 +182,24 @@ internal static class ExtensionMethods
     /// Maps the given <paramref name="value"/> from one range to another.
     /// </summary>
     /// <param name="value">The value to map.</param>
-    /// <param name="fromStart">The from starting range value.</param>
-    /// <param name="fromStop">The from ending range value.</param>
-    /// <param name="toStart">The to starting range value.</param>
-    /// <param name="toStop">The to ending range value.</param>
+    /// <param name="fromStart">The starting value of the start range.</param>
+    /// <param name="fromStop">The ending value of the start range.</param>
+    /// <param name="toStart">The starting value of the end range.</param>
+    /// <param name="toStop">The ending value of the end range.</param>
     /// <returns>A value that has been mapped to a range between <paramref name="toStart"/> and <paramref name="toStop"/>.</returns>
     public static float MapValue(this long value, long fromStart, long fromStop, float toStart, float toStop)
         => toStart + ((toStop - toStart) * (float)((value - fromStart) / (double)(fromStop - fromStart)));
+
+    /// <summary>
+    /// Suppresses SimpleInjector diagnostic warnings related to disposing of objects when they
+    /// inherit from <see cref="IDisposable"/>.
+    /// </summary>
+    /// <typeparam name="T">The type to suppress against.</typeparam>
+    /// <param name="container">The container that the suppression applies to.</param>
+    [ExcludeFromCodeCoverage]
+    private static void SuppressDisposableTransientWarning<T>(this Container container)
+    {
+        var registration = container.GetRegistration(typeof(T))?.Registration;
+        registration?.SuppressDiagnosticWarning(DiagnosticType.DisposableTransientComponent, "Disposing of objects to be disposed of manually by the library.");
+    }
 }

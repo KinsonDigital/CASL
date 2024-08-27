@@ -15,6 +15,7 @@ public class SetPlaySpeedOptions
     public float Value
     {
         get => this.speed;
+        // ReSharper disable once UnusedMember.Global
         set
         {
             this.speed = value;
