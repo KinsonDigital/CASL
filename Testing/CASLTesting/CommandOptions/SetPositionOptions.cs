@@ -10,5 +10,6 @@ using CommandLine;
 public class SetPositionOptions
 {
     [Option('s', "seconds", Required = true)]
+    // ReSharper disable once UnusedAutoPropertyAccessor.Global
     public float Seconds { get; set; }
 }

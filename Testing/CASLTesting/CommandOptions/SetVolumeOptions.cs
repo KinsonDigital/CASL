@@ -15,6 +15,7 @@ public class SetVolumeOptions
     public float Value
     {
         get => this.volume;
+        // ReSharper disable once UnusedMember.Global
         set
         {
             this.volume = value;

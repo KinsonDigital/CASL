@@ -16,13 +16,13 @@ internal interface IReactableFactory
     /// Creates a reactable for changing the state of the audio such as play, pause, and stop.
     /// </summary>
     /// <returns>The reactable.</returns>
-    IPushReactable<AudioCommandData> CreateAudioCmndReactable();
+    IPushReactable<AudioCommandData> CreateAudioCmdReactable();
 
     /// <summary>
     /// Creates a reactable for setting the position within the audio.
     /// </summary>
     /// <returns>The reactable.</returns>
-    IPushReactable<PosCommandData> CreatePositionCmndReactable();
+    IPushReactable<PosCommandData> CreatePositionCmdReactable();
 
     /// <summary>
     /// Creates a reactable for setting the audio loop state.

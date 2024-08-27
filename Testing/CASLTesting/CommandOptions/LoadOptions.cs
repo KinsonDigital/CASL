@@ -30,5 +30,6 @@ public class LoadOptions
         Required = false,
         Default = BufferType.Stream,
         MetaValue = "[Stream|Full]")]
+    // ReSharper disable once UnusedAutoPropertyAccessor.Global
     public BufferType Type { get; set; }
 }
