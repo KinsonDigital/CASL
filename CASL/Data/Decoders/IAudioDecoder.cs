@@ -46,7 +46,7 @@ internal interface IAudioDecoder : IDisposable
     /// Gets the total number of sample frames.
     /// </summary>
     /// <remarks>
-    ///     A sample frame is all of the samples that consist of all the channels combined.
+    ///     A sample frame is all the samples that consist of all the channels combined.
     /// </remarks>
     long TotalSampleFrames { get; }
 
@@ -66,7 +66,7 @@ internal interface IAudioDecoder : IDisposable
     int ReadUpTo(uint upTo);
 
     /// <summary>
-    /// Reads the from the audio.
+    /// Reads the audio.
     /// </summary>
     /// <returns>The total number of samples read.</returns>
     /// <remarks>
@@ -75,7 +75,7 @@ internal interface IAudioDecoder : IDisposable
     int ReadSamples();
 
     /// <summary>
-    /// Reads all of the samples from the audio.
+    /// Reads all the samples from the audio.
     /// </summary>
     /// <remarks>
     ///     The data can be retrieved using the <see cref="GetSampleData{T}"/> method.
@@ -88,7 +88,7 @@ internal interface IAudioDecoder : IDisposable
     /// <typeparam name="T">The type of each data item.</typeparam>
     /// <returns>The audio sample data.</returns>
     /// <remarks>
-    ///     For MP3 data this would be bytes and for OGG data this would be float.
+    ///     For MP3 data this would be bytes and for OGG data this would be floats.
     /// </remarks>
     T[] GetSampleData<T>();
 

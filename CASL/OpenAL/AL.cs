@@ -251,7 +251,7 @@ internal sealed class AL
     /// <remarks>
     /// Requires OpenAL 1.0 or higher.
     /// <br/>
-    /// The buffer name zero is reserved as a “NULL Buffer" and is accepted by alSourcei(…,
+    /// The buffer name zero is reserved as "NULL Buffer" and is accepted by alSourcei(…,
     /// AL_BUFFER, …) as a valid buffer of zero length. The NULL Buffer is extremely useful
     /// for detaching buffers from a source which were attached using this call or with <see cref="ALSourceQueueBuffers"/>.
     /// <br/>
@@ -268,7 +268,7 @@ internal sealed class AL
     private delegate void ALSourceInt(uint source, ALSourcei param, int value);
 
     /// <summary>
-    /// Sets an floating point property of a source.
+    /// Sets a floating point property of a source.
     /// </summary>
     /// <param name="source">Source name whose attribute is being set.</param>
     /// <param name="param">The name of the attribute to set.</param>

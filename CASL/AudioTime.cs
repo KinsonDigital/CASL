@@ -7,7 +7,7 @@ namespace CASL;
 using System.Diagnostics.CodeAnalysis;
 
 /// <summary>
-/// Represents a time value of a audio.
+/// Represents a time value for some audio.
 /// </summary>
 /// <remarks>
 ///     This could represent the current position or the length of a audio.

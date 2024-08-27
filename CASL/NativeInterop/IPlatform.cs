@@ -17,15 +17,15 @@ internal interface IPlatform
     string CurrentOSPlatform { get; }
 
     /// <summary>
-    /// Returns a value indicating if the current platform is a windows platform.
+    /// Returns a value indicating if the current platform is a Windows platform.
     /// </summary>
-    /// <returns>True if the the platform is windows.</returns>
+    /// <returns>True if the platform is Windows.</returns>
     bool IsWinPlatform();
 
     /// <summary>
-    /// Returns a value indicating if the current platform is a windows 10 platform.
+    /// Returns a value indicating if the current platform is a Windows 10 platform.
     /// </summary>
-    /// <returns>True if windows 10.</returns>
+    /// <returns>True if Windows 10.</returns>
     bool IsWin10Platform();
 
     /// <summary>
@@ -41,7 +41,7 @@ internal interface IPlatform
     bool IsLinuxPlatform();
 
     /// <summary>
-    /// Returns a value indicating if the current platform is a posix(MacOS, Linux) platform.
+    /// Returns a value indicating if the current platform is a posix(macOS, Linux) platform.
     /// </summary>
     /// <returns>True if a posix platform.</returns>
     bool IsPosixPlatform();

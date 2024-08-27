@@ -91,8 +91,8 @@ public class StreamBufferTests
             .AndDoes(callInfo => this.loopSubscription = callInfo.Arg<IRespondSubscription<bool>>());
 
         this.mockReactableFactory = Substitute.For<IReactableFactory>();
-        this.mockReactableFactory.CreateAudioCmndReactable().Returns(mockAudioCmdReactable);
-        this.mockReactableFactory.CreatePositionCmndReactable().Returns(mockPosCmdReactable);
+        this.mockReactableFactory.CreateAudioCmdReactable().Returns(mockAudioCmdReactable);
+        this.mockReactableFactory.CreatePositionCmdReactable().Returns(mockPosCmdReactable);
         this.mockReactableFactory.CreateIsLoopingReactable().Returns(mockLoopingReactable);
 
         this.mockTaskService = Substitute.For<ITaskService>();
@@ -396,7 +396,7 @@ public class StreamBufferTests
 
         this.mockPath.GetExtension(Arg.Any<string>()).Returns(".ogg");
 
-        // Make sure that the task service is setup to run the 'StreamData' method
+        // Make sure that the task service is set up to run the 'StreamData' method
         this.mockTaskService.When(x => x.SetAction(Arg.Any<Action>()))
             .Do(cb => this.streamDataDelegate = cb.Arg<Action>());
         this.mockTaskService.When(x => x.Start()).Do(cb =>

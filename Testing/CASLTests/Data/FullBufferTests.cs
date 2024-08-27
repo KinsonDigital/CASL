@@ -81,8 +81,8 @@ public class FullBufferTests
             .AndDoes(callInfo => this.loopSubscription = callInfo.Arg<IRespondSubscription<bool>>());
 
         this.mockReactableFactory = Substitute.For<IReactableFactory>();
-        this.mockReactableFactory.CreateAudioCmndReactable().Returns(this.mockAudioCmdReactable);
-        this.mockReactableFactory.CreatePositionCmndReactable().Returns(this.mockPosCmdReactable);
+        this.mockReactableFactory.CreateAudioCmdReactable().Returns(this.mockAudioCmdReactable);
+        this.mockReactableFactory.CreatePositionCmdReactable().Returns(this.mockPosCmdReactable);
         this.mockReactableFactory.CreateIsLoopingReactable().Returns(this.mockLoopingReactable);
 
         this.mockPath = Substitute.For<IPath>();

@@ -143,7 +143,7 @@ internal enum ALSourcef
     Pitch = 0x1003,
 
     /// <summary>
-    /// Indicate the gain (volume amplification) applied. Type: float. Range: [0.0f - ? ] A value of 1.0 means un-attenuated/unchanged.
+    /// Indicate the gain (volume amplification) applied. Type: float. Range: [0.0f - ?] A value of 1.0 means un-attenuated/unchanged.
     /// Each division by 2 equals an attenuation of -6dB. Each multiplication with 2 equals an amplification of +6dB. A value of 0.0f is
     /// meaningless with respect to a logarithmic scale; it is interpreted as zero volume - the channel is effectively disabled.
     /// </summary>
@@ -181,20 +181,20 @@ internal enum ALSourcef
 
     /// <summary>
     /// (EFX Extension) This property is a multiplier on the amount of Air Absorption applied to the Source. The AL_AIR_ABSORPTION_FACTOR is
-    /// multiplied by an internal Air Absorption Gain HF value of 0.994 (-0.05dB) per meter which represents normal atmospheric humidity and temperature. Range [0.0f .. 10.0f] Default: 0.0f
+    /// multiplied by an internal Air Absorption Gain HF value of 0.994 (-0.05dB) per meter which represents normal atmospheric humidity and temperature. Range [0.0f - 10.0f] Default: 0.0f
     /// </summary>
     EfxAirAbsorptionFactor = 0x20007,
 
     /// <summary>
     /// (EFX Extension) This property is defined the same way as the Reverb Room Roll off property: it is one of two methods available in the
     /// Effect Extension to attenuate the reflected audio (early reflections and reverberation) according to source-listener distance.
-    /// ange [0.0f .. 10.0f] Default: 0.0f
+    /// ange [0.0f - 10.0f] Default: 0.0f
     /// </summary>
     EfxRoomRolloffFactor = 0x20008,
 
     /// <summary>
     /// (EFX Extension) A directed Source points in a specified direction. The Source audio at full volume when the listener is directly in
-    /// front of the source; it is attenuated as the listener circles the Source away from the front. Range [0.0f .. 1.0f] Default: 1.0f
+    /// front of the source; it is attenuated as the listener circles the Source away from the front. Range [0.0f - 1.0f] Default: 1.0f
     /// </summary>
     EfxConeOuterGainHighFrequency = 0x20009,
 }
@@ -429,7 +429,7 @@ internal enum ALGetBufferi
     Frequency = 0x2001,
 
     /// <summary>
-    /// Bit depth of the buffer. Should be 8 or 16.
+    /// The bit depth of the buffer. Should be 8 or 16.
     /// </summary>
     Bits = 0x2002,
 
@@ -450,15 +450,15 @@ internal enum ALGetBufferi
 internal enum ALSource3f
 {
     /// <summary>
-    /// Specify the current location in three dimensional space. OpenAL, like OpenGL, uses a right handed coordinate system, where in a
+    /// Specify the current location in three-dimensional space. OpenAL, like OpenGL, uses a right-handed coordinate system, where in a
     /// frontal default view X (thumb) points right, Y points up (index finger), and Z points towards the viewer/camera (middle finger).
-    /// To switch from a left handed coordinate system, flip the sign on the Z coordinate. Listener position is always in the world
+    /// To switch from a left-handed coordinate system, flip the sign on the Z coordinate. Listener position is always in the world
     /// coordinate system.
     /// </summary>
     Position = 0x1004,
 
     /// <summary>
-    /// Specify the current velocity in three dimensional space.
+    /// Specify the current velocity in three-dimensional space.
     /// </summary>
     Velocity = 0x1006,
 

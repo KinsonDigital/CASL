@@ -12,7 +12,7 @@ using Data;
 internal interface IAudioBufferFactory
 {
     /// <summary>
-    /// Creates a full audio buffer for loading all of the audio file.
+    /// Creates a full audio buffer for loading all the audio file.
     /// </summary>
     /// <param name="filePath">The fully qualified path to the audio file.</param>
     /// <returns>The buffer.</returns>
