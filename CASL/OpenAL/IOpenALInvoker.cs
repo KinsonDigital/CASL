@@ -21,7 +21,7 @@ internal interface IOpenALInvoker
     ///     Error support. Obtain the most recent error generated in the AL state machine.
     ///     When an error is detected by AL, a flag is set and the error code is recorded.
     ///     Further errors, if they occur, do not affect this recorded code. When alGetError
-    ///     is called, the code is returned and the flag is cleared, so that a further error
+    ///     is called, the code is returned and the flag cleared, so that a further error
     ///     will again record its code.
     /// </summary>
     /// <returns>
@@ -269,7 +269,7 @@ internal interface IOpenALInvoker
     void Source(uint source, ALSourcei param, int value);
 
     /// <summary>
-    /// This function sets an bool property of a source.
+    /// This function sets a bool property of a source.
     /// </summary>
     /// <param name="source">Source name whose attribute is being set.</param>
     /// <param name="param">The name of the attribute to set: ALSourceb.SourceRelative, Looping.</param>

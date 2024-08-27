@@ -13,10 +13,10 @@ using ReactableData;
 internal sealed class ReactableFactory : IReactableFactory
 {
     /// <inheritdoc/>
-    public IPushReactable<AudioCommandData> CreateAudioCmndReactable() => IoC.Container.GetInstance<IPushReactable<AudioCommandData>>();
+    public IPushReactable<AudioCommandData> CreateAudioCmdReactable() => IoC.Container.GetInstance<IPushReactable<AudioCommandData>>();
 
     /// <inheritdoc/>
-    public IPushReactable<PosCommandData> CreatePositionCmndReactable() => IoC.Container.GetInstance<IPushReactable<PosCommandData>>();
+    public IPushReactable<PosCommandData> CreatePositionCmdReactable() => IoC.Container.GetInstance<IPushReactable<PosCommandData>>();
 
     /// <inheritdoc/>
     public IPullReactable<bool> CreateIsLoopingReactable() => IoC.Container.GetInstance<IPullReactable<bool>>();

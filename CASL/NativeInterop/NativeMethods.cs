@@ -100,7 +100,7 @@ internal static partial class NativeMethods
     /// <remarks>
     /// The library can be specified by its filename or by using a system search algorithm.
     /// Use the dlsym function to retrieve the address of symbols (functions or variables) defined in the library.
-    /// Call dlclose to unload the library and free associated resources.
+    /// Call dlclose to unload the library and free-associated resources.
     /// Use dlerror to retrieve error messages if any errors occur during the loading process.
     /// <br/>
     /// <br/>

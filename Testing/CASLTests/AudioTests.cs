@@ -18,6 +18,7 @@ using CASL.Data;
 using CASL.Devices;
 using CASL.Exceptions;
 using CASL.Factories;
+using CASL.NativeInterop;
 using CASL.OpenAL;
 using CASL.ReactableData;
 using FluentAssertions;
@@ -39,6 +40,7 @@ public class AudioTests
     private const string Mp3ContentFilePath = $"{BaseDirPath}/{AudioFileNameWithoutExtension}{MP3FileExtension}";
     private const string OggContentFilePath = $"{BaseDirPath}/{AudioFileNameWithoutExtension}{OggFileExtension}";
     private readonly IAudioDeviceManager mockAudioManager;
+    private readonly IPlatform mockPlatform;
     private readonly IOpenALInvoker mockALInvoker;
     private readonly IAudioBufferFactory mockAudioBufferFactory;
     private readonly IReactableFactory mockReactableFactory;
@@ -55,6 +57,7 @@ public class AudioTests
     [SuppressMessage("csharpsquid", "S1075", Justification = "Only used for testing")]
     public AudioTests()
     {
+        this.mockPlatform = Substitute.For<IPlatform>();
         this.mockALInvoker = Substitute.For<IOpenALInvoker>();
         this.mockALInvoker.GenSource().Returns(SrcId);
         this.mockALInvoker.GenBuffer().Returns(BufferId);
@@ -74,8 +77,8 @@ public class AudioTests
         this.mockLoopingReactable = Substitute.For<IPullReactable<bool>>();
 
         this.mockReactableFactory = Substitute.For<IReactableFactory>();
-        this.mockReactableFactory.CreateAudioCmndReactable().Returns(this.mockAudioCmdReactable);
-        this.mockReactableFactory.CreatePositionCmndReactable().Returns(this.mockPosCmnReactable);
+        this.mockReactableFactory.CreateAudioCmdReactable().Returns(this.mockAudioCmdReactable);
+        this.mockReactableFactory.CreatePositionCmdReactable().Returns(this.mockPosCmnReactable);
         this.mockReactableFactory.CreateIsLoopingReactable().Returns(this.mockLoopingReactable);
 
         this.mockPath = Substitute.For<IPath>();
@@ -87,6 +90,28 @@ public class AudioTests
         this.mockFile.Exists(Arg.Any<string>()).Returns(true);
     }
 
+    #region Test Data
+    /// <summary>
+    /// Provides test data for the <see cref="Ctor_WhenInvoked_InitializesAudio"/> test.
+    /// </summary>
+    /// <returns>The test data.</returns>
+    public static TheoryData<string, char, char, BufferType, bool> Ctor_WhenInvoked_InitializesAudio_Data()
+    {
+        const bool isLinux = false;
+        const bool isWin = true;
+
+        return new TheoryData<string, char, char, BufferType, bool>
+        {
+            { OggFileExtension, '/', '/',  BufferType.Full, isLinux },
+            { MP3FileExtension, '/', '/',  BufferType.Stream, isLinux },
+            { OggFileExtension, '\\', '\\',  BufferType.Full, isWin },
+            { MP3FileExtension, '\\', '\\',  BufferType.Stream, isWin },
+            { OggFileExtension, '/', '\\',  BufferType.Full, isWin },
+            { MP3FileExtension, '/', '\\',  BufferType.Stream, isWin },
+        };
+    }
+    #endregion
+
     #region Constructor Tests
     [Theory]
     [InlineData(null, "Value cannot be null. (Parameter 'filePath')")]
@@ -96,6 +121,7 @@ public class AudioTests
         // Arrange & Act
         var act = () => _ = new Audio(
             filePath,
+            this.mockPlatform,
             BufferType.Full,
             this.mockALInvoker,
             this.mockAudioManager,
@@ -116,6 +142,7 @@ public class AudioTests
         // Arrange & Act
         var act = void () => _ = new Audio(
             OggContentFilePath,
+            this.mockPlatform,
             BufferType.Full,
             null,
             this.mockAudioManager,
@@ -136,6 +163,7 @@ public class AudioTests
         // Arrange & Act
         var act = () => _ = new Audio(
             OggContentFilePath,
+            this.mockPlatform,
             BufferType.Full,
             this.mockALInvoker,
             null,
@@ -156,6 +184,7 @@ public class AudioTests
         // Arrange & Act
         var act = () => _ = new Audio(
             OggContentFilePath,
+            this.mockPlatform,
             BufferType.Full,
             this.mockALInvoker,
             this.mockAudioManager,
@@ -176,6 +205,7 @@ public class AudioTests
         // Arrange & Act
         var act = () => _ = new Audio(
             OggContentFilePath,
+            this.mockPlatform,
             BufferType.Full,
             this.mockALInvoker,
             this.mockAudioManager,
@@ -196,6 +226,7 @@ public class AudioTests
         // Arrange & Act
         var act = () => _ = new Audio(
             OggContentFilePath,
+            this.mockPlatform,
             BufferType.Full,
             this.mockALInvoker,
             this.mockAudioManager,
@@ -216,6 +247,7 @@ public class AudioTests
         // Arrange & Act
         var act = () => _ = new Audio(
             OggContentFilePath,
+            this.mockPlatform,
             BufferType.Full,
             this.mockALInvoker,
             this.mockAudioManager,
@@ -234,6 +266,7 @@ public class AudioTests
     public void Ctor_WhenFileDoesNotExist_ThrowsException()
     {
         // Arrange
+        this.mockPath.GetExtension(Arg.Any<string>()).Returns(".ogg");
         this.mockFile.Exists(Arg.Any<string>()).Returns(false);
 
         // Act
@@ -274,16 +307,33 @@ public class AudioTests
     }
 
     [Theory]
-    [InlineData(BufferType.Full)]
-    [InlineData(BufferType.Stream)]
-    public void Ctor_WhenInvoked_InitializesAudio(BufferType bufferType)
+    [MemberData(nameof(Ctor_WhenInvoked_InitializesAudio_Data))]
+    public void Ctor_WhenInvoked_InitializesAudio(
+        string extension,
+        char startDirSep,
+        char expectedDirSep,
+        BufferType bufferType,
+        bool isWinPlatform)
     {
-        // Arrange & Act
-        var sut = CreateSystemUnderTest(OggContentFilePath, bufferType);
+        // Arrange
+        const string audioFileNameWithoutExtension = "audio";
+        var startBaseDirPath = $"C:{startDirSep}temp{startDirSep}Content{startDirSep}Audio";
+        var filePath = $"{startBaseDirPath}{startDirSep}{audioFileNameWithoutExtension}{extension}";
+
+        var expectedBaseDirPath = $"C:{expectedDirSep}temp{expectedDirSep}Content{expectedDirSep}Audio";
+        var expected = $"{expectedBaseDirPath}{expectedDirSep}{audioFileNameWithoutExtension}{extension}";
+
+        this.mockPath.GetExtension(Arg.Any<string>()).Returns(extension);
+        this.mockPath.DirectorySeparatorChar.Returns('\\');
+        this.mockPath.AltDirectorySeparatorChar.Returns('/');
+        this.mockPlatform.IsWinPlatform().Returns(isWinPlatform);
+
+        // Act
+        var sut = CreateSystemUnderTest(filePath, bufferType);
 
         // Assert
         sut.BufferType.Should().Be(bufferType);
-        this.mockAudioBuffer.Received(1).Init(OggContentFilePath);
+        this.mockAudioBuffer.Received(1).Init(expected);
         this.mockAudioBuffer.Received(1).Upload();
     }
 
@@ -297,6 +347,7 @@ public class AudioTests
         // Act
         var act = () => _ = new Audio(
             @"C:\temp\Content\Audio\audio.wav",
+            this.mockPlatform,
             BufferType.Full,
             this.mockALInvoker,
             this.mockAudioManager,
@@ -644,8 +695,8 @@ public class AudioTests
     {
         /*NOTE:
          * The first InlineData value must be a raw integer value of the ALSourceState enum.
-         * This is because ALSourceState is scoped as internal and we cannot use it as a parameter
-         * for the unit test method.  This is illegal. So the value is casted to get around this limitation
+         * This is because ALSourceState is scoped as internal, and we cannot use it as a parameter
+         * for the unit test method.  This is illegal. So the value is cast to get around this limitation
          * for testing purposes.
          */
 
@@ -1001,7 +1052,7 @@ public class AudioTests
     public void Audio_WhenChangingAudioDevice_ReinitializeAudio()
     {
         // Arrange
-        // Simulate an audio device change so the event is invoked inside of the  audio class
+        // Simulate an audio device change so the event is invoked inside the audio class
         var sut = CreateSystemUnderTest(OggContentFilePath);
 
         this.mockAudioManager.DeviceChanged += Raise.EventWith(sut, EventArgs.Empty);
@@ -1096,7 +1147,7 @@ public class AudioTests
         this.mockAudioManager.DeviceChanged += Raise.EventWith(sut, EventArgs.Empty);
 
         // Assert
-        // Assert that the changing process has been completed
+        // Has the changing process has been completed
         this.mockALInvoker.Received(1).GetSourceState(SrcId);
         this.mockALInvoker.Received(stateBeforeChange == ALSourceState.Stopped ? 0 : 1).SourceStop(SrcId);
         this.mockALInvoker.Received(1).GetSource(SrcId, ALSourcef.Gain);
@@ -1120,8 +1171,9 @@ public class AudioTests
     /// <param name="filePath">The path to the  audio file.</param>
     /// <param name="bufferType">The type of buffer.</param>
     /// <returns>The instance for testing.</returns>
-    private Audio CreateSystemUnderTest(string filePath, BufferType bufferType = BufferType.Full)
-        => new (filePath,
+    private Audio CreateSystemUnderTest(string filePath, BufferType bufferType = BufferType.Full) =>
+        new (filePath,
+            this.mockPlatform,
             bufferType,
             this.mockALInvoker,
             this.mockAudioManager,

@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 internal interface ITaskService : IDisposable
 {
     /// <summary>
-    /// Gets a value indicating whether or not the task has ran to completion.
+    /// Gets a value indicating whether the task has run to completion.
     /// </summary>
     bool IsCompletedSuccessfully { get; }
 
