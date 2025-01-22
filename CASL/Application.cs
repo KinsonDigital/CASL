@@ -4,8 +4,8 @@
 
 namespace CASL;
 
+using System;
 using System.Diagnostics.CodeAnalysis;
-using System.Reflection;
 
 /// <summary>
 /// Provides information about the running application.
@@ -14,5 +14,5 @@ using System.Reflection;
 internal sealed class Application : IApplication
 {
     /// <inheritdoc/>
-    public string Location => Assembly.GetExecutingAssembly().Location;
+    public string Location => AppContext.BaseDirectory;
 }
