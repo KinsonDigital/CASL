@@ -16,10 +16,6 @@ using SimpleInjector.Diagnostics;
 /// </summary>
 internal static class ExtensionMethods
 {
-    // TODO: Need to exchange these with the path api versions
-    private const char WinDirSeparatorChar = '\\';
-    private const char CrossPlatDirSeparatorChar = '/';
-
     /// <summary>
     ///     Registers that a new instance of <typeparamref name="TImplementation"/> will be returned every time
     ///     a <typeparamref name="TService"/> is requested (transient).
@@ -120,19 +116,6 @@ internal static class ExtensionMethods
         return result.ToArray();
     }
 
-    // TODO: refactor usages of this method and remove the method
-    /// <summary>
-    /// Converts the given <paramref name="path"/> to a cross-platform path.
-    /// </summary>
-    /// <param name="path">Manages file paths.</param>
-    /// <returns>The cross-platform version of the <paramref name="path"/>.</returns>
-    /// <returns>
-    ///     This changes all '\' characters to '/' characters.
-    ///     The '/' directory separator is valid on Windows and Linux systems.
-    /// </returns>
-    public static string ToCrossPlatPath(this string path) => path.Replace(WinDirSeparatorChar, CrossPlatDirSeparatorChar);
-
-    // todo: look into all refs of this method
     /// <summary>
     /// Trims all the consecutive characters that match the given <paramref name="character"/> from the <c>string</c>.
     /// </summary>
