@@ -8,7 +8,7 @@
     <Nullable>enable</Nullable>
 
     <!--Update this for preview releases-->
-    <Version>1.0.0-preview.20</Version>
+    <Version>1.0.0-preview.201</Version>
 
     <!--Update this for preview releases-->
     <FileVersion>1.0.0-preview.20</FileVersion>
@@ -40,9 +40,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Remove="OpenAL\libs\**" />
-    <EmbeddedResource Remove="OpenAL\libs\**" />
-    <None Remove="OpenAL\libs\**" />
     <None Include="..\README.md" Pack="true" PackagePath="\" />
     <None Include="..\Images\casl-logo.ico" Pack="true" PackagePath="\" />
     <None Include="..\Images\casl-logo.png" Pack="true" PackagePath="\" />
@@ -73,8 +70,15 @@
     <PackageReference Include="System.IO.Abstractions" Version="21.0.29" />
   </ItemGroup>
 
-  <!--ADD STUFF TO WINDOWS NUGET PACKAGE-->
-  <!--TODO: CREATE A WINDOW SPECIFIC SOLUTION AND PROJECT CONFIGS-->
+  <ItemGroup>
+    <Content Include="OpenAL\libs\linux-x64\libopenal.so.1" />
+    <Content Include="OpenAL\libs\win-x64\soft_oal.dll">
+        <Link>soft_oal.dll</Link>
+        <CopyToOutputDirectory Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <!--ADD NATIVE LIBS TO THE NUGET PACKAGE-->
   <Target Name="AddNativeWindowLibsToNugetPackage" AfterTargets="Build" Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU' Or '$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <ItemGroup>
       <!--WINDOWS-->
