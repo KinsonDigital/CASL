@@ -69,9 +69,7 @@ internal static class IoC
         IoCContainer.Register<IPlatform, Platform>(Lifestyle.Singleton);
         IoCContainer.Register<ILibrary, OpenALLibrary>(Lifestyle.Singleton);
         IoCContainer.Register<IDelegateFactory, DelegateFactory>(Lifestyle.Singleton);
-        IoCContainer.Register<IDependencyManager, OpenALDependencyManager>(Lifestyle.Singleton);
         IoCContainer.Register<ILibraryLoader, NativeLibraryLoader>(Lifestyle.Singleton);
-        IoCContainer.Register<IFilePathResolver, NativeLibPathResolver>(Lifestyle.Singleton);
         IoCContainer.Register<IAudioDecoderFactory, AudioDecoderFactory>(Lifestyle.Singleton);
         IoCContainer.Register<IAudioBufferFactory, AudioBufferFactory>(Lifestyle.Singleton);
 
