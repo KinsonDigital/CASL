@@ -1,4 +1,4 @@
-﻿// <copyright file="NativeLibraryLoader.cs" company="KinsonDigital">
+// <copyright file="NativeLibraryLoader.cs" company="KinsonDigital">
 // Copyright (c) KinsonDigital. All rights reserved.
 // </copyright>
 
@@ -23,8 +23,7 @@ using Exceptions;
 /// </summary>
 internal sealed class NativeLibraryLoader : ILibraryLoader
 {
-    private const char CrossPlatDirSeparatorChar = '/';
-    private readonly IDependencyManager dependencyManager;
+    private readonly IApplication application;
     private readonly IPlatform platform;
     private readonly IDirectory directory;
     private readonly IFile file;
@@ -33,36 +32,33 @@ internal sealed class NativeLibraryLoader : ILibraryLoader
     /// <summary>
     /// Initializes a new instance of the <see cref="NativeLibraryLoader"/> class.
     /// </summary>
-    /// <param name="dependencyManager">Manages the native library's dependencies.</param>
     /// <param name="platform">Provides platform specific information.</param>
     /// <param name="directory">Performs operations with directories.</param>
     /// <param name="file">Performs operations with files.</param>
     /// <param name="path">Manages file paths.</param>
     /// <param name="library">The library to load.</param>
     public NativeLibraryLoader(
-        IDependencyManager dependencyManager,
+        IApplication application,
         IPlatform platform,
         IDirectory directory,
         IFile file,
         IPath path,
         ILibrary library)
     {
-        ArgumentNullException.ThrowIfNull(dependencyManager);
+        ArgumentNullException.ThrowIfNull(application);
         ArgumentNullException.ThrowIfNull(platform);
         ArgumentNullException.ThrowIfNull(directory);
         ArgumentNullException.ThrowIfNull(file);
         ArgumentNullException.ThrowIfNull(path);
         ArgumentNullException.ThrowIfNull(library);
 
-        this.dependencyManager = dependencyManager;
+        this.application = application;
         this.platform = platform;
         this.directory = directory;
         this.file = file;
         this.path = path;
 
         LibraryName = ProcessLibExtension(library.GetLibraryName());
-
-        dependencyManager.VerifyDependencies();
     }
 
     /// <inheritdoc/>
@@ -71,12 +67,13 @@ internal sealed class NativeLibraryLoader : ILibraryLoader
     /// <inheritdoc/>
     public nint LoadLibrary()
     {
-        var libDirPath = this.dependencyManager.NativeLibDirPath;
+        var libDirPath = (this.path.GetDirectoryName(this.application.Location) ?? string.Empty)
+            .TrimAllFromEnd(this.path.AltDirectorySeparatorChar);
 
         // Add a directory separator if one is missing
-        libDirPath = libDirPath.ToCrossPlatPath().TrimAllFromEnd(CrossPlatDirSeparatorChar);
+        libDirPath = libDirPath.TrimAllFromEnd(this.path.AltDirectorySeparatorChar);
 
-        var libFilePath = $"{libDirPath}{CrossPlatDirSeparatorChar}{LibraryName}";
+        var libFilePath = $"{libDirPath}{this.path.AltDirectorySeparatorChar}{LibraryName}";
 
         var (exists, libPtr) = LoadLibraryIfExists(libFilePath);
 
