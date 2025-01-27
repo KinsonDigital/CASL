@@ -72,7 +72,7 @@ internal sealed class NativeLibraryLoader : ILibraryLoader
             return libPtr;
         }
 
-        var exceptionMsg = $"Could not find the library '{LibraryName}' in directory path '{libDirPath}'";
+        var exceptionMsg = $"Could not find the library '{LibraryName}' in the directory path '{libDirPath}'.";
 
         throw new FileNotFoundException(exceptionMsg, libFilePath);
     }
