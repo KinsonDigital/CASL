@@ -4,6 +4,7 @@
 
 namespace CASL.NativeInterop;
 
+using System;
 using System.IO;
 using System.IO.Abstractions;
 using DotnetWrappers;
@@ -37,7 +38,12 @@ internal sealed class OpenALLibrary : ILibrary
         IPath path,
         IAssembly assembly)
     {
-        // TODO: Add null checks for all params
+        ArgumentNullException.ThrowIfNull(platform);
+        ArgumentNullException.ThrowIfNull(directory);
+        ArgumentNullException.ThrowIfNull(file);
+        ArgumentNullException.ThrowIfNull(path);
+        ArgumentNullException.ThrowIfNull(assembly);
+
         this.platform = platform;
         this.directory = directory;
         this.file = file;

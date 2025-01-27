@@ -2,10 +2,8 @@
 // Copyright (c) KinsonDigital. All rights reserved.
 // </copyright>
 
-#pragma warning disable IDE0002 // The name can be simplified
 namespace CASLTests.NativeInterop;
 
-#pragma warning disable IDE0001 // The name can be simplified
 using System.IO;
 using System.IO.Abstractions;
 using CASL.DotnetWrappers;
@@ -13,9 +11,8 @@ using CASL.Exceptions;
 using CASL.NativeInterop;
 using Xunit;
 using FluentAssertions;
+using Helpers;
 using NSubstitute;
-
-#pragma warning restore IDE0001 // The name can be simplified
 
 /// <summary>
 /// Tests the <see cref="OpenALLibrary"/> class.
@@ -40,10 +37,82 @@ public class OpenALLibraryTests
         this.mockAssembly = Substitute.For<IAssembly>();
     }
 
-
-    // TODO: Add ctor tests for null params
-
     #region Constructor Tests
+    [Fact]
+    public void Ctor_WithNullPlatformParam_ThrowsException()
+    {
+        // Arrange & Act
+        var act = () => new OpenALLibrary(
+            null,
+            this.mockDirectory,
+            this.mockFile,
+            this.mockPath,
+            this.mockAssembly);
+
+        // Assert
+        act.Should().ThrowArgNullException().WithNullParamMsg("platform");
+    }
+
+    [Fact]
+    public void Ctor_WithNullDirectoryParam_ThrowsException()
+    {
+        // Arrange & Act
+        var act = () => new OpenALLibrary(
+            this.mockPlatform,
+            null,
+            this.mockFile,
+            this.mockPath,
+            this.mockAssembly);
+
+        // Assert
+        act.Should().ThrowArgNullException().WithNullParamMsg("directory");
+    }
+
+    [Fact]
+    public void Ctor_WithNullFileParam_ThrowsException()
+    {
+        // Arrange & Act
+        var act = () => new OpenALLibrary(
+            this.mockPlatform,
+            this.mockDirectory,
+            null,
+            this.mockPath,
+            this.mockAssembly);
+
+        // Assert
+        act.Should().ThrowArgNullException().WithNullParamMsg("file");
+    }
+
+    [Fact]
+    public void Ctor_WithNullPathParam_ThrowsException()
+    {
+        // Arrange & Act
+        var act = () => new OpenALLibrary(
+            this.mockPlatform,
+            this.mockDirectory,
+            this.mockFile,
+            null,
+            this.mockAssembly);
+
+        // Assert
+        act.Should().ThrowArgNullException().WithNullParamMsg("path");
+    }
+
+    [Fact]
+    public void Ctor_WithNullAssemblyParam_ThrowsException()
+    {
+        // Arrange & Act
+        var act = () => new OpenALLibrary(
+            this.mockPlatform,
+            this.mockDirectory,
+            this.mockFile,
+            this.mockPath,
+            null);
+
+        // Assert
+        act.Should().ThrowArgNullException().WithNullParamMsg("assembly");
+    }
+
     [Fact]
     public void Ctor_WithUnknownPlatform_ThrowsException()
     {
