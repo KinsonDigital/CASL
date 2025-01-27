@@ -14,6 +14,7 @@ namespace CASL.NativeInterop;
 using System;
 using System.IO;
 using System.IO.Abstractions;
+using DotnetWrappers;
 using Exceptions;
 
 /// <summary>
@@ -21,38 +22,34 @@ using Exceptions;
 /// </summary>
 internal sealed class NativeLibraryLoader : ILibraryLoader
 {
-    private readonly IApplication application;
+    private readonly IAssembly assembly;
     private readonly IPlatform platform;
-    private readonly IDirectory directory;
     private readonly IFile file;
     private readonly IPath path;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="NativeLibraryLoader"/> class.
     /// </summary>
+    /// <param name="assembly">Provides assembly related services.</param>
     /// <param name="platform">Provides platform specific information.</param>
-    /// <param name="directory">Performs operations with directories.</param>
     /// <param name="file">Performs operations with files.</param>
     /// <param name="path">Manages file paths.</param>
     /// <param name="library">The library to load.</param>
     public NativeLibraryLoader(
-        IApplication application,
+        IAssembly assembly,
         IPlatform platform,
-        IDirectory directory,
         IFile file,
         IPath path,
         ILibrary library)
     {
-        ArgumentNullException.ThrowIfNull(application);
+        ArgumentNullException.ThrowIfNull(assembly);
         ArgumentNullException.ThrowIfNull(platform);
-        ArgumentNullException.ThrowIfNull(directory);
         ArgumentNullException.ThrowIfNull(file);
         ArgumentNullException.ThrowIfNull(path);
         ArgumentNullException.ThrowIfNull(library);
 
-        this.application = application;
+        this.assembly = assembly;
         this.platform = platform;
-        this.directory = directory;
         this.file = file;
         this.path = path;
 
@@ -65,7 +62,7 @@ internal sealed class NativeLibraryLoader : ILibraryLoader
     /// <inheritdoc/>
     public nint LoadLibrary()
     {
-        var libDirPath = this.application.Location;
+        var libDirPath = this.assembly.Location;
         var libFilePath = $"{libDirPath}{this.path.DirectorySeparatorChar}{LibraryName}";
 
         var (exists, libPtr) = LoadLibraryIfExists(libFilePath);

@@ -6,6 +6,7 @@ namespace CASL.NativeInterop;
 
 using System.IO;
 using System.IO.Abstractions;
+using DotnetWrappers;
 using Exceptions;
 
 /// <summary>
@@ -25,20 +26,23 @@ internal sealed class OpenALLibrary : ILibrary
     /// Initializes a new instance of the <see cref="OpenALLibrary"/> class.
     /// </summary>
     /// <param name="platform">Provides platform specific information.</param>
-    /// <param name="application">Provides application related services.</param>
+    /// <param name="directory">Performs operations with directories.</param>
+    /// <param name="file">Performs operations with files.</param>
+    /// <param name="path">Manages file paths.</param>
+    /// <param name="assembly">Provides assembly related services.</param>
     public OpenALLibrary(
         IPlatform platform,
         IDirectory directory,
         IFile file,
         IPath path,
-        IApplication application)
+        IAssembly assembly)
     {
         // TODO: Add null checks for all params
         this.platform = platform;
         this.directory = directory;
         this.file = file;
         this.path = path;
-        this.appDirPath = application.Location;
+        this.appDirPath = assembly.Location;
 
         ProcessLibFile();
     }
@@ -69,7 +73,7 @@ internal sealed class OpenALLibrary : ILibrary
         var libName = GetLibraryName();
         var fullLibPath = $"{this.appDirPath}{this.path.DirectorySeparatorChar}{libName}";
 
-        // Check if the library exists in the same location as the application
+        // Check if the library exists in the same location as the assembly
         if (this.file.Exists(fullLibPath))
         {
             return;
@@ -103,7 +107,7 @@ internal sealed class OpenALLibrary : ILibrary
             throw new FileNotFoundException($"The library '{libName}' does not exist in the platform directory '{platformDirPath}'.");
         }
 
-        // At this point, the library file exist.  Copy the library to the same location as the application.
+        // At this point, the library file exist.  Copy the library to the same location as the assembly.
         this.file.Copy(fullPlatLibPath, fullLibPath);
     }
 }

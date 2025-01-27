@@ -6,6 +6,7 @@ namespace CASL.DotnetWrappers;
 
 using System;
 using System.Diagnostics.CodeAnalysis;
+using System.IO;
 using System.Runtime.Loader;
 
 /// <inheritdoc cref="IAssembly"/>
@@ -20,6 +21,7 @@ internal sealed class Assembly : IAssembly, IDisposable
     /// </summary>
     public Assembly()
     {
+        this.Location = AppContext.BaseDirectory.TrimEnd(Path.DirectorySeparatorChar);
         var assembly = System.Reflection.Assembly.GetExecutingAssembly();
 
         ArgumentNullException.ThrowIfNull(assembly);
@@ -31,6 +33,9 @@ internal sealed class Assembly : IAssembly, IDisposable
 
     /// <inheritdoc/>
     public event Action? Unloading;
+
+    /// <inheritdoc/>
+    public string Location { get; }
 
     /// <inheritdoc cref="IDisposable.Dispose"/>
     public void Dispose() => Dispose(true);

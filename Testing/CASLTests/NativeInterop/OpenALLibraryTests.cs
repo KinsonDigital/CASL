@@ -8,7 +8,7 @@ namespace CASLTests.NativeInterop;
 #pragma warning disable IDE0001 // The name can be simplified
 using System.IO;
 using System.IO.Abstractions;
-using CASL;
+using CASL.DotnetWrappers;
 using CASL.Exceptions;
 using CASL.NativeInterop;
 using Xunit;
@@ -26,7 +26,7 @@ public class OpenALLibraryTests
     private readonly IDirectory mockDirectory;
     private readonly IFile mockFile;
     private readonly IPath mockPath;
-    private readonly IApplication mockApplication;
+    private readonly IAssembly mockAssembly;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="OpenALLibraryTests"/> class.
@@ -37,7 +37,7 @@ public class OpenALLibraryTests
         this.mockDirectory = Substitute.For<IDirectory>();
         this.mockFile = Substitute.For<IFile>();
         this.mockPath = Substitute.For<IPath>();
-        this.mockApplication = Substitute.For<IApplication>();
+        this.mockAssembly = Substitute.For<IAssembly>();
     }
 
 
@@ -65,7 +65,7 @@ public class OpenALLibraryTests
     {
         // Arrange
         MockWindowsPlatform();
-        this.mockApplication.Location.Returns(@"C:\app-dir");
+        this.mockAssembly.Location.Returns(@"C:\app-dir");
         this.mockFile.Exists(Arg.Any<string>()).Returns(false);
         this.mockDirectory.Exists(Arg.Any<string>()).Returns(false);
 
@@ -84,7 +84,7 @@ public class OpenALLibraryTests
         const string expected = @"The library 'soft_oal.dll' does not exist" +
                                 @" in the platform directory 'C:\app-dir\runtimes\win-x64\native'.";
         MockWindowsPlatform();
-        this.mockApplication.Location.Returns(@"C:\app-dir");
+        this.mockAssembly.Location.Returns(@"C:\app-dir");
         this.mockFile.Exists(Arg.Any<string>()).Returns(false);
         this.mockDirectory.Exists(Arg.Any<string>()).Returns(true);
 
@@ -172,7 +172,7 @@ public class OpenALLibraryTests
             this.mockDirectory,
             this.mockFile,
             this.mockPath,
-            this.mockApplication);
+            this.mockAssembly);
 
     /// <summary>
     /// Mocks a windows platform.
@@ -182,7 +182,7 @@ public class OpenALLibraryTests
         this.mockPlatform.IsWinPlatform().Returns(true);
         this.mockPlatform.IsPosixPlatform().Returns(false);
         this.mockPath.DirectorySeparatorChar.Returns('\\');
-        this.mockApplication.Location.Returns(@"C:\app-dir");
+        this.mockAssembly.Location.Returns(@"C:\app-dir");
     }
 
     /// <summary>
@@ -193,6 +193,6 @@ public class OpenALLibraryTests
         this.mockPlatform.IsWinPlatform().Returns(false);
         this.mockPlatform.IsPosixPlatform().Returns(true);
         this.mockPath.DirectorySeparatorChar.Returns('/');
-        this.mockApplication.Location.Returns("/app-dir");
+        this.mockAssembly.Location.Returns("/app-dir");
     }
 }
