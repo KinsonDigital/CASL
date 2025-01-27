@@ -45,18 +45,6 @@ public class ExtensionMethodTests
     }
 
     [Theory]
-    [InlineData(@"C:\dir-1\dir-2", "C:/dir-1/dir-2")]
-    [InlineData(@"C:\dir-1\dir-2\", "C:/dir-1/dir-2/")]
-    public void ToCrossPlatPath_WhenInvoked_ReturnsCorrectResult(string path, string expected)
-    {
-        // Act
-        var actual = path.ToCrossPlatPath();
-
-        // Assert
-        Assert.Equal(expected, actual);
-    }
-
-    [Theory]
     [InlineData("test-value/", "test-value")]
     [InlineData("test-value///", "test-value")]
     [InlineData(null, "")]

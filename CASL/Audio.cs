@@ -14,7 +14,6 @@ using Data;
 using Devices;
 using Exceptions;
 using Factories;
-using NativeInterop;
 using OpenAL;
 using ReactableData;
 
@@ -33,7 +32,6 @@ public class Audio : IAudio
     private readonly IAudioBuffer audioBuffer;
     private readonly IPath path;
     private readonly IFile file;
-    private readonly IPlatform platform;
     private uint srcId;
     private bool isDisposed;
     private bool audioDeviceChanging;
@@ -66,7 +64,6 @@ public class Audio : IAudio
 
         BufferType = bufferType;
 
-        this.platform = IoC.Container.GetInstance<IPlatform>();
         this.alInvoker = IoC.Container.GetInstance<IOpenALInvoker>();
         this.alInvoker.ErrorCallback += ErrorCallback;
 
@@ -96,7 +93,6 @@ public class Audio : IAudio
     /// Initializes a new instance of the <see cref="Audio"/> class.
     /// </summary>
     /// <param name="filePath">The path to the audio file.</param>
-    /// <param name="platform">Provides platform specific information.</param>
     /// <param name="bufferType">The type of audio buffer used.</param>
     /// <param name="alInvoker">Provides access to OpenAL.</param>
     /// <param name="audioManager">Manages audio device related operations.</param>
@@ -119,7 +115,6 @@ public class Audio : IAudio
     [SuppressMessage("csharpsquid", "S107", Justification = "Not part of the public API.")]
     internal Audio(
         string filePath,
-        IPlatform platform,
         BufferType bufferType,
         IOpenALInvoker alInvoker,
         IAudioDeviceManager audioManager,
@@ -129,7 +124,6 @@ public class Audio : IAudio
         IFile file)
     {
         ArgumentException.ThrowIfNullOrEmpty(filePath);
-        ArgumentNullException.ThrowIfNull(platform);
         ArgumentNullException.ThrowIfNull(alInvoker);
         ArgumentNullException.ThrowIfNull(audioManager);
         ArgumentNullException.ThrowIfNull(bufferFactory);
@@ -139,7 +133,6 @@ public class Audio : IAudio
 
         BufferType = bufferType;
 
-        this.platform = platform;
         this.alInvoker = alInvoker;
         this.alInvoker.ErrorCallback += ErrorCallback;
 
@@ -481,13 +474,7 @@ public class Audio : IAudio
             throw new AudioException(exMsg);
         }
 
-        FilePath = filePath.TrimAllFromEnd(this.path.DirectorySeparatorChar)
-            .TrimAllFromEnd(this.path.AltDirectorySeparatorChar);
-
-        if (this.platform.IsWinPlatform())
-        {
-            FilePath = filePath.Replace(this.path.AltDirectorySeparatorChar, this.path.DirectorySeparatorChar);
-        }
+        FilePath = filePath;
 
         if (!this.file.Exists(filePath))
         {
