@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -53,18 +53,10 @@
     </None>
   </ItemGroup>
 
-  <!--COPY 64 BIT WINDOWS VERSION OF OPENAL TO PUBLISH DIRECTORY-->
-  <Target Name="CopyOpenALLib" AfterTargets="publish" Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <Copy SourceFiles="..\..\CASL\OpenAL\libs\win-x64\soft_oal.dll" DestinationFolder="bin\Debug\net5.0\publish\" />
+  <!--
+    Copy 64 bit windows version of the OpenAL library to the output directory for development.
+  -->
+  <Target Name="CopyOpenALLib" AfterTargets="Build">
+    <Copy SourceFiles="$(SolutionDir)CASL/NativeLibs/win-x64/soft_oal.dll" DestinationFolder="$(OutputPath)" />
   </Target>
-
-    <!--COPY 64 BIT LINUX VERSION OF OPENAL TO PUBLISH DIRECTORY-->
-
-  <!--COPY 64 BIT WINDOWS VERSION OF OPENAL TO OUTPUT DIRECTORY-->
-  <Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <Copy SourceFiles="..\..\CASL\OpenAL\libs\win-x64\soft_oal.dll" DestinationFolder="$(TargetDir)\runtimes\win-x64\native" />
-  </Target>
-
-  <!--COPY 64 BIT LINUX VERSION OF OPENAL TO OUTPUT DIRECTORY-->
-
 </Project>
