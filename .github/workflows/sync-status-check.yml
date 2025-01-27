@@ -43,8 +43,7 @@ jobs:
             4. Event Type - set to pull request event type
             5. PAT
           #>
-          deno run `
-            --allow-net --allow-read `
+          deno run -RN `
             "$scriptUrl" `
             "${{ vars.ORGANIZATION_NAME }}" `
             "${{ vars.PROJECT_NAME }}" `

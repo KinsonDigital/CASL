@@ -42,8 +42,7 @@ jobs:
             4. Event Type - set to issue event type
             5. PAT
           #>
-          deno run `
-            --allow-net `
+          deno run -N `
             "$scriptUrl" `
             "${{ vars.PROJECT_NAME }}" `
             "$issueNumber" `
