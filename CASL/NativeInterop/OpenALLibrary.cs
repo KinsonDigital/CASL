@@ -16,7 +16,7 @@ using Exceptions;
 internal sealed class OpenALLibrary : ILibrary
 {
     private const string WinLibName = "soft_oal.dll";
-    private const string PosixLibName = "libopenal.so";
+    private const string PosixLibName = "libopenal.so.1.24.2";
     private readonly IPlatform platform;
     private readonly IDirectory directory;
     private readonly IFile file;
