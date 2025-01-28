@@ -187,16 +187,16 @@ public class OpenALLibraryTests
     {
         // Arrange
         MockPosixPlatform();
-        this.mockFile.Exists("/app-dir/libopenal.so").Returns(false);
+        this.mockFile.Exists("/app-dir/libopenal.so.1.24.2").Returns(false);
         this.mockDirectory.Exists(Arg.Any<string>()).Returns(true);
-        this.mockFile.Exists("/app-dir/runtimes/linux-x64/native/libopenal.so").Returns(true);
+        this.mockFile.Exists("/app-dir/runtimes/linux-x64/native/libopenal.so.1.24.2").Returns(true);
 
         // Act
         CreateSystemUnderTest();
 
         // Assert
         this.mockFile.Received(1)
-            .Copy("/app-dir/runtimes/linux-x64/native/libopenal.so", "/app-dir/libopenal.so");
+            .Copy("/app-dir/runtimes/linux-x64/native/libopenal.so.1.24.2", "/app-dir/libopenal.so.1.24.2");
     }
     #endregion
 
@@ -228,7 +228,7 @@ public class OpenALLibraryTests
         var actual = sut.GetLibraryName();
 
         // Assert
-        actual.Should().Be("libopenal.so");
+        actual.Should().Be("libopenal.so.1.24.2");
     }
     #endregion
 
