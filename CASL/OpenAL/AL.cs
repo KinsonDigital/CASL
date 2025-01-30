@@ -4,6 +4,7 @@
 
 /* References:
  * OpenAL documentation and other resources can be found at http://www.openal.org/documentation/
+ * OpenAL Soft information can be found at https://openal-soft.org/
  */
 
 // ReSharper disable UnusedType.Local

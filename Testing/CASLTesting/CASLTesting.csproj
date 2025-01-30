@@ -59,5 +59,6 @@
   -->
   <Target Name="CopyOpenALLib" AfterTargets="Build">
     <Copy SourceFiles="$(SolutionDir)CASL/NativeLibs/win-x64/soft_oal.dll" DestinationFolder="$(OutputPath)" />
+    <Copy SourceFiles="$(SolutionDir)CASL/NativeLibs/linux-x64/libopenal.so.1.24.2" DestinationFolder="$(OutputPath)" />
   </Target>
 </Project>
