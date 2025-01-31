@@ -161,7 +161,15 @@ public class Audio : IAudio
     /// Finalizes an instance of the <see cref="Audio"/> class.
     /// </summary>
     [ExcludeFromCodeCoverage(Justification = "Finalizers cannot be tested")]
-    ~Audio() => Dispose(false);
+    ~Audio()
+    {
+        if (UnitTestDetector.IsRunningFromUnitTest)
+        {
+            return;
+        }
+
+        Dispose(false);
+    }
 
     /// <inheritdoc/>
     public string Name => this.path.GetFileNameWithoutExtension(FilePath);
