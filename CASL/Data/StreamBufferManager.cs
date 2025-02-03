@@ -1,4 +1,4 @@
-﻿// <copyright file="StreamBufferManager.cs" company="KinsonDigital">
+// <copyright file="StreamBufferManager.cs" company="KinsonDigital">
 // Copyright (c) KinsonDigital. All rights reserved.
 // </copyright>
 
@@ -141,28 +141,11 @@ internal sealed class StreamBufferManager : IStreamBufferManager
                 continue;
             }
 
-            switch (bufferStats.FormatType)
-            {
-                case AudioFormatType.Mp3:
-                    this.alInvoker.BufferData(
-                        bufferId,
-                        bufferStats.DecoderFormat,
-                        sampleData,
-                        bufferStats.SampleRate);
-                    break;
-                case AudioFormatType.Ogg:
-                    this.alInvoker.BufferData(
-                        bufferId,
-                        bufferStats.DecoderFormat,
-                        sampleData,
-                        bufferStats.SampleRate);
-                    break;
-                default:
-                    throw new InvalidEnumArgumentException(
-                        $"this.{nameof(bufferStats.FormatType)}",
-                        (int)bufferStats.FormatType,
-                        typeof(AudioFormatType));
-            }
+            this.alInvoker.BufferData(
+                bufferId,
+                bufferStats.DecoderFormat,
+                sampleData,
+                bufferStats.SampleRate);
 
             this.alInvoker.SourceQueueBuffer(bufferStats.SourceId, ref bufferId);
         }
