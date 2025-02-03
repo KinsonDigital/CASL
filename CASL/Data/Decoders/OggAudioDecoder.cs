@@ -38,18 +38,7 @@ internal sealed class OggAudioDecoder : IAudioFileDecoder<float>
     public ALFormat Format => TotalChannels == 1 ? ALFormat.MonoFloat32Ext : ALFormat.StereoFloat32Ext;
 
     /// <inheritdoc/>
-    public int SampleRate
-    {
-        get
-        {
-            if (string.IsNullOrEmpty(this.filePath))
-            {
-                return 0;
-            }
-
-            return this.vorbisReader.SampleRate;
-        }
-    }
+    public int SampleRate => string.IsNullOrEmpty(this.filePath) ? 0 : this.vorbisReader.SampleRate;
 
     /// <inheritdoc/>
     public long TotalSamples
