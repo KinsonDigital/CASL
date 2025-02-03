@@ -42,7 +42,15 @@ internal sealed class AudioDeviceManager : IAudioDeviceManager
     /// Finalizes an instance of the <see cref="AudioDeviceManager"/> class.
     /// </summary>
     [ExcludeFromCodeCoverage(Justification = "Finalizers cannot be tested")]
-    ~AudioDeviceManager() => Dispose(false);
+    ~AudioDeviceManager()
+    {
+        if (UnitTestDetector.IsRunningFromUnitTest)
+        {
+            return;
+        }
+
+        Dispose(false);
+    }
 
     /// <inheritdoc/>
     public event EventHandler<EventArgs>? DeviceChanging;

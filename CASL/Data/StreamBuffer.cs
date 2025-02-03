@@ -127,7 +127,15 @@ internal sealed class StreamBuffer : IAudioBuffer
     /// Finalizes an instance of the <see cref="StreamBuffer"/> class.
     /// </summary>
     [ExcludeFromCodeCoverage(Justification = "Finalizers cannot be tested")]
-    ~StreamBuffer() => Dispose(false);
+    ~StreamBuffer()
+    {
+        if (UnitTestDetector.IsRunningFromUnitTest)
+        {
+            return;
+        }
+
+        Dispose(false);
+    }
 
     /// <inheritdoc/>
     public float TotalSeconds => this.audioDecoder.TotalSeconds;
