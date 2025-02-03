@@ -127,7 +127,15 @@ internal sealed class FullBuffer : IAudioBuffer
     /// Finalizes an instance of the <see cref="FullBuffer"/> class.
     /// </summary>
     [ExcludeFromCodeCoverage(Justification = "Finalizers cannot be tested")]
-    ~FullBuffer() => Dispose(false);
+    ~FullBuffer()
+    {
+        if (UnitTestDetector.IsRunningFromUnitTest)
+        {
+            return;
+        }
+
+        Dispose(false);
+    }
 
     /// <inheritdoc/>
     public float TotalSeconds => this.audioDecoder.TotalSeconds;

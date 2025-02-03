@@ -39,22 +39,22 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "WorkFlows", "WorkFlows", "{
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug|Any CPU = Debug|Any CPU
-		Release|Any CPU = Release|Any CPU
+		Release|x64 = Release|x64
+		Debug|x64 = Debug|x64
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{B62B38C5-0DFF-46A0-B95A-D613F366040D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B62B38C5-0DFF-46A0-B95A-D613F366040D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B62B38C5-0DFF-46A0-B95A-D613F366040D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B62B38C5-0DFF-46A0-B95A-D613F366040D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{1DC6781C-60A4-478A-9FCF-AB23A9CF111A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{1DC6781C-60A4-478A-9FCF-AB23A9CF111A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{1DC6781C-60A4-478A-9FCF-AB23A9CF111A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{1DC6781C-60A4-478A-9FCF-AB23A9CF111A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{2F67B7C0-7BA4-4EDD-8B0C-38793A3DE77C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{2F67B7C0-7BA4-4EDD-8B0C-38793A3DE77C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{2F67B7C0-7BA4-4EDD-8B0C-38793A3DE77C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{2F67B7C0-7BA4-4EDD-8B0C-38793A3DE77C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B62B38C5-0DFF-46A0-B95A-D613F366040D}.Release|x64.ActiveCfg = Release|x64
+		{B62B38C5-0DFF-46A0-B95A-D613F366040D}.Release|x64.Build.0 = Release|x64
+		{B62B38C5-0DFF-46A0-B95A-D613F366040D}.Debug|x64.ActiveCfg = Debug|x64
+		{B62B38C5-0DFF-46A0-B95A-D613F366040D}.Debug|x64.Build.0 = Debug|x64
+		{1DC6781C-60A4-478A-9FCF-AB23A9CF111A}.Release|x64.ActiveCfg = Release|x64
+		{1DC6781C-60A4-478A-9FCF-AB23A9CF111A}.Release|x64.Build.0 = Release|x64
+		{1DC6781C-60A4-478A-9FCF-AB23A9CF111A}.Debug|x64.ActiveCfg = Debug|x64
+		{1DC6781C-60A4-478A-9FCF-AB23A9CF111A}.Debug|x64.Build.0 = Debug|x64
+		{2F67B7C0-7BA4-4EDD-8B0C-38793A3DE77C}.Release|x64.ActiveCfg = Release|x64
+		{2F67B7C0-7BA4-4EDD-8B0C-38793A3DE77C}.Release|x64.Build.0 = Release|x64
+		{2F67B7C0-7BA4-4EDD-8B0C-38793A3DE77C}.Debug|x64.ActiveCfg = Debug|x64
+		{2F67B7C0-7BA4-4EDD-8B0C-38793A3DE77C}.Debug|x64.Build.0 = Debug|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
