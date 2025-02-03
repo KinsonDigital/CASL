@@ -1,4 +1,4 @@
-﻿// <copyright file="Mp3AudioDecoder.cs" company="KinsonDigital">
+// <copyright file="Mp3AudioDecoder.cs" company="KinsonDigital">
 // Copyright (c) KinsonDigital. All rights reserved.
 // </copyright>
 
@@ -72,7 +72,25 @@ internal sealed class Mp3AudioDecoder : IAudioFileDecoder<byte>
     public int ReadSamples(byte[] buffer) => this.mp3Stream.Read(buffer);
 
     /// <inheritdoc/>
-    public int ReadSamples(byte[] buffer, int offset, int count) => this.mp3Stream.Read(buffer, offset, count);
+    public int ReadSamples(byte[] buffer, int offset, int count)
+    {
+        var samplesRead = this.mp3Stream.Read(buffer, offset, count);
+
+        if (samplesRead >= buffer.Length)
+        {
+            return samplesRead;
+        }
+
+        // Not enough data was read to completely fill the buffer
+        // Set the rest of the buffer data to silence to prevent crunchy
+        // sounds at the end of the audio.
+        for (var i = samplesRead; i < buffer.Length; i++)
+        {
+            buffer[i] = 0;
+        }
+
+        return samplesRead;
+    }
 
     /// <inheritdoc/>
     public int ReadUpTo(byte[] buffer, uint upTo)
