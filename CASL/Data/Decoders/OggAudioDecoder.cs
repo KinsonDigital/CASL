@@ -94,7 +94,25 @@ internal sealed class OggAudioDecoder : IAudioFileDecoder<float>
     }
 
     /// <inheritdoc/>
-    public int ReadSamples(float[] buffer, int offset, int count) => this.vorbisReader.ReadSamples(buffer, offset, count);
+    public int ReadSamples(float[] buffer, int offset, int count)
+    {
+        var samplesRead = this.vorbisReader.ReadSamples(buffer, offset, count);
+
+        if (samplesRead >= buffer.Length)
+        {
+            return samplesRead;
+        }
+
+        // Not enough data was read to completely fill the buffer
+        // Set the rest of the buffer data to silence to prevent crunchy
+        // sounds at the end of the audio.
+        for (var i = samplesRead; i < buffer.Length; i++)
+        {
+            buffer[i] = 0;
+        }
+
+        return samplesRead;
+    }
 
     /// <inheritdoc/>
     public int ReadSamples(float[] buffer) => this.vorbisReader.ReadSamples(buffer);
