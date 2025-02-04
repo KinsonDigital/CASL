@@ -5,14 +5,12 @@
 namespace CASL.Data.Decoders;
 
 using System;
-using System.Diagnostics.CodeAnalysis;
 using MP3Sharp;
 using OpenAL;
 
 /// <summary>
 /// Decodes mp3 audio data from a mp3 file.
 /// </summary>
-[ExcludeFromCodeCoverage(Justification = "Directly interacts with audio file.")]
 internal sealed class Mp3AudioDecoder : IAudioFileDecoder<byte>
 {
     // NOTE: the Mp3Sharp decoder library only deals with 16bit mp3 files.  Which is 99% of what is used now days.
@@ -96,11 +94,10 @@ internal sealed class Mp3AudioDecoder : IAudioFileDecoder<byte>
     public int ReadUpTo(byte[] buffer, uint upTo)
     {
         Flush();
-
-        _ = this.mp3Stream.Read(new byte[upTo].AsSpan());
+        _ = this.mp3Stream.Read(new byte[upTo], 0, (int)upTo);
 
         // Read the requested samples
-        return this.mp3Stream.Read(buffer);
+        return this.mp3Stream.Read(buffer, 0, buffer.Length);
     }
 
     /// <inheritdoc/>

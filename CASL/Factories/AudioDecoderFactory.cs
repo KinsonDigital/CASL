@@ -6,6 +6,7 @@ namespace CASL.Factories;
 
 using System.Diagnostics.CodeAnalysis;
 using Data.Decoders;
+using Wrappers;
 
 /// <inheritdoc/>
 [ExcludeFromCodeCoverage(Justification = "No logic to test.")]
@@ -15,5 +16,10 @@ internal sealed class AudioDecoderFactory : IAudioDecoderFactory
     public IAudioFileDecoder<byte> CreateMp3AudioDecoder(string filePath) => new Mp3AudioDecoder(filePath);
 
     /// <inheritdoc/>
-    public IAudioFileDecoder<float> CreateOggAudioDecoder(string filePath) => new OggAudioDecoder(filePath);
+    public IAudioFileDecoder<float> CreateOggAudioDecoder(string filePath)
+    {
+        var decoder = IoC.Container.GetInstance<IVorbisReaderWrapper>();
+
+        return new OggAudioDecoder(filePath, decoder);
+    }
 }
