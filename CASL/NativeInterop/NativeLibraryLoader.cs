@@ -1,4 +1,4 @@
-﻿// <copyright file="NativeLibraryLoader.cs" company="KinsonDigital">
+// <copyright file="NativeLibraryLoader.cs" company="KinsonDigital">
 // Copyright (c) KinsonDigital. All rights reserved.
 // </copyright>
 
@@ -12,10 +12,9 @@
 namespace CASL.NativeInterop;
 
 using System;
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.IO.Abstractions;
-using System.Linq;
+using DotnetWrappers;
 using Exceptions;
 
 /// <summary>
@@ -23,46 +22,38 @@ using Exceptions;
 /// </summary>
 internal sealed class NativeLibraryLoader : ILibraryLoader
 {
-    private const char CrossPlatDirSeparatorChar = '/';
-    private readonly IDependencyManager dependencyManager;
+    private readonly IAssembly assembly;
     private readonly IPlatform platform;
-    private readonly IDirectory directory;
     private readonly IFile file;
     private readonly IPath path;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="NativeLibraryLoader"/> class.
     /// </summary>
-    /// <param name="dependencyManager">Manages the native library's dependencies.</param>
+    /// <param name="assembly">Provides assembly related services.</param>
     /// <param name="platform">Provides platform specific information.</param>
-    /// <param name="directory">Performs operations with directories.</param>
     /// <param name="file">Performs operations with files.</param>
     /// <param name="path">Manages file paths.</param>
     /// <param name="library">The library to load.</param>
     public NativeLibraryLoader(
-        IDependencyManager dependencyManager,
+        IAssembly assembly,
         IPlatform platform,
-        IDirectory directory,
         IFile file,
         IPath path,
         ILibrary library)
     {
-        ArgumentNullException.ThrowIfNull(dependencyManager);
+        ArgumentNullException.ThrowIfNull(assembly);
         ArgumentNullException.ThrowIfNull(platform);
-        ArgumentNullException.ThrowIfNull(directory);
         ArgumentNullException.ThrowIfNull(file);
         ArgumentNullException.ThrowIfNull(path);
         ArgumentNullException.ThrowIfNull(library);
 
-        this.dependencyManager = dependencyManager;
+        this.assembly = assembly;
         this.platform = platform;
-        this.directory = directory;
         this.file = file;
         this.path = path;
 
-        LibraryName = ProcessLibExtension(library.GetLibraryName());
-
-        dependencyManager.VerifyDependencies();
+        LibraryName = library.GetLibraryName();
     }
 
     /// <inheritdoc/>
@@ -71,12 +62,8 @@ internal sealed class NativeLibraryLoader : ILibraryLoader
     /// <inheritdoc/>
     public nint LoadLibrary()
     {
-        var libDirPath = this.dependencyManager.NativeLibDirPath;
-
-        // Add a directory separator if one is missing
-        libDirPath = libDirPath.ToCrossPlatPath().TrimAllFromEnd(CrossPlatDirSeparatorChar);
-
-        var libFilePath = $"{libDirPath}{CrossPlatDirSeparatorChar}{LibraryName}";
+        var libDirPath = this.assembly.Location;
+        var libFilePath = $"{libDirPath}{this.path.DirectorySeparatorChar}{LibraryName}";
 
         var (exists, libPtr) = LoadLibraryIfExists(libFilePath);
 
@@ -85,7 +72,7 @@ internal sealed class NativeLibraryLoader : ILibraryLoader
             return libPtr;
         }
 
-        var exceptionMsg = $"Could not find the library '{LibraryName}' in directory path '{libDirPath}'";
+        var exceptionMsg = $"Could not find the library '{LibraryName}' in the directory path '{libDirPath}'.";
 
         throw new FileNotFoundException(exceptionMsg, libFilePath);
     }
@@ -119,86 +106,5 @@ internal sealed class NativeLibraryLoader : ILibraryLoader
         loadLibExceptionMsg += $"\n\nLibrary Path: '{libraryFilePath}'";
 
         throw new LoadLibraryException(loadLibExceptionMsg);
-    }
-
-    /// <summary>
-    /// Processes the current windows library name to make sure that it has an extension.
-    /// </summary>
-    /// <param name="libraryName">The library name to process.</param>
-    /// <returns>The name of the library with the extension on it.</returns>
-    /// <remarks>
-    ///     If the library already has a valid extension, then nothing is changed. If it does not have an extension,
-    ///     or the extension is incorrect, it will fix it.
-    /// </remarks>
-    private string ProcessLibExtension(string libraryName)
-    {
-        if (string.IsNullOrEmpty(libraryName))
-        {
-            throw new ArgumentNullException(nameof(libraryName), "The parameter must not be null or empty.");
-        }
-
-        while (this.path.HasExtension(libraryName))
-        {
-            libraryName = this.path.GetFileNameWithoutExtension(libraryName);
-        }
-
-        return $"{libraryName}{this.platform.GetPlatformLibFileExtension()}";
-    }
-
-    /// <summary>
-    /// Searches for and gets the latest version of a posix library that matches the given <paramref name="libraryName"/>.
-    /// </summary>
-    /// <param name="possibleLibPath">The path to where the libraries might exist.</param>
-    /// <param name="libraryName">The library name to process.</param>
-    /// <returns>The latest version of the given <paramref name="libraryName"/>.</returns>
-    [SuppressMessage("csharpsquid", "S1144", Justification = "Not referenced internally but might be in the future.")]
-    private string GetLatestPosixLibraryVersion(string possibleLibPath, string libraryName)
-    {
-        var libExtension = this.platform.GetPlatformLibFileExtension();
-
-        libraryName = libraryName.ToLower();
-
-        // Strip any extensions off of the name
-        while (this.path.HasExtension(libraryName))
-        {
-            libraryName = this.path.GetFileNameWithoutExtension(libraryName);
-        }
-
-        var possibleLibs = (from n in this.directory.GetFiles(possibleLibPath)
-            where this.path.GetFileName(n).ToLower().Contains(libraryName.ToLower())
-                  && this.path.GetFileName(n).ToLower().Contains(".so")
-            select n).ToArray();
-
-        if (possibleLibs.Length <= 0)
-        {
-            return string.Empty;
-        }
-
-        var largestVersion = -1;
-
-        // Find the library name that has the largest version number on it.
-        // Example: '.so.1' or '.so.2'
-        foreach (var possibleLib in possibleLibs)
-        {
-            if (!possibleLib.Contains(".so."))
-            {
-                continue;
-            }
-
-            var sections = possibleLib.Split(".so.");
-
-            var parseSuccess = int.TryParse(sections[1], out var libVersion);
-
-            if (parseSuccess && libVersion > largestVersion)
-            {
-                largestVersion = libVersion;
-            }
-        }
-
-        var chosenLibName = largestVersion == -1u
-            ? this.path.GetFileName(possibleLibs[0])
-            : $"{libraryName}{libExtension}.{largestVersion}";
-
-        return chosenLibName;
     }
 }

@@ -1,36 +1,38 @@
-﻿// <copyright file="Mp3AudioDecoder.cs" company="KinsonDigital">
+// <copyright file="Mp3AudioDecoder.cs" company="KinsonDigital">
 // Copyright (c) KinsonDigital. All rights reserved.
 // </copyright>
 
 namespace CASL.Data.Decoders;
 
 using System;
-using System.Diagnostics.CodeAnalysis;
 using MP3Sharp;
 using OpenAL;
+using Wrappers;
 
 /// <summary>
 /// Decodes mp3 audio data from a mp3 file.
 /// </summary>
-[ExcludeFromCodeCoverage(Justification = "Directly interacts with audio file.")]
 internal sealed class Mp3AudioDecoder : IAudioFileDecoder<byte>
 {
     // NOTE: the Mp3Sharp decoder library only deals with 16bit mp3 files.  Which is 99% of what is used now days.
     private const float BytesPerSample = 4f;
     private readonly string filePath;
-    private MP3Stream mp3Stream;
+    private IMP3StreamWrapper mp3Stream;
     private bool isDisposed;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="Mp3AudioDecoder"/> class.
     /// </summary>
     /// <param name="filePath">The fully qualified path to the ogg audio file.</param>
-    public Mp3AudioDecoder(string filePath)
+    /// <param name="mp3StreamWrapper">Wraps the original mp3 stream object.</param>
+    public Mp3AudioDecoder(string filePath, IMP3StreamWrapper mp3StreamWrapper)
     {
         ArgumentException.ThrowIfNullOrEmpty(filePath);
+        ArgumentNullException.ThrowIfNull(mp3StreamWrapper);
 
         this.filePath = filePath;
-        this.mp3Stream = new MP3Stream(filePath);
+        this.mp3Stream = mp3StreamWrapper;
+        this.mp3Stream.Load(filePath);
         CalcSamplesAndTime();
     }
 
@@ -38,20 +40,10 @@ internal sealed class Mp3AudioDecoder : IAudioFileDecoder<byte>
     public int TotalChannels => this.mp3Stream.ChannelCount;
 
     /// <inheritdoc/>
-    public ALFormat Format
-    {
-        get
-        {
-            if (string.IsNullOrEmpty(this.filePath))
-            {
-                return default;
-            }
-
-            return this.mp3Stream.Format == SoundFormat.Pcm16BitMono
-                ? ALFormat.Mono16
-                : ALFormat.Stereo16;
-        }
-    }
+    public ALFormat Format =>
+        this.mp3Stream.Format == SoundFormat.Pcm16BitMono
+            ? ALFormat.Mono16
+            : ALFormat.Stereo16;
 
     /// <inheritdoc/>
     public int SampleRate => this.mp3Stream.Frequency;
@@ -69,28 +61,46 @@ internal sealed class Mp3AudioDecoder : IAudioFileDecoder<byte>
     public long TotalSampleFrames => TotalSamples / TotalChannels;
 
     /// <inheritdoc/>
-    public int ReadSamples(byte[] buffer) => this.mp3Stream.Read(buffer);
+    public int ReadSamples(byte[] buffer) => this.mp3Stream.Read(buffer, 0, buffer.Length);
 
     /// <inheritdoc/>
-    public int ReadSamples(byte[] buffer, int offset, int count) => this.mp3Stream.Read(buffer, offset, count);
+    public int ReadSamples(byte[] buffer, int offset, int count)
+    {
+        var samplesRead = this.mp3Stream.Read(buffer, offset, count);
+
+        if (samplesRead >= buffer.Length)
+        {
+            return samplesRead;
+        }
+
+        // Not enough data was read to completely fill the buffer
+        // Set the rest of the buffer data to silence to prevent crunchy
+        // sounds at the end of the audio.
+        for (var i = samplesRead; i < buffer.Length; i++)
+        {
+            buffer[i] = 0;
+        }
+
+        return samplesRead;
+    }
 
     /// <inheritdoc/>
     public int ReadUpTo(byte[] buffer, uint upTo)
     {
         Flush();
-
-        _ = this.mp3Stream.Read(new byte[upTo].AsSpan());
+        _ = this.mp3Stream.Read(new byte[upTo], 0, (int)upTo);
 
         // Read the requested samples
-        return this.mp3Stream.Read(buffer);
+        return this.mp3Stream.Read(buffer, 0, buffer.Length);
     }
 
     /// <inheritdoc/>
     public void Flush()
     {
         // NOTE: The Flush() method does not seem to be internally implemented or working
+        this.mp3Stream.Flush();
         this.mp3Stream.Dispose();
-        this.mp3Stream = new MP3Stream(this.filePath);
+        this.mp3Stream.Load(this.filePath);
     }
 
     /// <inheritdoc/>
@@ -119,14 +129,14 @@ internal sealed class Mp3AudioDecoder : IAudioFileDecoder<byte>
     private void CalcSamplesAndTime()
     {
         var bufferSize = 4096 * this.mp3Stream.ChannelCount;
-        var buffer = new byte[bufferSize].AsSpan();
+        var buffer = new byte[bufferSize];
         var totalBytesRead = 0L;
         var totalTimeSec = 0f;
         var totalSamplesRead = 0L;
 
         while (true)
         {
-            var bytesRead = this.mp3Stream.Read(buffer);
+            var bytesRead = this.mp3Stream.Read(buffer, 0, buffer.Length);
             totalBytesRead += bytesRead;
 
             var samples = bytesRead / BytesPerSample;
@@ -141,9 +151,7 @@ internal sealed class Mp3AudioDecoder : IAudioFileDecoder<byte>
             }
         }
 
-        this.mp3Stream.Flush();
-        this.mp3Stream.Dispose();
-        this.mp3Stream = new MP3Stream(this.filePath);
+        Flush();
 
         TotalBytes = totalBytesRead;
         TotalSamples = totalSamplesRead * this.mp3Stream.ChannelCount;

@@ -90,6 +90,11 @@ internal interface ITaskService : IDisposable
     Task ContinueWith(Action<Task> continuationAction, TaskContinuationOptions taskContinuationOptions, TaskScheduler scheduler);
 
     /// <summary>
+    /// Waits until the task has completed successfully.
+    /// </summary>
+    void WaitUntilTaskCompletes();
+
+    /// <summary>
     /// Cancels the task.
     /// </summary>
     /// <remarks>

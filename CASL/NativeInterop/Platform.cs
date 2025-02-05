@@ -86,14 +86,8 @@ internal sealed class Platform : IPlatform
         {
             return ".dll";
         }
-        else if (IsPosixPlatform())
-        {
-            return ".so";
-        }
-        else
-        {
-            return string.Empty;
-        }
+
+        return IsPosixPlatform() ? ".so" : string.Empty;
     }
 
     /// <inheritdoc/>

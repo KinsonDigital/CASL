@@ -5,30 +5,31 @@
 namespace CASL.Data.Decoders;
 
 using System;
-using System.Diagnostics.CodeAnalysis;
-using NVorbis;
 using OpenAL;
+using Wrappers;
 
 /// <summary>
 /// Decodes ogg audio data from an ogg file.
 /// </summary>
-[ExcludeFromCodeCoverage(Justification = "Directly interacts with audio file.")]
 internal sealed class OggAudioDecoder : IAudioFileDecoder<float>
 {
     private readonly string filePath;
-    private VorbisReader vorbisReader;
+    private readonly IVorbisReaderWrapper vorbisReader;
     private bool isDisposed;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="OggAudioDecoder"/> class.
     /// </summary>
     /// <param name="filePath">The fully qualified path to the ogg audio file.</param>
-    public OggAudioDecoder(string filePath)
+    /// <param name="vorbisReaderWrapper">Wraps original vorbis reader object.</param>
+    public OggAudioDecoder(string filePath, IVorbisReaderWrapper vorbisReaderWrapper)
     {
         ArgumentException.ThrowIfNullOrEmpty(filePath);
+        ArgumentNullException.ThrowIfNull(vorbisReaderWrapper);
 
         this.filePath = filePath;
-        this.vorbisReader = new VorbisReader(this.filePath);
+        this.vorbisReader = vorbisReaderWrapper;
+        this.vorbisReader.Load(filePath);
     }
 
     /// <inheritdoc/>
@@ -38,18 +39,7 @@ internal sealed class OggAudioDecoder : IAudioFileDecoder<float>
     public ALFormat Format => TotalChannels == 1 ? ALFormat.MonoFloat32Ext : ALFormat.StereoFloat32Ext;
 
     /// <inheritdoc/>
-    public int SampleRate
-    {
-        get
-        {
-            if (string.IsNullOrEmpty(this.filePath))
-            {
-                return 0;
-            }
-
-            return this.vorbisReader.SampleRate;
-        }
-    }
+    public int SampleRate => this.vorbisReader.SampleRate;
 
     /// <inheritdoc/>
     public long TotalSamples
@@ -72,32 +62,51 @@ internal sealed class OggAudioDecoder : IAudioFileDecoder<float>
     public long TotalBytes => TotalSamples * sizeof(float);
 
     /// <inheritdoc/>
-    public float TotalSeconds => (float)this.vorbisReader.TotalTime.TotalSeconds;
+    public float TotalSeconds => this.vorbisReader.TotalSeconds;
 
     /// <inheritdoc/>
     public void Flush()
     {
         this.vorbisReader.Dispose();
-        this.vorbisReader = new VorbisReader(this.filePath);
+        this.vorbisReader.Load(this.filePath);
     }
 
     /// <inheritdoc/>
     public int ReadUpTo(float[] buffer, uint upTo)
     {
         Flush();
-        _ = this.vorbisReader.ReadSamples(new float[upTo].AsSpan());
+
+        _ = this.vorbisReader.ReadSamples(new float[upTo], 0, (int)upTo);
 
         // Read the requested samples
-        var samplesRead = this.vorbisReader.ReadSamples(buffer);
+        var samplesRead = this.vorbisReader.ReadSamples(buffer, 0, buffer.Length);
 
         return samplesRead;
     }
 
     /// <inheritdoc/>
-    public int ReadSamples(float[] buffer, int offset, int count) => this.vorbisReader.ReadSamples(buffer, offset, count);
+    public int ReadSamples(float[] buffer, int offset, int count)
+    {
+        var samplesRead = this.vorbisReader.ReadSamples(buffer, offset, count);
+
+        if (samplesRead >= buffer.Length)
+        {
+            return samplesRead;
+        }
+
+        // Not enough data was read to completely fill the buffer
+        // Set the rest of the buffer data to silence to prevent crunchy
+        // sounds at the end of the audio.
+        for (var i = samplesRead; i < buffer.Length; i++)
+        {
+            buffer[i] = 0;
+        }
+
+        return samplesRead;
+    }
 
     /// <inheritdoc/>
-    public int ReadSamples(float[] buffer) => this.vorbisReader.ReadSamples(buffer);
+    public int ReadSamples(float[] buffer) => this.vorbisReader.ReadSamples(buffer, 0, buffer.Length);
 
     /// <inheritdoc/>
     public void Dispose() => Dispose(true);
