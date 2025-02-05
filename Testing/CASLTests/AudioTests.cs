@@ -97,10 +97,8 @@ public class AudioTests
         return new TheoryData<string, BufferType>
         {
             { OggFileExtension, BufferType.Full },
-            { MP3FileExtension, BufferType.Stream },
-            { OggFileExtension, BufferType.Full },
-            { MP3FileExtension, BufferType.Stream },
-            { OggFileExtension, BufferType.Full },
+            { MP3FileExtension, BufferType.Full },
+            { OggFileExtension, BufferType.Stream },
             { MP3FileExtension, BufferType.Stream },
         };
     }
