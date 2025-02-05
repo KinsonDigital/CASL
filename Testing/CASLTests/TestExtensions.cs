@@ -1,4 +1,4 @@
-// <copyright file="TestExtensions.cs" company="KinsonDigital">
+﻿// <copyright file="TestExtensions.cs" company="KinsonDigital">
 // Copyright (c) KinsonDigital. All rights reserved.
 // </copyright>
 
@@ -23,5 +23,40 @@ public static class TestExtensions
         {
             yield return start + i;
         }
+    }
+
+    /// <summary>
+    /// Generates a range of byte values.
+    /// </summary>
+    /// <param name="start">The starting value of the range.</param>
+    /// <param name="count">The number of items in the range.</param>
+    /// <returns>The range of values.</returns>
+    public static IEnumerable<byte> RangeOfBytes(byte start, int count)
+    {
+        var value = start;
+        var iterator = 0;
+
+        while (true)
+        {
+            if (iterator >= count)
+            {
+                break;
+            }
+
+            if (value == byte.MaxValue)
+            {
+                value = 0;
+            }
+            else
+            {
+                value += 1;
+            }
+
+            iterator += 1;
+
+            yield return value;
+        }
+
+        yield return value;
     }
 }
