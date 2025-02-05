@@ -9,7 +9,6 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using CASL;
@@ -20,7 +19,7 @@ using CommandOptions;
 public class OptionsProcessor
 {
     private const string AudioDirName = "AudioFiles";
-    private static readonly string DefaultAudioLibDirPath = $@"{Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}{Path.DirectorySeparatorChar}{AudioDirName}";
+    private static readonly string DefaultAudioLibDirPath = $"{AppContext.BaseDirectory}{AudioDirName}";
     private readonly Type[] options;
     private string? audioLibDirPath;
     private Task? audioPosTask;
@@ -540,7 +539,7 @@ public class OptionsProcessor
     private void SetDefaultSoundFile()
     {
         var audioFileName = Path.GetFileName(GetAudioFiles(this.audioLibDirPath)[0]);
-        var audioFilePath = $"{this.audioLibDirPath}/{audioFileName}";
+        var audioFilePath = $"{this.audioLibDirPath}{Path.DirectorySeparatorChar}{audioFileName}";
         this.audio = new Audio(audioFilePath, BufferType.Stream);
 
         WriteLine($"Music Library set to '{this.audioLibDirPath}'.");

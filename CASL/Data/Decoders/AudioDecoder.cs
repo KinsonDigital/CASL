@@ -216,8 +216,8 @@ internal sealed class AudioDecoder : IAudioDecoder
     public T[] GetSampleData<T>() =>
         this.audioFormatType switch
         {
-            AudioFormatType.Mp3 => this.mp3Buffer as T[] ?? Array.Empty<T>(),
-            AudioFormatType.Ogg => this.oggBuffer as T[] ?? Array.Empty<T>(),
+            AudioFormatType.Mp3 => this.mp3Buffer as T[] ?? [],
+            AudioFormatType.Ogg => this.oggBuffer as T[] ?? [],
             _ => throw new InvalidEnumArgumentException(
                 $"this.{nameof(this.audioFormatType)}",
                 (int)this.audioFormatType,

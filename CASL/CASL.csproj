@@ -2,8 +2,8 @@
 
   <PropertyGroup>
     <OutputType>Library</OutputType>
-    <TargetFramework>net8.0</TargetFramework>
-    <LangVersion>12.0</LangVersion>
+    <TargetFramework>net9.0</TargetFramework>
+    <LangVersion>13</LangVersion>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <Nullable>enable</Nullable>
 
@@ -16,7 +16,7 @@
     <AssemblyVersion>1.0.0</AssemblyVersion>
     <ApplicationIcon>casl-logo.ico</ApplicationIcon>
     <StartupObject />
-    <Configurations>Debug;Release</Configurations>
+    <Configurations>Release;Debug</Configurations>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <Authors>Kinson Digital Team</Authors>
     <Description>CASL is a simplistic cross-platform, .NET library for playing and managing audio powered by OpenAL 1.1 using software rendering.</Description>
@@ -31,6 +31,7 @@
     <PackageIcon>casl-logo.png</PackageIcon>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <NoWarn>CS7035</NoWarn>
+    <Platforms>x64</Platforms>
   </PropertyGroup>
 
   <ItemGroup>
@@ -40,17 +41,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Remove="OpenAL\libs\**" />
-    <EmbeddedResource Remove="OpenAL\libs\**" />
-    <None Remove="OpenAL\libs\**" />
     <None Include="..\README.md" Pack="true" PackagePath="\" />
     <None Include="..\Images\casl-logo.ico" Pack="true" PackagePath="\" />
     <None Include="..\Images\casl-logo.png" Pack="true" PackagePath="\" />
     <None Include="..\LICENSE.md" Pack="true" PackagePath="\" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Remove="stylecop.json" />
   </ItemGroup>
 
   <ItemGroup>
@@ -73,16 +67,14 @@
     <PackageReference Include="System.IO.Abstractions" Version="21.0.29" />
   </ItemGroup>
 
-  <!--ADD STUFF TO WINDOWS NUGET PACKAGE-->
-  <!--TODO: CREATE A WINDOW SPECIFIC SOLUTION AND PROJECT CONFIGS-->
-  <Target Name="AddNativeWindowLibsToNugetPackage" AfterTargets="Build" Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU' Or '$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+  <!--ADD NATIVE LIBS TO THE NUGET PACKAGE-->
+  <Target Name="AddNativeWindowLibsToNugetPackage" AfterTargets="Build">
     <ItemGroup>
       <!--WINDOWS-->
-      <Content Include="$(ProjectDir)OpenAL\libs\win-x86\*.dll" Pack="true" PackagePath="\runtimes\win-x86\native" />
-      <Content Include="$(ProjectDir)OpenAL\libs\win-x64\*.dll" Pack="true" PackagePath="\runtimes\win-x64\native" />
+      <Content Include="$(ProjectDir)NativeLibs/win-x64/*.dll" Pack="true" PackagePath="/runtimes/win-x64/native" />
 
       <!--LINUX-->
-      <Content Include="$(ProjectDir)OpenAL\libs\linux-x64\*.so*" Pack="true" PackagePath="\runtimes\linux-x64\native" />
+      <Content Include="$(ProjectDir)NativeLibs/linux-x64/*.so*" Pack="true" PackagePath="/runtimes/linux-x64/native" />
     </ItemGroup>
   </Target>
 

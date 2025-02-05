@@ -77,6 +77,23 @@ internal sealed class TaskService : ITaskService
         this.tokenSrc.Token.WaitHandle.WaitOne();
     }
 
+    /// <inheritdoc/>
+    public void WaitUntilTaskCompletes()
+    {
+        if (IsCompletedSuccessfully)
+        {
+            return;
+        }
+
+        while (true)
+        {
+            if (IsCompletedSuccessfully)
+            {
+                break;
+            }
+        }
+    }
+
     /// <inheritdoc cref="IDisposable.Dispose"/>
     public void Dispose() => Dispose(true);
 

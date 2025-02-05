@@ -17,13 +17,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Set Up Deno
-        if: startsWith(github.ref_name, 'feature/')
-        uses: denoland/setup-deno@v1
+        uses: denoland/setup-deno@v2
         with:
           deno-version: ${{ vars.DENO_VERSION }}
 
       - name: Run Sync Bot (Issue Change)
-        if: startsWith(github.ref_name, 'feature/')
         run: |
           $scriptUrl = "${{ vars.SCRIPT_BASE_URL }}/${{ vars.CICD_SCRIPTS_VERSION }}/${{ vars.SCRIPT_RELATIVE_DIR_PATH}}/sync-bot-status-check.ts";
 
@@ -44,8 +42,7 @@ jobs:
             4. Event Type - set to issue event type
             5. PAT
           #>
-          deno run `
-            --allow-net `
+          deno run -N `
             "$scriptUrl" `
             "${{ vars.PROJECT_NAME }}" `
             "$issueNumber" `

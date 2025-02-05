@@ -15,4 +15,9 @@ internal interface IAssembly
     /// Occurs when the assembly is unloading.
     /// </summary>
     event Action Unloading;
+
+    /// <summary>
+    /// Gets the file path of the current assembly.
+    /// </summary>
+    string Location { get; }
 }
