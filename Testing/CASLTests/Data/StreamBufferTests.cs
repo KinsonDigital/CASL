@@ -162,6 +162,20 @@ public class StreamBufferTests
 
     #region Prop Tests
     [Fact]
+    public void TotalSeconds_WhenGettingValue_ReturnsCorrectResult()
+    {
+        // Arrange
+        this.mockAudioDecoder.TotalSeconds.Returns(123f);
+        var sut = CreateSystemUnderTest();
+
+        // Act
+        var actual = sut.TotalSeconds;
+
+        // Assert
+        actual.Should().Be(123f);
+    }
+
+    [Fact]
     public void Position_WhenGettingValue_ReturnsCorrectResult()
     {
         // Arrange
