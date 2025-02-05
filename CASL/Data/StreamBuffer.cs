@@ -253,13 +253,7 @@ internal sealed class StreamBuffer : IAudioBuffer
 
             this.taskService.Cancel();
 
-            while (true)
-            {
-                if (this.taskService.IsCompletedSuccessfully)
-                {
-                    break;
-                }
-            }
+            this.taskService.WaitUntilTaskCompletes();
 
             this.taskService.Dispose();
 

@@ -17,6 +17,7 @@ using NativeInterop.Factories;
 using OpenAL;
 using ReactableData;
 using SimpleInjector;
+using Wrappers;
 
 /// <summary>
 /// Provides dependency injection for the application.
@@ -71,6 +72,8 @@ internal static class IoC
         IoCContainer.Register<ILibraryLoader, NativeLibraryLoader>(Lifestyle.Singleton);
         IoCContainer.Register<IAudioDecoderFactory, AudioDecoderFactory>(Lifestyle.Singleton);
         IoCContainer.Register<IAudioBufferFactory, AudioBufferFactory>(Lifestyle.Singleton);
+        IoCContainer.Register<IVorbisReaderWrapper, VorbisReaderWrapper>(Lifestyle.Singleton);
+        IoCContainer.Register<IMP3StreamWrapper, MP3StreamWrapper>(Lifestyle.Singleton);
 
         SetupAudio();
         SetupReactables();

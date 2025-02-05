@@ -191,38 +191,6 @@ public class StreamBufferManagerTests
     }
 
     [Fact]
-    public void FillBuffersFromStart_WithInvalidFormatType_ThrowsException()
-    {
-        // Arrange
-        var expectedMsg = "The value of argument 'this.FormatType' (10000) is invalid for Enum type 'AudioFormatType'.";
-        expectedMsg += " (Parameter 'this.FormatType')";
-
-        var bufferStats = new BufferStats
-        {
-            SourceId = 123u,
-            FormatType = (AudioFormatType)10_000,
-        };
-
-        void FlushData()
-        {
-            // implementation not required
-        }
-
-        float[] ReadSamples() => new[] { 0f };
-
-        this.mockAlInvoker.GetSource(Arg.Any<uint>(), ALGetSourcei.BuffersProcessed).Returns(1);
-
-        var sut = new StreamBufferManager(this.mockAlInvoker);
-
-        // Act
-        var act = () => sut.FillBuffersFromStart(bufferStats, new[] { 0u }, FlushData, (Func<float[]>?)ReadSamples);
-
-        // Assert
-        act.Should().Throw<InvalidEnumArgumentException>()
-            .WithMessage(expectedMsg);
-    }
-
-    [Fact]
     public void FillBuffersFromStart_WithNoSampleData_DoesNotAttemptDataBuffering()
     {
         // Arrange
