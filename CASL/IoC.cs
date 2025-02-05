@@ -73,6 +73,7 @@ internal static class IoC
         IoCContainer.Register<IAudioDecoderFactory, AudioDecoderFactory>(Lifestyle.Singleton);
         IoCContainer.Register<IAudioBufferFactory, AudioBufferFactory>(Lifestyle.Singleton);
         IoCContainer.Register<IVorbisReaderWrapper, VorbisReaderWrapper>(Lifestyle.Singleton);
+        IoCContainer.Register<IMP3StreamWrapper, MP3StreamWrapper>(Lifestyle.Singleton);
 
         SetupAudio();
         SetupReactables();
