@@ -4,7 +4,7 @@
     "repoName": "CASL",
     "githubTokenEnvVarName": "CICD_TOKEN",
     "baseBranches": [
-        "main",
-        "preview"
+        "preview",
+        "main"
     ]
 }
