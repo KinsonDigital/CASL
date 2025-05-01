@@ -14,10 +14,17 @@
         "🧪",
         "🔬"
     ],
+    "issueCategoryIssueTypeMappings": {
+        "CICD": "CICD ⚙️",
+        "Bug": "Bug Fixes 🐛",
+        "Enhancement": "Enhancements 💎",
+        "Feature": "New Features ✨",
+        "Project Config": "Configuration 🛠️",
+        "Research": "Research 🔬",
+        "QA Testing": "Testing 🧪",
+        "Tech Debt": "Tech Debt 📉"
+    },
     "issueCategoryLabelMappings": {
-        "New Features ✨": "✨new-feature",
-        "Enhancements 💎": "💎enhancement",
-        "Bug Fixes 🐛": "🐛bug",
         "Breaking Changes 🧨": "🧨breaking-changes",
         "Dependency Updates 📦": "📦dependency-update"
     },
