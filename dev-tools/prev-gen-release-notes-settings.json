@@ -23,10 +23,10 @@
         "Bug": "Bug Fixes 🐛",
         "Enhancement": "Enhancements 💎",
         "Feature": "New Features ✨",
-        "Project Config": "Configuration 🛠️",
+        "Project-Config": "Configuration 🛠️",
         "Research": "Research 🔬",
-        "QA Testing": "Testing 🧪",
-        "Tech Debt": "Tech Debt 📉"
+        "QA-Testing": "Testing 🧪",
+        "Tech-Debt": "Tech Debt 📉"
     },
     "issueCategoryLabelMappings": {
         "Breaking Changes 🧨": "🧨breaking-changes",
