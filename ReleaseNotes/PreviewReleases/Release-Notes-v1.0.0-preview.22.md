@@ -11,7 +11,7 @@ As with all software, there is always a chance for issues and bugs, especially f
 
 <h2 align="center" style="font-weight: bold;">Project-Config</h2>
 
-2. [#393](https://github.com/KinsonDigital/CASL/issues/393) - Updated the kd-admin development tool to latest version.
+1. [#393](https://github.com/KinsonDigital/CASL/issues/393) - Updated the kd-admin development tool to latest version.
 
 <h2 align="center" style="font-weight: bold;">Dependency Updates 📦</h2>
 
