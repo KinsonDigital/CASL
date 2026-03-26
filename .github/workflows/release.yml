@@ -53,13 +53,13 @@ jobs:
       release-notes-file-name-prefix: "${{ vars.RELEASE_NOTES_FILE_NAME_PREFIX }}"
       build-config: ${{ inputs.release-type == 'Production' && 'Release' || 'Debug' }}
       pr-include-notes-label: "${{ vars.PR_INCLUDE_NOTES_LABEL }}"
-      send-release-tweet: ${{ vars.TWITTER_BROADCAST_ENABLED == 'true' }}
+      send-release-tweet: ${{ vars.SOCIAL_MEDIA_BROADCAST_ENABLED == 'true' }}
       dry-run: ${{ inputs.dry-run }}
       transpile-readme: true
     secrets:
       cicd-pat: "${{ secrets.CICD_TOKEN }}"
       nuget-org-api-key: "${{ secrets.NUGET_ORG_API_KEY }}"
-      twitter-consumer-api-key: "${{ secrets.TWITTER_CONSUMER_API_KEY }}"
-      twitter-consumer-api-secret: "${{ secrets.TWITTER_CONSUMER_API_SECRET }}"
-      twitter-access-token: "${{ secrets.TWITTER_ACCESS_TOKEN }}"
-      twitter-access-token-secret: "${{ secrets.TWITTER_ACCESS_TOKEN_SECRET }}"
+      twitter-consumer-api-key: "${{ secrets.X_CONSUMER_API_KEY }}"
+      twitter-consumer-api-secret: "${{ secrets.X_CONSUMER_API_SECRET }}"
+      twitter-access-token: "${{ secrets.X_ACCESS_TOKEN_KEY }}"
+      twitter-access-token-secret: "${{ secrets.X_ACCESS_TOKEN_SECRET }}"
