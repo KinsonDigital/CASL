@@ -59,7 +59,7 @@ Interested in contributing? If so, click [here](https://github.com/KinsonDigital
 
 ![x-logo-dark-mode](https://raw.githubusercontent.com/KinsonDigital/.github/main/Images/x-logo-16x16-dark-mode.svg#gh-dark-mode-only)
 ![x-logo-light-mode](https://raw.githubusercontent.com/KinsonDigital/.github/main/Images/x-logo-16x16-light-mode.svg#gh-light-mode-only)
-[Calvin Wilkinson](https://twitter.com/KDCoder) (KinsonDigital GitHub Organization - Owner)
+[Calvin Wilkinson](https://x.com/KDCoder) (KinsonDigital GitHub Organization - Owner)
 
 <br/>
 
