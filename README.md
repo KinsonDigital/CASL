@@ -28,7 +28,7 @@ This library is still under development and is not at v1.0.0 yet!!  However, all
 **CASL** (pronounced Castle), is an acronym for (C)ross-platform (A)udio and (S)ound (L)ibrary and uses the latest possible dotnet version. **CASL** plays and manages sounds powered by **OpenAL 1.1**, using software rendering, which is accomplished by using low-level bindings to the native **OpenAL** library.  
 
 **CASL** can be used for video games and sound players and works on any dotnet-compliant platform.
-> **Note** Cross-platform work is still a WIP, but CASL works using Windows.
+> **Note** Cross-platform work is still in WIP, but CASL works using Windows.
 
 <h2 style="font-weight:bold" align="center">✨ Features ✨</h2>
 
@@ -60,6 +60,10 @@ Interested in contributing? If so, click [here](https://github.com/KinsonDigital
 ![x-logo-dark-mode](https://raw.githubusercontent.com/KinsonDigital/.github/main/Images/x-logo-16x16-dark-mode.svg#gh-dark-mode-only)
 ![x-logo-light-mode](https://raw.githubusercontent.com/KinsonDigital/.github/main/Images/x-logo-16x16-light-mode.svg#gh-light-mode-only)
 [Calvin Wilkinson](https://x.com/KDCoder) (KinsonDigital GitHub Organization - Owner)
+
+![bluesky-logo](https://raw.githubusercontent.com/KinsonDigital/.github/main/Images/bluesky-logo-16x16.svg)
+[Calvin Wilkinson](https://bsky.app/profile/kdcoder.bsky.social) (KinsonDigital GitHub Organization - Owner)
+
 
 <br/>
 
