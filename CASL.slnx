@@ -1,0 +1,40 @@
+<Solution>
+  <Configurations>
+    <Platform Name="arm64" />
+    <Platform Name="x64" />
+  </Configurations>
+  <Folder Name="/SolutionItems/">
+    <File Path=".editorconfig" />
+    <File Path=".gitignore" />
+    <File Path="BACKERS.md" />
+    <File Path="LICENSE.md" />
+    <File Path="README.md" />
+    <File Path="renovate.json" />
+  </Folder>
+  <Folder Name="/SolutionItems/WorkFlows/">
+    <File Path=".github/workflows/add-new-item-to-project.yml" />
+    <File Path=".github/workflows/build-status-check.yml" />
+    <File Path=".github/workflows/prepare-release.yml" />
+    <File Path=".github/workflows/release.yml" />
+    <File Path=".github/workflows/sync-bot.yml" />
+    <File Path=".github/workflows/sync-pr-to-issue.yml" />
+    <File Path=".github/workflows/sync-status-check.yml" />
+    <File Path=".github/workflows/unit-test-status-check.yml" />
+  </Folder>
+  <Folder Name="/Testing/">
+    <File Path="Testing/.editorconfig" />
+    <File Path="Testing/CASL.runsettings" />
+    <Project Path="Testing/CASLTesting/CASLTesting.csproj">
+      <Platform Solution="*|arm64" Project="arm64" />
+      <Platform Solution="*|x64" Project="x64" />
+    </Project>
+    <Project Path="Testing/CASLTests/CASLTests.csproj">
+      <Platform Solution="*|arm64" Project="arm64" />
+      <Platform Solution="*|x64" Project="x64" />
+    </Project>
+  </Folder>
+  <Project Path="CASL/CASL.csproj">
+    <Platform Solution="*|arm64" Project="arm64" />
+    <Platform Solution="*|x64" Project="x64" />
+  </Project>
+</Solution>
