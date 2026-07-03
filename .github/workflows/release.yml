@@ -7,6 +7,12 @@ defaults:
     shell: pwsh
 
 
+permissions:
+  contents: write # for creating releases
+  issues: read # for milestone checks
+  pull-requests: write
+
+
 env:
   CS_PROJ_FILE_NAME: ${{ github.workspace }}/${{ vars.PROJECT_NAME }}/${{ vars.PROJECT_NAME }}.csproj
 
@@ -270,7 +276,7 @@ jobs:
     needs: [build_casl, run_casl_tests, get_and_validate_version]
     uses: KinsonDigital/Infrastructure/.github/workflows/dotnet-lib-release.yml@9c4f1702ed7e5f785415d7db14796b1dde7c6a16 #v17.2.0
     with:
-      project-name: "${{ vars.PROJECT_NAME}}"
+      project-name: "${{ vars.PROJECT_NAME }}"
       release-type: "${{ inputs.release-type }}"
       net-sdk-version: "${{ vars.NET_SDK_VERSION }}"
       build-config: ${{ inputs.release-type == 'Production' && 'Release' || 'Debug' }}
