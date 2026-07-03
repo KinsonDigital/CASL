@@ -19,11 +19,6 @@ on:
         required: true
         type: choice
         options: [Preview, Production]
-      cache-disabled:
-        description: Cache Disabled - Check to disable caching for the workflow.
-        required: false
-        default: false
-        type: boolean
       dry-run:
         description: Dry Run - Check to run the workflow without creating a release.
         required: false
@@ -43,7 +38,7 @@ jobs:
         uses: KinsonDigital/Infrastructure/actions/get-version@9c4f1702ed7e5f785415d7db14796b1dde7c6a16 #v17.2.0
         with:
           version-file-path: "${{ github.workspace }}/${{ vars.PROJECT_NAME }}/${{ vars.PROJECT_NAME }}.csproj"
-          cache-enabled: ${{ inputs.cache-disabled == true && 'false' || 'true' }}
+          cache-enabled: false
 
       - name: Validate Version
         id: validate-version
@@ -51,20 +46,7 @@ jobs:
         with:
           version: "v${{ steps.get-version.outputs.version }}"
           release-type: "${{ inputs.release-type }}"
-          cache-enabled: ${{ inputs.cache-disabled == true && 'false' || 'true' }}
-
-
-  determine_release_notes_path:
-    name: Determine Release Notes Dir Path
-    runs-on: ubuntu-latest
-    outputs:
-      release-notes-dir-path: ${{ steps.get-dir-path.outputs.release-notes-dir-path }}
-    steps:
-      - name: Get Dir Path
-        id: get-dir-path
-        run: |
-          $dirPath = "${{ inputs.release-type }}" -eq "Production" ? "${{ vars.PROD_RELATIVE_RELEASE_NOTES_DIR_PATH }}" : "${{ vars.PREV_RELATIVE_RELEASE_NOTES_DIR_PATH }}";
-          "release-notes-dir-path=$dirPath" >> $env:GITHUB_OUTPUT;
+          cache-enabled: false
 
 
   run_prerelease_validation:
@@ -97,7 +79,6 @@ jobs:
         uses: denoland/setup-deno@667a34cdef165d8d2b2e98dde39547c9daac7282 #v2.0.4
         with:
           deno-version: ${{ vars.DENO_VERSION }}
-          cache: ${{ inputs.cache-disabled == true && 'false' || 'true' }}
 
       - name: Validate Tag
         id: tag-check
@@ -108,7 +89,7 @@ jobs:
           release-type: "${{ inputs.release-type }}"
           tag-name: "v${{ needs.get_and_validate_version.outputs.version }}"
           github-token: "${{ secrets.CICD_TOKEN }}"
-          cache-enabled: ${{ inputs.cache-disabled == true && 'false' || 'true' }}
+          cache-enabled: false
         continue-on-error: true
 
       - name: Validate SDK Versions
@@ -125,7 +106,7 @@ jobs:
         with:
           release-notes-file-path: "${{ github.workspace }}/ReleaseNotes/${{ inputs.release-type }}Releases/${{ vars.RELEASE_NOTES_FILE_NAME_PREFIX }}v${{ needs.get_and_validate_version.outputs.version }}.md"
           fail-if-does-not-exist: true
-          cache-enabled: ${{ inputs.cache-disabled == true && 'false' || 'true' }}
+          cache-enabled: false
         continue-on-error: true
 
       - name: Nuget Package Does Not Exist
@@ -134,7 +115,7 @@ jobs:
         with:
           nuget-pkg-name: "${{ vars.ORGANIZATION_NAME }}.${{ vars.PROJECT_NAME }}"
           nuget-pkg-version: "${{ needs.get_and_validate_version.outputs.version }}"
-          cache-enabled: ${{ inputs.cache-disabled == true && 'false' || 'true' }}
+          cache-enabled: false
         continue-on-error: true
 
       - name: Milestone Exists
@@ -144,7 +125,7 @@ jobs:
           owner-name: "${{ vars.ORGANIZATION_NAME }}"
           repo-name: "${{ vars.PROJECT_NAME }}"
           milestone-name: "v${{ needs.get_and_validate_version.outputs.version }}"
-          cache-enabled: ${{ inputs.cache-disabled == true && 'false' || 'true' }}
+          cache-enabled: false
           github-token: "${{ secrets.CICD_TOKEN }}"
         continue-on-error: true
 
@@ -155,7 +136,7 @@ jobs:
           owner-name: "${{ vars.ORGANIZATION_NAME }}"
           repo-name: "${{ vars.PROJECT_NAME }}"
           milestone-name: "v${{ needs.get_and_validate_version.outputs.version }}"
-          cache-enabled: ${{ inputs.cache-disabled == true && 'false' || 'true' }}
+          cache-enabled: false
           fail-if-all-items-not-closed: true
           github-token: "${{ secrets.CICD_TOKEN }}"
         continue-on-error: true
@@ -167,7 +148,7 @@ jobs:
           owner-name: "${{ vars.ORGANIZATION_NAME }}"
           repo-name: "${{ vars.PROJECT_NAME }}"
           tag-name: "v${{ needs.get_and_validate_version.outputs.version }}"
-          cache-enabled: ${{ inputs.cache-disabled == true && 'false' || 'true' }}
+          cache-enabled: false
           github-token: "${{ secrets.CICD_TOKEN }}"
         continue-on-error: true
 
@@ -278,7 +259,7 @@ jobs:
 
   run_release:
     name: Performing ${{ inputs.release-type }} Release of ${{ vars.PROJECT_NAME }} (${{ inputs.release-type == 'Production' && 'Release' || 'Debug' }})
-    needs: [build_casl, get_and_validate_version]
+    needs: [build_casl, run_casl_tests, get_and_validate_version]
     uses: KinsonDigital/Infrastructure/.github/workflows/dotnet-lib-release.yml@v17.2.0
     with:
       project-name: "${{ vars.PROJECT_NAME}}"
