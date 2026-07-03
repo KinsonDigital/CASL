@@ -7,6 +7,12 @@ defaults:
     shell: pwsh
 
 
+permissions:
+  contents: write # for creating releases
+  issues: read # for milestone checks
+  pull-requests: write
+
+
 env:
   CS_PROJ_FILE_NAME: ${{ github.workspace }}/${{ vars.PROJECT_NAME }}/${{ vars.PROJECT_NAME }}.csproj
 
@@ -225,15 +231,19 @@ jobs:
         build_config: [Release]
     runs-on: ${{ matrix.platform }}
     steps:
-      - uses: actions/checkout@v7.0.0
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
       - name: Set Up .NET SDK (${{ vars.NET_SDK_VERSION }})
-        uses: actions/setup-dotnet@v5
+        uses: actions/setup-dotnet@26b0ec14cb23fa6904739307f278c14f94c95bf1 #v5.4.0
         with:
           dotnet-version: ${{ vars.NET_SDK_VERSION }}
 
       - name: Run Build
-        run: dotnet build "${{ github.workspace }}/${{ vars.PROJECT_NAME }}/${{ vars.PROJECT_NAME }}.csproj" -c ${{ matrix.build_config }};
+        env:
+          WORKSPACE: ${{ github.workspace }}
+          PROJECT_NAME: ${{ vars.PROJECT_NAME }}
+          BUILD_CONFIG: ${{ matrix.build_config }}
+        run: dotnet build "$($env:WORKSPACE)/$($env:PROJECT_NAME)/$($env:PROJECT_NAME).csproj" -c "$env:BUILD_CONFIG";
 
 
   run_casl_tests:
@@ -246,23 +256,27 @@ jobs:
         build_config: [Debug, Release]
     runs-on: ${{ matrix.platform }}
     steps:
-      - uses: actions/checkout@v7.0.0
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
       - name: Set Up .NET SDK (${{ vars.NET_SDK_VERSION }})
-        uses: actions/setup-dotnet@v5
+        uses: actions/setup-dotnet@26b0ec14cb23fa6904739307f278c14f94c95bf1 #v5.4.0
         with:
           dotnet-version: ${{ vars.NET_SDK_VERSION }}
 
       - name: Run Tests
-        run: dotnet test "${{ github.workspace }}/Testing/${{ vars.PROJECT_NAME }}Testing/${{ vars.PROJECT_NAME }}Testing.csproj" -c ${{ matrix.build_config }};
+        env:
+          WORKSPACE: ${{ github.workspace }}
+          PROJECT_NAME: ${{ vars.PROJECT_NAME }}
+          BUILD_CONFIG: ${{ matrix.build_config }}
+        run: dotnet test "$($env:WORKSPACE)/Testing/$($env:PROJECT_NAME)Testing/$($env:PROJECT_NAME)Testing.csproj" -c "$env:BUILD_CONFIG";
 
 
   run_release:
     name: Performing ${{ inputs.release-type }} Release of ${{ vars.PROJECT_NAME }} (${{ inputs.release-type == 'Production' && 'Release' || 'Debug' }})
     needs: [build_casl, run_casl_tests, get_and_validate_version]
-    uses: KinsonDigital/Infrastructure/.github/workflows/dotnet-lib-release.yml@v17.2.0
+    uses: KinsonDigital/Infrastructure/.github/workflows/dotnet-lib-release.yml@9c4f1702ed7e5f785415d7db14796b1dde7c6a16 #v17.2.0
     with:
-      project-name: "${{ vars.PROJECT_NAME}}"
+      project-name: "${{ vars.PROJECT_NAME }}"
       release-type: "${{ inputs.release-type }}"
       net-sdk-version: "${{ vars.NET_SDK_VERSION }}"
       build-config: ${{ inputs.release-type == 'Production' && 'Release' || 'Debug' }}

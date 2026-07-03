@@ -2,13 +2,17 @@ name: ✅ Unit Testing Status Check
 run-name: ✅ Unit Testing Status Check (${{ github.base_ref }} branch)
 
 
+permissions:
+  contents: read
+
+
 defaults:
   run:
     shell: pwsh
 
 
 on:
-  pull_request_target:
+  pull_request:
     branches: [main, preview]
 
 
@@ -22,12 +26,24 @@ jobs:
         build_config: [Debug, Release]
     runs-on: ${{ matrix.platform }}
     steps:
-      - uses: actions/checkout@v7.0.0
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
       - name: Set Up .NET SDK (${{ vars.NET_SDK_VERSION }})
-        uses: actions/setup-dotnet@v5
+        uses: actions/setup-dotnet@26b0ec14cb23fa6904739307f278c14f94c95bf1 #v5.4.0
         with:
           dotnet-version: ${{ vars.NET_SDK_VERSION }}
 
       - name: Run Tests
-        run: dotnet test "${{ github.workspace }}/Testing/${{ vars.PROJECT_NAME }}Testing/${{ vars.PROJECT_NAME }}Testing.csproj" -c ${{ matrix.build_config }};
+        env:
+          WORKSPACE: ${{ github.workspace }}
+          PROJECT_NAME: ${{ vars.PROJECT_NAME }}
+          BUILD_CONFIG: ${{ matrix.build_config }}
+        run: dotnet test "$($env:WORKSPACE)/Testing/$($env:PROJECT_NAME)Testing/$($env:PROJECT_NAME)Testing.csproj" -c "$env:BUILD_CONFIG";
+
+
+  unit_test_status_check:
+    name: ✅ Unit Testing Status Check
+    needs: [run_casl_tests]
+    runs-on: ubuntu-latest
+    steps:
+      - run: Write-Host "All unit test status checks passed.";
