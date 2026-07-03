@@ -63,3 +63,11 @@ jobs:
           PROJECT_NAME: ${{ vars.PROJECT_NAME }}
           BUILD_CONFIG: ${{ matrix.build_config }}
         run: dotnet build "$env.WORKSPACE/Testing/$($env.PROJECT_NAME)Testing/$($env.PROJECT_NAME)Testing.csproj" -c $env.BUILD_CONFIG;
+
+
+  build_status_check:
+    name: ✅ Build Status Check
+    needs: [build_casl, build_casl_testing]
+    runs-on: ubuntu-latest
+    steps:
+      - run: Write-Host "All build status checks passed.";
