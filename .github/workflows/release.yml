@@ -233,7 +233,11 @@ jobs:
           dotnet-version: ${{ vars.NET_SDK_VERSION }}
 
       - name: Run Build
-        run: dotnet build "${{ github.workspace }}/${{ vars.PROJECT_NAME }}/${{ vars.PROJECT_NAME }}.csproj" -c ${{ matrix.build_config }};
+        env:
+          WORKSPACE: ${{ github.workspace }}
+          PROJECT_NAME: ${{ vars.PROJECT_NAME }}
+          BUILD_CONFIG: ${{ matrix.build_config }}
+        run: dotnet build "$env.WORKSPACE/$env.PROJECT_NAME/$env.PROJECT_NAME.csproj" -c $env.BUILD_CONFIG;
 
 
   run_casl_tests:
@@ -254,7 +258,11 @@ jobs:
           dotnet-version: ${{ vars.NET_SDK_VERSION }}
 
       - name: Run Tests
-        run: dotnet test "${{ github.workspace }}/Testing/${{ vars.PROJECT_NAME }}Testing/${{ vars.PROJECT_NAME }}Testing.csproj" -c ${{ matrix.build_config }};
+        env:
+          WORKSPACE: ${{ github.workspace }}
+          PROJECT_NAME: ${{ vars.PROJECT_NAME }}
+          BUILD_CONFIG: ${{ matrix.build_config }}
+        run: dotnet test "$env.WORKSPACE/Testing/$($env.PROJECT_NAME)Testing/$($env.PROJECT_NAME)Testing.csproj" -c $env.BUILD_CONFIG;
 
 
   run_release:
