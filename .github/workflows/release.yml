@@ -1,4 +1,4 @@
-name: 🚀Release
+name: 🚀 Release
 run-name: ${{ vars.PROJECT_NAME }} ${{ inputs.release-type }} Release ${{ inputs.dry-run == true && '(Dry Run)' || '' }}
 
 
@@ -19,6 +19,11 @@ on:
         required: true
         type: choice
         options: [Preview, Production]
+      cache-disabled:
+        description: Cache Disabled - Check to disable caching for the workflow.
+        required: false
+        default: false
+        type: boolean
       dry-run:
         description: Dry Run - Check to run the workflow without creating a release.
         required: false
@@ -27,6 +32,28 @@ on:
 
 
 jobs:
+  get_and_validate_version:
+    name: Get And Validate Version
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.get-version.outputs.version }}
+    steps:
+      - name: Get Version
+        id: get-version
+        uses: KinsonDigital/Infrastructure/actions/get-version@9c4f1702ed7e5f785415d7db14796b1dde7c6a16 #v17.2.0
+        with:
+          version-file-path: "${{ github.workspace }}/${{ vars.PROJECT_NAME }}/${{ vars.PROJECT_NAME }}.csproj"
+          cache-enabled: ${{ inputs.cache-disabled == true && 'false' || 'true' }}
+
+      - name: Validate Version
+        id: validate-version
+        uses: KinsonDigital/Infrastructure/actions/validate-version@9c4f1702ed7e5f785415d7db14796b1dde7c6a16 #v17.2.0
+        with:
+          version: "v${{ steps.get-version.outputs.version }}"
+          release-type: "${{ inputs.release-type }}"
+          cache-enabled: ${{ inputs.cache-disabled == true && 'false' || 'true' }}
+
+
   determine_release_notes_path:
     name: Determine Release Notes Dir Path
     runs-on: ubuntu-latest
@@ -40,26 +67,186 @@ jobs:
           "release-notes-dir-path=$dirPath" >> $env:GITHUB_OUTPUT;
 
 
+  run_prerelease_validation:
+    name: Run Pre-Release Validation
+    needs: [get_and_validate_version]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check Branch
+        env:
+          BRANCH_NAME: ${{ github.ref_name }}
+          PROD_BRANCH: ${{ vars.PROD_BRANCH }}
+          PREV_BRANCH: ${{ vars.PREV_BRANCH }}
+          RELEASE_TYPE: ${{ inputs.release-type }}
+          DRY_RUN: ${{ inputs.dry-run }}
+        run: |
+          $releaseType = "$env:RELEASE_TYPE".ToLower().Trim();
+          $branchName = "$env:BRANCH_NAME".Trim();
+          $expectedBranchName = $releaseType -eq "production" ? $env:PROD_BRANCH : $env:PREV_BRANCH;
+          $errorMsg = "::error::The branch name must be '$expectedBranchName' for a $releaseType release.";
+
+          if ($branchName -ne $expectedBranchName) {
+            Write-Host $errorMsg;
+            exit $env:DRY_RUN -eq "true" ? 0 : 1;
+          }
+
+      - name: Checkout Repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - name: Set Up Deno (${{ vars.DENO_VERSION }})
+        uses: denoland/setup-deno@667a34cdef165d8d2b2e98dde39547c9daac7282 #v2.0.4
+        with:
+          deno-version: ${{ vars.DENO_VERSION }}
+          cache: ${{ inputs.cache-disabled == true && 'false' || 'true' }}
+
+      - name: Validate Tag
+        id: tag-check
+        uses: KinsonDigital/Infrastructure/actions/validate-tag@9c4f1702ed7e5f785415d7db14796b1dde7c6a16 #v17.2.0
+        with:
+          repo-owner: "${{ vars.ORGANIZATION_NAME }}"
+          repo-name: "${{ vars.PROJECT_NAME }}"
+          release-type: "${{ inputs.release-type }}"
+          tag-name: "v${{ needs.get_and_validate_version.outputs.version }}"
+          github-token: "${{ secrets.CICD_TOKEN }}"
+          cache-enabled: ${{ inputs.cache-disabled == true && 'false' || 'true' }}
+        continue-on-error: true
+
+      - name: Validate SDK Versions
+        id: sdk-check
+        uses: KinsonDigital/Infrastructure/actions/validate-sdk-versions@9c4f1702ed7e5f785415d7db14796b1dde7c6a16 #v17.2.0
+        with:
+          base-search-dir-path: "${{ github.workspace }}"
+          net-sdk-version: "${{ vars.NET_SDK_VERSION }}"
+        continue-on-error: true
+
+      - name: Release Notes Exist
+        id: release-notes-check
+        uses: KinsonDigital/Infrastructure/actions/release-notes-exist@9c4f1702ed7e5f785415d7db14796b1dde7c6a16 #v17.2.0
+        with:
+          release-notes-file-path: "${{ github.workspace }}/ReleaseNotes/${{ inputs.release-type }}Releases/${{ vars.RELEASE_NOTES_FILE_NAME_PREFIX }}v${{ needs.get_and_validate_version.outputs.version }}.md"
+          fail-if-does-not-exist: true
+          cache-enabled: ${{ inputs.cache-disabled == true && 'false' || 'true' }}
+        continue-on-error: true
+
+      - name: Nuget Package Does Not Exist
+        uses: KinsonDigital/Infrastructure/actions/nuget-pkg-exists@9c4f1702ed7e5f785415d7db14796b1dde7c6a16 #v17.2.0
+        id: package-check
+        with:
+          nuget-pkg-name: "${{ vars.ORGANIZATION_NAME }}.${{ vars.PROJECT_NAME }}"
+          nuget-pkg-version: "${{ needs.get_and_validate_version.outputs.version }}"
+          cache-enabled: ${{ inputs.cache-disabled == true && 'false' || 'true' }}
+        continue-on-error: true
+
+      - name: Milestone Exists
+        id: milestone-exists
+        uses: KinsonDigital/Infrastructure/actions/milestone-exists@9c4f1702ed7e5f785415d7db14796b1dde7c6a16 #v17.2.0
+        with:
+          owner-name: "${{ vars.ORGANIZATION_NAME }}"
+          repo-name: "${{ vars.PROJECT_NAME }}"
+          milestone-name: "v${{ needs.get_and_validate_version.outputs.version }}"
+          cache-enabled: ${{ inputs.cache-disabled == true && 'false' || 'true' }}
+          github-token: "${{ secrets.CICD_TOKEN }}"
+        continue-on-error: true
+
+      - name: Validate Milestone Items
+        id: milestone-items-check
+        uses: KinsonDigital/Infrastructure/actions/milestone-items-closed@9c4f1702ed7e5f785415d7db14796b1dde7c6a16 #v17.2.0
+        with:
+          owner-name: "${{ vars.ORGANIZATION_NAME }}"
+          repo-name: "${{ vars.PROJECT_NAME }}"
+          milestone-name: "v${{ needs.get_and_validate_version.outputs.version }}"
+          cache-enabled: ${{ inputs.cache-disabled == true && 'false' || 'true' }}
+          fail-if-all-items-not-closed: true
+          github-token: "${{ secrets.CICD_TOKEN }}"
+        continue-on-error: true
+
+      - name: GitHub Release Does Not Exist
+        id: github-release-check
+        uses: KinsonDigital/Infrastructure/actions/github-release-exists@9c4f1702ed7e5f785415d7db14796b1dde7c6a16 #v17.2.0
+        with:
+          owner-name: "${{ vars.ORGANIZATION_NAME }}"
+          repo-name: "${{ vars.PROJECT_NAME }}"
+          tag-name: "v${{ needs.get_and_validate_version.outputs.version }}"
+          cache-enabled: ${{ inputs.cache-disabled == true && 'false' || 'true' }}
+          github-token: "${{ secrets.CICD_TOKEN }}"
+        continue-on-error: true
+
+      - name: Should Fail Job
+        env:
+          PROJECT_NAME: ${{ vars.PROJECT_NAME }}
+        run: |
+          $tagCheckFailed = "${{ steps.tag-check.outcome == 'failure' }}";
+          $sdkCheckFailed = "${{ steps.sdk-check.outcome == 'failure' }}";
+          $notesFileCheckFailed = "${{ steps.release-notes-check.outcome == 'failure' }}";
+          $packageCheckFailed = "${{ steps.package-check.outcome == 'failure' }}";
+          $milestoneExistsFailed = "${{ steps.milestone-exists.outcome == 'failure' }}";
+          $milestoneExists = "${{ steps.milestone-exists.outputs.milestone-exists }}";
+          $milestoneItemsCheckFailed = "${{ steps.milestone-items-check.outcome == 'failure' }}";
+          $githubReleaseCheckFailed = "${{ steps.github-release-check.outcome == 'failure' }}";
+          $githubReleaseExists = "${{ steps.github-release-check.outputs.release-exists }}";
+
+          if ($tagCheckFailed -eq "true") {
+            Write-Host "::error::Tag already exists. Please update the version in the '$env:PROJECT_NAME.csproj' file.";
+          }
+
+          if ($sdkCheckFailed -eq "true") {
+            Write-Host "::error::One or more of the SDK versions are invalid. Check each '.csproj' file.";
+          }
+
+          if ($notesFileCheckFailed -eq "true") {
+            Write-Host "::error::The release notes for version '${{ needs.get_and_validate_version.outputs.version }}' do not exist.";
+          }
+
+          if ($packageCheckFailed -eq "true") {
+            Write-Host "::error::The NuGet package already exists.";
+          }
+
+          if ($milestoneExistsFailed -eq "true") {
+            Write-Host "::error::Failed to check if milestone exists.";
+          }
+
+          if ($milestoneExists -eq "false") {
+            Write-Host "::error::The milestone 'v${{ needs.get_and_validate_version.outputs.version }}' does not exist.";
+          }
+
+          if ($milestoneItemsCheckFailed -eq "true") {
+            Write-Host "::error::The milestone 'v${{ needs.get_and_validate_version.outputs.version }}' has one or more issues that are not closed or PRs that are in draft.";
+          }
+
+          if ($githubReleaseCheckFailed -eq "true") {
+            Write-Host "::error::Failed to check if the GitHub release exists.";
+          }
+
+          if ($githubReleaseExists -eq "true") {
+            Write-Host "::error::The GitHub release already exists.";
+          }
+
+          if ($tagCheckFailed -eq "true" `
+              -or $sdkCheckFailed -eq "true" `
+              -or $notesFileCheckFailed -eq "true" `
+              -or $packageCheckFailed -eq "true" `
+              -or $milestoneExistsFailed -eq "true" `
+              -or $milestoneExists -eq "false" `
+              -or $milestoneItemsCheckFailed -eq "true" `
+              -or $githubReleaseCheckFailed -eq "true" `
+              -or $githubReleaseExists -eq "true") {
+            exit 1;
+          }
+
+
   run_release:
     name: Performing ${{ inputs.release-type }} Release of ${{ vars.PROJECT_NAME }} (${{ inputs.release-type == 'Production' && 'Release' || 'Debug' }})
-    needs: determine_release_notes_path
+    needs: [get_and_validate_version, determine_release_notes_path]
     uses: KinsonDigital/Infrastructure/.github/workflows/dotnet-lib-release.yml@v17.2.0
     with:
       project-name: "${{ vars.PROJECT_NAME}}"
       release-type: "${{ inputs.release-type }}"
-      run-branch: "${{ github.ref_name }}"
       net-sdk-version: "${{ vars.NET_SDK_VERSION }}"
-      relative-release-notes-dir-path: "${{ needs.determine_release_notes_path.outputs.release-notes-dir-path }}"
-      release-notes-file-name-prefix: "${{ vars.RELEASE_NOTES_FILE_NAME_PREFIX }}"
       build-config: ${{ inputs.release-type == 'Production' && 'Release' || 'Debug' }}
-      pr-include-notes-label: "${{ vars.PR_INCLUDE_NOTES_LABEL }}"
-      send-release-tweet: ${{ vars.SOCIAL_MEDIA_BROADCAST_ENABLED == 'true' }}
       dry-run: ${{ inputs.dry-run }}
       transpile-readme: true
+      deno-version: "${{ vars.DENO_VERSION }}"
+      release-notes-file-path: "${{ github.workspace }}/${{ needs.determine_release_notes_path.outputs.release-notes-dir-path }}/Release-Notes-${{ needs.get_and_validate_version.outputs.version }}.md"
     secrets:
       cicd-pat: "${{ secrets.CICD_TOKEN }}"
       nuget-org-api-key: "${{ secrets.NUGET_ORG_API_KEY }}"
-      twitter-consumer-api-key: "${{ secrets.X_CONSUMER_API_KEY }}"
-      twitter-consumer-api-secret: "${{ secrets.X_CONSUMER_API_SECRET }}"
-      twitter-access-token: "${{ secrets.X_ACCESS_TOKEN_KEY }}"
-      twitter-access-token-secret: "${{ secrets.X_ACCESS_TOKEN_SECRET }}"
