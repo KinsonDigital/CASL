@@ -1,11 +1,17 @@
 {
+	"deno.enablePaths": [
+		"./DevTools/"
+	],
     "cSpell.words": [
+		"avalonia",
+		"benchmarkdotnet",
 		"Bufferi",
 		"CASL",
 		"cicd",
 		"cobertura",
 		"codeanalysis",
 		"Codecov",
+		"communitytoolkit",
 		"csharpsquid",
 		"deepseek",
 		"demilestoned",
@@ -15,6 +21,8 @@
 		"fluentassertions",
 		"gitattributes",
 		"ibrary",
+		"imagesharp",
+		"kdgui",
 		"Kinson",
 		"kinsondigital",
 		"libasound",
@@ -22,6 +30,7 @@
 		"libpipewire",
 		"milestoned",
 		"msbuild",
+		"mvvm",
 		"netanalyzers",
 		"nint",
 		"nsubstitute",
@@ -34,7 +43,9 @@
 		"reactables",
 		"REPONAME",
 		"runsettings",
+		"serilog",
 		"simpleinjector",
+		"sixlabors",
 		"softprops",
 		"Sourceb",
 		"Sourcef",
@@ -47,6 +58,13 @@
 		"Vorbis",
 		"xunit"
 	],
+	"workbench.editor.customLabels.patterns": {
+		"**/Testing/**/*Tests.cs": "${filename}🧪",
+		"**/CASL/**/*.cs": "${filename}👾",
+		"**/DevTools/**/*.ts": "${filename}🔧",
+		"**/.github/workflows/**/*.yml": "${filename}⚙️",
+		"**/ReleaseNotes/**/*.md": "${filename}📋",
+	},
     "dotnet.defaultSolution": "CASL.sln",
     "[csharp]": {
 		"editor.insertSpaces": true,
@@ -64,5 +82,5 @@
 	"[github-actions-workflow]": {
 		"editor.indentSize": 2,
 		"editor.insertSpaces": true
-	}
+	},
 }

@@ -19,27 +19,47 @@
         "🔬"
     ],
     "issueCategoryIssueTypeMappings": {
-        "CICD": "CICD ⚙️",
-        "Bug": "Bug Fixes 🐛",
-        "Enhancement": "Enhancements 💎",
         "Feature": "New Features ✨",
+        "Enhancement": "Enhancements 💎",
+        "Bug": "Bug Fixes 🐛",
+        "Tech-Debt": "Tech Debt 📉",
+        "Documentation": "Documentation 📄",
         "Project-Config": "Configuration 🛠️",
         "Research": "Research 🔬",
-        "QA-Testing": "Testing 🧪",
-        "Tech-Debt": "Tech Debt 📉"
+        "CICD": "CICD ⚙️",
+        "QA-Testing": "Testing 🧪"
     },
     "issueCategoryLabelMappings": {
-        "Breaking Changes 🧨": "🧨breaking-changes",
-        "Dependency Updates 📦": "📦dependency-update"
+        "breaking-changes": "Breaking Changes 🧨",
+        "dependency-update": "Dependency Updates 📦",
+         "performance": "Performance 🏎️"
     },
     "prCategoryLabelMappings": {
-        "Dependency Updates 📦": "📦dependency-update"
+        "dependency-update": "Dependency Updates 📦"
     },
     "ignoreLabels": [
-        "🚀preview-release"
+        "preview-release"
     ],
     "wordReplacements": {
-        "chore(deps): ": ""
+        "chore(deps): ": "",
+        "benchmarkdotnet": "_**benchmarkdotnet**_",
+        "system.io.abstractions": "_**system.io.abstractions**_",
+        "sixlabors.imagesharp": "_**sixlabors.imagesharp**_",
+        "avalonia.themes.fluent": "_**avalonia.themes.fluent**_",
+        "avalonia.fonts.inter": "_**avalonia.fonts.inter**_",
+        "avalonia.diagnostics": "_**avalonia.diagnostics**_",
+        "avalonia.desktop": "_**avalonia.desktop**_",
+        "avalonia": "_**avalonia**_",
+        "serilog.sinks.console": "_**serilog.sinks.console**_",
+        "serilog": "_**serilog**_",
+        "xunit": "_**xunit**_",
+        "xunit.runner.visualstudio": "_**xunit.runner.visualstudio**_",
+        "simpleinjector": "_**simpleinjector**_",
+        "communitytoolkit.mvvm": "_**communitytoolkit.mvvm**_",
+        "kinsondigital.kdgui": "_**kinsondigital.kdgui**_",
+        "kinsondigital.casl": "_**kinsondigital.casl**_",
+        "fluentassertions": "_**fluentassertions**_",
+        "microsoft.net.test.sdk": "_**microsoft.net.test.sdk**_"
     },
     "firstWordReplacements": {
         "Add": "Added",

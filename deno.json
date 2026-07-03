@@ -1,0 +1,35 @@
+{
+    "tasks": {
+        "create-local-nuget-pkg-debug": "pwsh -File ./DevTools/create-local-nuget-pkg.ps1 -BuildConfig Debug -EnableTelemetry \"true\"",
+        "create-local-nuget-pkg-release": "pwsh -File ./DevTools/create-local-nuget-pkg.ps1 -BuildConfig Release -EnableTelemetry \"true\"",
+        "create-pr": "deno run -A jsr:@kinsondigital/sprocket@3.0.0 run-job ./DevTools/sprocket-config.ts --job-name Create-PR",
+        "prep-prev-release": "deno run -A jsr:@kinsondigital/sprocket@3.0.0 run-job ./DevTools/sprocket-config.ts --job-name Prep-Prev-Release"
+    },
+    "lint": {
+        "include": [
+            "DevTools/",
+            "tests/"
+        ],
+        "exclude": [
+            "**/playground.ts"
+        ]
+    },
+    "fmt": {
+        "include": [
+            "DevTools/"
+        ],
+        "exclude": [
+            "**/*.md",
+            "**/*.json",
+            "**/*.js",
+            "**/*.yml",
+            "**/*.yaml",
+            "**/playground.ts"
+        ],
+        "useTabs": true,
+        "lineWidth": 130,
+        "indentWidth": 4,
+        "semiColons": true,
+        "singleQuote": false
+    }
+}

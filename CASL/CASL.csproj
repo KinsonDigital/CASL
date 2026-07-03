@@ -31,7 +31,7 @@
     <PackageIcon>casl-logo.png</PackageIcon>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <NoWarn>CS7035</NoWarn>
-    <Platforms>x64</Platforms>
+    <Platforms>x64;arm64</Platforms>
   </PropertyGroup>
 
   <ItemGroup>
