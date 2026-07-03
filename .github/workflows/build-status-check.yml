@@ -19,7 +19,7 @@ jobs:
       fail-fast: false
       matrix:
         platform: [windows-latest, ubuntu-latest, macos-latest]
-        build_config: [Debug, Telemetry-Debug]
+        build_config: [Debug, Release]
     runs-on: ${{ matrix.platform }}
     steps:
       - uses: actions/checkout@v7.0.0
@@ -39,6 +39,7 @@ jobs:
       fail-fast: false
       matrix:
         platform: [windows-latest, ubuntu-latest, macos-latest]
+        build_config: [Debug, Release]
     runs-on: ${{ matrix.platform }}
     steps:
       - uses: actions/checkout@v7.0.0
@@ -49,4 +50,4 @@ jobs:
           dotnet-version: ${{ vars.NET_SDK_VERSION }}
 
       - name: Run Build
-        run: dotnet build "${{ github.workspace }}/Testing/${{ vars.PROJECT_NAME }}Testing/${{ vars.PROJECT_NAME }}Testing.csproj" -c Debug;
+        run: dotnet build "${{ github.workspace }}/Testing/${{ vars.PROJECT_NAME }}Testing/${{ vars.PROJECT_NAME }}Testing.csproj" -c ${{ matrix.build_config }};
