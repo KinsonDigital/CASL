@@ -13,7 +13,6 @@ using CASL.Exceptions;
 using OpenAL;
 using CASL.NativeInterop;
 
-
 /// <summary>
 /// Manages audio devices on the system using OpenAL.
 /// </summary>

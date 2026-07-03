@@ -15,6 +15,9 @@ using Xunit;
 using FluentAssertions;
 using Helpers;
 using NSubstitute;
+using CASL.NativeInterop;
+
+#pragma warning disable IDE0053 // Use expression body for lambda expression
 
 /// <summary>
 /// Tests the <see cref="AudioDeviceManager"/> class.
@@ -24,6 +27,7 @@ public class AudioDeviceManagerTests
     private const uint SrcId = 4321;
     private const uint BufferId = 9876;
     private readonly IOpenALInvoker mockALInvoker;
+    private readonly IPlatform mockPlatform;
     private readonly ALContext context;
     private readonly ALDevice device;
 
@@ -36,6 +40,7 @@ public class AudioDeviceManagerTests
         this.context = new ALContext(5678);
 
         this.mockALInvoker = Substitute.For<IOpenALInvoker>();
+        this.mockPlatform = Substitute.For<IPlatform>();
 
         MockAudioLength(60);
 
@@ -54,11 +59,24 @@ public class AudioDeviceManagerTests
         // Arrange & Act
         var act = () =>
         {
-            _ = new AudioDeviceManager(null);
+            _ = new AudioDeviceManager(null, this.mockPlatform);
         };
 
         // Assert
         act.Should().ThrowArgNullException().WithNullParamMsg("alInvoker");
+    }
+
+    [Fact]
+    public void Ctor_WithNullPlatformParam_ThrowsException()
+    {
+        // Arrange & Act
+        var act = () =>
+        {
+            _ = new AudioDeviceManager(this.mockALInvoker, null);
+        };
+
+        // Assert
+        act.Should().ThrowArgNullException().WithNullParamMsg("platform");
     }
 
     [Fact]
@@ -289,7 +307,7 @@ public class AudioDeviceManagerTests
     /// Creates a new instance of <see cref="AudioDeviceManager"/> for the purpose of testing.
     /// </summary>
     /// <returns>The instance to test.</returns>
-    private AudioDeviceManager CreateSystemUnderTest() => new (this.mockALInvoker);
+    private AudioDeviceManager CreateSystemUnderTest() => new (this.mockALInvoker, this.mockPlatform);
 
     /// <summary>
     /// Mocks the buffer data stats to influence the total seconds that the  audio has.
