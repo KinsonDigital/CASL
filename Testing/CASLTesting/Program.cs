@@ -17,14 +17,17 @@ public static class Program
 {
     public static void Main(string[] args)
     {
-        var isInteractive = Parser.Default.ParseArguments<InteractiveOptions>(args)
-            .WithParsed((o) =>
+        var isInteractive = false;
+
+        Parser.Default.ParseArguments<InteractiveOptions>(args)
+            .WithParsed(o =>
             {
                 if (o.Interactive)
                 {
                     Console.WriteLine("You are in interactive mode. Type 'exit' to exit.\n");
+                    isInteractive = true;
                 }
-            }).Value.Interactive;
+            });
 
         if (isInteractive)
         {
