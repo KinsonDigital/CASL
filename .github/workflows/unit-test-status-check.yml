@@ -38,7 +38,7 @@ jobs:
           WORKSPACE: ${{ github.workspace }}
           PROJECT_NAME: ${{ vars.PROJECT_NAME }}
           BUILD_CONFIG: ${{ matrix.build_config }}
-        run: dotnet test "$env.WORKSPACE/Testing/$($env.PROJECT_NAME)Testing/$($env.PROJECT_NAME)Testing.csproj" -c $env.BUILD_CONFIG;
+        run: dotnet test "$($env:WORKSPACE)/Testing/$($env:PROJECT_NAME)Testing/$($env:PROJECT_NAME)Testing.csproj" -c "$env:BUILD_CONFIG";
 
 
   unit_test_status_check:
