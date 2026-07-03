@@ -68,7 +68,7 @@ internal sealed class OpenALLibrary : ILibrary
             return MacLibName;
         }
 
-        if (this.platform.IsPosixPlatform())
+        if (this.platform.IsLinuxPlatform())
         {
             return PosixLibName;
         }

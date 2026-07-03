@@ -183,10 +183,10 @@ public class OpenALLibraryTests
     }
 
     [Fact]
-    public void Ctor_WithPosixPlatforms_ProcessesLibFile()
+    public void Ctor_WithLinuxPlatforms_ProcessesLibFile()
     {
         // Arrange
-        MockPosixPlatform();
+        MockLinuxPlatform();
         this.mockFile.Exists("/app-dir/libopenal.so.1.24.2").Returns(false);
         this.mockDirectory.Exists(Arg.Any<string>()).Returns(true);
         this.mockFile.Exists("/app-dir/runtimes/linux-x64/native/libopenal.so.1.24.2").Returns(true);
@@ -217,10 +217,25 @@ public class OpenALLibraryTests
     }
 
     [Fact]
+    public void GetLibraryName_WhenGettingValueWithMacOSPlatform_ReturnsCorrectResult()
+    {
+        // Arrange
+        MockMacOSPlatform();
+        this.mockFile.Exists(Arg.Any<string>()).Returns(true);
+        var sut = CreateSystemUnderTest();
+
+        // Act
+        var actual = sut.GetLibraryName();
+
+        // Assert
+        actual.Should().Be("OpenAL");
+    }
+
+    [Fact]
     public void GetLibraryName_WhenGettingValueWithPosixPlatform_ReturnsCorrectResult()
     {
         // Arrange
-        MockPosixPlatform();
+        MockLinuxPlatform();
         this.mockFile.Exists(Arg.Any<string>()).Returns(true);
         var sut = CreateSystemUnderTest();
 
@@ -229,6 +244,36 @@ public class OpenALLibraryTests
 
         // Assert
         actual.Should().Be("libopenal.so.1.24.2");
+    }
+
+    [Fact]
+    public void GetLibraryPath_WhenGettingValueWithMacosPlatform_ReturnsCorrectResult()
+    {
+        // Arrange
+        MockMacOSPlatform();
+        var sut = CreateSystemUnderTest();
+
+        // Act
+        var actual = sut.GetLibraryPath();
+
+        // Assert
+        actual.Should().Be("/System/Library/Frameworks/OpenAL.framework/OpenAL");
+    }
+
+    [Fact]
+    public void GetLibraryPath_WhenGettingValueWithNonMacosPlatform_ReturnsCorrectResult()
+    {
+        // Arrange
+        MockWindowsPlatform();
+        this.mockDirectory.Exists(Arg.Any<string>()).Returns(true);
+        this.mockFile.Exists(Arg.Any<string>()).Returns(true);
+        var sut = CreateSystemUnderTest();
+
+        // Act
+        var actual = sut.GetLibraryPath();
+
+        // Assert
+        actual.Should().Be(@"C:\app-dir\soft_oal.dll");
     }
     #endregion
 
@@ -250,17 +295,32 @@ public class OpenALLibraryTests
     {
         this.mockPlatform.IsWinPlatform().Returns(true);
         this.mockPlatform.IsPosixPlatform().Returns(false);
+        this.mockPlatform.IsLinuxPlatform().Returns(false);
         this.mockPath.DirectorySeparatorChar.Returns('\\');
         this.mockAssembly.Location.Returns(@"C:\app-dir");
     }
 
     /// <summary>
-    /// Mocks a posix platform.
+    /// Mocks a linux platform.
     /// </summary>
-    private void MockPosixPlatform()
+    private void MockLinuxPlatform()
     {
         this.mockPlatform.IsWinPlatform().Returns(false);
         this.mockPlatform.IsPosixPlatform().Returns(true);
+        this.mockPlatform.IsLinuxPlatform().Returns(true);
+        this.mockPath.DirectorySeparatorChar.Returns('/');
+        this.mockAssembly.Location.Returns("/app-dir");
+    }
+
+    /// <summary>
+    /// Mocks the macOS platform.
+    /// </summary>
+    private void MockMacOSPlatform()
+    {
+        this.mockPlatform.IsWinPlatform().Returns(false);
+        this.mockPlatform.IsPosixPlatform().Returns(true);
+        this.mockPlatform.IsLinuxPlatform().Returns(false);
+        this.mockPlatform.IsMacOSXPlatform().Returns(true);
         this.mockPath.DirectorySeparatorChar.Returns('/');
         this.mockAssembly.Location.Returns("/app-dir");
     }
