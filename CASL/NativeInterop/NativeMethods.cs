@@ -4,15 +4,35 @@
 
 namespace CASL.NativeInterop;
 
+using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
 
 /// <summary>
 /// Provides access to interop with native windows and posix platform related functions.
 /// </summary>
+[ExcludeFromCodeCoverage(Justification = "Interop with native methods is not covered by unit tests.")]
 internal static partial class NativeMethods
 {
     private const string WinLibName = "kernel32.dll";
     private const string PosixLibName = "libdl.so.2";
+    private const string MacLibName = "libSystem.dylib";
+
+    /// <summary>
+    /// Initializes static members of the <see cref="NativeMethods"/> class.
+    /// </summary>
+    static NativeMethods() =>
+        NativeLibrary.SetDllImportResolver(
+            typeof(NativeMethods).Assembly,
+            (libraryName, assembly, searchPath) =>
+            {
+                if (libraryName != PosixLibName || !RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                {
+                    return IntPtr.Zero;
+                }
+
+                return NativeLibrary.TryLoad(MacLibName, assembly, searchPath, out var handle) ? handle : IntPtr.Zero;
+            });
 
     /// <summary>
     /// Loads the specified module into the address space of the calling process. The specified module may cause other modules to be loaded.

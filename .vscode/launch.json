@@ -8,16 +8,20 @@
             "name": "Run CASL Testing",
             "type": "coreclr",
             "request": "launch",
-            "preLaunchTask": "BuildSolution",
-            "args": [],
+            "preLaunchTask": "build",
+            "args": ["--interactive"],
             "stopAtEntry": false,
             "windows": {
-                "program": "${workspaceFolder}/Testing/CASLTesting/bin/Debug/net8.0/CASLTesting.dll",
-                "console": "externalTerminal"
+                "program": "${workspaceFolder}/Testing/CASLTesting/bin/x64/Debug/net9.0/CASLTesting.dll",
+                "console": "integratedTerminal"
             },
             "linux": {
-                "program": "${workspaceFolder}/Testing/CASLTesting/bin/Debug/net8.0/CASLTesting.dll",
-                "console": "externalTerminal"
+                "program": "${workspaceFolder}/Testing/CASLTesting/bin/x64/Debug/net9.0/CASLTesting.dll",
+                "console": "integratedTerminal"
+            },
+            "osx": {
+                "program": "${workspaceFolder}/Testing/CASLTesting/bin/arm64/Debug/net9.0/CASLTesting.dll",
+                "console": "integratedTerminal"
             }
         },
         {

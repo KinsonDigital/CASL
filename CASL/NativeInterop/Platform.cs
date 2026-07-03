@@ -87,6 +87,11 @@ internal sealed class Platform : IPlatform
             return ".dll";
         }
 
+        if (IsMacOSXPlatform())
+        {
+            return ".dylib";
+        }
+
         return IsPosixPlatform() ? ".so" : string.Empty;
     }
 
@@ -98,6 +103,10 @@ internal sealed class Platform : IPlatform
             if (IsWinPlatform())
             {
                 return NativeMethods.LoadLibrary_WIN(libPath);
+            }
+            else if (IsMacOSXPlatform())
+            {
+                return NativeMethods.dlopen_POSIX(libPath, (UbuntuRTLDMode)MacRTLDMode.RTLD_NOW);
             }
             else if (IsPosixPlatform())
             {

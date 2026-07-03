@@ -1,0 +1,13 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "build",
+			"type": "dotnet",
+			"task": "build ${workspaceFolder}/Testing/CASLTesting/CASLTesting.csproj",
+			"file": "${workspaceFolder}/Testing/CASLTesting/CASLTesting.csproj",
+			"group": "build",
+			"problemMatcher": [],
+		}
+	]
+}

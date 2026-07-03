@@ -58,7 +58,7 @@
     Copy 64 bit windows version of the OpenAL library to the output directory for development.
   -->
   <Target Name="CopyOpenALLib" AfterTargets="Build">
-    <Copy SourceFiles="$(SolutionDir)CASL/NativeLibs/win-x64/soft_oal.dll" DestinationFolder="$(OutputPath)" />
-    <Copy SourceFiles="$(SolutionDir)CASL/NativeLibs/linux-x64/libopenal.so.1.24.2" DestinationFolder="$(OutputPath)" />
+    <Copy SourceFiles="$(MSBuildProjectDirectory)\..\..\CASL\NativeLibs\win-x64\soft_oal.dll" DestinationFolder="$(OutputPath)" Condition="Exists('$(MSBuildProjectDirectory)\..\..\CASL\NativeLibs\win-x64\soft_oal.dll')" />
+    <Copy SourceFiles="$(MSBuildProjectDirectory)\..\..\CASL\NativeLibs\linux-x64\libopenal.so.1.24.2" DestinationFolder="$(OutputPath)" Condition="Exists('$(MSBuildProjectDirectory)\..\..\CASL\NativeLibs\linux-x64\libopenal.so.1.24.2')" />
   </Target>
 </Project>

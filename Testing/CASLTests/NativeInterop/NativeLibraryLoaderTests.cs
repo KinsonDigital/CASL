@@ -48,10 +48,10 @@ public class NativeLibraryLoaderTests
         // Arrange & Act
         var act = () => new NativeLibraryLoader(
             null,
+            this.mockLibrary,
             this.mockPlatform,
             this.mockFile,
-            this.mockPath,
-            this.mockLibrary);
+            this.mockPath);
 
         // Assert
         act.Should().ThrowArgNullException().WithNullParamMsg("assembly");
@@ -63,10 +63,10 @@ public class NativeLibraryLoaderTests
         // Arrange & Act
         var act = () => new NativeLibraryLoader(
             this.mockAssembly,
+            this.mockLibrary,
             null,
             this.mockFile,
-            this.mockPath,
-            this.mockLibrary);
+            this.mockPath);
 
         // Assert
         act.Should().ThrowArgNullException().WithNullParamMsg("platform");
@@ -78,10 +78,10 @@ public class NativeLibraryLoaderTests
         // Arrange & Act
         var act = () => new NativeLibraryLoader(
             this.mockAssembly,
+            this.mockLibrary,
             this.mockPlatform,
             null,
-            this.mockPath,
-            this.mockLibrary);
+            this.mockPath);
 
         // Assert
         act.Should().ThrowArgNullException().WithNullParamMsg("file");
@@ -93,10 +93,10 @@ public class NativeLibraryLoaderTests
         // Arrange & Act
         var act = () => new NativeLibraryLoader(
             this.mockAssembly,
+            this.mockLibrary,
             this.mockPlatform,
             this.mockFile,
-            null,
-            this.mockLibrary);
+            null);
 
         // Assert
         act.Should().ThrowArgNullException().WithNullParamMsg("path");
@@ -108,10 +108,10 @@ public class NativeLibraryLoaderTests
         // Arrange & Act
         var act = () => new NativeLibraryLoader(
             this.mockAssembly,
+            null,
             this.mockPlatform,
             this.mockFile,
-            this.mockPath,
-            null);
+            this.mockPath);
 
         // Assert
         act.Should().ThrowArgNullException().WithNullParamMsg("library");
@@ -156,6 +156,7 @@ public class NativeLibraryLoaderTests
         // Arrange
         const string expected = "test-system-error\n\nLibrary path: 'C:\\lib-dir\\test-library'";
         this.mockLibrary.GetLibraryName().Returns("test-library");
+        this.mockLibrary.GetLibraryPath().Returns(@"C:\lib-dir\test-library");
         this.mockAssembly.Location.Returns(@"C:\lib-dir");
         this.mockFile.Exists(Arg.Any<string>()).Returns(true);
         this.mockPlatform.LoadLibrary(Arg.Any<string>()).Returns(IntPtr.Zero);
@@ -164,7 +165,7 @@ public class NativeLibraryLoaderTests
         var sut = CreateSystemUnderTest();
 
         // Act
-        var act = () => sut.LoadLibrary();
+        var act = sut.LoadLibrary;
 
         // Assert
         act.Should().Throw<LoadLibraryException>().WithMessage(expected);
@@ -196,8 +197,8 @@ public class NativeLibraryLoaderTests
     private NativeLibraryLoader CreateSystemUnderTest()
         => new (
             this.mockAssembly,
+            this.mockLibrary,
             this.mockPlatform,
             this.mockFile,
-            this.mockPath,
-            this.mockLibrary);
+            this.mockPath);
 }

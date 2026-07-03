@@ -206,7 +206,10 @@ internal sealed class OpenALInvoker : IOpenALInvoker
             var nullDevice = new ALDevice(0);
             ClearAlcError(nullDevice);
 
-            var stringsStart = this.alc.GetStringPtr(nullDevice, (AlcGetString)AlcGetStringList.AllDevicesSpecifier);
+            // Use the standard ALC_DEVICE_SPECIFIER (0x1005) which is supported by all OpenAL
+            // implementations including Apple's. The ALC_ALL_DEVICES_SPECIFIER (0x1013) is an
+            // extension that Apple's OpenAL does not support.
+            var stringsStart = this.alc.GetStringPtr(nullDevice, (AlcGetString)AlcGetStringList.DeviceSpecifier);
             ProcessAlcError(nullDevice);
 
             return ((nint)stringsStart).ToStrings();

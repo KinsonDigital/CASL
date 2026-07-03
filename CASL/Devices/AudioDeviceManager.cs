@@ -11,6 +11,7 @@ using System.Linq;
 using Exceptions;
 using CASL.Exceptions;
 using OpenAL;
+using CASL.NativeInterop;
 
 /// <summary>
 /// Manages audio devices on the system using OpenAL.
@@ -19,6 +20,7 @@ internal sealed class AudioDeviceManager : IAudioDeviceManager
 {
     private const string DeviceNamePrefix = "OpenAL Soft on "; // All device names returned are prefixed with this
     private readonly IOpenALInvoker alInvoker;
+    private readonly IPlatform platform;
     private ALDevice device;
     private ALContext context;
     private ALContextAttributes? attributes;
@@ -28,12 +30,15 @@ internal sealed class AudioDeviceManager : IAudioDeviceManager
     /// Initializes a new instance of the <see cref="AudioDeviceManager"/> class.
     /// </summary>
     /// <param name="alInvoker">Provides access to OpenAL.</param>
-    public AudioDeviceManager(IOpenALInvoker alInvoker)
+    /// <param name="platform">Provides information about the current platform.</param>
+    public AudioDeviceManager(IOpenALInvoker alInvoker, IPlatform platform)
     {
         ArgumentNullException.ThrowIfNull(alInvoker);
+        ArgumentNullException.ThrowIfNull(platform);
 
         this.alInvoker = alInvoker;
         this.alInvoker.ErrorCallback += ErrorCallback;
+        this.platform = platform;
 
         InitDevice();
     }
@@ -172,11 +177,30 @@ internal sealed class AudioDeviceManager : IAudioDeviceManager
     /// </remarks>
     private void DestroyDevice()
     {
+        // If the device was never opened, there is nothing to destroy
+        if (this.device == ALDevice.Null())
+        {
+            return;
+        }
+
         this.alInvoker.MakeContextCurrent(ALContext.Null());
-        this.alInvoker.DestroyContext(this.context);
+
+        if (this.context != ALContext.Null())
+        {
+            this.alInvoker.DestroyContext(this.context);
+        }
+
         this.context = ALContext.Null();
 
-        this.alInvoker.CloseDevice(new ALDevice(this.device));
+        // On macOS, Apple's OpenAL treats the default audio device as a shared system resource.
+        // Calling alcCloseDevice on it returns ALC_INVALID_DEVICE because the application does
+        // not own the device — the system manages its lifecycle. Skipping close on macOS is the
+        // correct and documented behavior.
+        if (!this.platform.IsMacOSXPlatform())
+        {
+            this.alInvoker.CloseDevice(new ALDevice(this.device));
+        }
+
         this.device = ALDevice.Null();
 
         this.attributes = null;

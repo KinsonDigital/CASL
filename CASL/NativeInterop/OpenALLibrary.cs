@@ -17,11 +17,13 @@ internal sealed class OpenALLibrary : ILibrary
 {
     private const string WinLibName = "soft_oal.dll";
     private const string PosixLibName = "libopenal.so.1.24.2";
+    private const string MacLibName = "OpenAL";
     private readonly IPlatform platform;
     private readonly IDirectory directory;
     private readonly IFile file;
     private readonly IPath path;
     private readonly string appDirPath;
+    private string fullLibPath = string.Empty;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="OpenALLibrary"/> class.
@@ -61,13 +63,21 @@ internal sealed class OpenALLibrary : ILibrary
             return WinLibName;
         }
 
-        if (this.platform.IsPosixPlatform())
+        if (this.platform.IsMacOSXPlatform())
+        {
+            return MacLibName;
+        }
+
+        if (this.platform.IsLinuxPlatform())
         {
             return PosixLibName;
         }
 
         throw new UnknownPlatformException($"The platform '{this.platform.CurrentOSPlatform}' is unknown or not supported.");
     }
+
+    /// <inheritdoc/>
+    public string GetLibraryPath() => this.fullLibPath;
 
     /// <summary>
     /// Checks if the OpenAL library located in the same location as CASL.
@@ -77,10 +87,19 @@ internal sealed class OpenALLibrary : ILibrary
     private void ProcessLibFile()
     {
         var libName = GetLibraryName();
-        var fullLibPath = $"{this.appDirPath}{this.path.DirectorySeparatorChar}{libName}";
+
+        this.fullLibPath = this.platform.IsMacOSXPlatform()
+            ? "/System/Library/Frameworks/OpenAL.framework/OpenAL"
+            : $"{this.appDirPath}{this.path.DirectorySeparatorChar}{libName}";
+
+        // On macOS, use the system OpenAL framework (no copying needed)
+        if (this.platform.IsMacOSXPlatform())
+        {
+            return;
+        }
 
         // Check if the library exists in the same location as the assembly
-        if (this.file.Exists(fullLibPath))
+        if (this.file.Exists(this.fullLibPath))
         {
             return;
         }
@@ -114,6 +133,6 @@ internal sealed class OpenALLibrary : ILibrary
         }
 
         // At this point, the library file exist.  Copy the library to the same location as the assembly.
-        this.file.Copy(fullPlatLibPath, fullLibPath);
+        this.file.Copy(fullPlatLibPath, this.fullLibPath);
     }
 }

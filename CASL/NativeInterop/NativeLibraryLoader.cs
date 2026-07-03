@@ -18,11 +18,12 @@ using DotnetWrappers;
 using Exceptions;
 
 /// <summary>
-/// Loads a native library and returns a pointer for the purpose of interoping with it.
+/// Loads a native library and returns a pointer for the purpose of using it.
 /// </summary>
 internal sealed class NativeLibraryLoader : ILibraryLoader
 {
     private readonly IAssembly assembly;
+    private readonly ILibrary library;
     private readonly IPlatform platform;
     private readonly IFile file;
     private readonly IPath path;
@@ -37,18 +38,19 @@ internal sealed class NativeLibraryLoader : ILibraryLoader
     /// <param name="library">The library to load.</param>
     public NativeLibraryLoader(
         IAssembly assembly,
+        ILibrary library,
         IPlatform platform,
         IFile file,
-        IPath path,
-        ILibrary library)
+        IPath path)
     {
         ArgumentNullException.ThrowIfNull(assembly);
+        ArgumentNullException.ThrowIfNull(library);
         ArgumentNullException.ThrowIfNull(platform);
         ArgumentNullException.ThrowIfNull(file);
         ArgumentNullException.ThrowIfNull(path);
-        ArgumentNullException.ThrowIfNull(library);
 
         this.assembly = assembly;
+        this.library = library;
         this.platform = platform;
         this.file = file;
         this.path = path;
@@ -65,7 +67,7 @@ internal sealed class NativeLibraryLoader : ILibraryLoader
         var libDirPath = this.assembly.Location;
         var libFilePath = $"{libDirPath}{this.path.DirectorySeparatorChar}{LibraryName}";
 
-        var (exists, libPtr) = LoadLibraryIfExists(libFilePath);
+        var (exists, libPtr) = LoadLibraryIfExists(this.library.GetLibraryPath());
 
         if (exists)
         {

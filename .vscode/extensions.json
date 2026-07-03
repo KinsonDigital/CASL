@@ -4,7 +4,6 @@
 		"ms-dotnettools.csharp",
 		"ms-dotnettools.csdevkit",
 		"github.vscode-github-actions",
-		"ms-dotnettools.vscodeintellicode-csharp",
 		"redhat.vscode-yaml"
 	]
 }
