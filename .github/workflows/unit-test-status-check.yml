@@ -13,14 +13,21 @@ on:
 
 
 jobs:
-  run_tests:
-    name: ${{ vars.PROJECT_NAME }} Test Status Check
-    uses: KinsonDigital/Infrastructure/.github/workflows/run-csharp-tests.yml@v17.2.0
-    with:
-      project-name: "${{ vars.PROJECT_NAME }}Tests"
-      build-config: Debug
-      net-sdk-version: "${{ vars.NET_SDK_VERSION }}"
-      checkout-repository: ${{ github.event.pull_request.head.repo.full_name }}
-      checkout-ref: ${{ github.event.pull_request.head.ref }}
-    secrets:
-      cicd-pat: ${{ secrets.CICD_TOKEN }}
+  run_casl_tests:
+    name: Run CASL Tests
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [windows-latest, ubuntu-latest, macos-latest]
+        build_config: [Debug, Release]
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - uses: actions/checkout@v7.0.0
+
+      - name: Set Up .NET SDK (${{ vars.NET_SDK_VERSION }})
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: ${{ vars.NET_SDK_VERSION }}
+
+      - name: Run Tests
+        run: dotnet test "${{ github.workspace }}/Testing/${{ vars.PROJECT_NAME }}Testing/${{ vars.PROJECT_NAME }}Testing.csproj" -c ${{ matrix.build_config }};
