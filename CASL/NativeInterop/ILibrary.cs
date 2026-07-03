@@ -14,4 +14,10 @@ internal interface ILibrary
     /// </summary>
     /// <returns>The name of the library.</returns>
     string GetLibraryName();
+
+    /// <summary>
+    /// Gets the full path to the library.
+    /// </summary>
+    /// <returns>The full path to the library.</returns>
+    string GetLibraryPath();
 }
