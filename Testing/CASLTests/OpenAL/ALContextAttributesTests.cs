@@ -6,7 +6,7 @@ namespace CASLTests.OpenAL;
 
 using CASL.OpenAL;
 using Xunit;
-using FluentAssertions;
+using Shouldly;
 
 /// <summary>
 /// Tests the <see cref="ALContextAttributes"/> class.
@@ -21,12 +21,12 @@ public class ALContextAttributesTests
         var actual = new ALContextAttributes();
 
         // Assert
-        actual.Frequency.Should().BeNull();
-        actual.MonoSources.Should().BeNull();
-        actual.StereoSources.Should().BeNull();
-        actual.Refresh.Should().BeNull();
-        actual.Sync.Should().BeNull();
-        actual.AdditionalAttributes.Should().BeEmpty();
+        actual.Frequency.ShouldBeNull();
+        actual.MonoSources.ShouldBeNull();
+        actual.StereoSources.ShouldBeNull();
+        actual.Refresh.ShouldBeNull();
+        actual.Sync.ShouldBeNull();
+        actual.AdditionalAttributes.ShouldBeEmpty();
     }
 
     [Fact]
@@ -36,12 +36,15 @@ public class ALContextAttributesTests
         var actual = new ALContextAttributes(11, 22, 33, 44, true);
 
         // Assert
-        actual.Frequency.Should().Be(11);
-        actual.MonoSources.Should().Be(22);
-        actual.StereoSources.Should().Be(33);
-        actual.Refresh.Should().Be(44);
-        actual.Sync.Should().BeTrue();
-        actual.AdditionalAttributes.Should().BeEmpty();
+        actual.Frequency.ShouldBe(11);
+        actual.MonoSources.ShouldBe(22);
+        actual.StereoSources.ShouldBe(33);
+        actual.Refresh.ShouldBe(44);
+
+        var actualSync = actual.Sync is null ? false : actual.Sync.Value;
+        actualSync.ShouldBeTrue();
+
+        actual.AdditionalAttributes.ShouldBeEmpty();
     }
     #endregion
 
@@ -59,8 +62,9 @@ public class ALContextAttributesTests
         var actual = contextAttributes.CreateAttributeArray();
 
         // Assert
-        actual.Should().HaveCount(11);
-        actual.Should().ContainInOrder(
+        actual.Length.ShouldBe(11);
+        actual.ShouldBe(new[]
+        {
             (int)AlcContextAttributes.Frequency,
             111,
             (int)AlcContextAttributes.MonoSources,
@@ -72,7 +76,8 @@ public class ALContextAttributesTests
             expectedAttrValue,
             expectedIntValue,
             // Assert the trailing byte
-            0);
+            0,
+        });
     }
 
     [Fact]
@@ -85,8 +90,9 @@ public class ALContextAttributesTests
         var actual = contextAttributes.CreateAttributeArray();
 
         // Assert
-        actual.Should().HaveCount(11);
-        actual.Should().ContainInOrder(
+        actual.Length.ShouldBe(11);
+        actual.ShouldBe(new[]
+        {
             (int)AlcContextAttributes.Frequency,
             111,
             (int)AlcContextAttributes.StereoSources,
@@ -99,7 +105,8 @@ public class ALContextAttributesTests
             0,
             0,
             // Assert the trailing byte
-            0);
+            0,
+        });
     }
 
     [Fact]
@@ -112,8 +119,9 @@ public class ALContextAttributesTests
         var actual = contextAttributes.CreateAttributeArray();
 
         // Assert
-        actual.Should().HaveCount(11);
-        actual.Should().ContainInOrder(
+        actual.Length.ShouldBe(11);
+        actual.ShouldBe(new[]
+        {
             (int)AlcContextAttributes.Frequency,
             111,
             (int)AlcContextAttributes.MonoSources,
@@ -126,7 +134,8 @@ public class ALContextAttributesTests
             0,
             0,
             // Assert trailing byte is zero
-            0);
+            0,
+        });
     }
 
     [Fact]
@@ -140,8 +149,9 @@ public class ALContextAttributesTests
         var actual = contextAttributes.CreateAttributeArray();
 
         // Assert
-        actual.Should().HaveCount(13);
-        actual.Should().ContainInOrder(
+        actual.Length.ShouldBe(13);
+        actual.ShouldBe(new[]
+        {
             (int)AlcContextAttributes.Frequency,
             111,
             (int)AlcContextAttributes.MonoSources,
@@ -156,7 +166,8 @@ public class ALContextAttributesTests
             555,
             666,
             // Assert trailing byte
-            0);
+            0,
+        });
     }
 
     [Fact]
@@ -180,7 +191,7 @@ public class ALContextAttributesTests
         var actual = contextAttributes.ToString();
 
         // Assert
-        actual.Should().Be(expected);
+        actual.ShouldBe(expected);
     }
 
     [Fact]
@@ -201,7 +212,7 @@ public class ALContextAttributesTests
         var actual = contextAttributes.ToString();
 
         // Assert
-        actual.Should().Be(expected);
+        actual.ShouldBe(expected);
     }
     #endregion
 }

@@ -7,7 +7,7 @@ namespace CASLTests.Devices.Exceptions;
 using CASL.Devices.Exceptions;
 using System;
 using Xunit;
-using FluentAssertions;
+using Shouldly;
 
 /// <summary>
 /// Tests the <see cref="AudioDeviceDoesNotExistException"/> class.
@@ -25,7 +25,7 @@ public class AudioDeviceDoesNotExistExceptionTests
         var exception = new AudioDeviceDoesNotExistException();
 
         // Assert
-        exception.Message.Should().Be(expected);
+        exception.Message.ShouldBe(expected);
     }
 
     [Fact]
@@ -38,7 +38,7 @@ public class AudioDeviceDoesNotExistExceptionTests
         var exception = new AudioDeviceDoesNotExistException(expected);
 
         // Assert
-        exception.Message.Should().Be(expected);
+        exception.Message.ShouldBe(expected);
     }
 
     [Fact]
@@ -53,7 +53,7 @@ public class AudioDeviceDoesNotExistExceptionTests
         var exception = new AudioDeviceDoesNotExistException(expectedMessage, expectedDeviceName);
 
         // Assert
-        exception.Message.Should().Be(expectedExceptionMessage);
+        exception.Message.ShouldBe(expectedExceptionMessage);
     }
 
     [Fact]
@@ -68,8 +68,8 @@ public class AudioDeviceDoesNotExistExceptionTests
         var deviceException = new AudioDeviceDoesNotExistException(expectedMessage, innerException);
 
         // Assert
-        deviceException.InnerException.Message.Should().Be(expectedInnerMessage);
-        deviceException.Message.Should().Be(expectedMessage);
+        deviceException.InnerException.Message.ShouldBe(expectedInnerMessage);
+        deviceException.Message.ShouldBe(expectedMessage);
     }
     #endregion
 }

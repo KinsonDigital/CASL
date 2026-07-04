@@ -7,7 +7,7 @@ namespace CASLTests.Exceptions;
 using System;
 using CASL.Exceptions;
 using Xunit;
-using FluentAssertions;
+using Shouldly;
 
 /// <summary>
 /// Tests the <see cref="AudioException"/> class.
@@ -22,7 +22,7 @@ public class AudioExceptionTests
         var exception = new AudioException();
 
         // Assert
-        exception.Message.Should().Be("An audio exception has occurred.");
+        exception.Message.ShouldBe("An audio exception has occurred.");
     }
 
     [Fact]
@@ -35,7 +35,7 @@ public class AudioExceptionTests
         var exception = new AudioException(expected);
 
         // Assert
-        exception.Message.Should().Be(expected);
+        exception.Message.ShouldBe(expected);
     }
 
     [Fact]
@@ -50,8 +50,8 @@ public class AudioExceptionTests
         var deviceException = new AudioException(expectedExceptionMessage, innerException);
 
         // Assert
-        deviceException.InnerException.Message.Should().Be(expectedInnerExceptionMessage);
-        deviceException.Message.Should().Be(expectedExceptionMessage);
+        deviceException.InnerException.Message.ShouldBe(expectedInnerExceptionMessage);
+        deviceException.Message.ShouldBe(expectedExceptionMessage);
     }
     #endregion
 }

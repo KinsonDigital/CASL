@@ -12,7 +12,7 @@ using CASL.Devices.Exceptions;
 using CASL.Exceptions;
 using CASL.OpenAL;
 using Xunit;
-using FluentAssertions;
+using Shouldly;
 using Helpers;
 using NSubstitute;
 using CASL.NativeInterop;
@@ -63,7 +63,7 @@ public class AudioDeviceManagerTests
         };
 
         // Assert
-        act.Should().ThrowArgNullException().WithNullParamMsg("alInvoker");
+        Should.Throw<ArgumentNullException>(act).WithNullParamMsg("alInvoker");
     }
 
     [Fact]
@@ -76,7 +76,7 @@ public class AudioDeviceManagerTests
         };
 
         // Assert
-        act.Should().ThrowArgNullException().WithNullParamMsg("platform");
+        Should.Throw<ArgumentNullException>(act).WithNullParamMsg("platform");
     }
 
     [Fact]
@@ -101,7 +101,7 @@ public class AudioDeviceManagerTests
         var act = () => CreateSystemUnderTest();
 
         // Assert
-        act.Should().Throw<InitializeDeviceException>().WithMessage("There was an issue initializing the audio device.");
+        Should.Throw<InitializeDeviceException>(act).Message.ShouldBe("There was an issue initializing the audio device.");
     }
     #endregion
 
@@ -116,7 +116,7 @@ public class AudioDeviceManagerTests
         var actual = sut.IsInitialized;
 
         // Assert
-        actual.Should().BeTrue();
+        actual.ShouldBeTrue();
     }
 
     [Fact]
@@ -130,7 +130,7 @@ public class AudioDeviceManagerTests
         var actual = sut.GetDeviceNames().ToArray();
 
         // Assert
-        actual.Should().BeEquivalentTo(expected);
+        actual.ShouldBe(expected, ignoreOrder: true);
     }
 
     [Fact]
@@ -144,7 +144,8 @@ public class AudioDeviceManagerTests
         var actual = attributes.AdditionalAttributes;
 
         // Assert
-        actual.Should().NotBeNull().And.BeEmpty();
+        actual.ShouldNotBeNull();
+        actual.ShouldBeEmpty();
     }
 
     [Fact]
@@ -158,7 +159,9 @@ public class AudioDeviceManagerTests
         var actual = attributes.AdditionalAttributes;
 
         // Assert
-        actual.Should().NotBeNull().And.HaveCount(2).And.ContainInOrder(111, 222);
+        actual.ShouldNotBeNull();
+        actual.Length.ShouldBe(2);
+        actual.ShouldBe(new[] { 111, 222 });
     }
     #endregion
 
@@ -174,7 +177,7 @@ public class AudioDeviceManagerTests
 
         // Assert
         var expectedExceptionMessage = "Device Name: non-existing-device\nThe audio device does not exist.";
-        action.Should().Throw<AudioDeviceDoesNotExistException>().WithMessage(expectedExceptionMessage);
+        Should.Throw<AudioDeviceDoesNotExistException>(action).Message.ShouldBe(expectedExceptionMessage);
     }
 
     [Fact]
@@ -187,7 +190,7 @@ public class AudioDeviceManagerTests
         var action = () => sut.ChangeDevice("Device-1");
 
         // Assert
-        action.Should().NotThrow<NullReferenceException>();
+        Should.NotThrow(action);
     }
 
     [Fact]
@@ -200,7 +203,7 @@ public class AudioDeviceManagerTests
         var action = () => sut.ChangeDevice("Device-2");
 
         // Assert
-        action.Should().NotThrow<NullReferenceException>();
+        Should.NotThrow(action);
     }
 
     [Fact]
@@ -251,7 +254,7 @@ public class AudioDeviceManagerTests
         sut.ChangeDevice("Device-2");
 
         // Assert
-        deviceChangingEventRaised.Should().BeTrue();
+        deviceChangingEventRaised.ShouldBeTrue();
 
         // Verify that the device was destroyed
         // GetDeviceList
@@ -260,8 +263,8 @@ public class AudioDeviceManagerTests
         this.mockALInvoker.Received(1).DestroyContext(this.context);
         this.mockALInvoker.Received(1).CloseDevice(this.device);
 
-        sut.GetStructFieldValue<ALDevice>("device").Should().Be(newDevice);
-        sut.GetStructFieldValue<ALContext>("context").Should().Be(newContext);
+        sut.GetStructFieldValue<ALDevice>("device").ShouldBe(newDevice);
+        sut.GetStructFieldValue<ALContext>("context").ShouldBe(newContext);
 
         // Verify that the new device was initialized
         this.mockALInvoker.Received(1).OpenDevice("OpenAL Soft on Device-2");
@@ -269,7 +272,7 @@ public class AudioDeviceManagerTests
         this.mockALInvoker.Received(1).MakeContextCurrent(newContext);
         this.mockALInvoker.Received(2).GetDefaultDevice();
 
-        deviceChangedEventRaised.Should().BeTrue();
+        deviceChangedEventRaised.ShouldBeTrue();
     }
 
     [Fact]
@@ -299,7 +302,7 @@ public class AudioDeviceManagerTests
         var act = () => this.mockALInvoker.ErrorCallback += Raise.Event<Action<string>>("test-error");
 
         // Assert
-        act.Should().Throw<AudioException>().WithMessage("test-error");
+        Should.Throw<AudioException>(act).Message.ShouldBe("test-error");
     }
     #endregion
 

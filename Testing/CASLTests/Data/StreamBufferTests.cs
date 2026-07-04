@@ -2,7 +2,8 @@
 // Copyright (c) KinsonDigital. All rights reserved.
 // </copyright>
 
-#pragma warning disable SA1202
+#pragma warning disable SA1202 // Elements must be ordered by access
+#pragma warning disable IDE0053 // Use expression body for lambda expression
 
 namespace CASLTests.Data;
 
@@ -20,7 +21,7 @@ using CASL.DotnetWrappers;
 using CASL.Factories;
 using CASL.OpenAL;
 using CASL.ReactableData;
-using FluentAssertions;
+using Shouldly;
 using Helpers;
 using NSubstitute;
 using Xunit;
@@ -102,7 +103,7 @@ public class StreamBufferTests
             .Do(callInfo =>
             {
                 this.streamDataDelegate = callInfo.Arg<Action>();
-                this.streamDataDelegate.Should().NotBeNull();
+                this.streamDataDelegate.ShouldNotBeNull();
             });
 
         this.mockThreadService = Substitute.For<IThreadService>();
@@ -134,7 +135,7 @@ public class StreamBufferTests
         };
 
         // Assert
-        act.Should().ThrowArgNullException().WithNullParamMsg("alInvoker");
+        Should.Throw<ArgumentNullException>(act).WithNullParamMsg("alInvoker");
     }
 
     [Fact]
@@ -156,7 +157,7 @@ public class StreamBufferTests
         };
 
         // Assert
-        act.Should().ThrowArgNullException().WithNullParamMsg("audioDeviceManager");
+        Should.Throw<ArgumentNullException>(act).WithNullParamMsg("audioDeviceManager");
     }
     #endregion
 
@@ -172,7 +173,7 @@ public class StreamBufferTests
         var actual = sut.TotalSeconds;
 
         // Assert
-        actual.Should().Be(123f);
+        actual.ShouldBe(123f);
     }
 
     [Fact]
@@ -187,7 +188,7 @@ public class StreamBufferTests
         var actual = sut.Position;
 
         // Assert
-        actual.TotalSeconds.Should().Be(50);
+        actual.TotalSeconds.ShouldBe(50);
     }
     #endregion
 
@@ -199,10 +200,10 @@ public class StreamBufferTests
         var sut = CreateSystemUnderTest();
 
         // Act
-        var act = () => sut.Init(null);
+        var act = () => { sut.Init(null); };
 
         // Assert
-        act.Should().ThrowArgNullException().WithNullParamMsg("filePath");
+        Should.Throw<ArgumentNullException>(act).WithNullParamMsg("filePath");
     }
 
     [Fact]
@@ -212,10 +213,10 @@ public class StreamBufferTests
         var sut = CreateSystemUnderTest();
 
         // Act
-        var act = () => sut.Init(string.Empty);
+        var act = () => { sut.Init(string.Empty); };
 
         // Assert
-        act.Should().ThrowArgException().WithEmptyStringParamMsg("filePath");
+        Should.Throw<ArgumentException>(act).WithEmptyStringParamMsg("filePath");
     }
 
     [Fact]
@@ -226,12 +227,12 @@ public class StreamBufferTests
         var sut = CreateSystemUnderTest();
 
         // Act
-        var act = () => sut.Init("test-file.ogg");
+        var act = () => { sut.Init("test-file.ogg"); };
 
         // Assert
-        act.Should().Throw<FileNotFoundException>()
-            .WithMessage("The audio file could not be found.")
-            .And.FileName.Should().Be("test-file.ogg");
+        var ex = Should.Throw<FileNotFoundException>(act);
+        ex.Message.ShouldBe("The audio file could not be found.");
+        ex.FileName.ShouldBe("test-file.ogg");
     }
 
     [Fact]
@@ -243,11 +244,10 @@ public class StreamBufferTests
         var sut = CreateSystemUnderTest();
 
         // Act
-        var act = () => sut.Init("test-file.mp4");
+        var act = () => { sut.Init("test-file.mp4"); };
 
         // Assert
-        act.Should().Throw<ArgumentException>()
-            .WithMessage(expected);
+        Should.Throw<ArgumentException>(act).Message.ShouldBe(expected);
     }
 
     [Theory]
@@ -267,7 +267,7 @@ public class StreamBufferTests
         var actualSrcId = sut.Init(fileName);
 
         // Assert
-        actualSrcId.Should().Be(SourceId);
+        actualSrcId.ShouldBe(SourceId);
         this.mockPath.Received(1).GetExtension(fileName);
     }
 
@@ -281,8 +281,7 @@ public class StreamBufferTests
         var act = () => sut.Upload();
 
         // Assert
-        act.Should().Throw<InvalidOperationException>()
-            .WithMessage("The buffer has not been initialized.");
+        Should.Throw<InvalidOperationException>(act).Message.ShouldBe("The buffer has not been initialized.");
     }
 
     [Fact]
@@ -312,7 +311,7 @@ public class StreamBufferTests
         // Assert
         this.mockStreamBufferManager.Received(1).FillBuffersFromStart(
             expectedBufferStats,
-            Arg.Do<uint[]>(bufferIdsArg => bufferIdsArg.Should().BeEquivalentTo(this.bufferIds)),
+            Arg.Do<uint[]>(bufferIdsArg => bufferIdsArg.ShouldBe(this.bufferIds, ignoreOrder: true)),
             this.mockAudioDecoder.Flush,
             Arg.Any<Func<float[]>>());
         this.mockTaskService.Received(1).SetAction(Arg.Any<Action>());
@@ -346,7 +345,7 @@ public class StreamBufferTests
         // Assert
         this.mockStreamBufferManager.Received(1).FillBuffersFromStart(
             expectedBufferStats,
-            Arg.Do<uint[]>(bufferIdsArg => bufferIdsArg.Should().BeEquivalentTo(this.bufferIds)),
+            Arg.Do<uint[]>(bufferIdsArg => bufferIdsArg.ShouldBe(this.bufferIds, ignoreOrder: true)),
             this.mockAudioDecoder.Flush,
             Arg.Any<Func<byte[]>>());
         this.mockTaskService.Received(1).SetAction(Arg.Any<Action>());
@@ -415,7 +414,7 @@ public class StreamBufferTests
             .Do(cb => this.streamDataDelegate = cb.Arg<Action>());
         this.mockTaskService.When(x => x.Start()).Do(cb =>
         {
-            cb.Should().NotBeNull("it is required for mocking the task service.");
+            cb.ShouldNotBeNull();
             this.streamDataDelegate?.Invoke();
         });
 
@@ -471,7 +470,7 @@ public class StreamBufferTests
             .Do(cb => this.streamDataDelegate = cb.Arg<Action>());
         this.mockTaskService.When(x => x.Start()).Do(cb =>
         {
-            cb.Should().NotBeNull("it is required for mocking the task service.");
+            cb.ShouldNotBeNull();
             this.streamDataDelegate?.Invoke();
         });
         this.mockTaskService.IsCancellationRequested.Returns(_ => isCancelRequested);
@@ -525,7 +524,7 @@ public class StreamBufferTests
             .Do(cb => this.streamDataDelegate = cb.Arg<Action>());
         this.mockTaskService.When(x => x.Start()).Do(cb =>
         {
-            cb.Should().NotBeNull("it is required for mocking the task service.");
+            cb.ShouldNotBeNull();
             this.streamDataDelegate?.Invoke();
             taskServiceIsRunning = true;
         });
@@ -644,8 +643,8 @@ public class StreamBufferTests
         var changedInvoked = sut.GetBoolFieldValue("audioDeviceChanging");
 
         // Assert
-        changingInvoked.Should().BeFalse("the device changing event should not have been invoked.");
-        changedInvoked.Should().BeTrue("the device changed event should not have been invoked.");
+        changingInvoked.ShouldBeFalse();
+        changedInvoked.ShouldBeTrue();
 
         this.mockTaskService.Received(1).Cancel();
         this.mockTaskService.Received(1).Dispose();
@@ -748,7 +747,7 @@ public class StreamBufferTests
         // Assert
         this.mockStreamBufferManager.Received(1).FillBuffersFromStart(
             expectedBufferStats,
-            Arg.Do<uint[]>(bufferIdsArg => bufferIdsArg.Should().BeEquivalentTo(this.bufferIds)),
+            Arg.Do<uint[]>(bufferIdsArg => bufferIdsArg.ShouldBe(this.bufferIds, ignoreOrder: true)),
             this.mockAudioDecoder.Flush,
             Arg.Any<Func<byte[]>>());
         this.mockAlInvoker.Received(1).SourceRewind(SourceId);
@@ -783,7 +782,7 @@ public class StreamBufferTests
         // Assert
         this.mockStreamBufferManager.Received(1).FillBuffersFromStart(
             expectedBufferStats,
-            Arg.Do<uint[]>(bufferIdsArg => bufferIdsArg.Should().BeEquivalentTo(this.bufferIds)),
+            Arg.Do<uint[]>(bufferIdsArg => bufferIdsArg.ShouldBe(this.bufferIds, ignoreOrder: true)),
             this.mockAudioDecoder.Flush,
             Arg.Any<Func<float[]>>());
         this.mockAlInvoker.Received(1).SourceRewind(SourceId);
@@ -826,7 +825,7 @@ public class StreamBufferTests
         var actualLoopState = sut.GetBoolFieldValue("isLooping");
 
         // Assert
-        actualLoopState.Should().Be(expected);
+        actualLoopState.ShouldBe(expected);
     }
 
     [Fact]
@@ -978,7 +977,7 @@ public class StreamBufferTests
         var actual = this.loopSubscription.OnRespond();
 
         // Assert
-        actual.Should().Be(expected);
+        actual.ShouldBe(expected);
     }
     #endregion
 

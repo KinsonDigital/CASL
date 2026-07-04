@@ -5,7 +5,7 @@
 namespace CASLTests.OpenAL;
 
 using CASL.OpenAL;
-using FluentAssertions;
+using Shouldly;
 using Xunit;
 
 /// <summary>
@@ -24,7 +24,7 @@ public class ALContextTests
         var context = new ALContext(handle);
 
         // Assert
-        context.Handle.Should().Be(1234);
+        context.Handle.ShouldBe(1234);
     }
     #endregion
 
@@ -40,7 +40,7 @@ public class ALContextTests
         nint actual = context;
 
         // Assert
-        actual.Should().Be(1234);
+        actual.ShouldBe(1234);
     }
 
     [Fact]
@@ -54,7 +54,7 @@ public class ALContextTests
         var actual = left == right;
 
         // Assert
-        actual.Should().BeTrue();
+        actual.ShouldBeTrue();
     }
 
     [Fact]
@@ -68,7 +68,7 @@ public class ALContextTests
         var actual = left != right;
 
         // Assert
-        actual.Should().BeTrue();
+        actual.ShouldBeTrue();
     }
     #endregion
 
@@ -80,7 +80,7 @@ public class ALContextTests
         var actual = ALContext.Null();
 
         // Assert
-        actual.Handle.Should().Be(0);
+        actual.Handle.ShouldBe(0);
     }
     #endregion
 }

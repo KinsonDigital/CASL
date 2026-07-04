@@ -4,6 +4,7 @@
 
 namespace CASLTests.Data.Decoders;
 
+using System;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.IO.Abstractions;
@@ -12,7 +13,7 @@ using CASL.Data.Decoders;
 using CASL.Exceptions;
 using CASL.Factories;
 using CASL.OpenAL;
-using FluentAssertions;
+using Shouldly;
 using Helpers;
 using NSubstitute;
 using Xunit;
@@ -49,85 +50,70 @@ public class AudioDecoderTests
     public void Ctor_WithNullFilePath_ThrowsException()
     {
         // Arrange & Act
-        var act = () =>
-        {
-            _ = new AudioDecoder(
+        var act = () => _ = new AudioDecoder(
                 null,
                 this.mockDecoderFactory,
                 this.mockPath,
                 this.mockFile);
-        };
 
         // Assert
-        act.Should().ThrowArgNullException().WithNullParamMsg("filePath");
+        Should.Throw<ArgumentNullException>(act).WithNullParamMsg("filePath");
     }
 
     [Fact]
     public void Ctor_WithEmptyFilePath_ThrowsException()
     {
         // Arrange & Act
-        var act = () =>
-        {
-            _ = new AudioDecoder(
+        var act = () => _ = new AudioDecoder(
                 string.Empty,
                 this.mockDecoderFactory,
                 this.mockPath,
                 this.mockFile);
-        };
 
         // Assert
-        act.Should().ThrowArgException().WithEmptyStringParamMsg("filePath");
+        Should.Throw<ArgumentException>(act).WithEmptyStringParamMsg("filePath");
     }
 
     [Fact]
     public void Ctor_WithNullDataDecoderFactoryParam_ThrowsException()
     {
         // Arrange & Act
-        var act = () =>
-        {
-            _ = new AudioDecoder(
+        var act = () => _ = new AudioDecoder(
                 "test-file.ogg",
                 null,
                 this.mockPath,
                 this.mockFile);
-        };
 
         // Assert
-        act.Should().ThrowArgNullException().WithNullParamMsg("dataDecoderFactory");
+        Should.Throw<ArgumentNullException>(act).WithNullParamMsg("dataDecoderFactory");
     }
 
     [Fact]
     public void Ctor_WithNullPathParam_ThrowsException()
     {
         // Arrange & Act
-        var act = () =>
-        {
-            _ = new AudioDecoder(
+        var act = () => _ = new AudioDecoder(
                 "test-file.ogg",
                 this.mockDecoderFactory,
                 null,
                 this.mockFile);
-        };
 
         // Assert
-        act.Should().ThrowArgNullException().WithNullParamMsg("path");
+        Should.Throw<ArgumentNullException>(act).WithNullParamMsg("path");
     }
 
     [Fact]
     public void Ctor_WithNullFileParam_ThrowsException()
     {
         // Arrange & Act
-        var act = () =>
-        {
-            _ = new AudioDecoder(
+        var act = () => _ = new AudioDecoder(
                 "test-file.ogg",
                 this.mockDecoderFactory,
                 this.mockPath,
                 null);
-        };
 
         // Assert
-        act.Should().ThrowArgNullException().WithNullParamMsg("file");
+        Should.Throw<ArgumentNullException>(act).WithNullParamMsg("file");
     }
 
     [Fact]
@@ -146,12 +132,12 @@ public class AudioDecoderTests
 
         // Assert
         this.mockDecoderFactory.CreateMp3AudioDecoder("test-file.mp3");
-        sut.TotalSeconds.Should().Be(123);
-        sut.TotalChannels.Should().Be(1);
-        sut.TotalSamples.Should().Be(1234);
-        sut.Format.Should().Be(ALFormat.Mono16);
-        sut.SampleRate.Should().Be(4321);
-        sut.TotalSampleFrames.Should().Be(617);
+        sut.TotalSeconds.ShouldBe(123);
+        sut.TotalChannels.ShouldBe(1);
+        sut.TotalSamples.ShouldBe(1234);
+        sut.Format.ShouldBe(ALFormat.Mono16);
+        sut.SampleRate.ShouldBe(4321);
+        sut.TotalSampleFrames.ShouldBe(617);
     }
 
     [Fact]
@@ -169,12 +155,12 @@ public class AudioDecoderTests
 
         // Assert
         this.mockDecoderFactory.CreateMp3AudioDecoder("test-file.ogg");
-        sut.TotalSeconds.Should().Be(123);
-        sut.TotalChannels.Should().Be(2);
-        sut.TotalSamples.Should().Be(1234);
-        sut.Format.Should().Be(ALFormat.StereoFloat32Ext);
-        sut.SampleRate.Should().Be(4321);
-        sut.TotalSampleFrames.Should().Be(617);
+        sut.TotalSeconds.ShouldBe(123);
+        sut.TotalChannels.ShouldBe(2);
+        sut.TotalSamples.ShouldBe(1234);
+        sut.Format.ShouldBe(ALFormat.StereoFloat32Ext);
+        sut.SampleRate.ShouldBe(4321);
+        sut.TotalSampleFrames.ShouldBe(617);
     }
 
     [Fact]
@@ -182,11 +168,11 @@ public class AudioDecoderTests
     {
         // Arrange & Act
         this.mockPath.GetExtension(Arg.Any<string>()).Returns(".invalid");
-        var expected = "The file extension '.invalid' is not supported.  Supported extensions are: '.mp3', '.ogg'.";
+        var expected = "The file extension '.invalid' is not supported. Supported extensions are: '.mp3', '.ogg'.";
         var act = () => CreateSystemUnderTest("test-file.invalid");
 
         // Assert
-        act.Should().Throw<AudioException>(expected);
+        Should.Throw<AudioException>(act).Message.ShouldBe(expected);
     }
     #endregion
 
@@ -204,11 +190,10 @@ public class AudioDecoderTests
         sut.SetEnumFieldValue("audioFormatType", (AudioFormatType)1000);
 
         // Act
-        var act = () => sut.ReadUpTo(123);
+        Action act = () => sut.ReadUpTo(123);
 
         // Assert
-        act.Should().Throw<InvalidEnumArgumentException>()
-            .WithMessage(expected);
+        Should.Throw<InvalidEnumArgumentException>(act).Message.ShouldBe(expected);
     }
 
     [Theory]
@@ -262,11 +247,10 @@ public class AudioDecoderTests
         sut.SetEnumFieldValue("audioFormatType", (AudioFormatType)1000);
 
         // Act
-        var act = () => sut.ReadSamples();
+        Action act = () => sut.ReadSamples();
 
         // Assert
-        act.Should().Throw<InvalidEnumArgumentException>()
-            .WithMessage(expected);
+        Should.Throw<InvalidEnumArgumentException>(act).Message.ShouldBe(expected);
     }
 
     [Fact]
@@ -279,10 +263,10 @@ public class AudioDecoderTests
         sut.SetArrayFieldToNull<byte>("mp3Buffer");
 
         // Act
-        var act = () => sut.ReadSamples();
+        Action act = () => sut.ReadSamples();
 
         // Assert
-        act.Should().ThrowArgNullException()
+        Should.Throw<ArgumentNullException>(act)
             .WithNullParamMsg("this.mp3Buffer");
     }
 
@@ -296,10 +280,10 @@ public class AudioDecoderTests
         sut.SetArrayFieldToNull<float>("oggBuffer");
 
         // Act
-        var act = () => sut.ReadSamples();
+        Action act = () => sut.ReadSamples();
 
         // Assert
-        act.Should().ThrowArgNullException()
+        Should.Throw<ArgumentNullException>(act)
             .WithNullParamMsg("this.oggBuffer");
     }
 
@@ -357,8 +341,7 @@ public class AudioDecoderTests
         var act = () => sut.ReadAllSamples();
 
         // Assert
-        act.Should().Throw<InvalidEnumArgumentException>()
-            .WithMessage(expected);
+        Should.Throw<InvalidEnumArgumentException>(act).Message.ShouldBe(expected);
     }
 
     [Fact]
@@ -374,7 +357,7 @@ public class AudioDecoderTests
         var act = () => sut.ReadAllSamples();
 
         // Assert
-        act.Should().ThrowArgNullException()
+        Should.Throw<ArgumentNullException>(act)
             .WithNullParamMsg("this.mp3DataDecoder");
     }
 
@@ -391,7 +374,7 @@ public class AudioDecoderTests
         var act = () => sut.ReadAllSamples();
 
         // Assert
-        act.Should().ThrowArgNullException()
+        Should.Throw<ArgumentNullException>(act)
             .WithNullParamMsg("this.oggDataDecoder");
     }
 
@@ -453,8 +436,7 @@ public class AudioDecoderTests
         var act = () => sut.GetSampleData<float>();
 
         // Assert
-        act.Should().Throw<InvalidEnumArgumentException>()
-            .WithMessage(expected);
+        Should.Throw<InvalidEnumArgumentException>(act).Message.ShouldBe(expected);
     }
 
     [Fact]
@@ -469,8 +451,8 @@ public class AudioDecoderTests
         var actual = sut.GetSampleData<byte>();
 
         // Assert
-        actual.Should().NotBeNull();
-        actual.Should().BeEmpty();
+        actual.ShouldNotBeNull();
+        actual.ShouldBeEmpty();
     }
 
     [Fact]
@@ -485,8 +467,8 @@ public class AudioDecoderTests
         var actual = sut.GetSampleData<float>();
 
         // Assert
-        actual.Should().NotBeNull();
-        actual.Should().BeEmpty();
+        actual.ShouldNotBeNull();
+        actual.ShouldBeEmpty();
     }
 
     [Theory]
@@ -504,9 +486,9 @@ public class AudioDecoderTests
         var actual = sut.GetSampleData<byte>();
 
         // Assert
-        actual.Should().NotBeNull();
-        actual.Should().NotBeEmpty();
-        actual.Length.Should().Be(bufferSize);
+        actual.ShouldNotBeNull();
+        actual.ShouldNotBeEmpty();
+        actual.Length.ShouldBe(bufferSize);
     }
 
     [Theory]
@@ -524,9 +506,9 @@ public class AudioDecoderTests
         var actual = sut.GetSampleData<float>();
 
         // Assert
-        actual.Should().NotBeNull();
-        actual.Should().NotBeEmpty();
-        actual.Length.Should().Be(bufferSize);
+        actual.ShouldNotBeNull();
+        actual.ShouldNotBeEmpty();
+        actual.Length.ShouldBe(bufferSize);
     }
 
     [Fact]
@@ -545,8 +527,7 @@ public class AudioDecoderTests
         var act = () => sut.Flush();
 
         // Assert
-        act.Should().Throw<InvalidEnumArgumentException>()
-            .WithMessage(expected);
+        Should.Throw<InvalidEnumArgumentException>(act).Message.ShouldBe(expected);
     }
 
     [Fact]

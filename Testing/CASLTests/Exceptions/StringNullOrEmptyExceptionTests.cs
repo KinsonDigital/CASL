@@ -7,7 +7,7 @@ namespace CASLTests.Exceptions;
 using System;
 using CASL.Exceptions;
 using Xunit;
-using FluentAssertions;
+using Shouldly;
 
 /// <summary>
 /// Tests the <see cref="StringNullOrEmptyException"/> class.
@@ -23,7 +23,7 @@ public class StringNullOrEmptyExceptionTests
 
         // Assert
         var expectedExceptionMessage = "The string must not be null or empty.";
-        exception.Message.Should().Be(expectedExceptionMessage);
+        exception.Message.ShouldBe(expectedExceptionMessage);
     }
 
     [Fact]
@@ -36,7 +36,7 @@ public class StringNullOrEmptyExceptionTests
         var exception = new StringNullOrEmptyException(expected);
 
         // Assert
-        exception.Message.Should().Be(expected);
+        exception.Message.ShouldBe(expected);
     }
 
     [Fact]
@@ -51,8 +51,8 @@ public class StringNullOrEmptyExceptionTests
         var deviceException = new StringNullOrEmptyException("test-exception", innerException);
 
         // Assert
-        deviceException.InnerException.Message.Should().Be(innerExceptionMessage);
-        deviceException.Message.Should().Be(exceptionMessage);
+        deviceException.InnerException.Message.ShouldBe(innerExceptionMessage);
+        deviceException.Message.ShouldBe(exceptionMessage);
     }
     #endregion
 }

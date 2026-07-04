@@ -7,7 +7,7 @@ namespace CASLTests;
 using System;
 using System.Runtime.InteropServices;
 using CASL;
-using FluentAssertions;
+using Shouldly;
 using Xunit;
 
 /// <summary>
@@ -70,7 +70,7 @@ public class ExtensionMethodTests
         var actual = value.MapValue(0f, 200f, 0L, 1000L);
 
         // Assert
-        actual.Should().Be(615);
+        actual.ShouldBe(615);
     }
 
     [Fact]
@@ -83,7 +83,7 @@ public class ExtensionMethodTests
         var actual = value.MapValue(0f, 200f, 0, 1000);
 
         // Assert
-        actual.Should().Be(615);
+        actual.ShouldBe(615);
     }
 
     [Fact]
@@ -96,6 +96,6 @@ public class ExtensionMethodTests
         var actual = value.MapValue(0L, 200L, 0f, 1000f);
 
         // Assert
-        actual.Should().Be(615);
+        actual.ShouldBe(615);
     }
 }

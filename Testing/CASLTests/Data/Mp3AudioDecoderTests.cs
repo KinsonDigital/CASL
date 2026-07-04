@@ -12,7 +12,7 @@ using System.Runtime.CompilerServices;
 using CASL.Data.Decoders;
 using CASL.OpenAL;
 using CASL.Wrappers;
-using FluentAssertions;
+using Shouldly;
 using Helpers;
 using MP3Sharp;
 using NSubstitute;
@@ -37,30 +37,22 @@ public class Mp3AudioDecoderTests
     public void Ctor_WithNullFilePathParam_ThrowsException()
     {
         // Arrange & Act
-        var act = () =>
-        {
-            _ = new Mp3AudioDecoder(null, this.mockMP3Stream);
-        };
+        var act = () => _ = new Mp3AudioDecoder(null, this.mockMP3Stream);
 
         // Assert
-        act.Should()
-            .Throw<ArgumentNullException>()
-            .WithMessage("Value cannot be null. (Parameter 'filePath')");
+        Should.Throw<ArgumentNullException>(act)
+            .Message.ShouldBe("Value cannot be null. (Parameter 'filePath')");
     }
 
     [Fact]
     public void Ctor_WithEmptyFilePathParam_ThrowsException()
     {
         // Arrange & Act
-        var act = () =>
-        {
-            _ = new Mp3AudioDecoder(string.Empty, this.mockMP3Stream);
-        };
+        var act = () => _ = new Mp3AudioDecoder(string.Empty, this.mockMP3Stream);
 
         // Assert
-        act.Should()
-            .Throw<ArgumentException>()
-            .WithMessage("The value cannot be an empty string. (Parameter 'filePath')");
+        Should.Throw<ArgumentException>(act)
+            .Message.ShouldBe("The value cannot be an empty string. (Parameter 'filePath')");
     }
 
     [Fact]
@@ -70,7 +62,7 @@ public class Mp3AudioDecoderTests
         var act = () => new Mp3AudioDecoder("test-path", null);
 
         // Assert
-        act.Should().ThrowArgNullException().WithNullParamMsg("mp3StreamWrapper");
+        Should.Throw<ArgumentNullException>(act).WithNullParamMsg("mp3StreamWrapper");
     }
 
     [Fact]
@@ -85,9 +77,9 @@ public class Mp3AudioDecoderTests
         this.mockMP3Stream.Received(1).Flush();
         this.mockMP3Stream.Received(1).Dispose();
         this.mockMP3Stream.Received(2).Load("test-path");
-        sut.TotalBytes.Should().Be(500_000);
-        sut.TotalSamples.Should().Be(250_000);
-        sut.TotalSeconds.Should().Be(2.6041667f);
+        sut.TotalBytes.ShouldBe(500_000);
+        sut.TotalSamples.ShouldBe(250_000);
+        sut.TotalSeconds.ShouldBe(2.6041667f);
     }
     #endregion
 
@@ -104,7 +96,7 @@ public class Mp3AudioDecoderTests
         var actual = sut.TotalChannels;
 
         // Assert
-        actual.Should().Be(123);
+        actual.ShouldBe(123);
     }
 
     [Theory]
@@ -120,7 +112,7 @@ public class Mp3AudioDecoderTests
         var actual = sut.Format;
 
         // Assert
-        actual.Should().Be(expected);
+        actual.ShouldBe(expected);
     }
 
     [Fact]
@@ -138,7 +130,7 @@ public class Mp3AudioDecoderTests
         var actual = sut.SampleRate;
 
         // Assert
-        actual.Should().Be(456);
+        actual.ShouldBe(456);
     }
 
     [Fact]
@@ -153,7 +145,7 @@ public class Mp3AudioDecoderTests
         var actual = sut.TotalSampleFrames;
 
         // Assert
-        actual.Should().Be(125_000);
+        actual.ShouldBe(125_000);
     }
     #endregion
 
@@ -191,7 +183,7 @@ public class Mp3AudioDecoderTests
         var actual = sut.ReadSamples(buffer, 10, 20);
 
         // Assert
-        actual.Should().Be(200);
+        actual.ShouldBe(200);
     }
 
     [Fact]
@@ -211,18 +203,18 @@ public class Mp3AudioDecoderTests
         var actual = sut.ReadSamples(buffer, 10, 20);
 
         // Assert
-        actual.Should().Be(175);
-        buffer.Should().AllSatisfy(sample =>
+        actual.ShouldBe(175);
+        foreach (var sample in buffer)
         {
             if (sample <= 176)
             {
-                sample.Should().Be(sample);
+                sample.ShouldBe(sample);
             }
             else
             {
-                sample.Should().Be(0);
+                sample.ShouldBe((byte)0);
             }
-        });
+        }
     }
 
     [Fact]
@@ -244,7 +236,7 @@ public class Mp3AudioDecoderTests
 
         // Assert
         this.mockMP3Stream.Received(2).Dispose();
-        actual.Should().Be(0);
+        actual.ShouldBe(0);
 
         return;
 
@@ -254,9 +246,9 @@ public class Mp3AudioDecoderTests
             var offsetArg = callInfo.ArgAt<int>(1);
             var upToArg = callInfo.ArgAt<int>(2);
 
-            bufferArg.Should().HaveCount(8192);
-            offsetArg.Should().Be(0);
-            upToArg.Should().Be(8192);
+            bufferArg.Length.ShouldBe(8192);
+            offsetArg.ShouldBe(0);
+            upToArg.ShouldBe(8192);
         }
 
         void SecondAssertCallback(CallInfo callInfo)
@@ -265,9 +257,9 @@ public class Mp3AudioDecoderTests
             var offsetArg = callInfo.ArgAt<int>(1);
             var upToArg = callInfo.ArgAt<int>(2);
 
-            bufferArg.Should().HaveCount(250);
-            offsetArg.Should().Be(0);
-            upToArg.Should().Be(250);
+            bufferArg.Length.ShouldBe(250);
+            offsetArg.ShouldBe(0);
+            upToArg.ShouldBe(250);
         }
 
         void ThirdAssertCallback(CallInfo callInfo)
@@ -276,9 +268,9 @@ public class Mp3AudioDecoderTests
             var offsetArg = callInfo.ArgAt<int>(1);
             var upToArg = callInfo.ArgAt<int>(2);
 
-            bufferArg.Should().HaveCount(501);
-            offsetArg.Should().Be(0);
-            upToArg.Should().Be(501);
+            bufferArg.Length.ShouldBe(501);
+            offsetArg.ShouldBe(0);
+            upToArg.ShouldBe(501);
         }
     }
 

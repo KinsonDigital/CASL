@@ -45,6 +45,7 @@
 		"REPONAME",
 		"runsettings",
 		"serilog",
+		"Shouldly",
 		"simpleinjector",
 		"sixlabors",
 		"softprops",

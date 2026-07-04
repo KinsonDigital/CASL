@@ -7,7 +7,7 @@ namespace CASLTests.Exceptions;
 using System;
 using CASL.Exceptions;
 using Xunit;
-using FluentAssertions;
+using Shouldly;
 
 /// <summary>
 /// Tests the <see cref="UnknownPlatformException"/> class.
@@ -23,7 +23,7 @@ public class UnknownPlatformExceptionTests
 
         // Assert
         var expectedExceptionMessage = "The platform is unknown.";
-        exception.Message.Should().Be(expectedExceptionMessage);
+        exception.Message.ShouldBe(expectedExceptionMessage);
     }
 
     [Fact]
@@ -36,7 +36,7 @@ public class UnknownPlatformExceptionTests
         var exception = new UnknownPlatformException(expected);
 
         // Assert
-        exception.Message.Should().Be(expected);
+        exception.Message.ShouldBe(expected);
     }
 
     [Fact]
@@ -51,8 +51,8 @@ public class UnknownPlatformExceptionTests
         var deviceException = new UnknownPlatformException(exceptionMessage, innerException);
 
         // Assert
-        deviceException.InnerException.Message.Should().Be(innerExceptionMessage);
-        deviceException.Message.Should().Be(exceptionMessage);
+        deviceException.InnerException.Message.ShouldBe(innerExceptionMessage);
+        deviceException.Message.ShouldBe(exceptionMessage);
     }
     #endregion
 }
