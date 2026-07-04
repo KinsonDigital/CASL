@@ -120,6 +120,28 @@ public class AudioDeviceManagerTests
     }
 
     [Fact]
+    public void IsInitialized_GettingValueWhenAudioIsNull_ReturnsFalse()
+    {
+        // Arrange
+        // Ensures that the device is null
+        this.mockALInvoker.OpenDevice(Arg.Any<string>()).Returns(ALDevice.Null());
+
+        // Ensures that the context is null
+        this.mockALInvoker.CreateContext(Arg.Any<ALDevice>(), Arg.Any<ALContextAttributes>()).Returns(ALContext.Null());
+
+        // Sets the context as the current context
+        this.mockALInvoker.MakeContextCurrent(Arg.Any<ALContext>()).Returns(true);
+
+        var sut = CreateSystemUnderTest();
+
+        // Act
+        var actual = sut.IsInitialized;
+
+        // Assert
+        actual.ShouldBeFalse();
+    }
+
+    [Fact]
     public void GetDeviceNames_WhenGettingValueBeforeBeingDisposed_ReturnsCorrectResult()
     {
         // Arrange
@@ -191,6 +213,23 @@ public class AudioDeviceManagerTests
         this.mockALInvoker.Received(1).MakeContextCurrent(Arg.Any<ALContext>());
         this.mockALInvoker.DidNotReceive().DestroyContext(Arg.Any<ALContext>());
         this.mockALInvoker.DidNotReceive().CloseDevice(Arg.Any<ALDevice>());
+    }
+
+    [Fact]
+    public void ChangeDevice_WhenDeviceIsNull_DoesNotAttemptToDestroyDevice()
+    {
+        // Arrange
+        MockWindowsPlatform();
+        this.mockALInvoker.OpenDevice(Arg.Any<string>()).Returns(default(ALDevice));
+        this.mockALInvoker.MakeContextCurrent(Arg.Any<ALContext>()).Returns(true);
+        this.mockALInvoker.GetDeviceList().Returns(["test-device-1", "test-device-2"]);
+        var sut = CreateSystemUnderTest();
+
+        // Act
+        sut.ChangeDevice("test-device-1");
+
+        // Assert
+        this.mockALInvoker.Received(2).MakeContextCurrent(ALContext.Null());
     }
 
     [Theory]
@@ -279,7 +318,7 @@ public class AudioDeviceManagerTests
     /// Creates a new instance of <see cref="AudioDeviceManager"/> for the purpose of testing.
     /// </summary>
     /// <returns>The instance to test.</returns>
-    private AudioDeviceManager CreateSystemUnderTest() => new (this.mockALInvoker, this.mockPlatform);
+    private AudioDeviceManager CreateSystemUnderTest() => new(this.mockALInvoker, this.mockPlatform);
 
     /// <summary>
     /// Mocks the buffer data stats to influence the total seconds that the  audio has.
@@ -303,5 +342,15 @@ public class AudioDeviceManagerTests
         this.mockALInvoker.GetBuffer(BufferId, ALGetBufferi.Channels).Returns(channels);
         this.mockALInvoker.GetBuffer(BufferId, ALGetBufferi.Bits).Returns(bitDepth);
         this.mockALInvoker.GetBuffer(BufferId, ALGetBufferi.Frequency).Returns(freq);
+    }
+
+    /// <summary>
+    /// Mocks a windows platform.
+    /// </summary>
+    private void MockWindowsPlatform()
+    {
+        this.mockPlatform.IsWinPlatform().Returns(true);
+        this.mockPlatform.IsPosixPlatform().Returns(false);
+        this.mockPlatform.IsLinuxPlatform().Returns(false);
     }
 }
