@@ -65,7 +65,7 @@ internal sealed class AudioDecoder : IAudioDecoder
                 break;
             default:
                 var exMsg = $"The file extension '{extension}' is not supported.";
-                exMsg += " Supported extensions are '.ogg' and '.mp3'.";
+                exMsg += " Supported extensions are: '.mp3' and '.ogg'.";
                 throw new AudioException(exMsg);
         }
 

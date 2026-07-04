@@ -264,9 +264,9 @@ public class Mp3AudioDecoderTests
             var offsetArg = callInfo.ArgAt<int>(1);
             var upToArg = callInfo.ArgAt<int>(2);
 
-            bufferArg.Length.ShouldBe(501);
+            bufferArg.Length.ShouldBe(500);
             offsetArg.ShouldBe(0);
-            upToArg.ShouldBe(501);
+            upToArg.ShouldBe(500);
         }
     }
 

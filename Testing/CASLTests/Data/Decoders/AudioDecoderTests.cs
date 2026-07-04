@@ -168,7 +168,7 @@ public class AudioDecoderTests
     {
         // Arrange & Act
         this.mockPath.GetExtension(Arg.Any<string>()).Returns(".invalid");
-        var expected = "The file extension '.invalid' is not supported. Supported extensions are: '.mp3', '.ogg'.";
+        var expected = "The file extension '.invalid' is not supported. Supported extensions are: '.mp3' and '.ogg'.";
         var act = () => CreateSystemUnderTest("test-file.invalid");
 
         // Assert
