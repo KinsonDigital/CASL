@@ -156,7 +156,7 @@ public class NativeLibraryLoaderTests
     public void LoadLibrary_WithZeroLibraryPointer_ThrowsException()
     {
         // Arrange
-        const string expected = "test-system-error\n\nLibrary path: 'C:\\lib-dir\\test-library'";
+        const string expected = "test-system-error\n\nLibrary Path: 'C:\\lib-dir\\test-library'";
         this.mockLibrary.GetLibraryName().Returns("test-library");
         this.mockLibrary.GetLibraryPath().Returns(@"C:\lib-dir\test-library");
         this.mockAssembly.Location.Returns(@"C:\lib-dir");
