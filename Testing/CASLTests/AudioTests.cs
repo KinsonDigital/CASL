@@ -1,4 +1,4 @@
-// <copyright file="AudioTests.cs" company="KinsonDigital">
+﻿// <copyright file="AudioTests.cs" company="KinsonDigital">
 // Copyright (c) KinsonDigital. All rights reserved.
 // </copyright>
 
@@ -12,7 +12,6 @@ using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.IO.Abstractions;
-using System.Linq;
 using Carbonate.OneWay;
 using CASL;
 using CASL.Data;
@@ -955,7 +954,7 @@ public class AudioTests
         sut.Rewind(10f);
 
         // Assert
-        this.mockALInvoker.DidNotReceive().Source(Arg.Any<uint>(), ALSourcef.SecOffset, Arg.Any<float>());
+        this.mockPosCmnReactable.DidNotReceive().Push(Arg.Any<Guid>(), Arg.Any<PosCommandData>());
     }
 
     [Theory]

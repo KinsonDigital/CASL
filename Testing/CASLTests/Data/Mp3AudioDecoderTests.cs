@@ -1,14 +1,12 @@
-// <copyright file="Mp3AudioDecoderTests.cs" company="KinsonDigital">
+﻿// <copyright file="Mp3AudioDecoderTests.cs" company="KinsonDigital">
 // Copyright (c) KinsonDigital. All rights reserved.
 // </copyright>
 
 namespace CASLTests.Data;
 
 using System;
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using CASL.Data.Decoders;
 using CASL.OpenAL;
 using CASL.Wrappers;

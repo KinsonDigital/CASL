@@ -17,7 +17,7 @@ internal sealed class Mp3AudioDecoder : IAudioFileDecoder<byte>
     // NOTE: the Mp3Sharp decoder library only deals with 16bit mp3 files.  Which is 99% of what is used now days.
     private const float BytesPerSample = 4f;
     private readonly string filePath;
-    private IMP3StreamWrapper mp3Stream;
+    private readonly IMP3StreamWrapper mp3Stream;
     private bool isDisposed;
 
     /// <summary>
