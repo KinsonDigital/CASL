@@ -8,6 +8,10 @@
     <Configurations>Release;Debug</Configurations>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <Platforms>x64;arm64</Platforms>
+    <!-- Exclude this test project from code coverage results -->
+    <Exclude>[CASLTests]*</Exclude>
+    <IncludeTestAssembly>false</IncludeTestAssembly>
+    <ExcludeFromCodeCoverage>true</ExcludeFromCodeCoverage>
   </PropertyGroup>
 
   <ItemGroup>
