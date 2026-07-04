@@ -2,15 +2,17 @@
 // Copyright (c) KinsonDigital. All rights reserved.
 // </copyright>
 
+// ReSharper disable ConvertToLocalFunction
 namespace CASLTests.NativeInterop;
 
+using System;
 using System.IO;
 using System.IO.Abstractions;
 using CASL.DotnetWrappers;
 using CASL.Exceptions;
 using CASL.NativeInterop;
 using Xunit;
-using FluentAssertions;
+using Shouldly;
 using Helpers;
 using NSubstitute;
 
@@ -43,14 +45,14 @@ public class OpenALLibraryTests
     {
         // Arrange & Act
         var act = () => new OpenALLibrary(
-            null,
+            null!,
             this.mockDirectory,
             this.mockFile,
             this.mockPath,
             this.mockAssembly);
 
         // Assert
-        act.Should().ThrowArgNullException().WithNullParamMsg("platform");
+        Should.Throw<ArgumentNullException>(act).WithNullParamMsg("platform");
     }
 
     [Fact]
@@ -59,13 +61,13 @@ public class OpenALLibraryTests
         // Arrange & Act
         var act = () => new OpenALLibrary(
             this.mockPlatform,
-            null,
+            null!,
             this.mockFile,
             this.mockPath,
             this.mockAssembly);
 
         // Assert
-        act.Should().ThrowArgNullException().WithNullParamMsg("directory");
+        Should.Throw<ArgumentNullException>(act).WithNullParamMsg("directory");
     }
 
     [Fact]
@@ -75,12 +77,12 @@ public class OpenALLibraryTests
         var act = () => new OpenALLibrary(
             this.mockPlatform,
             this.mockDirectory,
-            null,
+            null!,
             this.mockPath,
             this.mockAssembly);
 
         // Assert
-        act.Should().ThrowArgNullException().WithNullParamMsg("file");
+        Should.Throw<ArgumentNullException>(act).WithNullParamMsg("file");
     }
 
     [Fact]
@@ -91,11 +93,11 @@ public class OpenALLibraryTests
             this.mockPlatform,
             this.mockDirectory,
             this.mockFile,
-            null,
+            null!,
             this.mockAssembly);
 
         // Assert
-        act.Should().ThrowArgNullException().WithNullParamMsg("path");
+        Should.Throw<ArgumentNullException>(act).WithNullParamMsg("path");
     }
 
     [Fact]
@@ -107,10 +109,10 @@ public class OpenALLibraryTests
             this.mockDirectory,
             this.mockFile,
             this.mockPath,
-            null);
+            null!);
 
         // Assert
-        act.Should().ThrowArgNullException().WithNullParamMsg("assembly");
+        Should.Throw<ArgumentNullException>(act).WithNullParamMsg("assembly");
     }
 
     [Fact]
@@ -125,8 +127,8 @@ public class OpenALLibraryTests
         var act = CreateSystemUnderTest;
 
         // Assert
-        act.Should().Throw<UnknownPlatformException>()
-            .WithMessage("The platform 'xyz' is unknown or not supported.");
+        Should.Throw<UnknownPlatformException>(act)
+            .Message.ShouldBe("The platform 'xyz' is unknown or not supported.");
     }
 
     [Fact]
@@ -142,8 +144,8 @@ public class OpenALLibraryTests
         var act = CreateSystemUnderTest;
 
         // Assert
-        act.Should().Throw<DirectoryNotFoundException>()
-            .WithMessage(@"The directory 'C:\app-dir\runtimes\win-x64\native' does not exist.");
+        Should.Throw<DirectoryNotFoundException>(act)
+            .Message.ShouldBe(@"The directory 'C:\app-dir\runtimes\win-x64\native' does not exist.");
     }
 
     [Fact]
@@ -161,8 +163,8 @@ public class OpenALLibraryTests
         var act = CreateSystemUnderTest;
 
         // Assert
-        act.Should().Throw<FileNotFoundException>()
-            .WithMessage(expected);
+        Should.Throw<FileNotFoundException>(act)
+            .Message.ShouldBe(expected);
     }
 
     [Fact]
@@ -213,7 +215,7 @@ public class OpenALLibraryTests
         var actual = sut.GetLibraryName();
 
         // Assert
-        actual.Should().Be("soft_oal.dll");
+        actual.ShouldBe("soft_oal.dll");
     }
 
     [Fact]
@@ -228,7 +230,7 @@ public class OpenALLibraryTests
         var actual = sut.GetLibraryName();
 
         // Assert
-        actual.Should().Be("OpenAL");
+        actual.ShouldBe("OpenAL");
     }
 
     [Fact]
@@ -243,7 +245,7 @@ public class OpenALLibraryTests
         var actual = sut.GetLibraryName();
 
         // Assert
-        actual.Should().Be("libopenal.so.1.24.2");
+        actual.ShouldBe("libopenal.so.1.24.2");
     }
 
     [Fact]
@@ -257,7 +259,7 @@ public class OpenALLibraryTests
         var actual = sut.GetLibraryPath();
 
         // Assert
-        actual.Should().Be("/System/Library/Frameworks/OpenAL.framework/OpenAL");
+        actual.ShouldBe("/System/Library/Frameworks/OpenAL.framework/OpenAL");
     }
 
     [Fact]
@@ -273,7 +275,7 @@ public class OpenALLibraryTests
         var actual = sut.GetLibraryPath();
 
         // Assert
-        actual.Should().Be(@"C:\app-dir\soft_oal.dll");
+        actual.ShouldBe(@"C:\app-dir\soft_oal.dll");
     }
     #endregion
 

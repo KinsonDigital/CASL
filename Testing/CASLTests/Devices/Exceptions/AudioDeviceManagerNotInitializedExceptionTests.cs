@@ -7,7 +7,7 @@ namespace CASLTests.Devices.Exceptions;
 using CASL.Devices.Exceptions;
 using System;
 using Xunit;
-using FluentAssertions;
+using Shouldly;
 
 /// <summary>
 /// Tests the <see cref="AudioDeviceManagerNotInitializedException"/> class.
@@ -23,7 +23,7 @@ public class AudioDeviceManagerNotInitializedExceptionTests
 
         // Assert
         var expectedMessage = "The audio device manager has not been initialized.";
-        exception.Message.Should().Be(expectedMessage);
+        exception.Message.ShouldBe(expectedMessage);
     }
 
     [Fact]
@@ -36,7 +36,7 @@ public class AudioDeviceManagerNotInitializedExceptionTests
         var exception = new AudioDeviceManagerNotInitializedException(expected);
 
         // Assert
-        exception.Message.Should().Be(expected);
+        exception.Message.ShouldBe(expected);
     }
 
     [Fact]
@@ -51,8 +51,8 @@ public class AudioDeviceManagerNotInitializedExceptionTests
         var deviceException = new AudioDeviceManagerNotInitializedException(expectedExceptionMessage, innerException);
 
         // Assert
-        deviceException.InnerException.Message.Should().Be(expectedInnerExceptionMessage);
-        deviceException.Message.Should().Be(expectedExceptionMessage);
+        deviceException.InnerException?.Message.ShouldBe(expectedInnerExceptionMessage);
+        deviceException.Message.ShouldBe(expectedExceptionMessage);
     }
     #endregion
 }

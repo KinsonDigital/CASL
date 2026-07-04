@@ -2,6 +2,10 @@
 // Copyright (c) KinsonDigital. All rights reserved.
 // </copyright>
 
+// ReSharper disable ConvertToLocalFunction
+// ReSharper disable ConvertClosureToMethodGroup
+#pragma warning disable IDE0053 // Use expression body for lambda expression
+
 namespace CASLTests.Data;
 
 using System;
@@ -18,7 +22,7 @@ using CASL.Exceptions;
 using CASL.Factories;
 using CASL.OpenAL;
 using CASL.ReactableData;
-using FluentAssertions;
+using Shouldly;
 using Helpers;
 using NSubstitute;
 using Xunit;
@@ -99,7 +103,7 @@ public class FullBufferTests
         var act = () =>
         {
             _ = new FullBuffer(
-                null,
+                null!,
                 this.mockAudioDecoder,
                 this.mockReactableFactory,
                 this.mockPath,
@@ -107,7 +111,7 @@ public class FullBufferTests
         };
 
         // Assert
-        act.Should().ThrowArgNullException().WithNullParamMsg("alInvoker");
+        Should.Throw<ArgumentNullException>(act).WithNullParamMsg("alInvoker");
     }
 
     [Fact]
@@ -118,14 +122,14 @@ public class FullBufferTests
         {
             _ = new FullBuffer(
                 this.mockAlInvoker,
-                null,
+                null!,
                 this.mockReactableFactory,
                 this.mockPath,
                 this.mockFile);
         };
 
         // Assert
-        act.Should().ThrowArgNullException().WithNullParamMsg("audioDecoder");
+        Should.Throw<ArgumentNullException>(act).WithNullParamMsg("audioDecoder");
     }
 
     [Fact]
@@ -137,13 +141,13 @@ public class FullBufferTests
             _ = new FullBuffer(
                 this.mockAlInvoker,
                 this.mockAudioDecoder,
-                null,
+                null!,
                 this.mockPath,
                 this.mockFile);
         };
 
         // Assert
-        act.Should().ThrowArgNullException().WithNullParamMsg("reactableFactory");
+        Should.Throw<ArgumentNullException>(act).WithNullParamMsg("reactableFactory");
     }
 
     [Fact]
@@ -156,12 +160,12 @@ public class FullBufferTests
                 this.mockAlInvoker,
                 this.mockAudioDecoder,
                 this.mockReactableFactory,
-                null,
+                null!,
                 this.mockFile);
         };
 
         // Assert
-        act.Should().ThrowArgNullException().WithNullParamMsg("path");
+        Should.Throw<ArgumentNullException>(act).WithNullParamMsg("path");
     }
 
     [Fact]
@@ -175,11 +179,11 @@ public class FullBufferTests
                 this.mockAudioDecoder,
                 this.mockReactableFactory,
                 this.mockPath,
-                null);
+                null!);
         };
 
         // Assert
-        act.Should().ThrowArgNullException().WithNullParamMsg("file");
+        Should.Throw<ArgumentNullException>(act).WithNullParamMsg("file");
     }
 
     [Fact]
@@ -226,7 +230,7 @@ public class FullBufferTests
         var actual = sut.TotalSeconds;
 
         // Assert
-        actual.Should().Be(123);
+        actual.ShouldBe(123);
     }
 
     [Fact]
@@ -240,7 +244,7 @@ public class FullBufferTests
         var actual = sut.Position;
 
         // Assert
-        actual.Should().Be(expected);
+        actual.ShouldBe(expected);
     }
 
     [Fact]
@@ -258,7 +262,7 @@ public class FullBufferTests
         var actual = sut.Position;
 
         // Assert
-        actual.Should().Be(expected);
+        actual.ShouldBe(expected);
         this.mockAlInvoker.Received(1).GetSource(SourceId, ALSourcef.SecOffset);
     }
     #endregion
@@ -271,10 +275,10 @@ public class FullBufferTests
         var sut = CreateSystemUnderTest();
 
         // Act
-        var act = () => sut.Init(null);
+        var act = () => { sut.Init(null!); };
 
         // Assert
-        act.Should().ThrowArgNullException().WithNullParamMsg("filePath");
+        Should.Throw<ArgumentNullException>(act).WithNullParamMsg("filePath");
     }
 
     [Fact]
@@ -284,10 +288,10 @@ public class FullBufferTests
         var sut = CreateSystemUnderTest();
 
         // Act
-        var act = () => sut.Init(string.Empty);
+        var act = () => { sut.Init(string.Empty); };
 
         // Assert
-        act.Should().ThrowArgException().WithEmptyStringParamMsg("filePath");
+        Should.Throw<ArgumentException>(act).WithEmptyStringParamMsg("filePath");
     }
 
     [Fact]
@@ -298,12 +302,12 @@ public class FullBufferTests
         var sut = CreateSystemUnderTest();
 
         // Act
-        var act = () => sut.Init("non-existing-file.ogg");
+        var act = () => { sut.Init("non-existing-file.ogg"); };
 
         // Assert
-        act.Should().Throw<FileNotFoundException>()
-            .WithMessage("The audio file could not be found.")
-            .And.FileName.Should().Be("non-existing-file.ogg");
+        var ex = Should.Throw<FileNotFoundException>(act);
+        ex.Message.ShouldBe("The audio file could not be found.");
+        ex.FileName.ShouldBe("non-existing-file.ogg");
     }
 
     [Theory]
@@ -325,7 +329,7 @@ public class FullBufferTests
         var actualSrcId = sut.Init(filePath);
 
         // Assert
-        actualSrcId.Should().Be(SourceId);
+        actualSrcId.ShouldBe(SourceId);
         this.mockPath.Received(1).GetExtension(filePath);
     }
 
@@ -339,7 +343,7 @@ public class FullBufferTests
         var act = () => sut.Upload();
 
         // Assert
-        act.Should().Throw<InvalidOperationException>().WithMessage("The buffer has not been initialized.");
+        Should.Throw<InvalidOperationException>(act).Message.ShouldBe("The buffer has not been initialized.");
     }
 
     [Fact]
@@ -358,7 +362,7 @@ public class FullBufferTests
         var act = () => sut.Upload();
 
         // Assert
-        act.Should().Throw<AudioException>().WithMessage(expectedMsg);
+        Should.Throw<AudioException>(act).Message.ShouldBe(expectedMsg);
     }
 
     [Fact]

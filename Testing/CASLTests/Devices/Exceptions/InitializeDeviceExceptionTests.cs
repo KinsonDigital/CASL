@@ -7,7 +7,7 @@ namespace CASLTests.Devices.Exceptions;
 using System;
 using CASL.Devices.Exceptions;
 using Xunit;
-using FluentAssertions;
+using Shouldly;
 
 /// <summary>
 /// Tests the <see cref="InitializeDeviceException"/> class.
@@ -25,7 +25,7 @@ public class InitializeDeviceExceptionTests
         var exception = new InitializeDeviceException();
 
         // Assert
-        exception.Message.Should().Be(expected);
+        exception.Message.ShouldBe(expected);
     }
 
     [Fact]
@@ -36,7 +36,7 @@ public class InitializeDeviceExceptionTests
         var exception = new InitializeDeviceException(exceptionMessage);
 
         // Assert
-        exception.Message.Should().Be(exceptionMessage);
+        exception.Message.ShouldBe(exceptionMessage);
     }
 
     [Fact]
@@ -51,8 +51,8 @@ public class InitializeDeviceExceptionTests
         var deviceException = new InitializeDeviceException(expectedExceptionMessage, innerException);
 
         // Assert
-        deviceException.InnerException.Message.Should().Be(expectedInnerExceptionMessage);
-        deviceException.Message.Should().Be(expectedExceptionMessage);
+        deviceException.InnerException?.Message.ShouldBe(expectedInnerExceptionMessage);
+        deviceException.Message.ShouldBe(expectedExceptionMessage);
     }
     #endregion
 }

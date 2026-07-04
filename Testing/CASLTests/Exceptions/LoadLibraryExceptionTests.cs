@@ -6,7 +6,7 @@ namespace CASLTests.Exceptions;
 
 using System;
 using CASL.Exceptions;
-using FluentAssertions;
+using Shouldly;
 using Xunit;
 
 /// <summary>
@@ -23,7 +23,7 @@ public class LoadLibraryExceptionTests
 
         // Assert
         var expectedExceptionMessage = "There was an issue loading the library.";
-        exception.Message.Should().Be(expectedExceptionMessage);
+        exception.Message.ShouldBe(expectedExceptionMessage);
     }
 
     [Fact]
@@ -36,7 +36,7 @@ public class LoadLibraryExceptionTests
         var exception = new LoadLibraryException(expected);
 
         // Assert
-        exception.Message.Should().Be(expected);
+        exception.Message.ShouldBe(expected);
     }
 
     [Fact]
@@ -51,8 +51,8 @@ public class LoadLibraryExceptionTests
         var deviceException = new LoadLibraryException(expectedExceptionMessage, innerException);
 
         // Assert
-        deviceException.InnerException.Message.Should().Be(expectedInnerExceptionMessage);
-        deviceException.Message.Should().Be(expectedExceptionMessage);
+        deviceException.InnerException?.Message.ShouldBe(expectedInnerExceptionMessage);
+        deviceException.Message.ShouldBe(expectedExceptionMessage);
     }
     #endregion
 }

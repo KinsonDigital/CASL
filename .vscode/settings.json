@@ -6,12 +6,14 @@
 		"avalonia",
 		"benchmarkdotnet",
 		"Bufferi",
+		"buildtransitive",
 		"CASL",
 		"cicd",
 		"cobertura",
 		"codeanalysis",
 		"Codecov",
 		"communitytoolkit",
+		"contentfiles",
 		"csharpsquid",
 		"deepseek",
 		"demilestoned",
@@ -45,6 +47,7 @@
 		"REPONAME",
 		"runsettings",
 		"serilog",
+		"Shouldly",
 		"simpleinjector",
 		"sixlabors",
 		"softprops",
@@ -59,6 +62,16 @@
 		"Vorbis",
 		"xunit"
 	],
+	"files.exclude": {
+		"**/.git": true,
+		"**/.svn": true,
+		"**/.hg": true,
+		"**/.DS_Store": true,
+		"**/Thumbs.db": true,
+		"**/bin": true,
+		"**/obj": true,
+		"**/*.sln.DotSettings.user": true
+	},
 	"workbench.editor.customLabels.patterns": {
 		"**/Testing/**/*Tests.cs": "${filename}🧪",
 		"**/CASL/**/*.cs": "${filename}👾",
@@ -67,6 +80,7 @@
 		"**/ReleaseNotes/**/*.md": "${filename}📋",
 	},
     "dotnet.defaultSolution": "CASL.sln",
+    "dotnet.unitTests.runSettingsPath": "Testing/CASL.runsettings",
     "[csharp]": {
 		"editor.insertSpaces": true,
 		"editor.indentSize": 4,

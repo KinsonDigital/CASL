@@ -2,6 +2,7 @@
 // Copyright (c) KinsonDigital. All rights reserved.
 // </copyright>
 
+// ReSharper disable ConvertToLocalFunction
 #pragma warning disable SA1202
 
 namespace CASLTests.Data;
@@ -11,7 +12,7 @@ using System.ComponentModel;
 using CASL;
 using CASL.Data;
 using CASL.OpenAL;
-using FluentAssertions;
+using Shouldly;
 using Helpers;
 using NSubstitute;
 using Xunit;
@@ -33,13 +34,10 @@ public class StreamBufferManagerTests
     public void Ctor_WithNullAlInvokerParam_ThrowsException()
     {
         // Arrange & Act
-        var act = () =>
-        {
-            _ = new StreamBufferManager(null);
-        };
+        var act = () => _ = new StreamBufferManager(null!);
 
         // Assert
-        act.Should().ThrowArgNullException().WithNullParamMsg("alInvoker");
+        Should.Throw<ArgumentNullException>(act).WithNullParamMsg("alInvoker");
     }
     #endregion
 
@@ -54,7 +52,7 @@ public class StreamBufferManagerTests
         var actual = sut.GetCurrentSamplePos();
 
         // Assert
-        actual.Should().Be(0);
+        actual.ShouldBe(0);
     }
 
     [Fact]
@@ -68,7 +66,7 @@ public class StreamBufferManagerTests
         var actual = sut.GetCurrentSamplePos();
 
         // Assert
-        actual.Should().Be(123);
+        actual.ShouldBe(123);
     }
 
     [Fact]
@@ -83,7 +81,7 @@ public class StreamBufferManagerTests
         var actual = sut.GetCurrentSamplePos();
 
         // Assert
-        actual.Should().Be(0);
+        actual.ShouldBe(0);
     }
 
     [Fact]
@@ -103,8 +101,8 @@ public class StreamBufferManagerTests
         var act = () => sut.ManageBuffers(bufferData, Array.Empty<float>);
 
         // Assert
-        act.Should().Throw<InvalidEnumArgumentException>()
-            .WithMessage(expectedMsg);
+        Should.Throw<InvalidEnumArgumentException>(act)
+            .Message.ShouldBe(expectedMsg);
     }
 
     [Theory]
@@ -169,7 +167,7 @@ public class StreamBufferManagerTests
         this.mockAlInvoker.Received(2).SourceUnqueueBuffer(srcId, ref Arg.Any<uint>());
         this.mockAlInvoker.Received(2).BufferData(bufferId, expectedFormat, expectedBufferData, expectedSampleRate);
         this.mockAlInvoker.Received(2).SourceQueueBuffer(srcId, ref bufferId);
-        samplePos.Should().Be(expectedSamplePos);
+        samplePos.ShouldBe(expectedSamplePos);
     }
 
     [Fact]
@@ -221,10 +219,10 @@ public class StreamBufferManagerTests
         // Assert
         this.mockAlInvoker.Received(1).GetSource(srcId, ALGetSourcei.BuffersProcessed);
         this.mockAlInvoker.Received(1).SourceUnqueueBuffers(srcId, 1, ref Arg.Any<uint[]>());
-        flushDataInvoked.Should().BeTrue();
+        flushDataInvoked.ShouldBeTrue();
         this.mockAlInvoker.DidNotReceive().BufferData(Arg.Any<uint>(), Arg.Any<ALFormat>(), Arg.Any<float[]>(), Arg.Any<int>());
         this.mockAlInvoker.DidNotReceive().SourceQueueBuffer(Arg.Any<uint>(), ref Arg.Any<uint>());
-        actualSamplePos.Should().Be(0);
+        actualSamplePos.ShouldBe(0);
     }
 
     [Theory]
@@ -280,12 +278,12 @@ public class StreamBufferManagerTests
         this.mockAlInvoker.Received(1).SourceStop(srcId);
         this.mockAlInvoker.Received(1).GetSource(srcId, ALGetSourcei.BuffersProcessed);
         this.mockAlInvoker.Received(1).SourceUnqueueBuffers(srcId, 1, ref Arg.Any<uint[]>());
-        flushDataInvoked.Should().BeTrue();
+        flushDataInvoked.ShouldBeTrue();
         this.mockAlInvoker.Received(1).BufferData(123u, expectedFormat, expectedSampleData, expectedSampleRate);
         this.mockAlInvoker.Received(1).BufferData(456u, expectedFormat, expectedSampleData, expectedSampleRate);
         this.mockAlInvoker.Received(1).SourceQueueBuffer(srcId, ref Arg.Is<uint>(arg => arg == 123u));
         this.mockAlInvoker.Received(1).SourceQueueBuffer(srcId, ref Arg.Is<uint>(arg => arg == 456u));
-        actualSamplePos.Should().Be(0);
+        actualSamplePos.ShouldBe(0);
     }
 
     [Fact]
@@ -298,7 +296,7 @@ public class StreamBufferManagerTests
         var actual = sut.ToPositionSamples(123f, 200f, 1000L);
 
         // Assert
-        actual.Should().Be(615);
+        actual.ShouldBe(615);
     }
 
     [Fact]
@@ -312,7 +310,7 @@ public class StreamBufferManagerTests
         var actual = sut.ToPositionSeconds(500L, 2000f);
 
         // Assert
-        actual.Should().Be(492);
+        actual.ShouldBe(492);
     }
     #endregion
 }

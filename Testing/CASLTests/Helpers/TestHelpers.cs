@@ -8,8 +8,7 @@ namespace CASLTests.Helpers;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
-using FluentAssertions;
-using FluentAssertions.Specialized;
+using Shouldly;
 
 /// <summary>
 /// Provides testing helpers.
@@ -17,132 +16,24 @@ using FluentAssertions.Specialized;
 public static class TestHelpers
 {
     /// <summary>
-    /// Asserts that the current <see cref="Delegate" /> throws an exception of type <see name="ArgumentException"/>.
+    /// Asserts that the thrown <see cref="ArgumentException"/> has a message that matches the expected dotnet
+    /// empty string parameter exception message.
     /// </summary>
-    /// <param name="actionAssertions">
-    /// Contains a number of methods to assert that an <see cref="Action"/> yields the expected result.
-    /// </param>
-    /// <param name="because">
-    /// A formatted phrase as is supported by <see cref="string.Format(string,object[])" /> explaining why the assertion
-    /// is needed. If the phrase does not start with the word <i>because</i>, it is prepended automatically.
-    /// </param>
-    /// <param name="becauseArgs">
-    /// Zero or more objects to format using the placeholders in <paramref name="because" />.
-    /// </param>
-    /// <returns>The exception assertion object.</returns>
-    public static ExceptionAssertions<ArgumentException> ThrowArgException(
-        this ActionAssertions actionAssertions,
-        string because = "",
-        params object[] becauseArgs) =>
-        actionAssertions.Throw<ArgumentException>(because, becauseArgs);
-
-    /// <summary>
-    /// Asserts that the current <see cref="Delegate" /> throws an exception of type <see name="ArgumentException"/>.
-    /// </summary>
-    /// <param name="functionAssertions">
-    /// Contains a number of methods to assert that a synchronous function yields the expected result.
-    /// </param>
-    /// <param name="because">
-    /// A formatted phrase as is supported by <see cref="string.Format(string,object[])" /> explaining why the assertion
-    /// is needed. If the phrase does not start with the word <i>because</i>, it is prepended automatically.
-    /// </param>
-    /// <param name="becauseArgs">
-    /// Zero or more objects to format using the placeholders in <paramref name="because" />.
-    /// </param>
-    /// <typeparam name="T">The type returned by the <see cref="Func{T}"/>.</typeparam>
-    /// <returns>The exception assertion object.</returns>
-    public static ExceptionAssertions<ArgumentException> ThrowArgException<T>(
-        this FunctionAssertions<T> functionAssertions,
-        string because = "",
-        params object[] becauseArgs) =>
-        functionAssertions.Throw<ArgumentException>(because, becauseArgs);
-
-    /// <summary>
-    /// Asserts that the current <see cref="Delegate" /> throws an exception of type <see name="ArgumentNullException"/>.
-    /// </summary>
-    /// <param name="actionAssertions">
-    /// Contains a number of methods to assert that an <see cref="Action"/> yields the expected result.
-    /// </param>
-    /// <param name="because">
-    /// A formatted phrase as is supported by <see cref="string.Format(string,object[])" /> explaining why the assertion
-    /// is needed. If the phrase does not start with the word <i>because</i>, it is prepended automatically.
-    /// </param>
-    /// <param name="becauseArgs">
-    /// Zero or more objects to format using the placeholders in <paramref name="because" />.
-    /// </param>
-    /// <returns>The exception assertion object.</returns>
-    public static ExceptionAssertions<ArgumentNullException> ThrowArgNullException(
-        this ActionAssertions actionAssertions,
-        string because = "",
-        params object[] becauseArgs) =>
-        actionAssertions.Throw<ArgumentNullException>(because, becauseArgs);
-
-    /// <summary>
-    /// Asserts that the current <see cref="Delegate" /> throws an exception of type <see name="ArgumentNullException"/>.
-    /// </summary>
-    /// <param name="functionAssertions">
-    /// Contains a number of methods to assert that a synchronous function yields the expected result.
-    /// </param>
-    /// <param name="because">
-    /// A formatted phrase as is supported by <see cref="string.Format(string,object[])" /> explaining why the assertion
-    /// is needed. If the phrase does not start with the word <i>because</i>, it is prepended automatically.
-    /// </param>
-    /// <param name="becauseArgs">
-    /// Zero or more objects to format using the placeholders in <paramref name="because" />.
-    /// </param>
-    /// <typeparam name="T">The type returned by the <see cref="Func{T}"/>.</typeparam>
-    /// <returns>The exception assertion object.</returns>
-    public static ExceptionAssertions<ArgumentNullException> ThrowArgNullException<T>(
-        this FunctionAssertions<T> functionAssertions,
-        string because = "",
-        params object[] becauseArgs) =>
-        functionAssertions.Throw<ArgumentNullException>(because, becauseArgs);
-
-    /// <summary>
-    /// Asserts that the thrown exception has a message that matches the expected dotnet empty string parameter exception message.
-    /// </summary>
-    /// <param name="exAssertion">
-    /// Contains a number of methods to assert that an <see cref="Exception" /> is in the correct state.
-    /// </param>
+    /// <param name="exception">The exception to assert against.</param>
     /// <param name="paramName">The name of the parameter that is being asserted.</param>
-    /// <param name="because">
-    /// A formatted phrase as is supported by <see cref="string.Format(string,object[])" /> explaining why the assertion
-    /// is needed. If the phrase does not start with the word <i>because</i>, it is prepended automatically.
-    /// </param>
-    /// <param name="becauseArgs">
-    /// Zero or more objects to format using the placeholders in <paramref name="because"/>.
-    /// </param>
-    /// <returns>The exception assertion object.</returns>
-    [SuppressMessage("ReSharper", "UnusedMethodReturnValue.Global", Justification = "Ignored for possible future use.")]
-    public static ExceptionAssertions<ArgumentException> WithEmptyStringParamMsg(
-        this ExceptionAssertions<ArgumentException> exAssertion,
-        string paramName,
-        string because = "",
-        params object[] becauseArgs) =>
-        exAssertion.WithMessage($"The value cannot be an empty string. (Parameter '{paramName}')", because, becauseArgs);
+    [SuppressMessage("ReSharper", "UnusedMember.Global", Justification = "Ignored for possible future use.")]
+    public static void WithEmptyStringParamMsg(this ArgumentException exception, string paramName) =>
+        exception.Message.ShouldBe($"The value cannot be an empty string. (Parameter '{paramName}')");
 
     /// <summary>
-    /// Asserts that the thrown exception has a message that matches the expected dotnet null parameter exception message.
+    /// Asserts that the thrown <see cref="ArgumentNullException"/> has a message that matches the expected dotnet
+    /// null parameter exception message.
     /// </summary>
-    /// <param name="exAssertion">
-    /// Contains a number of methods to assert that an <see cref="Exception" /> is in the correct state.
-    /// </param>
+    /// <param name="exception">The exception to assert against.</param>
     /// <param name="paramName">The name of the parameter that is being asserted.</param>
-    /// <param name="because">
-    /// A formatted phrase as is supported by <see cref="string.Format(string,object[])" /> explaining why the assertion
-    /// is needed. If the phrase does not start with the word <i>because</i>, it is prepended automatically.
-    /// </param>
-    /// <param name="becauseArgs">
-    /// Zero or more objects to format using the placeholders in <paramref name="because"/>.
-    /// </param>
-    /// <returns>The exception assertion object.</returns>
-    [SuppressMessage("ReSharper", "UnusedMethodReturnValue.Global", Justification = "Ignored for possible future use.")]
-    public static ExceptionAssertions<ArgumentNullException> WithNullParamMsg(
-        this ExceptionAssertions<ArgumentNullException> exAssertion,
-        string paramName,
-        string because = "",
-        params object[] becauseArgs) =>
-        exAssertion.WithMessage($"Value cannot be null. (Parameter '{paramName}')", because, becauseArgs);
+    [SuppressMessage("ReSharper", "UnusedMember.Global", Justification = "Ignored for possible future use.")]
+    public static void WithNullParamMsg(this ArgumentNullException exception, string paramName) =>
+        exception.Message.ShouldBe($"Value cannot be null. (Parameter '{paramName}')");
 
     /// <summary>
     /// Sets the value of a private field that matches the given <paramref name="fieldName"/> to the
@@ -155,16 +46,16 @@ public static class TestHelpers
     public static void SetEnumFieldValue<TEnum>(this object fieldContainer, string fieldName, TEnum value)
         where TEnum : Enum
     {
-        fieldContainer.Should().NotBeNull("setting the enum field value of a null object is not possible.");
-        fieldName.Should().NotBeNullOrEmpty("setting an enum field value requires a non-empty or null field name.");
+        fieldContainer.ShouldNotBeNull("setting the enum field value of a null object is not possible.");
+        fieldName.ShouldNotBeNullOrEmpty("setting an enum field value requires a non-empty or null field name.");
 
         var allEnumFields = fieldContainer.GetType().GetFields(BindingFlags.NonPublic | BindingFlags.Instance);
 
-        allEnumFields.Should().HaveCountGreaterThan(0, $"no enum fields exist in the object.");
+        allEnumFields.Length.ShouldBeGreaterThan(0, "no enum fields exist in the object.");
 
         var enumField = Array.Find(allEnumFields, f => f.FieldType.IsEnum && f.Name == fieldName);
 
-        enumField.Should().NotBeNull($"a field with the name '{fieldName}' does not exist in the object.");
+        enumField.ShouldNotBeNull($"a field with the name '{fieldName}' does not exist in the object.");
 
         enumField.SetValue(fieldContainer, value);
     }
@@ -177,18 +68,18 @@ public static class TestHelpers
     /// <typeparam name="TElements">The type of the field array's elements.</typeparam>
     public static void SetArrayFieldToNull<TElements>(this object fieldContainer, string fieldName)
     {
-        fieldContainer.Should().NotBeNull("setting the enum field value of a null object is not possible.");
-        fieldName.Should().NotBeNullOrEmpty("setting an enum field value requires a non-empty or null field name.");
+        fieldContainer.ShouldNotBeNull("setting the enum field value of a null object is not possible.");
+        fieldName.ShouldNotBeNullOrEmpty("setting an enum field value requires a non-empty or null field name.");
 
         var allEnumFields = fieldContainer.GetType().GetFields(BindingFlags.NonPublic | BindingFlags.Instance);
 
-        allEnumFields.Should().HaveCountGreaterThan(0, $"no enum fields exist in the object.");
+        allEnumFields.Length.ShouldBeGreaterThan(0, "no enum fields exist in the object.");
 
         var foundField = Array.Find(allEnumFields, f => f.Name == fieldName);
 
-        foundField.Should().NotBeNull($"a field with the name '{fieldName}' does not exist in the object.");
-        foundField.FieldType.IsArray.Should().BeTrue("the field is not an array.");
-        foundField.FieldType.GetElementType().Should().Be(typeof(TElements), $"the array's elements are not of type {typeof(TElements)}");
+        foundField.ShouldNotBeNull($"a field with the name '{fieldName}' does not exist in the object.");
+        foundField.FieldType.IsArray.ShouldBeTrue("the field is not an array.");
+        foundField.FieldType.GetElementType().ShouldBe(typeof(TElements), $"the array's elements are not of type {typeof(TElements)}");
 
         foundField.SetValue(fieldContainer, null);
     }
@@ -200,17 +91,17 @@ public static class TestHelpers
     /// <param name="fieldName">The name of the field.</param>
     public static void SetFieldToNull(this object fieldContainer, string fieldName)
     {
-        fieldContainer.Should().NotBeNull("setting the field value of a null object is not possible.");
-        fieldName.Should().NotBeNullOrEmpty("setting the field value requires a non-empty or null field name.");
+        fieldContainer.ShouldNotBeNull("setting the field value of a null object is not possible.");
+        fieldName.ShouldNotBeNullOrEmpty("setting the field value requires a non-empty or null field name.");
 
         var fields = fieldContainer.GetType().GetFields(BindingFlags.NonPublic | BindingFlags.Instance);
 
-        fields.Should().HaveCountGreaterThan(0, $"no fields exist in the object.");
+        fields.Length.ShouldBeGreaterThan(0, "no fields exist in the object.");
 
         var foundField = Array.Find(fields, f => f.Name == fieldName);
 
-        foundField.Should().NotBeNull($"a field with the name '{fieldName}' does not exist in the object.");
-        foundField.FieldType.IsValueType.Should().BeFalse("the field is not a value type.");
+        foundField.ShouldNotBeNull($"a field with the name '{fieldName}' does not exist in the object.");
+        foundField.FieldType.IsValueType.ShouldBeFalse("the field is not a value type.");
 
         foundField.SetValue(fieldContainer, null);
     }
@@ -224,17 +115,17 @@ public static class TestHelpers
     /// <typeparam name="T">The type of parameter.</typeparam>
     public static void SetFieldValue<T>(this object fieldContainer, string fieldName, T value)
     {
-        fieldContainer.Should().NotBeNull("setting the field value of a null object is not possible.");
-        fieldName.Should().NotBeNullOrEmpty("setting the field value requires a non-empty or null field name.");
+        fieldContainer.ShouldNotBeNull("setting the field value of a null object is not possible.");
+        fieldName.ShouldNotBeNullOrEmpty("setting the field value requires a non-empty or null field name.");
 
         var fields = fieldContainer.GetType().GetFields(BindingFlags.NonPublic | BindingFlags.Instance);
 
-        fields.Should().HaveCountGreaterThan(0, $"no fields exist in the object.");
+        fields.Length.ShouldBeGreaterThan(0, "no fields exist in the object.");
 
         var foundField = Array.Find(fields, f => f.Name == fieldName);
 
-        foundField.Should().NotBeNull($"a field with the name '{fieldName}' does not exist in the object.");
-        foundField.FieldType.Should().Be(typeof(T), "the generic type should match the actual field type.");
+        foundField.ShouldNotBeNull($"a field with the name '{fieldName}' does not exist in the object.");
+        foundField.FieldType.ShouldBe(typeof(T), "the generic type should match the actual field type.");
 
         foundField.SetValue(fieldContainer, value);
     }
@@ -248,16 +139,16 @@ public static class TestHelpers
     /// <returns>The boolean value.</returns>
     public static bool GetBoolFieldValue(this object fieldContainer, string fieldName)
     {
-        fieldContainer.Should().NotBeNull("getting the bool field value of a null object is not possible.");
-        fieldName.Should().NotBeNullOrEmpty("getting the bool field value requires a non-empty or null field name.");
+        fieldContainer.ShouldNotBeNull("getting the bool field value of a null object is not possible.");
+        fieldName.ShouldNotBeNullOrEmpty("getting the bool field value requires a non-empty or null field name.");
 
         var allEnumFields = fieldContainer.GetType().GetFields(BindingFlags.NonPublic | BindingFlags.Instance);
-        allEnumFields.Should().HaveCountGreaterThan(0, $"no fields exist in the object.");
+        allEnumFields.Length.ShouldBeGreaterThan(0, "no fields exist in the object.");
 
         var foundField = Array.Find(allEnumFields, f => f.Name == fieldName);
 
-        foundField.Should().NotBeNull($"a field with the name '{fieldName}' does not exist in the object.");
-        foundField.FieldType.Should().Be(typeof(bool), "the field is not a boolean type.");
+        foundField.ShouldNotBeNull($"a field with the name '{fieldName}' does not exist in the object.");
+        foundField.FieldType.ShouldBe(typeof(bool), "the field is not a boolean type.");
 
         return foundField.GetValue(fieldContainer) as bool? ?? false;
     }
@@ -270,17 +161,17 @@ public static class TestHelpers
     /// <param name="value">The new private field value.</param>
     public static void SetBoolField(this object fieldContainer, string fieldName, bool value)
     {
-        fieldContainer.Should().NotBeNull("setting the enum field value of a null object is not possible.");
-        fieldName.Should().NotBeNullOrEmpty("setting an enum field value requires a non-empty or null field name.");
+        fieldContainer.ShouldNotBeNull("setting the enum field value of a null object is not possible.");
+        fieldName.ShouldNotBeNullOrEmpty("setting an enum field value requires a non-empty or null field name.");
 
         var allEnumFields = fieldContainer.GetType().GetFields(BindingFlags.NonPublic | BindingFlags.Instance);
 
-        allEnumFields.Should().HaveCountGreaterThan(0, $"no enum fields exist in the object.");
+        allEnumFields.Length.ShouldBeGreaterThan(0, "no enum fields exist in the object.");
 
         var foundField = Array.Find(allEnumFields, f => f.Name == fieldName);
 
-        foundField.Should().NotBeNull($"a field with the name '{fieldName}' does not exist in the object.");
-        foundField.FieldType.Should().Be(typeof(bool), "the field is not a boolean type.");
+        foundField.ShouldNotBeNull($"a field with the name '{fieldName}' does not exist in the object.");
+        foundField.FieldType.ShouldBe(typeof(bool), "the field is not a boolean type.");
 
         foundField.SetValue(fieldContainer, value);
     }
@@ -296,21 +187,19 @@ public static class TestHelpers
     public static T GetStructFieldValue<T>(this object fieldContainer, string fieldName)
         where T : struct
     {
-        fieldContainer.Should().NotBeNull("setting the enum field value of a null object is not possible.");
-        fieldName.Should().NotBeNullOrEmpty("setting an enum field value requires a non-empty or null field name.");
+        fieldContainer.ShouldNotBeNull("setting the enum field value of a null object is not possible.");
+        fieldName.ShouldNotBeNullOrEmpty("setting an enum field value requires a non-empty or null field name.");
 
         var allEnumFields = fieldContainer.GetType().GetFields(BindingFlags.NonPublic | BindingFlags.Instance);
 
-        allEnumFields.Should().HaveCountGreaterThan(0, $"no enum fields exist in the object.");
+        allEnumFields.Length.ShouldBeGreaterThan(0, "no enum fields exist in the object.");
 
         var foundField = Array.Find(allEnumFields, f => f.Name == fieldName);
 
-        foundField.Should().NotBeNull($"a field with the name '{fieldName}' does not exist in the object.");
-        foundField.FieldType.IsValueType.Should().BeTrue("the field is not a value type.");
+        foundField.ShouldNotBeNull($"a field with the name '{fieldName}' does not exist in the object.");
+        foundField.FieldType.IsValueType.ShouldBeTrue("the field is not a value type.");
 
         var fieldValue = (T)(foundField.GetValue(fieldContainer) ?? default(T));
-
-        fieldValue.Should().NotBeNull("the returned struct field value was null.");
 
         return fieldValue;
     }
@@ -325,17 +214,17 @@ public static class TestHelpers
     public static void SetStructFieldValue<T>(this object fieldContainer, string fieldName, T value)
         where T : struct
     {
-        fieldContainer.Should().NotBeNull("setting the enum field value of a null object is not possible.");
-        fieldName.Should().NotBeNullOrEmpty("setting an enum field value requires a non-empty or null field name.");
+        fieldContainer.ShouldNotBeNull("setting the enum field value of a null object is not possible.");
+        fieldName.ShouldNotBeNullOrEmpty("setting an enum field value requires a non-empty or null field name.");
 
         var allEnumFields = fieldContainer.GetType().GetFields(BindingFlags.NonPublic | BindingFlags.Instance);
 
-        allEnumFields.Should().HaveCountGreaterThan(0, $"no enum fields exist in the object.");
+        allEnumFields.Length.ShouldBeGreaterThan(0, "no enum fields exist in the object.");
 
         var foundField = Array.Find(allEnumFields, f => f.Name == fieldName);
 
-        foundField.Should().NotBeNull($"a field with the name '{fieldName}' does not exist in the object.");
-        foundField.FieldType.IsValueType.Should().BeTrue("the field is not a value type.");
+        foundField.ShouldNotBeNull($"a field with the name '{fieldName}' does not exist in the object.");
+        foundField.FieldType.IsValueType.ShouldBeTrue("the field is not a value type.");
 
         foundField.SetValue(fieldContainer, value);
     }

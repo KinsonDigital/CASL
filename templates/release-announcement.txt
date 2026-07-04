@@ -1,0 +1,9 @@
+{PROJECT_NAME} {VERSION} is live! 🚀
+
+Cross-platform audio for dotnet just got better!
+Create audio playback applications, use in games, and more!
+Take it for a spin, share what you build, and help drive the project's evolution! 🤘🏼
+
+GitHub: {WEBSITE_URL}
+
+#casl #dotnet #gamedev #opensource #indiedev

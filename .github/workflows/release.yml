@@ -287,3 +287,44 @@ jobs:
     secrets:
       cicd-pat: "${{ secrets.CICD_TOKEN }}"
       nuget-org-api-key: "${{ secrets.NUGET_ORG_API_KEY }}"
+
+
+  send_release_announcements:
+    name: Send Release Announcements
+    runs-on: ubuntu-latest
+    needs: [get_and_validate_version, run_prerelease_validation, build_casl, run_casl_tests, run_release]
+    if: ${{ inputs.dry-run == false }}
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - name: Send X Release Announcement
+        uses: KinsonDigital/Infrastructure/actions/send-x-release-announcement@9c4f1702ed7e5f785415d7db14796b1dde7c6a16 #v17.2.0
+        with:
+          repo-owner: ${{ vars.ORGANIZATION_NAME }}
+          project-name: ${{ vars.PROJECT_NAME }}
+          version: ${{ needs.get_and_validate_version.outputs.version }}
+          local-post-template-file-path: "${{ github.workspace }}/templates/${{ vars.RELEASE_POST_TEMPLATE_FILE_NAME }}"
+          discord-invite-code: ${{ vars.DISCORD_INVITE_CODE }}
+          website-url: ${{ vars.WEBSITE_URL }}
+          access-token-key: ${{ secrets.X_ACCESS_TOKEN_KEY }}
+          access-token-secret: ${{ secrets.X_ACCESS_TOKEN_SECRET }}
+          consumer-api-key: ${{ secrets.X_CONSUMER_API_KEY }}
+          consumer-api-secret: ${{ secrets.X_CONSUMER_API_SECRET }}
+          cache-enabled: false
+          github-token: ${{ secrets.CICD_TOKEN }}
+
+      - name: Send Bluesky Release Announcement
+        uses: KinsonDigital/Infrastructure/actions/send-bluesky-release-announcement@9c4f1702ed7e5f785415d7db14796b1dde7c6a16 #v17.2.0
+        with:
+          repo-owner: ${{ vars.ORGANIZATION_NAME }}
+          project-name: ${{ vars.PROJECT_NAME }}
+          version: ${{ needs.get_and_validate_version.outputs.version }}
+          website-url: ${{ vars.WEBSITE_URL }}
+          local-post-template-file-path: "${{ github.workspace }}/templates/${{ vars.RELEASE_POST_TEMPLATE_FILE_NAME }}"
+          discord-invite-code: ${{ vars.DISCORD_INVITE_CODE }}
+          service: ${{ vars.BLUESKY_SERVICE }}
+          identifier: ${{ secrets.BLUESKY_IDENTIFIER }}
+          password: ${{ secrets.BLUESKY_APP_PASSWORD }}
+          cache-enabled: false
+          github-token: ${{ secrets.CICD_TOKEN }}

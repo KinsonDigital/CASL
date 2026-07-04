@@ -7,7 +7,7 @@ namespace CASLTests.NativeInterop;
 using System;
 using System.Runtime.InteropServices;
 using CASL.NativeInterop;
-using FluentAssertions;
+using Shouldly;
 using Xunit;
 
 public class ExtensionMethodTests
@@ -20,7 +20,7 @@ public class ExtensionMethodTests
         var actual = IntPtr.Zero.ToManagedUtf8String();
 
         // Assert
-        actual.Should().BeEmpty();
+        actual.ShouldBeEmpty();
     }
 
     [Fact]
@@ -34,7 +34,7 @@ public class ExtensionMethodTests
         var actual = stringDataPtr.ToManagedUtf8String();
 
         // Assert
-        actual.Should().Be("hello world");
+        actual.ShouldBe("hello world");
     }
 
     [Fact]
@@ -47,7 +47,7 @@ public class ExtensionMethodTests
         var actual = testItems.ToReadOnlyCollection();
 
         // Assert
-        actual.Should().BeEquivalentTo("item-1", "item-2");
+        actual.ShouldBe(["item-1", "item-2"], ignoreOrder: true);
     }
     #endregion
 }

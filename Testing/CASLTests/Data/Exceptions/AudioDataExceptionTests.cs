@@ -44,7 +44,7 @@ public class AudioDataExceptionTests
         var deviceException = new AudioDataException("test-exception", innerException);
 
         // Assert
-        Assert.Equal("inner-exception", deviceException.InnerException.Message);
+        Assert.Equal("inner-exception", deviceException.InnerException?.Message);
         Assert.Equal("test-exception", deviceException.Message);
     }
     #endregion

@@ -5,7 +5,7 @@
 namespace CASLTests;
 
 using CASL;
-using FluentAssertions;
+using Shouldly;
 using Xunit;
 
 /// <summary>
@@ -27,10 +27,10 @@ public class AudioTimeTests
         var time = new AudioTime(90);
 
         // Assert
-        time.Milliseconds.Should().Be(expectedMilliseconds);
-        time.Seconds.Should().Be(expectedSeconds);
-        time.Minutes.Should().Be(expectedMinutes);
-        time.TotalSeconds.Should().Be(expectedTotalSeconds);
+        time.Milliseconds.ShouldBe(expectedMilliseconds);
+        time.Seconds.ShouldBe(expectedSeconds);
+        time.Minutes.ShouldBe(expectedMinutes);
+        time.TotalSeconds.ShouldBe(expectedTotalSeconds);
     }
     #endregion
 }

@@ -2,6 +2,7 @@
 // Copyright (c) KinsonDigital. All rights reserved.
 // </copyright>
 
+// ReSharper disable ConvertToLocalFunction
 namespace CASLTests.Data;
 
 using System;
@@ -10,7 +11,7 @@ using System.Linq;
 using CASL.Data.Decoders;
 using CASL.OpenAL;
 using CASL.Wrappers;
-using FluentAssertions;
+using Shouldly;
 using Helpers;
 using NSubstitute;
 using Xunit;
@@ -32,40 +33,30 @@ public class OggAudioDecoderTests
     public void Ctor_WithNullFilePathParam_ThrowsException()
     {
         // Arrange & Act
-        var act = () =>
-        {
-            _ = new OggAudioDecoder(null, this.mockVorbisReader);
-        };
+        var act = () => _ = new OggAudioDecoder(null!, this.mockVorbisReader);
 
         // Assert
-        act.Should()
-            .Throw<ArgumentNullException>()
-            .WithMessage("Value cannot be null. (Parameter 'filePath')");
+        Should.Throw<ArgumentNullException>(act).Message.ShouldBe("Value cannot be null. (Parameter 'filePath')");
     }
 
     [Fact]
     public void Ctor_WithEmptyFilePathParam_ThrowsException()
     {
         // Arrange & Act
-        var act = () =>
-        {
-            _ = new OggAudioDecoder(string.Empty, this.mockVorbisReader);
-        };
+        var act = () => _ = new OggAudioDecoder(string.Empty, this.mockVorbisReader);
 
         // Assert
-        act.Should()
-            .Throw<ArgumentException>()
-            .WithMessage("The value cannot be an empty string. (Parameter 'filePath')");
+        Should.Throw<ArgumentException>(act).Message.ShouldBe("The value cannot be an empty string. (Parameter 'filePath')");
     }
 
     [Fact]
     public void Ctor_WithNullVorbisReaderWrapperParam_ThrowsException()
     {
         // Arrange & Act
-        var act = () => new OggAudioDecoder("test-path", null);
+        var act = () => new OggAudioDecoder("test-path", null!);
 
         // Assert
-        act.Should().ThrowArgNullException().WithNullParamMsg("vorbisReaderWrapper");
+        Should.Throw<ArgumentNullException>(act).WithNullParamMsg("vorbisReaderWrapper");
     }
     #endregion
 
@@ -81,7 +72,7 @@ public class OggAudioDecoderTests
         var actual = sut.TotalChannels;
 
         // Assert
-        actual.Should().Be(123);
+        actual.ShouldBe(123);
     }
 
     [Theory]
@@ -97,7 +88,7 @@ public class OggAudioDecoderTests
         var actual = sut.Format;
 
         // Assert
-        actual.Should().Be(expected);
+        actual.ShouldBe(expected);
     }
 
     [Fact]
@@ -115,7 +106,7 @@ public class OggAudioDecoderTests
         var actual = sut.SampleRate;
 
         // Assert
-        actual.Should().Be(789);
+        actual.ShouldBe(789);
     }
 
     [Fact]
@@ -130,7 +121,7 @@ public class OggAudioDecoderTests
         var actual = sut.TotalSampleFrames;
 
         // Assert
-        actual.Should().Be(100L);
+        actual.ShouldBe(100L);
     }
 
     [Fact]
@@ -146,7 +137,7 @@ public class OggAudioDecoderTests
         var actual = sut.TotalBytes;
 
         // Assert
-        actual.Should().Be(8000);
+        actual.ShouldBe(8000);
     }
 
     [Fact]
@@ -160,7 +151,7 @@ public class OggAudioDecoderTests
         var actual = sut.TotalSeconds;
 
         // Assert
-        actual.Should().Be(456f);
+        actual.ShouldBe(456f);
     }
     #endregion
 
@@ -185,7 +176,6 @@ public class OggAudioDecoderTests
         // Arrange
         var buffer = new[] { 1f, 2f, 3f, 4f, 5f, 6f, 7f, 8f };
 
-        this.mockVorbisReader.ReadSamples(Arg.Any<float[]>(), Arg.Any<int>(), Arg.Any<int>());
         var sut = CreateSystemUnderTest();
 
         // Act
@@ -216,7 +206,7 @@ public class OggAudioDecoderTests
         var actual = sut.ReadSamples(buffer, 10, 20);
 
         // Assert
-        actual.Should().Be(200);
+        actual.ShouldBe(200);
     }
 
     [Fact]
@@ -238,17 +228,15 @@ public class OggAudioDecoderTests
         var actual = sut.ReadSamples(buffer, 10, 20);
 
         // Assert
-        actual.Should().Be(175);
-        buffer.Should().AllSatisfy(sample =>
+        actual.ShouldBe(175);
+        buffer.Aggregate(0f, (acc, sample) =>
         {
-            if (sample <= 175)
+            if (acc >= 176f)
             {
-                sample.Should().Be(sample);
+                sample.ShouldBe(0f);
             }
-            else
-            {
-                sample.Should().Be(0);
-            }
+
+            return acc + 1f;
         });
     }
 

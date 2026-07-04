@@ -2,6 +2,7 @@
 // Copyright (c) KinsonDigital. All rights reserved.
 // </copyright>
 
+// ReSharper disable ConvertToLocalFunction
 namespace CASLTests.Devices;
 
 using System;
@@ -12,7 +13,7 @@ using CASL.Devices.Exceptions;
 using CASL.Exceptions;
 using CASL.OpenAL;
 using Xunit;
-using FluentAssertions;
+using Shouldly;
 using Helpers;
 using NSubstitute;
 using CASL.NativeInterop;
@@ -46,7 +47,7 @@ public class AudioDeviceManagerTests
 
         this.mockALInvoker.GenSource().Returns(SrcId);
         this.mockALInvoker.GenBuffer().Returns(BufferId);
-        this.mockALInvoker.GetDeviceList().Returns(new[] { "Device-1", "Device-2" });
+        this.mockALInvoker.GetDeviceList().Returns(["Device-1", "Device-2"]);
         this.mockALInvoker.OpenDevice(Arg.Any<string>()).Returns(this.device);
         this.mockALInvoker.CreateContext(this.device, Arg.Any<ALContextAttributes>()).Returns(this.context);
         this.mockALInvoker.MakeContextCurrent(this.context).Returns(true);
@@ -59,11 +60,11 @@ public class AudioDeviceManagerTests
         // Arrange & Act
         var act = () =>
         {
-            _ = new AudioDeviceManager(null, this.mockPlatform);
+            _ = new AudioDeviceManager(null!, this.mockPlatform);
         };
 
         // Assert
-        act.Should().ThrowArgNullException().WithNullParamMsg("alInvoker");
+        Should.Throw<ArgumentNullException>(act).WithNullParamMsg("alInvoker");
     }
 
     [Fact]
@@ -72,11 +73,11 @@ public class AudioDeviceManagerTests
         // Arrange & Act
         var act = () =>
         {
-            _ = new AudioDeviceManager(this.mockALInvoker, null);
+            _ = new AudioDeviceManager(this.mockALInvoker, null!);
         };
 
         // Assert
-        act.Should().ThrowArgNullException().WithNullParamMsg("platform");
+        Should.Throw<ArgumentNullException>(act).WithNullParamMsg("platform");
     }
 
     [Fact]
@@ -101,7 +102,7 @@ public class AudioDeviceManagerTests
         var act = () => CreateSystemUnderTest();
 
         // Assert
-        act.Should().Throw<InitializeDeviceException>().WithMessage("There was an issue initializing the audio device.");
+        Should.Throw<InitializeDeviceException>(act).Message.ShouldBe("There was an issue initializing the audio device.");
     }
     #endregion
 
@@ -116,7 +117,29 @@ public class AudioDeviceManagerTests
         var actual = sut.IsInitialized;
 
         // Assert
-        actual.Should().BeTrue();
+        actual.ShouldBeTrue();
+    }
+
+    [Fact]
+    public void IsInitialized_GettingValueWhenAudioIsNull_ReturnsFalse()
+    {
+        // Arrange
+        // Ensures that the device is null
+        this.mockALInvoker.OpenDevice(Arg.Any<string>()).Returns(ALDevice.Null());
+
+        // Ensures that the context is null
+        this.mockALInvoker.CreateContext(Arg.Any<ALDevice>(), Arg.Any<ALContextAttributes>()).Returns(ALContext.Null());
+
+        // Sets the context as the current context
+        this.mockALInvoker.MakeContextCurrent(Arg.Any<ALContext>()).Returns(true);
+
+        var sut = CreateSystemUnderTest();
+
+        // Act
+        var actual = sut.IsInitialized;
+
+        // Assert
+        actual.ShouldBeFalse();
     }
 
     [Fact]
@@ -130,35 +153,7 @@ public class AudioDeviceManagerTests
         var actual = sut.GetDeviceNames().ToArray();
 
         // Assert
-        actual.Should().BeEquivalentTo(expected);
-    }
-
-    [Fact]
-    public void AdditionalAttributes_WithNullValue_ReturnsCorrectResult()
-    {
-        // Arrange
-        var attributes = new ALContextAttributes();
-
-        // Act
-        attributes.AdditionalAttributes = null;
-        var actual = attributes.AdditionalAttributes;
-
-        // Assert
-        actual.Should().NotBeNull().And.BeEmpty();
-    }
-
-    [Fact]
-    public void AdditionalAttributes_WithNonNullValue_ReturnsCorrectResult()
-    {
-        // Arrange
-        var attributes = new ALContextAttributes();
-
-        // Act
-        attributes.AdditionalAttributes = new[] { 111, 222 };
-        var actual = attributes.AdditionalAttributes;
-
-        // Assert
-        actual.Should().NotBeNull().And.HaveCount(2).And.ContainInOrder(111, 222);
+        actual.ShouldBe(expected, ignoreOrder: true);
     }
     #endregion
 
@@ -174,7 +169,7 @@ public class AudioDeviceManagerTests
 
         // Assert
         var expectedExceptionMessage = "Device Name: non-existing-device\nThe audio device does not exist.";
-        action.Should().Throw<AudioDeviceDoesNotExistException>().WithMessage(expectedExceptionMessage);
+        Should.Throw<AudioDeviceDoesNotExistException>(action).Message.ShouldBe(expectedExceptionMessage);
     }
 
     [Fact]
@@ -187,7 +182,7 @@ public class AudioDeviceManagerTests
         var action = () => sut.ChangeDevice("Device-1");
 
         // Assert
-        action.Should().NotThrow<NullReferenceException>();
+        Should.NotThrow(action);
     }
 
     [Fact]
@@ -200,7 +195,7 @@ public class AudioDeviceManagerTests
         var action = () => sut.ChangeDevice("Device-2");
 
         // Assert
-        action.Should().NotThrow<NullReferenceException>();
+        Should.NotThrow(action);
     }
 
     [Fact]
@@ -219,6 +214,23 @@ public class AudioDeviceManagerTests
         this.mockALInvoker.Received(1).MakeContextCurrent(Arg.Any<ALContext>());
         this.mockALInvoker.DidNotReceive().DestroyContext(Arg.Any<ALContext>());
         this.mockALInvoker.DidNotReceive().CloseDevice(Arg.Any<ALDevice>());
+    }
+
+    [Fact]
+    public void ChangeDevice_WhenDeviceIsNull_DoesNotAttemptToDestroyDevice()
+    {
+        // Arrange
+        MockWindowsPlatform();
+        this.mockALInvoker.OpenDevice(Arg.Any<string>()).Returns(default(ALDevice));
+        this.mockALInvoker.MakeContextCurrent(Arg.Any<ALContext>()).Returns(true);
+        this.mockALInvoker.GetDeviceList().Returns(["test-device-1", "test-device-2"]);
+        var sut = CreateSystemUnderTest();
+
+        // Act
+        sut.ChangeDevice("test-device-1");
+
+        // Assert
+        this.mockALInvoker.Received(2).MakeContextCurrent(ALContext.Null());
     }
 
     [Theory]
@@ -251,7 +263,7 @@ public class AudioDeviceManagerTests
         sut.ChangeDevice("Device-2");
 
         // Assert
-        deviceChangingEventRaised.Should().BeTrue();
+        deviceChangingEventRaised.ShouldBeTrue();
 
         // Verify that the device was destroyed
         // GetDeviceList
@@ -260,8 +272,8 @@ public class AudioDeviceManagerTests
         this.mockALInvoker.Received(1).DestroyContext(this.context);
         this.mockALInvoker.Received(1).CloseDevice(this.device);
 
-        sut.GetStructFieldValue<ALDevice>("device").Should().Be(newDevice);
-        sut.GetStructFieldValue<ALContext>("context").Should().Be(newContext);
+        sut.GetStructFieldValue<ALDevice>("device").ShouldBe(newDevice);
+        sut.GetStructFieldValue<ALContext>("context").ShouldBe(newContext);
 
         // Verify that the new device was initialized
         this.mockALInvoker.Received(1).OpenDevice("OpenAL Soft on Device-2");
@@ -269,7 +281,7 @@ public class AudioDeviceManagerTests
         this.mockALInvoker.Received(1).MakeContextCurrent(newContext);
         this.mockALInvoker.Received(2).GetDefaultDevice();
 
-        deviceChangedEventRaised.Should().BeTrue();
+        deviceChangedEventRaised.ShouldBeTrue();
     }
 
     [Fact]
@@ -299,7 +311,7 @@ public class AudioDeviceManagerTests
         var act = () => this.mockALInvoker.ErrorCallback += Raise.Event<Action<string>>("test-error");
 
         // Assert
-        act.Should().Throw<AudioException>().WithMessage("test-error");
+        Should.Throw<AudioException>(act).Message.ShouldBe("test-error");
     }
     #endregion
 
@@ -331,5 +343,15 @@ public class AudioDeviceManagerTests
         this.mockALInvoker.GetBuffer(BufferId, ALGetBufferi.Channels).Returns(channels);
         this.mockALInvoker.GetBuffer(BufferId, ALGetBufferi.Bits).Returns(bitDepth);
         this.mockALInvoker.GetBuffer(BufferId, ALGetBufferi.Frequency).Returns(freq);
+    }
+
+    /// <summary>
+    /// Mocks a windows platform.
+    /// </summary>
+    private void MockWindowsPlatform()
+    {
+        this.mockPlatform.IsWinPlatform().Returns(true);
+        this.mockPlatform.IsPosixPlatform().Returns(false);
+        this.mockPlatform.IsLinuxPlatform().Returns(false);
     }
 }

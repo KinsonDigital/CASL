@@ -2,7 +2,10 @@
 // Copyright (c) KinsonDigital. All rights reserved.
 // </copyright>
 
-#pragma warning disable SA1202
+// ReSharper disable ConvertToLocalFunction
+// ReSharper disable ConvertClosureToMethodGroup
+#pragma warning disable SA1202 // Elements must be ordered by access
+#pragma warning disable IDE0053 // Use expression body for lambda expression
 
 namespace CASLTests;
 
@@ -11,7 +14,6 @@ using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.IO.Abstractions;
-using System.Linq;
 using Carbonate.OneWay;
 using CASL;
 using CASL.Data;
@@ -20,7 +22,7 @@ using CASL.Exceptions;
 using CASL.Factories;
 using CASL.OpenAL;
 using CASL.ReactableData;
-using FluentAssertions;
+using Shouldly;
 using Helpers;
 using NSubstitute;
 using Xunit;
@@ -92,16 +94,15 @@ public class AudioTests
     /// Provides test data for the <see cref="Ctor_WhenInvoked_InitializesAudio"/> test.
     /// </summary>
     /// <returns>The test data.</returns>
-    public static TheoryData<string, BufferType> Ctor_WhenInvoked_InitializesAudio_Data()
-    {
-        return new TheoryData<string, BufferType>
+    public static TheoryData<string, BufferType> Ctor_WhenInvoked_InitializesAudio_Data() =>
+        new ()
         {
             { OggFileExtension, BufferType.Full },
             { MP3FileExtension, BufferType.Full },
             { OggFileExtension, BufferType.Stream },
             { MP3FileExtension, BufferType.Stream },
         };
-    }
+
     #endregion
 
     #region Constructor Tests
@@ -111,7 +112,7 @@ public class AudioTests
     public void Ctor_WithNullFilePathParam_ThrowsException(string? filePath, string expected)
     {
         // Arrange & Act
-        var act = () => _ = new Audio(filePath,
+        var act = () => _ = new Audio(filePath!,
             BufferType.Full,
             this.mockALInvoker,
             this.mockAudioManager,
@@ -121,9 +122,7 @@ public class AudioTests
             this.mockFile);
 
         // Assert
-        act.Should()
-            .Throw<ArgumentException>()
-            .WithMessage(expected);
+        Should.Throw<ArgumentException>(act).Message.ShouldBe(expected);
     }
 
     [Fact]
@@ -132,7 +131,7 @@ public class AudioTests
         // Arrange & Act
         var act = void () => _ = new Audio(OggContentFilePath,
             BufferType.Full,
-            null,
+            null!,
             this.mockAudioManager,
             this.mockAudioBufferFactory,
             this.mockReactableFactory,
@@ -140,9 +139,7 @@ public class AudioTests
             this.mockFile);
 
         // Assert
-        act.Should()
-            .Throw<ArgumentNullException>()
-            .WithMessage("Value cannot be null. (Parameter 'alInvoker')");
+        Should.Throw<ArgumentNullException>(act).Message.ShouldBe("Value cannot be null. (Parameter 'alInvoker')");
     }
 
     [Fact]
@@ -152,16 +149,14 @@ public class AudioTests
         var act = () => _ = new Audio(OggContentFilePath,
             BufferType.Full,
             this.mockALInvoker,
-            null,
+            null!,
             this.mockAudioBufferFactory,
             this.mockReactableFactory,
             this.mockPath,
             this.mockFile);
 
         // Assert
-        act.Should()
-            .Throw<ArgumentNullException>()
-            .WithMessage("Value cannot be null. (Parameter 'audioManager')");
+        Should.Throw<ArgumentNullException>(act).Message.ShouldBe("Value cannot be null. (Parameter 'audioManager')");
     }
 
     [Fact]
@@ -172,15 +167,13 @@ public class AudioTests
             BufferType.Full,
             this.mockALInvoker,
             this.mockAudioManager,
-            null,
+            null!,
             this.mockReactableFactory,
             this.mockPath,
             this.mockFile);
 
         // Assert
-        act.Should()
-            .Throw<ArgumentNullException>()
-            .WithMessage("Value cannot be null. (Parameter 'bufferFactory')");
+        Should.Throw<ArgumentNullException>(act).Message.ShouldBe("Value cannot be null. (Parameter 'bufferFactory')");
     }
 
     [Fact]
@@ -192,14 +185,12 @@ public class AudioTests
             this.mockALInvoker,
             this.mockAudioManager,
             this.mockAudioBufferFactory,
-            null,
+            null!,
             this.mockPath,
             this.mockFile);
 
         // Assert
-        act.Should()
-            .Throw<ArgumentNullException>()
-            .WithMessage("Value cannot be null. (Parameter 'reactableFactory')");
+        Should.Throw<ArgumentNullException>(act).Message.ShouldBe("Value cannot be null. (Parameter 'reactableFactory')");
     }
 
     [Fact]
@@ -212,13 +203,11 @@ public class AudioTests
             this.mockAudioManager,
             this.mockAudioBufferFactory,
             this.mockReactableFactory,
-            null,
+            null!,
             this.mockFile);
 
         // Assert
-        act.Should()
-            .Throw<ArgumentNullException>()
-            .WithMessage("Value cannot be null. (Parameter 'path')");
+        Should.Throw<ArgumentNullException>(act).Message.ShouldBe("Value cannot be null. (Parameter 'path')");
     }
 
     [Fact]
@@ -232,12 +221,10 @@ public class AudioTests
             this.mockAudioBufferFactory,
             this.mockReactableFactory,
             this.mockPath,
-            null);
+            null!);
 
         // Assert
-        act.Should()
-            .Throw<ArgumentNullException>()
-            .WithMessage("Value cannot be null. (Parameter 'file')");
+        Should.Throw<ArgumentNullException>(act).Message.ShouldBe("Value cannot be null. (Parameter 'file')");
     }
 
     [Fact]
@@ -251,9 +238,9 @@ public class AudioTests
         var act = () => _ = CreateSystemUnderTest("non-existing-file.data");
 
         // Assert
-        act.Should().Throw<FileNotFoundException>()
-            .WithMessage("The audio file could not be found.")
-            .Subject.First().FileName.Should().Be("non-existing-file.data");
+        var ex = Should.Throw<FileNotFoundException>(act);
+        ex.Message.ShouldBe("The audio file could not be found.");
+        ex.FileName.ShouldBe("non-existing-file.data");
     }
 
     [Fact]
@@ -265,7 +252,7 @@ public class AudioTests
         // Act
         var act = () => _ = CreateSystemUnderTest(OggContentFilePath, (BufferType)1000);
 
-        act.Should().Throw<InvalidEnumArgumentException>().WithMessage(expected);
+        Should.Throw<InvalidEnumArgumentException>(act).Message.ShouldBe(expected);
     }
 
     [Fact]
@@ -281,7 +268,7 @@ public class AudioTests
         this.mockAudioManager.DeviceChanged += Raise.EventWith(sut, EventArgs.Empty);
 
         // Assert
-        eventInvoked.Should().BeTrue();
+        eventInvoked.ShouldBeTrue();
     }
 
     [Theory]
@@ -304,7 +291,7 @@ public class AudioTests
         var sut = CreateSystemUnderTest(filePath, bufferType);
 
         // Assert
-        sut.BufferType.Should().Be(bufferType);
+        sut.BufferType.ShouldBe(bufferType);
         this.mockAudioBuffer.Received(1).Init(expected);
         this.mockAudioBuffer.Received(1).Upload();
     }
@@ -327,8 +314,7 @@ public class AudioTests
             this.mockFile);
 
         // Assert
-        act.Should().Throw<AudioException>()
-            .WithMessage(expected);
+        Should.Throw<AudioException>(act).Message.ShouldBe(expected);
     }
     #endregion
 
@@ -340,7 +326,7 @@ public class AudioTests
         var sut = CreateSystemUnderTest(OggContentFilePath);
 
         // Assert
-        sut.Name.Should().Be("audio");
+        sut.Name.ShouldBe("audio");
     }
 
     [Fact]
@@ -354,7 +340,7 @@ public class AudioTests
         var actual = sut.IsLooping;
 
         // Assert
-        actual.Should().BeFalse();
+        actual.ShouldBeFalse();
     }
 
     [Fact]
@@ -370,7 +356,7 @@ public class AudioTests
         var actual = sut.IsLooping;
 
         // Assert
-        actual.Should().BeFalse();
+        actual.ShouldBeFalse();
     }
 
     [Fact]
@@ -394,11 +380,10 @@ public class AudioTests
         sut.Dispose();
 
         // Act
-        var act = () => sut.IsLooping = true;
+        var act = () => { sut.IsLooping = true; };
 
         // Assert
-        act.Should().Throw<InvalidOperationException>()
-            .WithMessage("The audio is disposed.  You must create another audio instance.");
+        Should.Throw<InvalidOperationException>(act).Message.ShouldBe("The audio is disposed.  You must create another audio instance.");
     }
 
     [Fact]
@@ -444,7 +429,7 @@ public class AudioTests
         var actual = sut.Volume;
 
         // Assert
-        actual.Should().Be(50f);
+        actual.ShouldBe(50f);
     }
 
     [Fact]
@@ -458,7 +443,7 @@ public class AudioTests
         var actual = sut.Volume;
 
         // Assert
-        actual.Should().Be(0);
+        actual.ShouldBe(0);
     }
 
     [Fact]
@@ -472,7 +457,7 @@ public class AudioTests
         var actual = sut.Volume;
 
         // Assert
-        actual.Should().Be(12.3f);
+        actual.ShouldBe(12.3f);
         this.mockALInvoker.Received(1).GetSource(SrcId, ALSourcef.Gain);
     }
 
@@ -484,11 +469,10 @@ public class AudioTests
         sut.Dispose();
 
         // Act
-        var act = () => sut.Volume = 0.5f;
+        var act = () => { sut.Volume = 0.5f; };
 
         // Assert
-        act.Should().Throw<InvalidOperationException>()
-            .WithMessage("The audio is disposed.  You must create another audio instance.");
+        Should.Throw<InvalidOperationException>(act).Message.ShouldBe("The audio is disposed.  You must create another audio instance.");
     }
 
     [Theory]
@@ -541,7 +525,7 @@ public class AudioTests
         var actual = sut.Position;
 
         // Assert
-        actual.Should().Be(expected);
+        actual.ShouldBe(expected);
     }
 
     [Fact]
@@ -557,7 +541,7 @@ public class AudioTests
         var actual = sut.Position;
 
         // Assert
-        actual.Should().Be(expected);
+        actual.ShouldBe(expected);
     }
 
     [Fact]
@@ -573,7 +557,7 @@ public class AudioTests
         var actual = sut.Position;
 
         // Assert
-        actual.Should().Be(expected);
+        actual.ShouldBe(expected);
     }
 
     [Fact]
@@ -591,7 +575,7 @@ public class AudioTests
         var actual = sut.Length;
 
         // Assert
-        actual.Should().Be(expected);
+        actual.ShouldBe(expected);
     }
 
     [Fact]
@@ -608,7 +592,7 @@ public class AudioTests
         var actual = sut.Length;
 
         // Assert
-        actual.TotalSeconds.Should().Be(expected.TotalSeconds);
+        actual.TotalSeconds.ShouldBe(expected.TotalSeconds);
     }
 
     [Fact]
@@ -625,7 +609,7 @@ public class AudioTests
         var actual = sut.Length;
 
         // Assert
-        actual.Should().Be(expected);
+        actual.ShouldBe(expected);
     }
 
     [Fact]
@@ -639,7 +623,7 @@ public class AudioTests
         var actual = sut.State;
 
         // Assert
-        actual.Should().Be(AudioState.Stopped);
+        actual.ShouldBe(AudioState.Stopped);
     }
 
     [Fact]
@@ -653,7 +637,7 @@ public class AudioTests
         var actual = sut.State;
 
         // Assert
-        actual.Should().Be(AudioState.Stopped);
+        actual.ShouldBe(AudioState.Stopped);
     }
 
     [Theory]
@@ -678,7 +662,7 @@ public class AudioTests
         var actual = sut.State;
 
         // Assert
-        actual.Should().Be(expected);
+        actual.ShouldBe(expected);
     }
 
     [Fact]
@@ -692,7 +676,7 @@ public class AudioTests
         var actual = sut.PlaySpeed;
 
         // Assert
-        actual.Should().Be(0f);
+        actual.ShouldBe(0f);
     }
 
     [Fact]
@@ -706,7 +690,7 @@ public class AudioTests
         var actual = sut.PlaySpeed;
 
         // Assert
-        actual.Should().Be(0f);
+        actual.ShouldBe(0f);
     }
 
     [Theory]
@@ -754,8 +738,7 @@ public class AudioTests
         var act = () => sut.Play();
 
         // Assert
-        act.Should().Throw<InvalidOperationException>()
-            .WithMessage("The audio is disposed.  You must create another audio instance.");
+        Should.Throw<InvalidOperationException>(act).Message.ShouldBe("The audio is disposed.  You must create another audio instance.");
     }
 
     [Fact]
@@ -801,8 +784,7 @@ public class AudioTests
         var act = () => sut.Pause();
 
         // Assert
-        act.Should().Throw<InvalidOperationException>()
-            .WithMessage("The audio is disposed.  You must create another audio instance.");
+        Should.Throw<InvalidOperationException>(act).Message.ShouldBe("The audio is disposed.  You must create another audio instance.");
     }
 
     [Fact]
@@ -844,8 +826,7 @@ public class AudioTests
         var act = () => sut.Reset();
 
         // Assert
-        act.Should().Throw<InvalidOperationException>()
-            .WithMessage("The audio is disposed.  You must create another audio instance.");
+        Should.Throw<InvalidOperationException>(act).Message.ShouldBe("The audio is disposed.  You must create another audio instance.");
     }
 
     [Fact]
@@ -887,8 +868,7 @@ public class AudioTests
         var act = () => sut.SetTimePosition(5);
 
         // Assert
-        act.Should().Throw<InvalidOperationException>()
-            .WithMessage("The audio is disposed.  You must create another audio instance.");
+        Should.Throw<InvalidOperationException>(act).Message.ShouldBe("The audio is disposed.  You must create another audio instance.");
     }
 
     [Theory]
@@ -975,7 +955,7 @@ public class AudioTests
         sut.Rewind(10f);
 
         // Assert
-        this.mockALInvoker.DidNotReceive().Source(Arg.Any<uint>(), ALSourcef.SecOffset, Arg.Any<float>());
+        this.mockPosCmnReactable.DidNotReceive().Push(Arg.Any<Guid>(), Arg.Any<PosCommandData>());
     }
 
     [Theory]
@@ -1009,8 +989,7 @@ public class AudioTests
         sut.FastForward(20f);
 
         // Assert
-        this.mockALInvoker.DidNotReceive().SourceRewind(Arg.Any<uint>());
-        this.mockALInvoker.DidNotReceive().Source(Arg.Any<uint>(), Arg.Any<ALSourcef>(), Arg.Any<float>());
+        this.mockPosCmnReactable.DidNotReceive().Push(Arg.Any<Guid>(), Arg.Any<PosCommandData>());
     }
 
     [Fact]
@@ -1023,13 +1002,13 @@ public class AudioTests
         this.mockAudioManager.DeviceChanged += Raise.EventWith(sut, EventArgs.Empty);
 
         // Act
-        this.mockAudioManager.ChangeDevice(Arg.Any<string>());
         var actualDeviceChangingState = sut.GetBoolFieldValue("audioDeviceChanging");
 
         // Assert
         this.mockAudioBuffer.Received(2).Init(OggContentFilePath);
         this.mockAudioBuffer.Received(2).Upload();
-        actualDeviceChangingState.Should().BeFalse();
+        actualDeviceChangingState.ShouldBeFalse();
+        sut.FilePath.ShouldBe(OggContentFilePath);
     }
 
     [Theory]
@@ -1051,11 +1030,11 @@ public class AudioTests
 
         var actualIsDisposed = sut.GetBoolFieldValue("isDisposed");
 
-        actualIsDisposed.Should().BeTrue();
+        actualIsDisposed.ShouldBeTrue();
 
         var errorCallbackAct = () => this.mockALInvoker.ErrorCallback += Raise.Event<Action<string>>("test-error");
 
-        errorCallbackAct.Should().NotThrow<AudioException>();
+        Should.NotThrow(errorCallbackAct);
 
         // Raise the DeviceChanging event to verify that it has been unsubscribed
         this.mockAudioManager.DeviceChanging += Raise.EventWith(sut, EventArgs.Empty);
@@ -1070,10 +1049,10 @@ public class AudioTests
         // Assert
         this.mockALInvoker.Received(sourceState == ALSourceState.Playing ? 1 : 0).SourceStop(SrcId);
         this.mockAudioBuffer.Received(1).Dispose();
-        changingInvoked.Should().BeFalse("the DeviceChanging event was not unsubscribed.");
+        changingInvoked.ShouldBeFalse("the DeviceChanging event was not unsubscribed.");
 
         // Assert that the device changed was not invoked
-        changedInvoked.Should().BeTrue("the DeviceChanged event was not unsubscribed.");
+        changedInvoked.ShouldBeTrue("the DeviceChanged event was not unsubscribed.");
     }
     #endregion
 

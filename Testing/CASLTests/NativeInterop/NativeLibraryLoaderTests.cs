@@ -2,6 +2,9 @@
 // Copyright (c) KinsonDigital. All rights reserved.
 // </copyright>
 
+// ReSharper disable ConvertToLocalFunction
+#pragma warning disable IDE0053 // Use expression body for lambda expression
+
 namespace CASLTests.NativeInterop;
 
 using System;
@@ -10,7 +13,7 @@ using System.IO.Abstractions;
 using CASL.DotnetWrappers;
 using CASL.Exceptions;
 using CASL.NativeInterop;
-using FluentAssertions;
+using Shouldly;
 using Helpers;
 using NSubstitute;
 using Xunit;
@@ -47,14 +50,14 @@ public class NativeLibraryLoaderTests
     {
         // Arrange & Act
         var act = () => new NativeLibraryLoader(
-            null,
+            null!,
             this.mockLibrary,
             this.mockPlatform,
             this.mockFile,
             this.mockPath);
 
         // Assert
-        act.Should().ThrowArgNullException().WithNullParamMsg("assembly");
+        Should.Throw<ArgumentNullException>(act).WithNullParamMsg("assembly");
     }
 
     [Fact]
@@ -64,12 +67,12 @@ public class NativeLibraryLoaderTests
         var act = () => new NativeLibraryLoader(
             this.mockAssembly,
             this.mockLibrary,
-            null,
+            null!,
             this.mockFile,
             this.mockPath);
 
         // Assert
-        act.Should().ThrowArgNullException().WithNullParamMsg("platform");
+        Should.Throw<ArgumentNullException>(act).WithNullParamMsg("platform");
     }
 
     [Fact]
@@ -80,11 +83,11 @@ public class NativeLibraryLoaderTests
             this.mockAssembly,
             this.mockLibrary,
             this.mockPlatform,
-            null,
+            null!,
             this.mockPath);
 
         // Assert
-        act.Should().ThrowArgNullException().WithNullParamMsg("file");
+        Should.Throw<ArgumentNullException>(act).WithNullParamMsg("file");
     }
 
     [Fact]
@@ -96,10 +99,10 @@ public class NativeLibraryLoaderTests
             this.mockLibrary,
             this.mockPlatform,
             this.mockFile,
-            null);
+            null!);
 
         // Assert
-        act.Should().ThrowArgNullException().WithNullParamMsg("path");
+        Should.Throw<ArgumentNullException>(act).WithNullParamMsg("path");
     }
 
     [Fact]
@@ -108,13 +111,13 @@ public class NativeLibraryLoaderTests
         // Arrange & Act
         var act = () => new NativeLibraryLoader(
             this.mockAssembly,
-            null,
+            null!,
             this.mockPlatform,
             this.mockFile,
             this.mockPath);
 
         // Assert
-        act.Should().ThrowArgNullException().WithNullParamMsg("library");
+        Should.Throw<ArgumentNullException>(act).WithNullParamMsg("library");
     }
 
     [Fact]
@@ -125,7 +128,7 @@ public class NativeLibraryLoaderTests
         var sut = CreateSystemUnderTest();
 
         // Assert
-        sut.LibraryName.Should().Be("test-library");
+        sut.LibraryName.ShouldBe("test-library");
     }
     #endregion
 
@@ -144,17 +147,17 @@ public class NativeLibraryLoaderTests
         var sut = CreateSystemUnderTest();
 
         // Act
-        var act = () => sut.LoadLibrary();
+        var act = () => { sut.LoadLibrary(); };
 
         // Assert
-        act.Should().Throw<FileNotFoundException>().WithMessage(expected);
+        Should.Throw<FileNotFoundException>(act).Message.ShouldBe(expected);
     }
 
     [Fact]
     public void LoadLibrary_WithZeroLibraryPointer_ThrowsException()
     {
         // Arrange
-        const string expected = "test-system-error\n\nLibrary path: 'C:\\lib-dir\\test-library'";
+        const string expected = "test-system-error\n\nLibrary Path: 'C:\\lib-dir\\test-library'";
         this.mockLibrary.GetLibraryName().Returns("test-library");
         this.mockLibrary.GetLibraryPath().Returns(@"C:\lib-dir\test-library");
         this.mockAssembly.Location.Returns(@"C:\lib-dir");
@@ -165,10 +168,10 @@ public class NativeLibraryLoaderTests
         var sut = CreateSystemUnderTest();
 
         // Act
-        var act = sut.LoadLibrary;
+        var act = () => { sut.LoadLibrary(); };
 
         // Assert
-        act.Should().Throw<LoadLibraryException>().WithMessage(expected);
+        Should.Throw<LoadLibraryException>(act).Message.ShouldBe(expected);
     }
 
     [Fact]
@@ -186,7 +189,7 @@ public class NativeLibraryLoaderTests
         var actual = sut.LoadLibrary();
 
         // Assert
-        actual.Should().Be(123);
+        actual.ShouldBe(123);
     }
     #endregion
 
