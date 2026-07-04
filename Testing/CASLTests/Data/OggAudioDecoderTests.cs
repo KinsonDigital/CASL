@@ -175,7 +175,6 @@ public class OggAudioDecoderTests
         // Arrange
         var buffer = new[] { 1f, 2f, 3f, 4f, 5f, 6f, 7f, 8f };
 
-        this.mockVorbisReader.ReadSamples(Arg.Any<float[]>(), Arg.Any<int>(), Arg.Any<int>());
         var sut = CreateSystemUnderTest();
 
         // Act
@@ -229,17 +228,15 @@ public class OggAudioDecoderTests
 
         // Assert
         actual.ShouldBe(175);
-        foreach (var sample in buffer)
+        buffer.Aggregate(0f, (acc, sample) =>
         {
-            if (sample <= 175)
+            if (acc >= 176f)
             {
-                sample.ShouldBe(sample);
+                sample.ShouldBe(0f);
             }
-            else
-            {
-                sample.ShouldBe(0);
-            }
-        }
+
+            return acc + 1f;
+        });
     }
 
     [Fact]
@@ -276,5 +273,5 @@ public class OggAudioDecoderTests
     /// </summary>
     /// <returns>The instance to test.</returns>
     private OggAudioDecoder CreateSystemUnderTest()
-        => new ("test-path", this.mockVorbisReader);
+        => new("test-path", this.mockVorbisReader);
 }

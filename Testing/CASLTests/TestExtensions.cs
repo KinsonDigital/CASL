@@ -33,30 +33,9 @@ public static class TestExtensions
     /// <returns>The range of values.</returns>
     public static IEnumerable<byte> RangeOfBytes(byte start, int count)
     {
-        var value = start;
-        var iterator = 0;
-
-        while (true)
+        for (var i = 0; i < count; i++)
         {
-            if (iterator >= count)
-            {
-                break;
-            }
-
-            if (value == byte.MaxValue)
-            {
-                value = 0;
-            }
-            else
-            {
-                value += 1;
-            }
-
-            iterator += 1;
-
-            yield return value;
+            yield return (byte)(start + i);
         }
-
-        yield return value;
     }
 }

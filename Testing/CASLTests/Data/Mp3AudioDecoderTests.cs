@@ -1,4 +1,4 @@
-﻿// <copyright file="Mp3AudioDecoderTests.cs" company="KinsonDigital">
+// <copyright file="Mp3AudioDecoderTests.cs" company="KinsonDigital">
 // Copyright (c) KinsonDigital. All rights reserved.
 // </copyright>
 
@@ -204,17 +204,15 @@ public class Mp3AudioDecoderTests
 
         // Assert
         actual.ShouldBe(175);
-        foreach (var sample in buffer)
+        buffer.Aggregate(0f, (acc, sample) =>
         {
-            if (sample <= 176)
+            if (acc >= 176f)
             {
-                sample.ShouldBe(sample);
+                sample.ShouldBe((byte)0f);
             }
-            else
-            {
-                sample.ShouldBe((byte)0);
-            }
-        }
+
+            return acc + 1f;
+        });
     }
 
     [Fact]

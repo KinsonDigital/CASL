@@ -1,4 +1,4 @@
-﻿// <copyright file="AudioTests.cs" company="KinsonDigital">
+// <copyright file="AudioTests.cs" company="KinsonDigital">
 // Copyright (c) KinsonDigital. All rights reserved.
 // </copyright>
 
@@ -989,8 +989,7 @@ public class AudioTests
         sut.FastForward(20f);
 
         // Assert
-        this.mockALInvoker.DidNotReceive().SourceRewind(Arg.Any<uint>());
-        this.mockALInvoker.DidNotReceive().Source(Arg.Any<uint>(), Arg.Any<ALSourcef>(), Arg.Any<float>());
+        this.mockPosCmnReactable.DidNotReceive().Push(Arg.Any<Guid>(), Arg.Any<PosCommandData>());
     }
 
     [Fact]
@@ -1003,13 +1002,13 @@ public class AudioTests
         this.mockAudioManager.DeviceChanged += Raise.EventWith(sut, EventArgs.Empty);
 
         // Act
-        this.mockAudioManager.ChangeDevice(Arg.Any<string>());
         var actualDeviceChangingState = sut.GetBoolFieldValue("audioDeviceChanging");
 
         // Assert
         this.mockAudioBuffer.Received(2).Init(OggContentFilePath);
         this.mockAudioBuffer.Received(2).Upload();
         actualDeviceChangingState.ShouldBeFalse();
+        sut.FilePath.ShouldBe(OggContentFilePath);
     }
 
     [Theory]

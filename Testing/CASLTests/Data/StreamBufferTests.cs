@@ -861,7 +861,7 @@ public class StreamBufferTests
         _ = CreateSystemUnderTest();
 
         // Act
-        this.posCmdSubscription.OnReceive(new PosCommandData { SourceId = 710u, PositionSeconds = 379f });
+        this.posCmdSubscription.OnReceive(new PosCommandData { SourceId = 123u, PositionSeconds = 379f });
 
         // Assert
         this.mockAlInvoker.DidNotReceive().SourcePlay(Arg.Any<uint>());

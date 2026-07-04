@@ -132,37 +132,6 @@ public class AudioDeviceManagerTests
         // Assert
         actual.ShouldBe(expected, ignoreOrder: true);
     }
-
-    [Fact]
-    public void AdditionalAttributes_WithNullValue_ReturnsCorrectResult()
-    {
-        // Arrange
-        var attributes = new ALContextAttributes();
-
-        // Act
-        attributes.AdditionalAttributes = null;
-        var actual = attributes.AdditionalAttributes;
-
-        // Assert
-        actual.ShouldNotBeNull();
-        actual.ShouldBeEmpty();
-    }
-
-    [Fact]
-    public void AdditionalAttributes_WithNonNullValue_ReturnsCorrectResult()
-    {
-        // Arrange
-        var attributes = new ALContextAttributes();
-
-        // Act
-        attributes.AdditionalAttributes = new[] { 111, 222 };
-        var actual = attributes.AdditionalAttributes;
-
-        // Assert
-        actual.ShouldNotBeNull();
-        actual.Length.ShouldBe(2);
-        actual.ShouldBe(new[] { 111, 222 });
-    }
     #endregion
 
     #region Method Tests

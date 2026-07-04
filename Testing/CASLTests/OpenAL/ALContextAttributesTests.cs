@@ -48,6 +48,39 @@ public class ALContextAttributesTests
     }
     #endregion
 
+    #region Prop Tests
+    [Fact]
+    public void AdditionalAttributes_WithNullValue_ReturnsCorrectResult()
+    {
+        // Arrange
+        var attributes = new ALContextAttributes();
+
+        // Act
+        attributes.AdditionalAttributes = null;
+        var actual = attributes.AdditionalAttributes;
+
+        // Assert
+        actual.ShouldNotBeNull();
+        actual.ShouldBeEmpty();
+    }
+
+    [Fact]
+    public void AdditionalAttributes_WithNonNullValue_ReturnsCorrectResult()
+    {
+        // Arrange
+        var attributes = new ALContextAttributes();
+
+        // Act
+        attributes.AdditionalAttributes = new[] { 111, 222 };
+        var actual = attributes.AdditionalAttributes;
+
+        // Assert
+        actual.ShouldNotBeNull();
+        actual.Length.ShouldBe(2);
+        actual.ShouldBe([111, 222]);
+    }
+    #endregion
+
     #region Method Tests
     [Theory]
     [InlineData(true, (int)AlcContextAttributes.Sync, 1)]
