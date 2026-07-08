@@ -11,7 +11,7 @@ As with all software, there is always a chance for issues and bugs, especially f
 
 <h2 align="center" style="font-weight: bold;">Enhancements 💎</h2>
 
-1. [#433](https://github.com/KinsonDigital/CASL/issues/433) - Get CASL working on macOS. CASL is not fully cross-platform!
+1. [#433](https://github.com/KinsonDigital/CASL/issues/433) - Added ability for CASL to run on macOS. CASL is not fully cross-platform!
 2. [#423](https://github.com/KinsonDigital/CASL/issues/423) - Updated the production and preview release templates.
 3. [#415](https://github.com/KinsonDigital/CASL/issues/415) - Added a Bluesky social media link to the ReadMe.
 
@@ -38,5 +38,5 @@ As with all software, there is always a chance for issues and bugs, especially f
 4. [#428](https://github.com/KinsonDigital/CASL/pull/428) - Updated dependency _**coverlet.msbuild**_ to _**v10.0.0**_.
 5. [#427](https://github.com/KinsonDigital/CASL/pull/427) - Updated dependency _**coverlet.collector**_ to _**v10.0.0**_.
 6. [#426](https://github.com/KinsonDigital/CASL/pull/426) - Updated dependency _**System.IO.Abstractions**_ to _**v22.1.1**_.
-7. [#438](https://github.com/KinsonDigital/CASL/pull/438) - Updated _**denoland/setup-deno**_ action to _**v2.0.5**_.
-8. [#412](https://github.com/KinsonDigital/CASL/pull/412) - Updated _**KinsonDigital/Infrastructure**_ action to _**v17.0.0**_.
+7. [#438](https://github.com/KinsonDigital/CASL/pull/438) - Updated action _**denoland/setup-deno**_ to _**v2.0.5**_.
+8. [#412](https://github.com/KinsonDigital/CASL/pull/412) - Updated action _**KinsonDigital/Infrastructure**_ to _**v17.0.0**_.
