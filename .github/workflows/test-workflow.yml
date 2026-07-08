@@ -1,0 +1,14 @@
+name: 🧪 TEST WORKFLOW
+
+
+on:
+  workflow_dispatch:
+
+
+jobs:
+  caller_test:
+    name: Caller Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call Reusable Workflow
+        uses: KinsonDigital/Infrastructure/actions/test-action@test
