@@ -8,7 +8,4 @@ on:
 jobs:
   caller_test:
     name: Caller Test
-    runs-on: ubuntu-latest
-    steps:
-      - name: Call Reusable Workflow
-        uses: KinsonDigital/Infrastructure/actions/test-action@test
+    uses: KinsonDigital/Infrastructure/.github/workflows/reuse-test.yml@test
