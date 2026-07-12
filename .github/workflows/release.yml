@@ -135,7 +135,7 @@ jobs:
       version: ${{ needs.get_and_validate_version.outputs.version }}
       transpile-readme: true
       dry-run: ${{ inputs.dry-run }}
-      relative-release-notes-file-path: "ReleaseNotes/${{ inputs.release-type }}Releases/${{ vars.RELEASE_NOTES_FILE_NAME_PREFIX }}v${{ needs.get_and_validate_version.outputs.version }}.md"
+      relative-release-notes-file-path: "ReleaseNotes/${{ inputs.release-type }}Releases/${{ vars.RELEASE_NOTES_FILE_NAME_PREFIX }}${{ needs.get_and_validate_version.outputs.version }}.md"
     secrets:
       cicd-pat: "${{ secrets.CICD_TOKEN }}"
       nuget-api-key: "${{ secrets.NUGET_ORG_API_KEY }}"
