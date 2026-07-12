@@ -42,14 +42,14 @@ jobs:
     steps:
       - name: Get Version
         id: get-version
-        uses: KinsonDigital/Infrastructure/actions/get-version@v19.0.0
+        uses: KinsonDigital/Infrastructure/actions/get-version@acc7aa3997697717943e56c439f7b529d1e1d1ba # v19.0.0
         with:
           version-file-path: "${{ github.workspace }}/${{ vars.PROJECT_NAME }}/${{ vars.PROJECT_NAME }}.csproj"
           cache-enabled: false
 
       - name: Validate Version
         id: validate-version
-        uses: KinsonDigital/Infrastructure/actions/validate-version@v19.0.0
+        uses: KinsonDigital/Infrastructure/actions/validate-version@acc7aa3997697717943e56c439f7b529d1e1d1ba # v19.0.0
         with:
           version: "${{ steps.get-version.outputs.version }}"
           release-type: "${{ inputs.release-type }}"
@@ -135,7 +135,7 @@ jobs:
       version: ${{ needs.get_and_validate_version.outputs.version }}
       transpile-readme: true
       dry-run: ${{ inputs.dry-run }}
-      release-notes-file-path: "${{ github.workspace }}/ReleaseNotes/${{ inputs.release-type }}Releases/${{ vars.RELEASE_NOTES_FILE_NAME_PREFIX }}v${{ needs.get_and_validate_version.outputs.version }}.md"
+      relative-release-notes-file-path: "ReleaseNotes/${{ inputs.release-type }}Releases/${{ vars.RELEASE_NOTES_FILE_NAME_PREFIX }}v${{ needs.get_and_validate_version.outputs.version }}.md"
     secrets:
       cicd-pat: "${{ secrets.CICD_TOKEN }}"
       nuget-api-key: "${{ secrets.NUGET_ORG_API_KEY }}"
