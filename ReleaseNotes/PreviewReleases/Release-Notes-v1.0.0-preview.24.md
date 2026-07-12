@@ -11,8 +11,7 @@ As with all software, there is always a chance for issues and bugs, especially f
 
 <h2 align="center" style="font-weight: bold;">Dependency Updates 📦</h2>
 
-1. [#449](https://github.com/KinsonDigital/CASL/pull/449) - Updated KinsonDigital/Infrastructure action to _**v19.0.0**_.
-2. [#448](https://github.com/KinsonDigital/CASL/pull/448) - Updated dependency System.IO.Abstractions to _**v22.2.0**_.
-3. [#447](https://github.com/KinsonDigital/CASL/pull/447) - Updated dependency NSubstitute to _**v6.0.0**_.
-4. [#446](https://github.com/KinsonDigital/CASL/pull/446) - Updated dependency ubuntu to _**v24.0.0**_.
-5. [#444](https://github.com/KinsonDigital/CASL/pull/444) - Updated KinsonDigital/Infrastructure action to _**v18.0.0**_.
+1. [#449](https://github.com/KinsonDigital/CASL/pull/449) - Updated action _**KinsonDigital/Infrastructure**_ to _**v19.0.0**_.
+2. [#448](https://github.com/KinsonDigital/CASL/pull/448) - Updated dependency _**System.IO.Abstractions**_ to _**v22.2.0**_.
+3. [#447](https://github.com/KinsonDigital/CASL/pull/447) - Updated dependency _**NSubstitute**_ to _**v6.0.0**_.
+4. [#446](https://github.com/KinsonDigital/CASL/pull/446) - Updated dependency _**ubuntu**_ to _**v24.0.0**_.
