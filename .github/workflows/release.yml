@@ -58,7 +58,7 @@ jobs:
   validate_release:
     name: Validate Release
     needs: [get_and_validate_version]
-    uses: KinsonDigital/Infrastructure/.github/workflows/validate-release.yml@ccacf172bbbdd78b8a36992948b0c8bef008404c # v18.0.0
+    uses: KinsonDigital/Infrastructure/.github/workflows/validate-release.yml@v18.0.0
     with:
       owner-name: ${{ vars.ORGANIZATION_NAME }}
       repo-name: ${{ vars.PROJECT_NAME }}
