@@ -185,7 +185,7 @@ jobs:
     # needs: [get_and_validate_version, validate_release, build_casl, run_casl_tests, run_release]
     needs: [get_and_validate_version, validate_release, build_casl, run_casl_tests]
     if: ${{ inputs.dry-run == false }}
-    uses: KinsonDigital/Infrastructure/.github/workflows/process-milestone.yml@ccacf172bbbdd78b8a36992948b0c8bef008404c # v18.0.0
+    uses: KinsonDigital/Infrastructure/.github/workflows/process-milestone.yml@f8a2f742c00bd635072cf41a00f2998a67a43a45 # v18.0.0
     with:
       owner-name: ${{ vars.ORGANIZATION_NAME }}
       repo-name: ${{ vars.PROJECT_NAME }}
