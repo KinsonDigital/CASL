@@ -151,7 +151,7 @@ jobs:
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
       - name: Send X Release Announcement
-        uses: KinsonDigital/Infrastructure/actions/send-x-release-announcement@9c4f1702ed7e5f785415d7db14796b1dde7c6a16 #v17.2.0
+        uses: KinsonDigital/Infrastructure/actions/send-x-release-announcement@bd7b3de77c5f8b82c0e7ea4431777e5b179469a9 # v18.0.0
         with:
           repo-owner: ${{ vars.ORGANIZATION_NAME }}
           project-name: ${{ vars.PROJECT_NAME }}
@@ -167,7 +167,7 @@ jobs:
           github-token: ${{ secrets.CICD_TOKEN }}
 
       - name: Send Bluesky Release Announcement
-        uses: KinsonDigital/Infrastructure/actions/send-bluesky-release-announcement@9c4f1702ed7e5f785415d7db14796b1dde7c6a16 #v17.2.0
+        uses: KinsonDigital/Infrastructure/actions/send-bluesky-release-announcement@bd7b3de77c5f8b82c0e7ea4431777e5b179469a9 # v18.0.0
         with:
           repo-owner: ${{ vars.ORGANIZATION_NAME }}
           project-name: ${{ vars.PROJECT_NAME }}
