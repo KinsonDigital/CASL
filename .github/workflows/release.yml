@@ -42,14 +42,14 @@ jobs:
     steps:
       - name: Get Version
         id: get-version
-        uses: KinsonDigital/Infrastructure/actions/get-version@acc7aa3997697717943e56c439f7b529d1e1d1ba # v19.0.0
+        uses: KinsonDigital/Infrastructure/actions/get-version@5dade832543507f6ee8f9123794ca7dd3b317e67 # v19.0.1
         with:
           version-file-path: "${{ github.workspace }}/${{ vars.PROJECT_NAME }}/${{ vars.PROJECT_NAME }}.csproj"
           cache-enabled: false
 
       - name: Validate Version
         id: validate-version
-        uses: KinsonDigital/Infrastructure/actions/validate-version@acc7aa3997697717943e56c439f7b529d1e1d1ba # v19.0.0
+        uses: KinsonDigital/Infrastructure/actions/validate-version@5dade832543507f6ee8f9123794ca7dd3b317e67 # v19.0.1
         with:
           version: "${{ steps.get-version.outputs.version }}"
           release-type: "${{ inputs.release-type }}"
@@ -59,7 +59,7 @@ jobs:
   validate_release:
     name: Validate Release
     needs: [get_and_validate_version]
-    uses: KinsonDigital/Infrastructure/.github/workflows/validate-release.yml@acc7aa3997697717943e56c439f7b529d1e1d1ba # v19.0.0
+    uses: KinsonDigital/Infrastructure/.github/workflows/validate-release.yml@5dade832543507f6ee8f9123794ca7dd3b317e67 # v19.0.1
     with:
       owner-name: ${{ vars.ORGANIZATION_NAME }}
       repo-name: ${{ vars.PROJECT_NAME }}
@@ -124,7 +124,7 @@ jobs:
   run_release:
     name: Performing ${{ inputs.release-type }} Release of ${{ vars.PROJECT_NAME }} ${{ inputs.dry-run == true && '(Dry Run)' || '' }}
     needs: [build_casl, run_casl_tests, get_and_validate_version]
-    uses: KinsonDigital/Infrastructure/.github/workflows/dotnet-lib-release.yml@acc7aa3997697717943e56c439f7b529d1e1d1ba # v19.0.0
+    uses: KinsonDigital/Infrastructure/.github/workflows/dotnet-lib-release.yml@5dade832543507f6ee8f9123794ca7dd3b317e67 # v19.0.1
     with:
       owner-name: "${{ vars.ORGANIZATION_NAME }}" 
       repo-name: "${{ vars.PROJECT_NAME }}"
@@ -151,7 +151,7 @@ jobs:
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
       - name: Send X Release Announcement
-        uses: KinsonDigital/Infrastructure/actions/send-x-release-announcement@acc7aa3997697717943e56c439f7b529d1e1d1ba # v19.0.0
+        uses: KinsonDigital/Infrastructure/actions/send-x-release-announcement@5dade832543507f6ee8f9123794ca7dd3b317e67 # v19.0.1
         with:
           repo-owner: ${{ vars.ORGANIZATION_NAME }}
           project-name: ${{ vars.PROJECT_NAME }}
@@ -167,7 +167,7 @@ jobs:
           github-token: ${{ secrets.CICD_TOKEN }}
 
       - name: Send Bluesky Release Announcement
-        uses: KinsonDigital/Infrastructure/actions/send-bluesky-release-announcement@acc7aa3997697717943e56c439f7b529d1e1d1ba # v19.0.0
+        uses: KinsonDigital/Infrastructure/actions/send-bluesky-release-announcement@5dade832543507f6ee8f9123794ca7dd3b317e67 # v19.0.1
         with:
           repo-owner: ${{ vars.ORGANIZATION_NAME }}
           project-name: ${{ vars.PROJECT_NAME }}
@@ -186,7 +186,7 @@ jobs:
     name: Process Milestone ${{ inputs.dry-run == true && '(Dry Run)' || '' }}
     needs: [get_and_validate_version, validate_release, build_casl, run_casl_tests, run_release]
     if: ${{ inputs.dry-run == false }}
-    uses: KinsonDigital/Infrastructure/.github/workflows/process-milestone.yml@acc7aa3997697717943e56c439f7b529d1e1d1ba # v19.0.0
+    uses: KinsonDigital/Infrastructure/.github/workflows/process-milestone.yml@5dade832543507f6ee8f9123794ca7dd3b317e67 # v19.0.1
     with:
       owner-name: ${{ vars.ORGANIZATION_NAME }}
       repo-name: ${{ vars.PROJECT_NAME }}
